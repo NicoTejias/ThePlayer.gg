@@ -1,6 +1,6 @@
-
 import React, { useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
+import Logo from './Logo';
 
 const NavLinks = [
   { name: 'Inicio', path: '/' },
@@ -27,8 +27,8 @@ const Header: React.FC = () => {
       <nav className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           <div className="flex-shrink-0">
-            <Link to="/" className="text-white text-2xl font-bold font-rajdhani tracking-wider">
-              theplayer<span className="text-sky-400">.gg</span>
+            <Link to="/">
+              <Logo className="h-12 w-auto" />
             </Link>
           </div>
           <div className="hidden md:block">

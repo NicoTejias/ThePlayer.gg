@@ -14,7 +14,8 @@ const App: React.FC = () => {
           <Routes>
             <Route path="/" element={<HomePage />} />
             {/* Future routes will be added here */}
-            <Route path="/ranking/pwp" element={<div className="text-center text-4xl mt-20">Página Ranking PWP (En Construcción)</div>} />
+            <Route path="/ranking/pwp" element={<div className="text-center text-4xl mt-20">Página Ranking The Player (En Construcción)</div>} />
+            <Route path="/ranking/maestros" element={<div className="text-center text-4xl mt-20">Página Ranking Maestros (En Construcción)</div>} />
             <Route path="/eventos" element={<div className="text-center text-4xl mt-20">Página de Eventos (En Construcción)</div>} />
             <Route path="/mercado" element={<div className="text-center text-4xl mt-20">Página de Mercado (En Construcción)</div>} />
             <Route path="/media" element={<div className="text-center text-4xl mt-20">Página de Media (En Construcción)</div>} />

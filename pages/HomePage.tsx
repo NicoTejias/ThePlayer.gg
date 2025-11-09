@@ -1,9 +1,10 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import type { RankingEntry, CommunityEvent, MediaArticle, MarketplacePost } from '../types';
+import type { RankingEntry, CommunityEvent, MediaArticle, MarketplacePost, WinRateRankingEntry } from '../types';
 import Card from '../components/Card';
 import TrophyIcon from '../components/icons/TrophyIcon';
+import SparklesIcon from '../components/icons/SparklesIcon';
 
 // Mock Data
 const mockRanking: RankingEntry[] = [
@@ -12,6 +13,14 @@ const mockRanking: RankingEntry[] = [
   { rank: 3, playerName: 'GoblinKing', pwp: 1155, region: 'Concepción' },
   { rank: 4, playerName: 'AetherFlux', pwp: 1090, region: 'Antofagasta' },
   { rank: 5, playerName: 'JaceMind', pwp: 1075, region: 'Santiago' },
+];
+
+const mockWinRateRanking: WinRateRankingEntry[] = [
+  { rank: 1, playerName: 'ProdigyMTG', winRate: '78.5%', region: 'Viña del Mar' },
+  { rank: 2, playerName: 'Strategist', winRate: '75.2%', region: 'Santiago' },
+  { rank: 3, playerName: 'LaHechicera', winRate: '74.9%', region: 'La Serena' },
+  { rank: 4, playerName: 'ControlFreak', winRate: '72.1%', region: 'Temuco' },
+  { rank: 5, playerName: 'ComboMaster', winRate: '71.8%', region: 'Santiago' },
 ];
 
 const mockEvents: CommunityEvent[] = [
@@ -56,30 +65,57 @@ const HomePage: React.FC = () => {
           </Link>
         </div>
       </section>
+      
+      {/* Rankings Section Grid */}
+      <div className="grid lg:grid-cols-2 gap-16">
+        {/* Ranking The Player (PWP) Section */}
+        <section>
+          <SectionHeader title="Ranking The Player" linkTo="/ranking/pwp" />
+          <div className="bg-slate-800 rounded-lg p-6 shadow-xl border border-slate-700 h-full">
+            <ul className="space-y-4">
+              {mockRanking.map((player, index) => (
+                <li key={player.playerName} className={`flex items-center justify-between p-3 rounded-md ${index < 3 ? 'bg-slate-700/50' : ''}`}>
+                  <div className="flex items-center space-x-4">
+                    <span className={`text-xl font-bold w-8 text-center ${index === 0 ? 'text-yellow-400' : index === 1 ? 'text-slate-300' : index === 2 ? 'text-yellow-600' : 'text-slate-400'}`}>
+                      {player.rank}
+                    </span>
+                    <span className="text-lg text-white">{player.playerName}</span>
+                    <span className="text-sm text-slate-400 bg-slate-700 px-2 py-1 rounded">{player.region}</span>
+                  </div>
+                  <div className="flex items-center space-x-2 text-sky-400 font-semibold">
+                    <span>{player.pwp} pts</span>
+                    <TrophyIcon className="w-5 h-5" />
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </section>
 
-      {/* Ranking PWP Section */}
-      <section>
-        <SectionHeader title="Ranking PWP" linkTo="/ranking/pwp" />
-        <div className="bg-slate-800 rounded-lg p-6 shadow-xl border border-slate-700">
-          <ul className="space-y-4">
-            {mockRanking.map((player, index) => (
-              <li key={player.playerName} className={`flex items-center justify-between p-3 rounded-md ${index < 3 ? 'bg-slate-700/50' : ''}`}>
-                <div className="flex items-center space-x-4">
-                  <span className={`text-xl font-bold w-8 text-center ${index === 0 ? 'text-yellow-400' : index === 1 ? 'text-slate-300' : index === 2 ? 'text-yellow-600' : 'text-slate-400'}`}>
-                    {player.rank}
-                  </span>
-                  <span className="text-lg text-white">{player.playerName}</span>
-                  <span className="text-sm text-slate-400 bg-slate-700 px-2 py-1 rounded">{player.region}</span>
-                </div>
-                <div className="flex items-center space-x-2 text-sky-400 font-semibold">
-                  <span>{player.pwp} PWP</span>
-                  <TrophyIcon className="w-5 h-5" />
-                </div>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </section>
+        {/* Ranking Maestros (Win-Rate) Section */}
+        <section>
+          <SectionHeader title="Ranking Maestros" linkTo="/ranking/maestros" />
+          <div className="bg-slate-800 rounded-lg p-6 shadow-xl border border-slate-700 h-full">
+            <ul className="space-y-4">
+              {mockWinRateRanking.map((player, index) => (
+                <li key={player.playerName} className={`flex items-center justify-between p-3 rounded-md ${index < 3 ? 'bg-slate-700/50' : ''}`}>
+                  <div className="flex items-center space-x-4">
+                    <span className={`text-xl font-bold w-8 text-center ${index === 0 ? 'text-yellow-400' : index === 1 ? 'text-slate-300' : index === 2 ? 'text-yellow-600' : 'text-slate-400'}`}>
+                      {player.rank}
+                    </span>
+                    <span className="text-lg text-white">{player.playerName}</span>
+                    <span className="text-sm text-slate-400 bg-slate-700 px-2 py-1 rounded">{player.region}</span>
+                  </div>
+                  <div className="flex items-center space-x-2 text-violet-400 font-semibold">
+                    <span>{player.winRate} Win Rate</span>
+                    <SparklesIcon className="w-5 h-5" />
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </section>
+      </div>
 
       {/* Events Section */}
       <section>

@@ -6,6 +6,13 @@ export interface RankingEntry {
   region: string;
 }
 
+export interface WinRateRankingEntry {
+  rank: number;
+  playerName: string;
+  winRate: string;
+  region: string;
+}
+
 export interface CommunityEvent {
   id: string;
   title: string;
