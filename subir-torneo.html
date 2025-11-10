@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subir Torneo - theplayer.gg</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #111827; color: #E5E7EB; }
+        .card { background-color: #1F2937; border: 1px solid #374151; }
+        .nav-link { @apply px-3 py-2 rounded-md text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white; }
+        .nav-link-dropdown { @apply block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white; }
+        .dropdown:hover .dropdown-menu { display: block; }
+        .dropdown-menu { @apply hidden absolute z-10 mt-2 w-48 rounded-md shadow-lg py-1 bg-gray-800 ring-1 ring-black ring-opacity-5; }
+        input[type="number"], select { @apply mt-1 block w-full bg-gray-800 border-gray-600 rounded-md shadow-sm p-2 text-white; }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="bg-gray-900 shadow-md sticky top-0 z-50">
+      <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-16">
+          <div class="flex-shrink-0">
+            <a href="/" class="text-2xl font-bold text-white">
+                <span class="text-blue-500">the</span>player.gg
+            </a>
+          </div>
+        </div>
+      </nav>
+    </header>
+    <main class="container mx-auto px-4 py-16">
+        <div class="card max-w-2xl mx-auto p-8 rounded-lg shadow-xl">
+            <h1 class="text-3xl font-bold text-white mb-6">Subir Resultados de Torneo</h1>
+            <p class="text-gray-400 mb-6">Esta herramienta es solo para Tiendas Asociadas. Sube el archivo .html de Eventlink o Melee.</p>
+
+            <form id="torneo-form" class="space-y-6">
+
+                <div>
+                    <label for="formato" class="block text-sm font-medium text-gray-300">Formato del Torneo</label>
+                    <select id="formato" name="formato" required>
+                        <option value="standard">Standard</option>
+                        <option value="pioneer">Pioneer</option>
+                        <option value="modern">Modern</option>
+                        <option value="draft">Draft</option>
+                        <option value="sellado">Sellado</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label for="multiplicador" class="block text-sm font-medium text-gray-300">Multiplicador PWP</label>
+                    <p class="text-xs text-gray-500">Nuestra fórmula multiplicará los puntos por esto (Ej: Draft = 3, Standard = 1).</p>
+                    <input type="number" id="multiplicador" name="multiplicador" value="1" required>
+                </div>
+
+                <div>
+                    <label for="nro_jugadores" class="block text-sm font-medium text-gray-300">Número de Jugadores</label>
+                    <p class="text-xs text-gray-500">El número total de participantes (Ej: 32). Esto define los Puntos de Participación.</p>
+                    <input type="number" id="nro_jugadores" name="nro_jugadores" required>
+                </div>
+
+                <div>
+                    <label for="archivo_html" class="block text-sm font-medium text-gray-300">Archivo de Resultados (.html)</label>
+                    <input type="file" id="archivo_html" name="archivo_html" accept=".html" required class="mt-1 block w-full text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700">
+                </div>
+
+                <div>
+                    <button type="submit" id="submit-button" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-lg font-medium text-white bg-blue-600 hover:bg-blue-700">
+                        Subir y Procesar Torneo
+                    </button>
+                </div>
+            </form>
+
+            <div id="response-message" class="mt-6 p-4 rounded-md hidden"></div>
+
+        </div>
+    </main>
+
+    <footer class="bg-gray-900 pt-16 pb-8">
+      </footer>
+    <script>
+        lucide.createIcons(); // Iniciar iconos
+
+        const form = document.getElementById('torneo-form');
+        const responseMessage = document.getElementById('response-message');
+        const submitButton = document.getElementById('submit-button');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault(); // Evitar que la página se recargue
+
+            submitButton.disabled = true;
+            submitButton.textContent = 'Procesando...';
+            responseMessage.classList.add('hidden');
+
+            // 1. LEER EL ARCHIVO HTML COMO TEXTO
+            const fileInput = document.getElementById('archivo_html');
+            if (fileInput.files.length === 0) {
+                alert('Por favor, selecciona un archivo .html');
+                submitButton.disabled = false;
+                submitButton.textContent = 'Subir y Procesar Torneo';
+                return;
+            }
+            const file = fileInput.files[0];
+            const archivoHTMLComoTexto = await file.text();
+
+            // 2. PREPARAR TODOS LOS DATOS PARA EL "MOTOR"
+            const datosParaEnviar = {
+                formato: document.getElementById('formato').value,
+                multiplicador_pwp: parseInt(document.getElementById('multiplicador').value),
+                nro_jugadores: parseInt(document.getElementById('nro_jugadores').value),
+                contenidoHTML: archivoHTMLComoTexto // ¡Aquí va el archivo!
+            };
+
+            try {
+                // 3. LLAMAR A NUESTRO "MOTOR" (EL ARCHIVO /api/subir-torneo.js)
+                // Usamos la URL relativa '/api/subir-torneo'
+                const response = await fetch('/api/subir-torneo', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(datosParaEnviar),
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    // ¡Éxito!
+                    responseMessage.textContent = 'Éxito: ' + data.message;
+                    responseMessage.className = 'mt-6 p-4 rounded-md bg-green-800 text-green-200';
+                    form.reset(); // Limpiar el formulario
+                } else {
+                    // Error del servidor
+                    responseMessage.textContent = 'Error: ' + (data.message || 'Error desconocido');
+                    responseMessage.className = 'mt-6 p-4 rounded-md bg-red-800 text-red-200';
+                }
+
+            } catch (error) {
+                console.error('Error de red:', error);
+                responseMessage.textContent = 'Error fatal de conexión. Revisa la consola.';
+                responseMessage.className = 'mt-6 p-4 rounded-md bg-red-800 text-red-200';
+            }
+
+            responseMessage.classList.remove('hidden');
+            submitButton.disabled = false;
+            submitButton.textContent = 'Subir y Procesar Torneo';
+        });
+
+    </script>
+</body>
+</html>
