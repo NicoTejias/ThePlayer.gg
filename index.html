@@ -635,22 +635,48 @@
 
         /**
          * ======================================
-         * FUNCIONES DE RANKINGS
+         * FUNCIONES DE RANKINGS (¡CORREGIDAS!)
          * ======================================
          */
         function createPlayerHtml(jugador, index) {
             const region = jugador.region || '---';
+            // ¡ESTE ES EL CÓDIGO HTML REAL!
             return `
-                <div class... (código HTML del jugador PWP)... </div>
-            `; // (Omitido por brevedad, es el mismo que te di antes)
+                <div class="flex items-center justify-between bg-gray-800/60 p-4 rounded-lg border border-gray-700/50 transition duration-300 card-hover">
+                    <div class="flex items-center space-x-4">
+                        <span class="text-xl font-bold text-gray-400">${index + 1}</span>
+                        <div>
+                            <p class="font-semibold text-white">${jugador.nombre_usuario}</p>
+                            <span class="text-sm text-gray-500">${region}</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <span class="font-bold text-blue-400">${jugador.total_puntos} pts</span>
+                        <i data-lucide="star" class="w-4 h-4 text-yellow-500 fill-current"></i>
+                    </div>
+                </div>
+            `;
         }
 
         function createCaminanteHtml(jugador, index) {
             const region = jugador.region || '---';
             const winRate = (jugador.win_rate * 100).toFixed(1);
+            // ¡ESTE ES EL CÓDIGO HTML REAL!
             return `
-                <div class... (código HTML del jugador WR)... </div>
-            `; // (Omitido por brevedad, es el mismo que te di antes)
+                <div class="flex items-center justify-between bg-gray-800/60 p-4 rounded-lg border border-gray-700/50 transition duration-300 card-hover">
+                    <div class="flex items-center space-x-4">
+                        <span class="text-xl font-bold text-gray-400">${index + 1}</span>
+                        <div>
+                            <p class="font-semibold text-white">${jugador.nombre_usuario}</p>
+                            <span class="text-sm text-gray-500">${region}</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <span class="font-semibold text-green-400">${winRate}% Win Rate</span>
+                        <i data-lucide="trending-up" class="w-4 h-4 text-green-400"></i>
+                    </div>
+                </div>
+            `;
         }
         
         async function cargarRankings() {
@@ -696,27 +722,22 @@
 
         /**
          * ======================================
-         * FUNCIONES DE EVENTOS (¡NUEVO!)
+         * FUNCIONES DE EVENTOS
          * ======================================
          */
 
-        /**
-         * Formatea la fecha de Supabase a algo legible (ej: "Nov 15, 2025")
-         */
         function formatEventDate(dateString) {
+            // Formato: 15 nov. 2025
             const options = { year: 'numeric', month: 'short', day: 'numeric' };
+            // Usamos 'es-CL' para el formato de fecha en español de Chile
             return new Date(dateString).toLocaleDateString('es-CL', options);
         }
 
-        /**
-         * Crea el HTML para una tarjeta de evento
-         */
         function createEventoHtml(evento) {
             const region = evento.region || '---';
             const formato = evento.formato || '---';
             const fecha = formatEventDate(evento.fecha);
             
-            // Si no hay imagen_url, usamos una imagen genérica
             const imagen = evento.imagen_url || 'https://images.unsplash.com/photo-1511884642898-4c92249e20b6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=800';
 
             return `
@@ -745,9 +766,6 @@
             `;
         }
 
-        /**
-         * Carga los próximos eventos desde Supabase
-         */
         async function cargarEventos() {
             if (!eventosListContainer) {
                 console.warn('No se encontró el contenedor de eventos en esta página.');
@@ -755,22 +773,18 @@
             }
 
             try {
-                // Borramos el ejemplo estático y ponemos "Cargando..."
                 eventosListContainer.innerHTML = '<p class="text-gray-400">Cargando eventos...</p>';
 
-                // 1. Llamamos a la función SQL que creaste
                 const { data, error } = await _supabase.rpc('get_proximos_eventos');
-
                 if (error) throw error;
 
-                // 2. Revisamos si Supabase devolvió eventos
                 if (data && data.length > 0) {
-                    eventosListContainer.innerHTML = ''; // Limpiamos el "Cargando..."
+                    eventosListContainer.innerHTML = ''; 
                     data.forEach(evento => {
                         eventosListContainer.innerHTML += createEventoHtml(evento);
                     });
                 } else {
-                    eventosListContainer.innerHTML = '<p class="text-gray-400">No hay eventos programados por ahora.</p>';
+                    eventosListContainer.innerHTML = '<p classT="text-gray-400">No hay eventos programados por ahora.</p>';
                 }
 
             } catch (error) {
@@ -791,13 +805,13 @@
             updateUserUI(session);
 
             // 2. Cargar los rankings dinámicos
-            cargarRankings(); 
+            await cargarRankings(); 
 
-            // 3. Cargar los eventos dinámicos (¡NUEVO!)
-            cargarEventos();
+            // 3. Cargar los eventos dinámicos
+            await cargarEventos();
 
             // 4. Iniciar todos los iconos (¡Importante!)
-            // Lo movemos al final para que cargue los iconos de rankings Y eventos
+            // Debe ir al FINAL, después de que se cargue todo el contenido dinámico.
             lucide.createIcons();
         });
 
