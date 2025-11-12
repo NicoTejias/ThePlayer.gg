@@ -20,7 +20,6 @@ export default async function handler(request, response) {
     const datos = request.body;
     const { formato, multiplicador_pwp, nro_jugadores, contenidoHTML } = datos;
 
-    // Validar datos
     if (!contenidoHTML || !formato || !multiplicador_pwp || !nro_jugadores) {
       return response.status(400).json({ message: 'Faltan datos en el formulario.' });
     }
@@ -28,16 +27,21 @@ export default async function handler(request, response) {
     // --- 4. DECIDIR QUÉ PARSER USAR ---
     let listaResultados;
     if (contenidoHTML.includes("eventlink.wizards.com")) {
+      console.log("Detectado: Eventlink. Usando parser de Eventlink...");
       listaResultados = parsearEventlink(contenidoHTML);
     } else if (contenidoHTML.includes("melee.gg")) {
+      console.log("Detectado: Melee.gg. Usando parser de Melee...");
       listaResultados = parsearMelee(contenidoHTML);
     } else {
       return response.status(400).json({ message: 'Formato de archivo HTML no reconocido.' });
     }
 
     if (!listaResultados || listaResultados.length === 0) {
-      return response.status(400).json({ message: 'No se pudieron extraer jugadores del archivo. ¿Es el HTML correcto?' });
+      console.warn("El parser no encontró jugadores. El HTML podría haber cambiado.");
+      return response.status(400).json({ message: 'No se pudieron extraer jugadores del archivo. ¿Es el HTML de Posiciones (Standings)?' });
     }
+    
+    console.log(`Parser encontró ${listaResultados.length} jugadores.`);
 
     // --- 5. GUARDAR TODO EN LA BASE DE DATOS ---
     const resultadoGuardado = await guardarResultados(
@@ -62,17 +66,20 @@ export default async function handler(request, response) {
 // --- FUNCIONES DEL PARSER (El Cerebro) ---
 // --- ------------------------------- ---
 
-// Parser para Eventlink
+// Parser para Eventlink (VERSIÓN MEJORADA)
 function parsearEventlink(html) {
   const $ = cheerio.load(html);
   const jugadores = [];
   
-  $('table.standings tbody > tr').each((i, fila) => {
+  // Selector más robusto: busca todas las filas (tr) dentro de la tabla.
+  // Se saltará la fila del encabezado (th) porque no encontrará los 'td'
+  $('table.standings tr').each((i, fila) => {
     try {
       const nombre = $(fila).find('td.standings__cell.name').text().trim();
       const wld_string = $(fila).find('td.standings__cell.wldb').text().trim(); // Ej: "2/0/1"
       
-      if (nombre && wld_string) {
+      // Si encontramos un nombre y un W-L-D, es una fila de jugador
+      if (nombre && wld_string && nombre.length > 0) {
         const partes = wld_string.split('/');
         const ganados = parseInt(partes[0]) || 0;
         const perdidos = parseInt(partes[1]) || 0;
@@ -87,7 +94,7 @@ function parsearEventlink(html) {
   return jugadores; // -> [ {nombre: "Alexander...", ganados: 2, perdidos: 0, empatados: 1}, ... ]
 }
 
-// Parser para Melee.gg
+// Parser para Melee.gg (Sin cambios)
 function parsearMelee(html) {
   const $ = cheerio.load(html);
   const jugadores = [];
@@ -97,7 +104,7 @@ function parsearMelee(html) {
       const nombre = $(fila).find('td.Player-column a').text().trim();
       const wld_string = $(fila).find('td.MatchRecord-column').text().trim(); // Ej: "7-1-1"
 
-      if (nombre && wld_string) {
+      if (nombre && wld_string && nombre.length > 0) {
         const partes = wld_string.split('-');
         const ganados = parseInt(partes[0]) || 0;
         const perdidos = parseInt(partes[1]) || 0;
@@ -143,7 +150,7 @@ function buscarPuntosPorTabla(nro_jugadores) {
 async function guardarResultados(listaResultados, datosTorneo) {
   
   // 1. Crear el torneo en la BD
-  // (Asumimos tienda_id = 1 por ahora, hasta que tengamos login de tiendas)
+  // (Seguimos usando tienda_id: 1 como prueba)
   const { data: torneoData, error: torneoError } = await supabase
     .from('torneos')
     .insert({
@@ -152,8 +159,8 @@ async function guardarResultados(listaResultados, datosTorneo) {
       multiplicador_pwp: datosTorneo.multiplicador_pwp,
       nro_jugadores: datosTorneo.nro_jugadores
     })
-    .select() // .select() nos devuelve el ID del torneo que acabamos de crear
-    .single(); // .single() nos da un solo objeto
+    .select() 
+    .single(); 
 
   if (torneoError) {
     console.error("Error al crear torneo:", torneoError);
@@ -167,7 +174,6 @@ async function guardarResultados(listaResultados, datosTorneo) {
   
   for (const jugador of listaResultados) {
     // 3. Buscar el ID del jugador en la tabla 'perfiles'
-    // (Esto es una simplificación. Un sistema real necesitaría manejar nombres duplicados)
     let { data: perfil, error: perfilError } = await supabase
       .from('perfiles')
       .select('id')
@@ -186,7 +192,7 @@ async function guardarResultados(listaResultados, datosTorneo) {
         
       if (nuevoPerfilError) {
         console.warn(`No se pudo crear el perfil para ${jugador.nombre}: ${nuevoPerfilError.message}`);
-        continue; // Saltar a la siguiente iteración del loop
+        continue; 
       }
       jugadorID = nuevoPerfil.id;
     } else {
