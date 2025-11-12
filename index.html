@@ -4,106 +4,106 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>theplayer.gg - El Hub de TCG en Chile</title>
-    <!-- Carga de Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Carga de Fuente Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
-    <!-- Iconos (Lucide) -->
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     
-    <!-- ¡IMPORTANTE! Importamos la librería de Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #111827; color: #E5E7EB; }
+        body { 
+            font-family: 'Inter', sans-serif; 
+            /* Este es el color de fondo de tu 1ra imagen, más oscuro */
+            background-color: #0F141E; 
+            color: #E5E7EB; 
+        }
         .card { background-color: #1F2937; border: 1px solid #374151; }
-        .card-hover:hover { transform: translateY(-4px); border-color: #3B82F6; }
+        .card-hover:hover { 
+            transform: translateY(-4px); 
+            border-color: #3B82F6; 
+        }
         .nav-link { @apply px-3 py-2 rounded-md text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white; }
-        .nav-link-dropdown { @apply block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white; }
-        .dropdown:hover .dropdown-menu { display: block; }
-        .dropdown-menu { @apply hidden absolute z-10 mt-2 w-48 rounded-md shadow-lg py-1 bg-gray-800 ring-1 ring-black ring-opacity-5; }
-        .hero-gradient { background: linear-gradient(180deg, rgba(17, 24, 39, 0) 0%, #111827 100%), radial-gradient(100% 100% at 50% 0%, rgba(59, 130, 246, 0.15) 0%, rgba(17, 24, 39, 0) 100%); }
+        
+        /* * ¡OJO! Quité las reglas .dropdown y .dropdown-menu 
+         * porque ahora lo hacemos con group-hover de Tailwind.
+        */
+
+        /* Este gradiente es de tu primera imagen */
+        .hero-gradient {
+            background: radial-gradient(50% 50% at 50% 50%, rgba(29, 78, 216, 0.2) 0%, rgba(15, 20, 30, 0) 100%);
+        }
     </style>
 </head>
 <body class="antialiased">
 
-    <!-- Bloque 1: Navegación Principal -->
-    <header class="bg-gray-900 shadow-md sticky top-0 z-50">
+    <header class="bg-gray-900/50 backdrop-blur-md shadow-md sticky top-0 z-50 border-b border-gray-700/50">
         <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16">
-                <!-- Logo -->
                 <div class="flex-shrink-0">
                     <a href="/" class="text-2xl font-bold text-white">
-                        <span class="text-blue-500">the</span>player.gg
+                        <span class="text-blue-500">the</span>player
                     </a>
                 </div>
 
-                <!-- Menú Desktop (Oculto en móvil) -->
                 <div class="hidden md:block">
                     <div class="ml-10 flex items-baseline space-x-4">
                         <a href="/" class="nav-link bg-gray-700 text-white" aria-current="page">Inicio</a>
                         
-                        <!-- Dropdown Ranking -->
-                        <div class="dropdown relative">
+                        <div class="relative group">
                             <button class="nav-link inline-flex items-center">
                                 <span>Ranking</span>
                                 <i data-lucide="chevron-down" class="w-4 h-4 ml-1"></i>
                             </button>
-                            <div class="dropdown-menu">
-                                <a href="/ranking-pwp.html" class="nav-link-dropdown">Ranking PWP</a>
-                                <a href="/ranking-maestros.html" class="nav-link-dropdown">Ranking Maestros</a>
+                            <div class="hidden group-hover:block absolute z-10 mt-2 w-48 rounded-md shadow-lg py-1 bg-gray-800 ring-1 ring-black ring-opacity-5">
+                                <a href="/ranking-pwp.html" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white">Ranking PWP</a>
+                                <a href="/ranking-maestros.html" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white">Ranking Maestros</a>
                             </div>
                         </div>
 
                         <a href="#eventos" class="nav-link">Eventos</a>
+                        <a href="#torneos" class="nav-link">Torneos</a>
 
-                        <!-- Dropdown Marketplace -->
-                        <div class="dropdown relative">
+                        <div class="relative group">
                             <button class="nav-link inline-flex items-center">
                                 <span>Mercado</span>
                                 <i data-lucide="chevron-down" class="w-4 h-4 ml-1"></i>
                             </button>
-                            <div class="dropdown-menu">
-                                <a href="#marketplace-venta" class="nav-link-dropdown">Compra/Venta</a>
-                                <a href="#marketplace-cambio" class="nav-link-dropdown">Cambios</a>
+                            <div class="hidden group-hover:block absolute z-10 mt-2 w-48 rounded-md shadow-lg py-1 bg-gray-800 ring-1 ring-black ring-opacity-5">
+                                <a href="#marketplace-venta" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white">Compra/Venta</a>
+                                <a href="#marketplace-cambio" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white">Cambios</a>
                             </div>
                         </div>
 
-                        <!-- Dropdown Comunidad -->
-                        <div class="dropdown relative">
+                        <div class="relative group">
                             <button class="nav-link inline-flex items-center">
                                 <span>Media</span>
                                 <i data-lucide="chevron-down" class="w-4 h-4 ml-1"></i>
                             </button>
-                            <div class="dropdown-menu">
-                                <a href="#articulos" class="nav-link-dropdown">Artículos</a>
-                                <a href="#videos" class="nav-link-dropdown">Videos</a>
-                                <a href="#commander" class="nav-link-dropdown">Commander</a>
+                            <div class="hidden group-hover:block absolute z-10 mt-2 w-48 rounded-md shadow-lg py-1 bg-gray-800 ring-1 ring-black ring-opacity-5">
+                                <a href="#articulos" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white">Artículos</a>
+                                <a href="#videos" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white">Videos</a>
+                                <a href="#commander" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white">Commander</a>
                             </div>
                         </div>
 
                         <a href="#academia-jueces" class="nav-link">Jueces</a>
                         <a href="#tiendas" class="nav-link">Tiendas</a>
+                        <a href="#admin" class="nav-link">Admin</a>
+                        <a href="#panel-jugador" class="nav-link">Panel Jugador</a>
                     </div>
                 </div>
 
-                <!-- Botones Login/Registro (Desktop) -->
                 <div class="hidden md:block">
                     <div class="ml-4 flex items-center md:ml-6 space-x-2">
                         
-                        <!-- ESTADO: Desconectado (Visible por defecto) -->
                         <div id="user-menu-logged-out">
-                            <a href="/autenticacion.html" class="nav-link">
-                                Iniciar Sesión
-                            </a>
                             <a href="/autenticacion.html" class="px-3 py-2 rounded-md text-sm font-medium text-white bg-blue-600 hover:bg-blue-700">
-                                Registrarse
+                                Login
                             </a>
                         </div>
                         
-                        <!-- ESTADO: Conectado (Oculto por defecto) -->
                         <div id="user-menu-logged-in" class="hidden items-center space-x-2">
                             <span class="text-sm font-medium text-gray-300">Hola, <span id="user-name" class="font-bold text-white">...</span></span>
                             <a href="#" class="nav-link bg-gray-700">Mi Panel</a>
@@ -115,7 +115,6 @@
                     </div>
                 </div>
 
-                <!-- Botón Menú Móvil -->
                 <div class="-mr-2 flex md:hidden">
                     <button id="mobile-menu-button" type="button" class="bg-gray-800 inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 focus:outline-none" aria-controls="mobile-menu" aria-expanded="false">
                         <i data-lucide="menu" class="block h-6 w-6"></i>
@@ -125,9 +124,7 @@
             </div>
         </nav>
 
-        <!-- Menú Móvil (Desplegable) -->
         <div class="md:hidden hidden" id="mobile-menu">
-            <!-- (Contenido del menú móvil, por ahora lo dejamos estático) -->
             <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
                 <a href="/" class="block px-3 py-2 rounded-md text-base font-medium text-white bg-gray-700">Inicio</a>
                 <a href="/ranking-pwp.html" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:bg-gray-700">Ranking PWP</a>
@@ -136,26 +133,21 @@
         </div>
     </header>
 
-    <!-- Cuerpo Principal (Sin cambios) -->
     <main>
-        <!-- Bloque 2: Hero Section -->
-        <div class="relative pt-16 pb-32 flex content-center items-center justify-center min-h-[75vh]">
+        <div class="relative py-32 md:py-48 flex content-center items-center justify-center min-h-[60vh]">
             <div class="absolute top-0 w-full h-full hero-gradient"></div>
             <div class="container relative mx-auto px-4">
                 <div class="items-center flex flex-wrap">
-                    <div class="w-full lg:w-8/12 mx-auto text-center">
-                        <h1 class="text-white font-black text-5xl md:text-7xl leading-tight">
-                            El <span class="text-blue-500">Hub</span> de la Comunidad <span class="text-blue-500">TCG</span>
+                    <div class="w-full lg:w-10/12 mx-auto text-center">
+                        <h1 class="text-white font-black text-4xl md:text-6xl leading-tight uppercase">
+                            Bienvenido a theplayer.gg
                         </h1>
-                        <p class="mt-6 text-xl md:text-2xl text-gray-300 font-light">
-                            Tu punto de encuentro para rankings, torneos, artículos y el marketplace de TCGs en Chile.
+                        <p class="mt-6 text-xl md:text-2xl text-gray-300 font-light max-w-3xl mx-auto">
+                            El hub central de la comunidad de Trading Card Games en Chile. Rankings, eventos, contenido y mucho más.
                         </p>
                         <div class="mt-12 flex flex-col sm:flex-row gap-4 justify-center">
                             <a href="/autenticacion.html" class="w-full sm:w-auto text-lg font-semibold px-8 py-4 rounded-lg shadow-lg bg-blue-600 hover:bg-blue-700 text-white transition duration-300">
-                                Únete a la Federación
-                            </a>
-                            <a href="#eventos" class="w-full sm:w-auto text-lg font-semibold px-8 py-4 rounded-lg shadow-lg bg-gray-700 hover:bg-gray-600 text-white transition duration-300">
-                                Encuentra un Evento
+                                Únete a la Comunidad
                             </a>
                         </div>
                     </div>
@@ -163,204 +155,199 @@
             </div>
         </div>
 
-        <!-- Bloque 3: Rankings (Snapshot) -->
-<section id="rankings" class="container mx-auto px-4 -mt-24 pb-20">
-    
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
-
-        <div class="w-full">
-            <div class="flex justify-between items-center mb-4">
-                <h2 class="text-lg font-bold uppercase tracking-wider text-gray-300">
-                    Ranking The Player
-                </h2>
-                <a href="#" class="text-sm font-medium text-blue-400 hover:text-blue-300 transition duration-200">
-                    Ver más →
-                </a>
-            </div>
+        <section id="rankings" class="container mx-auto px-4 -mt-24 pb-20">
             
-            <div id="ranking-player-list" class="space-y-3">
-
-                <div class="flex items-center justify-between bg-gray-800/60 p-4 rounded-lg border border-gray-700/50 transition duration-300 card-hover">
-                    <div class="flex items-center space-x-4">
-                        <span class="text-xl font-bold text-gray-400">1</span>
-                        <div>
-                            <p class="font-semibold text-white">MageSlayer92</p>
-                            <span class="text-sm text-gray-500">Santiago</span>
-                        </div>
-                    </div>
-                    <div class="flex items-center space-x-2">
-                        <span class="font-bold text-blue-400">1250 pts</span>
-                        <i data-lucide="star" class="w-4 h-4 text-yellow-500"></i>
-                    </div>
-                </div>
-                
-                <div class="flex items-center justify-between bg-gray-800/60 p-4 rounded-lg border border-gray-700/50 transition duration-300 card-hover">
-                    <div class="flex items-center space-x-4">
-                        <span class="text-xl font-bold text-gray-400">2</span>
-                        <div>
-                            <p class="font-semibold text-white">ElfoNocturno</p>
-                            <span class="text-sm text-gray-500">Valparaíso</span>
-                        </div>
-                    </div>
-                    <div class="flex items-center space-x-2">
-                        <span class="font-bold text-blue-400">1180 pts</span>
-                        <i data-lucide="star" class="w-4 h-4 text-yellow-500"></i>
-                    </div>
-                </div>
-
-                <div class="flex items-center justify-between bg-gray-800/60 p-4 rounded-lg border border-gray-700/50 transition duration-300 card-hover">
-                    <div class="flex items-center space-x-4">
-                        <span class="text-xl font-bold text-gray-400">3</span>
-                        <div>
-                            <p class="font-semibold text-white">GoblinKing</p>
-                            <span class="text-sm text-gray-500">Concepción</span>
-                        </div>
-                    </div>
-                    <div class="flex items-center space-x-2">
-                        <span class="font-bold text-blue-400">1155 pts</span>
-                        <i data-lucide="star" class="w-4 h-4 text-yellow-500"></i>
-                    </div>
-                </div>
-
-                <div class="flex items-center justify-between bg-gray-800/60 p-4 rounded-lg border border-gray-700/50 transition duration-300 card-hover">
-                    <div class="flex items-center space-x-4">
-                        <span class="text-xl font-bold text-gray-400">4</span>
-                        <div>
-                            <p class="font-semibold text-white">AetherFlux</p>
-                            <span class="text-sm text-gray-500">Antofagasta</span>
-                        </div>
-                    </div>
-                    <div class="flex items-center space-x-2">
-                        <span class="font-bold text-blue-400">1090 pts</span>
-                        <i data-lucide="star" class="w-4 h-4 text-yellow-500"></i>
-                    </div>
-                </div>
-
-                <div class="flex items-center justify-between bg-gray-800/60 p-4 rounded-lg border border-gray-700/50 transition duration-300 card-hover">
-                    <div class="flex items-center space-x-4">
-                        <span class="text-xl font-bold text-gray-400">5</span>
-                        <div>
-                            <p class="font-semibold text-white">JaceMind</p>
-                            <span class="text-sm text-gray-500">Santiago</span>
-                        </div>
-                    </div>
-                    <div class="flex items-center space-x-2">
-                        <span class="font-bold text-blue-400">1075 pts</span>
-                        <i data-lucide="star" class="w-4 h-4 text-yellow-500"></i>
-                    </div>
-                </div>
-                
-            </div> </div>
-
-        <div class="w-full">
-            <div class="flex justify-between items-center mb-4">
-                <h2 class="text-lg font-bold uppercase tracking-wider text-gray-300">
-                    Ranking Caminante de Planos
-                </h2>
-                <a href="#" class="text-sm font-medium text-blue-400 hover:text-blue-300 transition duration-200">
-                    Ver más →
-                </a>
-            </div>
-            
-            <div id="ranking-caminante-list" class="space-y-3">
-                
-                <div class="flex items-center justify-between bg-gray-800/60 p-4 rounded-lg border border-gray-700/50 transition duration-300 card-hover">
-                    <div class="flex items-center space-x-4">
-                        <span class="text-xl font-bold text-gray-400">1</span>
-                        <div>
-                            <p class="font-semibold text-white">ProdigyMTG</p>
-                            <span class="text-sm text-gray-500">Viña del Mar</span>
-                        </div>
-                    </div>
-                    <div class="flex items-center space-x-2">
-                        <span class="font-semibold text-green-400">78.5% Win Rate</span>
-                        <i data-lucide="trending-up" class="w-4 h-4 text-green-400"></i>
-                    </div>
-                </div>
-                
-                <div class="flex items-center justify-between bg-gray-800/60 p-4 rounded-lg border border-gray-700/50 transition duration-300 card-hover">
-                    <div class="flex items-center space-x-4">
-                        <span class="text-xl font-bold text-gray-400">2</span>
-                        <div>
-                            <p class="font-semibold text-white">Strategist</p>
-                            <span class="text-sm text-gray-500">Santiago</span>
-                        </div>
-                    </div>
-                    <div class="flex items-center space-x-2">
-                        <span class="font-semibold text-green-400">75.2% Win Rate</span>
-                        <i data-lucide="trending-up" class="w-4 h-4 text-green-400"></i>
-                    </div>
-                </div>
-
-                <div class="flex items-center justify-between bg-gray-800/60 p-4 rounded-lg border border-gray-700/50 transition duration-300 card-hover">
-                    <div class="flex items-center space-x-4">
-                        <span class="text-xl font-bold text-gray-400">3</span>
-                        <div>
-                            <p class="font-semibold text-white">LaHechicera</p>
-                            <span class="text-sm text-gray-500">La Serena</span>
-                        </div>
-                    </div>
-                    <div class="flex items-center space-x-2">
-                        <span class="font-semibold text-green-400">74.8% Win Rate</span>
-                        <i data-lucide="trending-up" class="w-4 h-4 text-green-400"></i>
-                    </div>
-                </div>
-
-                <div class="flex items-center justify-between bg-gray-800/60 p-4 rounded-lg border border-gray-700/50 transition duration-300 card-hover">
-                    <div class="flex items-center space-x-4">
-                        <span class="text-xl font-bold text-gray-400">4</span>
-                        <div>
-                            <p class="font-semibold text-white">ControlFreak</p>
-                            <span class="text-sm text-gray-500">Temuco</span>
-                        </div>
-                    </div>
-                    <div class="flex items-center space-x-2">
-                        <span class="font-semibold text-green-400">72.1% Win Rate</span>
-                        <i data-lucide="trending-up" class="w-4 h-4 text-green-400"></i>
-                    </div>
-                </div>
-
-                <div class="flex items-center justify-between bg-gray-800/60 p-4 rounded-lg border border-gray-700/50 transition duration-300 card-hover">
-                    <div class="flex items-center space-x-4">
-                        <span class="text-xl font-bold text-gray-400">5</span>
-                        <div>
-                            <p class="font-semibold text-white">ComboMaster</p>
-                            <span class="text-sm text-gray-500">Santiago</span>
-                        </div>
-                    </div>
-                    <div class="flex items-center space-x-2">
-                        <span class="font-semibold text-green-400">71.8% Win Rate</span>
-                        <i data-lucide="trending-up" class="w-4 h-4 text-green-400"></i>
-                    </div>
-                </div>
-                
-            </div> </div>
-
-    </div>
-</section>
-        <!-- (Resto de la página principal sin cambios...) -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
         
-    </main>
+                <div class="w-full">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-lg font-bold uppercase tracking-wider text-gray-300">
+                            Ranking The Player
+                        </h2>
+                        <a href="#" class="text-sm font-medium text-blue-400 hover:text-blue-300 transition duration-200">
+                            Ver más →
+                        </a>
+                    </div>
+                    
+                    <div id="ranking-player-list" class="space-y-3">
+        
+                        <div class="flex items-center justify-between bg-gray-800/60 p-4 rounded-lg border border-gray-700/50 transition duration-300 card-hover">
+                            <div class="flex items-center space-x-4">
+                                <span class="text-xl font-bold text-gray-400">1</span>
+                                <div>
+                                    <p class="font-semibold text-white">MageSlayer92</p>
+                                    <span class="text-sm text-gray-500">Santiago</span>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <span class="font-bold text-blue-400">1250 pts</span>
+                                <i data-lucide="star" class="w-4 h-4 text-yellow-500 fill-current"></i>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center justify-between bg-gray-800/60 p-4 rounded-lg border border-gray-700/50 transition duration-300 card-hover">
+                            <div class="flex items-center space-x-4">
+                                <span class="text-xl font-bold text-gray-400">2</span>
+                                <div>
+                                    <p class="font-semibold text-white">ElfoNocturno</p>
+                                    <span class="text-sm text-gray-500">Valparaíso</span>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <span class="font-bold text-blue-400">1180 pts</span>
+                                <i data-lucide="star" class="w-4 h-4 text-yellow-500 fill-current"></i>
+                            </div>
+                        </div>
+        
+                        <div class="flex items-center justify-between bg-gray-800/60 p-4 rounded-lg border border-gray-700/50 transition duration-300 card-hover">
+                            <div class="flex items-center space-x-4">
+                                <span class="text-xl font-bold text-gray-400">3</span>
+                                <div>
+                                    <p class="font-semibold text-white">GoblinKing</p>
+                                    <span class="text-sm text-gray-500">Concepción</span>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <span class="font-bold text-blue-400">1155 pts</span>
+                                <i data-lucide="star" class="w-4 h-4 text-yellow-500 fill-current"></i>
+                            </div>
+                        </div>
+        
+                        <div class="flex items-center justify-between bg-gray-800/60 p-4 rounded-lg border border-gray-700/50 transition duration-300 card-hover">
+                            <div class="flex items-center space-x-4">
+                                <span class="text-xl font-bold text-gray-400">4</span>
+                                <div>
+                                    <p class="font-semibold text-white">AetherFlux</p>
+                                    <span class="text-sm text-gray-500">Antofagasta</span>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <span class="font-bold text-blue-400">1090 pts</span>
+                                <i data-lucide="star" class="w-4 h-4 text-yellow-500 fill-current"></i>
+                            </div>
+                        </div>
+        
+                        <div class="flex items-center justify-between bg-gray-800/60 p-4 rounded-lg border border-gray-700/50 transition duration-300 card-hover">
+                            <div class="flex items-center space-x-4">
+                                <span class="text-xl font-bold text-gray-400">5</span>
+                                <div>
+                                    <p class="font-semibold text-white">JaceMind</p>
+                                    <span class="text-sm text-gray-500">Santiago</span>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <span class="font-bold text-blue-400">1075 pts</span>
+                                <i data-lucide="star" class="w-4 h-4 text-yellow-500 fill-current"></i>
+                            </div>
+                        </div>
+                        
+                    </div> </div>
+        
+                <div class="w-full">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-lg font-bold uppercase tracking-wider text-gray-300">
+                            Ranking Caminante de Planos
+                        </h2>
+                        <a href="#" class="text-sm font-medium text-blue-400 hover:text-blue-300 transition duration-200">
+                            Ver más →
+                        </a>
+                    </div>
+                    
+                    <div id="ranking-caminante-list" class="space-y-3">
+                        
+                        <div class="flex items-center justify-between bg-gray-800/60 p-4 rounded-lg border border-gray-700/50 transition duration-300 card-hover">
+                            <div class="flex items-center space-x-4">
+                                <span class="text-xl font-bold text-gray-400">1</span>
+                                <div>
+                                    <p class="font-semibold text-white">ProdigyMTG</p>
+                                    <span class="text-sm text-gray-500">Viña del Mar</span>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <span class="font-semibold text-green-400">78.5% Win Rate</span>
+                                <i data-lucide="trending-up" class="w-4 h-4 text-green-400"></i>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center justify-between bg-gray-800/60 p-4 rounded-lg border border-gray-700/50 transition duration-300 card-hover">
+                            <div class="flex items-center space-x-4">
+                                <span class="text-xl font-bold text-gray-400">2</span>
+                                <div>
+                                    <p class="font-semibold text-white">Strategist</p>
+                                    <span class="text-sm text-gray-500">Santiago</span>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <span class="font-semibold text-green-400">75.2% Win Rate</span>
+                                <i data-lucide="trending-up" class="w-4 h-4 text-green-400"></i>
+                            </div>
+                        </div>
+        
+                        <div class="flex items-center justify-between bg-gray-800/60 p-4 rounded-lg border border-gray-700/50 transition duration-300 card-hover">
+                            <div class="flex items-center space-x-4">
+                                <span class="text-xl font-bold text-gray-400">3</span>
+                                <div>
+                                    <p class="font-semibold text-white">LaHechicera</p>
+                                    <span class="text-sm text-gray-500">La Serena</span>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <span class="font-semibold text-green-400">74.8% Win Rate</span>
+                                <i data-lucide="trending-up" class="w-4 h-4 text-green-400"></i>
+                            </div>
+                        </div>
+        
+                        <div class="flex items-center justify-between bg-gray-800/60 p-4 rounded-lg border border-gray-700/50 transition duration-300 card-hover">
+                            <div class="flex items-center space-x-4">
+                                <span class="text-xl font-bold text-gray-400">4</span>
+                                <div>
+                                    <p class="font-semibold text-white">ControlFreak</p>
+                                    <span class="text-sm text-gray-500">Temuco</span>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <span class="font-semibold text-green-400">72.1% Win Rate</span>
+                                <i data-lucide="trending-up" class="w-4 h-4 text-green-400"></i>
+                            </div>
+                        </div>
+        
+                        <div class="flex items-center justify-between bg-gray-800/60 p-4 rounded-lg border border-gray-700/50 transition duration-300 card-hover">
+                            <div class="flex items-center space-x-4">
+                                <span class="text-xl font-bold text-gray-400">5</span>
+                                <div>
+                                    <p class="font-semibold text-white">ComboMaster</p>
+                                    <span class="text-sm text-gray-500">Santiago</span>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <span class="font-semibold text-green-400">71.8% Win Rate</span>
+                                <i data-lucide="trending-up" class="w-4 h-4 text-green-400"></i>
+                            </div>
+                        </div>
+                        
+                    </div> </div>
+        
+            </div>
+        </section>
+
+        </main>
     
-    <footer class="bg-gray-900 pt-16 pb-8 mt-16">
+    <footer class="bg-gray-900/50 pt-16 pb-8 mt-16 border-t border-gray-700/50">
       <div class="text-center text-gray-500 text-sm">
-         © 2025 theplayer.gg - Todos los derechos reservados.
+          © 2025 theplayer.gg - Todos los derechos reservados.
       </div>
     </footer>
 
-    <!--
-    || ==================================================================== ||
-    || SCRIPT DE AUTENTICACIÓN: Esto hace que el menú sea dinámico
-    || ==================================================================== ||
-    -->
     <script>
         // --- ¡¡IMPORTANTE!! REEMPLAZA ESTO CON TUS LLAVES ---
         const SUPABASE_URL = 'https://jaqrddkrtcvwbfrjukvj.supabase.co'; 
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImphcXJkZGtydGN2d2Jmcmp1a3ZqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI3ODkyNTgsImV4cCI6MjA3ODM2NTI1OH0.voPWXtJo2fTqWKCqfzFTvi4JXcwesT3q9iWkGeM2NBI';
         // --------------------------------------------------
 
-        if (SUPABASE_URL.includes('PEGA_TU')) {
-            console.warn('ADVERTENCIA: Debes editar index.html y poner tus llaves de Supabase para que el login funcione.');
+        if (SUPABASE_URL.includes('jaqrddkrtcvwbfrjukvj')) {
+            console.log('Supabase conectado.');
+        } else {
+             console.warn('ADVERTENCIA: Debes editar index.html y poner tus llaves de Supabase para que el login funcione.');
         }
 
         const { createClient } = supabase;
@@ -426,8 +413,6 @@
             if (error) {
                 console.error('Error al cerrar sesión:', error);
             } else {
-                // onAuthStateChange se encargará de actualizar la UI
-                // Redirigir a la página principal por si acaso
                 window.location.href = '/';
             }
         });
