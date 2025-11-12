@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rankings Oficiales - theplayer.gg</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #111827; color: #E5E7EB; }
+        .card { background-color: #1F2937; border: 1px solid #374151; }
+        .nav-link { @apply px-3 py-2 rounded-md text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white; }
+        .nav-link-dropdown { @apply block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white; }
+        .dropdown:hover .dropdown-menu { display: block; }
+        .dropdown-menu { @apply hidden absolute z-10 mt-2 w-48 rounded-md shadow-lg py-1 bg-gray-800 ring-1 ring-black ring-opacity-5; }
+        
+        .ranking-table th { @apply p-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider; }
+        .ranking-table td { @apply p-4 whitespace-nowrap text-sm text-gray-200; }
+        .ranking-table tbody tr:nth-child(odd) { background-color: #1F2937; }
+        .ranking-table tbody tr:nth-child(even) { background-color: #1a2330; }
+        .pwp-top-3 { font-weight: 900; color: #60A5FA; } /* Azul para PWP */
+        .maestros-top-3 { font-weight: 900; color: #F87171; } /* Rojo para Maestros */
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- 
+      ¡TAREA PARA TI! 
+      Reemplaza este <header> y <footer> con los de tu 'index.html'
+    -->
+    <header class="bg-gray-900 shadow-md sticky top-0 z-50">
+      <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-16">
+          <div class="flex-shrink-0">
+            <a href="/" class="text-2xl font-bold text-white">
+                <span class="text-blue-500">the</span>player.gg
+            </a>
+          </div>
+          <div class="text-gray-400">(Menu de Navegación)</div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container mx-auto px-4 py-16">
+        
+        <!-- Contenedor principal de dos columnas -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+
+            <!-- Columna Izquierda: RANKING PWP -->
+            <div>
+                <h1 class="text-3xl font-bold text-white mb-2">Ranking PWP (Consistencia)</h1>
+                <p class="text-lg text-gray-400 mb-8">Clasifica al Torneo Nacional. (Actualizado en vivo)</p>
+                <div class="card overflow-hidden shadow-xl rounded-lg">
+                    <table class="min-w-full ranking-table">
+                        <thead>
+                            <tr>
+                                <th>Puesto</th>
+                                <th>Nombre</th>
+                                <th>Puntos PWP</th>
+                            </tr>
+                        </thead>
+                        <tbody id="pwp-table-body">
+                            <!-- Estado de Carga PWP -->
+                            <tr>
+                                <td colspan="3" class="text-center p-8">
+                                    <div class="flex justify-center items-center">
+                                        <i data-lucide="loader-2" class="animate-spin mr-2"></i>
+                                        Cargando ranking PWP...
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Columna Derecha: RANKING MAESTROS -->
+            <div>
+                <h1 class="text-3xl font-bold text-white mb-2">Ranking Maestros (Habilidad)</h1>
+                <p class="text-lg text-gray-400 mb-8">Clasifica al Torneo de Planeswalkers. (Min. 10 matches)</p>
+                <div class="card overflow-hidden shadow-xl rounded-lg">
+                    <table class="min-w-full ranking-table">
+                        <thead>
+                            <tr>
+                                <th>Puesto</th>
+                                <th>Nombre</th>
+                                <th>Matches</th>
+                                <th>Win-Rate</th>
+                            </tr>
+                        </thead>
+                        <tbody id="maestros-table-body">
+                            <!-- Estado de Carga Maestros -->
+                            <tr>
+                                <td colspan="4" class="text-center p-8">
+                                    <div class="flex justify-center items-center">
+                                        <i data-lucide="loader-2" class="animate-spin mr-2"></i>
+                                        Cargando ranking Maestros...
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div> <!-- Fin del grid de 2 columnas -->
+
+    </main>
+    
+    <footer class="bg-gray-900 pt-16 pb-8 mt-16">
+      <div class="text-center text-gray-500 text-sm">
+         © 2025 theplayer.gg - Todos los derechos reservados.
+      </div>
+    </footer>
+
+    <!--
+    || ==================================================================== ||
+    || SCRIPT DEL FRONTEND: Esto llama a AMBOS APIs
+    || ==================================================================== ||
+    -->
+    <script>
+        lucide.createIcons(); // Iniciar iconos
+
+        window.addEventListener('DOMContentLoaded', () => {
+            // Llamamos a ambas funciones de carga al mismo tiempo
+            cargarRankingPWP();
+            cargarRankingMaestros();
+        });
+
+        // --- Función para cargar el Ranking PWP ---
+        async function cargarRankingPWP() {
+            const tableBody = document.getElementById('pwp-table-body');
+            try {
+                const response = await fetch('/api/get-ranking-pwp');
+                if (!response.ok) throw new Error('Error en API PWP');
+                const rankingData = await response.json(); 
+
+                tableBody.innerHTML = ''; // Limpiar la tabla
+
+                if (rankingData && rankingData.length > 0) {
+                    rankingData.forEach((jugador) => {
+                        let puestoClass = (jugador.puesto <= 3) ? 'pwp-top-3' : '';
+                        const fila = `
+                            <tr>
+                                <td class="p-4 ${puestoClass}">#${jugador.puesto}</td>
+                                <td class="p-4 ${puestoClass}">${jugador.nombre_usuario || 'Jugador Anónimo'}</td>
+                                <td class="p-4 font-bold text-blue-400">${jugador.total_puntos} PWP</td>
+                            </tr>`;
+                        tableBody.innerHTML += fila;
+                    });
+                } else {
+                    tableBody.innerHTML = `<tr><td colspan="3" class="text-center p-8 text-gray-500">Aún no hay datos en el ranking.</td></tr>`;
+                }
+            } catch (error) {
+                console.error('Error al cargar PWP:', error);
+                tableBody.innerHTML = `<tr><td colspan="3" class="text-center p-8 text-red-400">Error al cargar ranking.</td></tr>`;
+            }
+        }
+
+        // --- Función para cargar el Ranking Maestros ---
+        async function cargarRankingMaestros() {
+            const tableBody = document.getElementById('maestros-table-body');
+            try {
+                const response = await fetch('/api/get-ranking-maestros');
+                if (!response.ok) throw new Error('Error en API Maestros');
+                const rankingData = await response.json(); 
+
+                tableBody.innerHTML = ''; // Limpiar la tabla
+
+                if (rankingData && rankingData.length > 0) {
+                    rankingData.forEach((jugador) => {
+                        let puestoClass = (jugador.puesto <= 3) ? 'maestros-top-3' : '';
+                        const fila = `
+                            <tr>
+                                <td class="p-4 ${puestoClass}">#${jugador.puesto}</td>
+                                <td class="p-4 ${puestoClass}">${jugador.nombre_usuario || 'Jugador Anónimo'}</td>
+                                <td class="p-4">${jugador.total_matches}</td>
+                                <td class="p-4 font-bold text-red-400">${parseFloat(jugador.win_rate).toFixed(2)} %</td>
+                            </tr>`;
+                        tableBody.innerHTML += fila;
+                    });
+                } else {
+                    tableBody.innerHTML = `<tr><td colspan="4" class="text-center p-8 text-gray-500">Aún no hay jugadores elegibles (min. 10 matches).</td></tr>`;
+                }
+            } catch (error) {
+                console.error('Error al cargar Maestros:', error);
+                tableBody.innerHTML = `<tr><td colspan="4" class="text-center p-8 text-red-400">Error al cargar ranking.</td></tr>`;
+            }
+        }
+    </script>
+</body>
+</html>
