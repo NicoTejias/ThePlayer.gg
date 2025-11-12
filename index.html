@@ -15,7 +15,6 @@
     <style>
         body { 
             font-family: 'Inter', sans-serif; 
-            /* Este es el color de fondo de tu 1ra imagen, más oscuro */
             background-color: #0F141E; 
             color: #E5E7EB; 
         }
@@ -26,11 +25,6 @@
         }
         .nav-link { @apply px-3 py-2 rounded-md text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white; }
         
-        /* * ¡OJO! Quité las reglas .dropdown y .dropdown-menu 
-         * porque ahora lo hacemos con group-hover de Tailwind.
-        */
-
-        /* Este gradiente es de tu primera imagen */
         .hero-gradient {
             background: radial-gradient(50% 50% at 50% 50%, rgba(29, 78, 216, 0.2) 0%, rgba(15, 20, 30, 0) 100%);
         }
@@ -57,8 +51,8 @@
                                 <i data-lucide="chevron-down" class="w-4 h-4 ml-1"></i>
                             </button>
                             <div class="hidden group-hover:block absolute z-10 mt-2 w-48 rounded-md shadow-lg py-1 bg-gray-800 ring-1 ring-black ring-opacity-5">
-                                <a href="/ranking-pwp.html" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white">Ranking PWP</a>
-                                <a href="/ranking-maestros.html" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white">Ranking Maestros</a>
+                                <a href="ranking-pwp.html" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white">Ranking PWP</a>
+                                <a href="ranking-maestros.html" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white">Ranking Maestros</a>
                             </div>
                         </div>
 
@@ -127,8 +121,8 @@
         <div class="md:hidden hidden" id="mobile-menu">
             <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
                 <a href="/" class="block px-3 py-2 rounded-md text-base font-medium text-white bg-gray-700">Inicio</a>
-                <a href="/ranking-pwp.html" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:bg-gray-700">Ranking PWP</a>
-                <a href="/ranking-maestros.html" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:bg-gray-700">Ranking Maestros</a>
+                <a href="ranking-pwp.html" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:bg-gray-700">Ranking PWP</a>
+                <a href="ranking-maestros.html" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:bg-gray-700">Ranking Maestros</a>
             </div>
         </div>
     </header>
@@ -164,14 +158,14 @@
                         <h2 class="text-lg font-bold uppercase tracking-wider text-gray-300">
                             Ranking The Player
                         </h2>
-                        <a href="#" class="text-sm font-medium text-blue-400 hover:text-blue-300 transition duration-200">
+                        <a href="ranking-pwp.html" class="text-sm font-medium text-blue-400 hover:text-blue-300 transition duration-200">
                             Ver más →
                         </a>
                     </div>
                     
                     <div id="ranking-player-list" class="space-y-3">
         
-                        <div class="flex items-center justify-between bg-gray-800/60 p-4 rounded-lg border border-gray-700/50 transition duration-300 card-hover">
+                        <div class="flex items-center justify-between bg-gray-800/60 p-4 rounded-lg border border-gray-700/50">
                             <div class="flex items-center space-x-4">
                                 <span class="text-xl font-bold text-gray-400">1</span>
                                 <div>
@@ -184,78 +178,22 @@
                                 <i data-lucide="star" class="w-4 h-4 text-yellow-500 fill-current"></i>
                             </div>
                         </div>
-                        
-                        <div class="flex items-center justify-between bg-gray-800/60 p-4 rounded-lg border border-gray-700/50 transition duration-300 card-hover">
-                            <div class="flex items-center space-x-4">
-                                <span class="text-xl font-bold text-gray-400">2</span>
-                                <div>
-                                    <p class="font-semibold text-white">ElfoNocturno</p>
-                                    <span class="text-sm text-gray-500">Valparaíso</span>
-                                </div>
-                            </div>
-                            <div class="flex items-center space-x-2">
-                                <span class="font-bold text-blue-400">1180 pts</span>
-                                <i data-lucide="star" class="w-4 h-4 text-yellow-500 fill-current"></i>
-                            </div>
                         </div>
-        
-                        <div class="flex items-center justify-between bg-gray-800/60 p-4 rounded-lg border border-gray-700/50 transition duration-300 card-hover">
-                            <div class="flex items-center space-x-4">
-                                <span class="text-xl font-bold text-gray-400">3</span>
-                                <div>
-                                    <p class="font-semibold text-white">GoblinKing</p>
-                                    <span class="text-sm text-gray-500">Concepción</span>
-                                </div>
-                            </div>
-                            <div class="flex items-center space-x-2">
-                                <span class="font-bold text-blue-400">1155 pts</span>
-                                <i data-lucide="star" class="w-4 h-4 text-yellow-500 fill-current"></i>
-                            </div>
-                        </div>
-        
-                        <div class="flex items-center justify-between bg-gray-800/60 p-4 rounded-lg border border-gray-700/50 transition duration-300 card-hover">
-                            <div class="flex items-center space-x-4">
-                                <span class="text-xl font-bold text-gray-400">4</span>
-                                <div>
-                                    <p class="font-semibold text-white">AetherFlux</p>
-                                    <span class="text-sm text-gray-500">Antofagasta</span>
-                                </div>
-                            </div>
-                            <div class="flex items-center space-x-2">
-                                <span class="font-bold text-blue-400">1090 pts</span>
-                                <i data-lucide="star" class="w-4 h-4 text-yellow-500 fill-current"></i>
-                            </div>
-                        </div>
-        
-                        <div class="flex items-center justify-between bg-gray-800/60 p-4 rounded-lg border border-gray-700/50 transition duration-300 card-hover">
-                            <div class="flex items-center space-x-4">
-                                <span class="text-xl font-bold text-gray-400">5</span>
-                                <div>
-                                    <p class="font-semibold text-white">JaceMind</p>
-                                    <span class="text-sm text-gray-500">Santiago</span>
-                                </div>
-                            </div>
-                            <div class="flex items-center space-x-2">
-                                <span class="font-bold text-blue-400">1075 pts</span>
-                                <i data-lucide="star" class="w-4 h-4 text-yellow-500 fill-current"></i>
-                            </div>
-                        </div>
-                        
-                    </div> </div>
+                </div>
         
                 <div class="w-full">
                     <div class="flex justify-between items-center mb-4">
                         <h2 class="text-lg font-bold uppercase tracking-wider text-gray-300">
                             Ranking Caminante de Planos
                         </h2>
-                        <a href="#" class="text-sm font-medium text-blue-400 hover:text-blue-300 transition duration-200">
+                        <a href="ranking-maestros.html" class="text-sm font-medium text-blue-400 hover:text-blue-300 transition duration-200">
                             Ver más →
                         </a>
                     </div>
                     
                     <div id="ranking-caminante-list" class="space-y-3">
                         
-                        <div class="flex items-center justify-between bg-gray-800/60 p-4 rounded-lg border border-gray-700/50 transition duration-300 card-hover">
+                        <div class="flex items-center justify-between bg-gray-800/60 p-4 rounded-lg border border-gray-700/50">
                             <div class="flex items-center space-x-4">
                                 <span class="text-xl font-bold text-gray-400">1</span>
                                 <div>
@@ -268,108 +206,54 @@
                                 <i data-lucide="trending-up" class="w-4 h-4 text-green-400"></i>
                             </div>
                         </div>
-                        
-                        <div class="flex items-center justify-between bg-gray-800/60 p-4 rounded-lg border border-gray-700/50 transition duration-300 card-hover">
-                            <div class="flex items-center space-x-4">
-                                <span class="text-xl font-bold text-gray-400">2</span>
-                                <div>
-                                    <p class="font-semibold text-white">Strategist</p>
-                                    <span class="text-sm text-gray-500">Santiago</span>
-                                </div>
-                            </div>
-                            <div class="flex items-center space-x-2">
-                                <span class="font-semibold text-green-400">75.2% Win Rate</span>
-                                <i data-lucide="trending-up" class="w-4 h-4 text-green-400"></i>
-                            </div>
                         </div>
-        
-                        <div class="flex items-center justify-between bg-gray-800/60 p-4 rounded-lg border border-gray-700/50 transition duration-300 card-hover">
-                            <div class="flex items-center space-x-4">
-                                <span class="text-xl font-bold text-gray-400">3</span>
-                                <div>
-                                    <p class="font-semibold text-white">LaHechicera</p>
-                                    <span class="text-sm text-gray-500">La Serena</span>
-                                </div>
-                            </div>
-                            <div class="flex items-center space-x-2">
-                                <span class="font-semibold text-green-400">74.8% Win Rate</span>
-                                <i data-lucide="trending-up" class="w-4 h-4 text-green-400"></i>
-                            </div>
-                        </div>
-        
-                        <div class="flex items-center justify-between bg-gray-800/60 p-4 rounded-lg border border-gray-700/50 transition duration-300 card-hover">
-                            <div class="flex items-center space-x-4">
-                                <span class="text-xl font-bold text-gray-400">4</span>
-                                <div>
-                                    <p class="font-semibold text-white">ControlFreak</p>
-                                    <span class="text-sm text-gray-500">Temuco</span>
-                                </div>
-                            </div>
-                            <div class="flex items-center space-x-2">
-                                <span class="font-semibold text-green-400">72.1% Win Rate</span>
-                                <i data-lucide="trending-up" class="w-4 h-4 text-green-400"></i>
-                            </div>
-                        </div>
-        
-                        <div class="flex items-center justify-between bg-gray-800/60 p-4 rounded-lg border border-gray-700/50 transition duration-300 card-hover">
-                            <div class="flex items-center space-x-4">
-                                <span class="text-xl font-bold text-gray-400">5</span>
-                                <div>
-                                    <p class="font-semibold text-white">ComboMaster</p>
-                                    <span class="text-sm text-gray-500">Santiago</span>
-                                </div>
-                            </div>
-                            <div class="flex items-center space-x-2">
-                                <span class="font-semibold text-green-400">71.8% Win Rate</span>
-                                <i data-lucide="trending-up" class="w-4 h-4 text-green-400"></i>
-                            </div>
-                        </div>
-                        
-                    </div> </div>
+                </div>
         
             </div>
         </section>
-<section id="eventos" class="container mx-auto px-4 mt-16 lg:mt-24 pb-12">
+
+        <section id="eventos" class="container mx-auto px-4 mt-16 lg:mt-24 pb-12">
         
-        <div class="flex justify-between items-center mb-6">
-            <h2 class="text-2xl md:text-3xl font-bold text-white">
-                Próximos Eventos
-            </h2>
-            <a href="/eventos.html" class="text-sm font-medium text-blue-400 hover:text-blue-300 transition duration-200">
-                Ver todos →
-            </a>
-        </div>
-
-        <div id="eventos-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-
-            <div class="card rounded-lg shadow-xl overflow-hidden transition duration-300 card-hover">
-                <a href="#">
-                    <img src="https://images.unsplash.com/photo-1511884642898-4c92249e20b6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w0NzEyNjZ8MHwxfGFsbHwxfHx8fHx8fHwxNzA4NjI5NjA3fA&ixlib=rb-4.0.3&q=80&w=800" 
-                         alt="Imagen de torneo" 
-                         class="w-full h-48 object-cover">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl md:text-3xl font-bold text-white">
+                    Próximos Eventos
+                </h2>
+                <a href="/eventos.html" class="text-sm font-medium text-blue-400 hover:text-blue-300 transition duration-200">
+                    Ver todos →
                 </a>
-                
-                <div class="p-5">
-                    <div class="flex justify-between items-center mb-2">
-                        <span class="text-xs font-semibold uppercase tracking-wider text-blue-400">
-                            Standard
-                        </span>
-                        <span class="text-xs text-gray-400">
-                            Nov 15, 2025
-                        </span>
-                    </div>
-                    <h3 class="text-xl font-bold text-white mb-2">
-                        <a href="#">Torneo de Apertura "El Portal"</a>
-                    </h3>
-                    <p class="text-sm text-gray-400 flex items-center">
-                        <i data-lucide="map-pin" class="w-4 h-4 mr-2 text-gray-500"></i>
-                        Tienda "El Portal", Santiago
-                    </p>
-                </div>
             </div>
 
-            </div> </section>
-        </main>
+            <div id="eventos-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+
+                <div class="card rounded-lg shadow-xl overflow-hidden transition duration-300 card-hover">
+                    <a href="#">
+                        <img src="https://images.unsplash.com/photo-1511884642898-4c92249e20b6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=800" 
+                             alt="Imagen de torneo" 
+                             class="w-full h-48 object-cover">
+                    </a>
+                    <div class="p-5">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-xs font-semibold uppercase tracking-wider text-blue-400">
+                                Standard
+                            </span>
+                            <span class="text-xs text-gray-400">
+                                Nov 15, 2025
+                            </span>
+                        </div>
+                        <h3 class="text-xl font-bold text-white mb-2">
+                            <a href="#">Torneo de Apertura "El Portal"</a>
+                        </h3>
+                        <p class="text-sm text-gray-400 flex items-center">
+                            <i data-lucide="map-pin" class="w-4 h-4 mr-2 text-gray-500"></i>
+                            Tienda "El Portal", Santiago
+                        </p>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+        
+    </main>
     
     <footer class="bg-gray-900/50 pt-16 pb-8 mt-16 border-t border-gray-700/50">
       <div class="text-center text-gray-500 text-sm">
@@ -377,202 +261,7 @@
       </div>
     </footer>
 
-   <script>
-        // --- ¡¡IMPORTANTE!! REEMPLAZA ESTO CON TUS LLAVES ---
-        const SUPABASE_URL = 'https://jaqrddkrtcvwbfrjukvj.supabase.co'; 
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImphcXJkZGtydGN2d2Jmcmp1a3ZqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI3ODkyNTgsImV4cCI6MjA3ODM2NTI1OH0.voPWXtJo2fTqWKCqfzFTvi4JXcwesT3q9iWkGeM2NBI';
-        // --------------------------------------------------
-
-        if (SUPABASE_URL.includes('jaqrddkrtcvwbfrjukvj')) {
-            console.log('Supabase conectado.');
-        } else {
-             console.warn('ADVERTENCIA: Debes editar index.html y poner tus llaves de Supabase para que el login funcione.');
-        }
-
-        const { createClient } = supabase;
-        const _supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-        // --- DOM Elements (Autenticación) ---
-        const userMenuLoggedIn = document.getElementById('user-menu-logged-in');
-        const userMenuLoggedOut = document.getElementById('user-menu-logged-out');
-        const userNameEl = document.getElementById('user-name');
-        const logoutButton = document.getElementById('logout-button');
-        const mobileMenuButton = document.getElementById('mobile-menu-button');
-        const mobileMenu = document.getElementById('mobile-menu');
-
-        // --- DOM Elements (Rankings) ---
-        const playerListContainer = document.getElementById('ranking-player-list');
-        const caminanteListContainer = document.getElementById('ranking-caminante-list');
-
-        /**
-         * Función para actualizar la UI de Autenticación
-         */
-        async function updateUserUI(session) {
-            if (session) {
-                // Usuario CONECTADO
-                userMenuLoggedOut.classList.add('hidden');
-                userMenuLoggedIn.classList.remove('hidden');
-
-                // Buscar el nombre en nuestra tabla 'perfiles'
-                const { data: perfil, error } = await _supabase
-                    .from('perfiles')
-                    .select('nombre_usuario')
-                    .eq('auth_id', session.user.id) // Busca el perfil que coincida con el ID de autenticación
-                    .single();
-                
-                if (perfil) {
-                    userNameEl.textContent = perfil.nombre_usuario;
-                } else {
-                    userNameEl.textContent = session.user.email.split('@')[0];
-                }
-
-            } else {
-                // Usuario DESCONECTADO
-                userMenuLoggedOut.classList.remove('hidden');
-                userMenuLoggedIn.classList.add('hidden');
-                userNameEl.textContent = '...';
-            }
-        }
-
-
-        // --- Funciones para crear el HTML de los Rankings ---
-        function createPlayerHtml(jugador, index) {
-            const region = jugador.region || '---';
-            return `
-                <div class="flex items-center justify-between bg-gray-800/60 p-4 rounded-lg border border-gray-700/50 transition duration-300 card-hover">
-                    <div class="flex items-center space-x-4">
-                        <span class="text-xl font-bold text-gray-400">${index + 1}</span>
-                        <div>
-                            <p class="font-semibold text-white">${jugador.nombre_usuario}</p>
-                            <span class="text-sm text-gray-500">${region}</span>
-                        </div>
-                    </div>
-                    <div class="flex items-center space-x-2">
-                        <span class="font-bold text-blue-400">${jugador.total_puntos} pts</span>
-                        <i data-lucide="star" class="w-4 h-4 text-yellow-500 fill-current"></i>
-                    </div>
-                </div>
-            `;
-        }
-
-        function createCaminanteHtml(jugador, index) {
-            const region = jugador.region || '---';
-            const winRate = (jugador.win_rate * 100).toFixed(1);
-            return `
-                <div class="flex items-center justify-between bg-gray-800/60 p-4 rounded-lg border border-gray-700/50 transition duration-300 card-hover">
-                    <div class="flex items-center space-x-4">
-                        <span class="text-xl font-bold text-gray-400">${index + 1}</span>
-                        <div>
-                            <p class="font-semibold text-white">${jugador.nombre_usuario}</p>
-                            <span class="text-sm text-gray-500">${region}</span>
-                        </div>
-                    </div>
-                    <div class="flex items-center space-x-2">
-                        <span class="font-semibold text-green-400">${winRate}% Win Rate</span>
-                        <i data-lucide="trending-up" class="w-4 h-4 text-green-400"></i>
-                    </div>
-                </div>
-            `;
-        }
-        
-        /**
-         * Función principal para cargar TODOS los rankings
-         */
-        async function cargarRankings() {
-            // Asegurarse que los contenedores existen antes de usarlos
-            if (!playerListContainer || !caminanteListContainer) {
-                console.warn('No se encontraron los contenedores de ranking en esta página.');
-                return;
-            }
-
-            try {
-                // 1. Limpiamos los datos de ejemplo
-                playerListContainer.innerHTML = '<p class="text-gray-400">Cargando ranking...</p>';
-                caminanteListContainer.innerHTML = '<p class="text-gray-400">Cargando ranking...</p>';
-
-                // 2. Hacemos las 2 consultas a Supabase
-                const [pwpResponse, wrResponse] = await Promise.all([
-                    _supabase.rpc('get_ranking_pwp'),
-                    _supabase.rpc('get_ranking_winrate')
-                ]);
-
-                // 3. Procesamos Ranking "The Player"
-                if (pwpResponse.error) throw pwpResponse.error;
-                
-                if (pwpResponse.data && pwpResponse.data.length > 0) {
-                    playerListContainer.innerHTML = ''; 
-                    pwpResponse.data.forEach((jugador, index) => {
-                        playerListContainer.innerHTML += createPlayerHtml(jugador, index);
-                    });
-                } else {
-                    playerListContainer.innerHTML = '<p class="text-gray-400">No hay datos para este ranking aún.</p>';
-                }
-
-                // 4. Procesamos Ranking "Caminante de Planos"
-                if (wrResponse.error) throw wrResponse.error;
-                
-                if (wrResponse.data && wrResponse.data.length > 0) {
-                    caminanteListContainer.innerHTML = '';
-                    wrResponse.data.forEach((jugador, index) => {
-                        caminanteListContainer.innerHTML += createCaminanteHtml(jugador, index);
-                    });
-                } else {
-                    caminanteListContainer.innerHTML = '<p class="text-gray-400">No hay datos para este ranking aún.</p>';
-                }
-                
-                // 5. ¡MUY IMPORTANTE! Volver a crear los iconos
-                lucide.createIcons();
-
-            } catch (error) {
-                console.error('Error cargando rankings:', error);
-                playerListContainer.innerHTML = '<p class="text-red-400">Error al cargar el ranking.</p>';
-                caminanteListContainer.innerHTML = '<p class="text-red-400">Error al cargar el ranking.</p>';
-            }
-        }
-
-        // --- Event Listeners ---
-
-        // 1. Escuchar cuando la página cargue
-        document.addEventListener('DOMContentLoaded', async () => {
-            lucide.createIcons(); // Iniciar iconos
-            
-            // Revisar el estado de la sesión al cargar la página
-            const { data: { session } } = await _supabase.auth.getSession();
-            updateUserUI(session);
-
-            // Cargar los rankings dinámicos
-            cargarRankings(); 
-        });
-
-        // 2. Escuchar cambios de estado (Login o Logout)
-        _supabase.auth.onAuthStateChange((event, session) => {
-            console.log('Auth event:', event, session);
-            updateUserUI(session);
-        });
-
-        // 3. Botón de Cerrar Sesión
-        logoutButton.addEventListener('click', async (e) => {
-            e.preventDefault();
-            const { error } = await _supabase.auth.signOut();
-            if (error) {
-                console.error('Error al cerrar sesión:', error);
-            } else {
-                window.location.href = '/';
-            }
-        });
-
-        // 4. Menú Móvil
-        mobileMenuButton.addEventListener('click', () => {
-            const isExpanded = mobileMenuButton.getAttribute('aria-expanded') === 'true';
-            mobileMenuButton.setAttribute('aria-expanded', !isExpanded);
-            mobileMenu.classList.toggle('hidden');
-            // Intercambiar iconos de menú (hamburguesa / X)
-            mobileMenuButton.querySelector('i[data-lucide="menu"]').classList.toggle('hidden');
-            mobileMenuButton.querySelector('i[data-lucide="x"]').classList.toggle('hidden');
-        });
-
-    </script>
-<script>
+    <script>
         // --- ¡¡IMPORTANTE!! TUS LLAVES DE SUPABASE ---
         const SUPABASE_URL = 'https://jaqrddkrtcvwbfrjukvj.supabase.co'; 
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImphcXJkZGtydGN2d2Jmcmp1a3ZqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI3ODkyNTgsImV4cCI6MjA3ODM2NTI1OH0.voPWXtJo2fTqWKCqfzFTvi4JXcwesT3q9iWkGeM2NBI';
@@ -599,7 +288,7 @@
         const playerListContainer = document.getElementById('ranking-player-list');
         const caminanteListContainer = document.getElementById('ranking-caminante-list');
 
-        // --- DOM Elements (Eventos) ¡NUEVO! ---
+        // --- DOM Elements (Eventos) ---
         const eventosListContainer = document.getElementById('eventos-list');
 
 
@@ -635,12 +324,11 @@
 
         /**
          * ======================================
-         * FUNCIONES DE RANKINGS (¡CORREGIDAS!)
+         * FUNCIONES DE RANKINGS
          * ======================================
          */
         function createPlayerHtml(jugador, index) {
             const region = jugador.region || '---';
-            // ¡ESTE ES EL CÓDIGO HTML REAL!
             return `
                 <div class="flex items-center justify-between bg-gray-800/60 p-4 rounded-lg border border-gray-700/50 transition duration-300 card-hover">
                     <div class="flex items-center space-x-4">
@@ -661,7 +349,6 @@
         function createCaminanteHtml(jugador, index) {
             const region = jugador.region || '---';
             const winRate = (jugador.win_rate * 100).toFixed(1);
-            // ¡ESTE ES EL CÓDIGO HTML REAL!
             return `
                 <div class="flex items-center justify-between bg-gray-800/60 p-4 rounded-lg border border-gray-700/50 transition duration-300 card-hover">
                     <div class="flex items-center space-x-4">
@@ -727,9 +414,7 @@
          */
 
         function formatEventDate(dateString) {
-            // Formato: 15 nov. 2025
             const options = { year: 'numeric', month: 'short', day: 'numeric' };
-            // Usamos 'es-CL' para el formato de fecha en español de Chile
             return new Date(dateString).toLocaleDateString('es-CL', options);
         }
 
@@ -784,7 +469,7 @@
                         eventosListContainer.innerHTML += createEventoHtml(evento);
                     });
                 } else {
-                    eventosListContainer.innerHTML = '<p classT="text-gray-400">No hay eventos programados por ahora.</p>';
+                    eventosListContainer.innerHTML = '<p class="text-gray-400">No hay eventos programados por ahora.</p>';
                 }
 
             } catch (error) {
@@ -810,8 +495,7 @@
             // 3. Cargar los eventos dinámicos
             await cargarEventos();
 
-            // 4. Iniciar todos los iconos (¡Importante!)
-            // Debe ir al FINAL, después de que se cargue todo el contenido dinámico.
+            // 4. Iniciar todos los iconos
             lucide.createIcons();
         });
 
@@ -842,5 +526,6 @@
         });
 
     </script>
+
 </body>
 </html>
