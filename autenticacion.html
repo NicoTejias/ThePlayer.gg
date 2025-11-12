@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acceder - theplayer.gg</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #111827; color: #E5E7EB; }
+        .card { background-color: #1F2937; border: 1px solid #374151; }
+        .nav-link { @apply px-3 py-2 rounded-md text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white; }
+        .tab-button { @apply w-1/2 py-4 px-1 text-center border-b-2 font-medium text-lg; }
+        .tab-active { @apply border-blue-500 text-blue-500; }
+        .tab-inactive { @apply border-transparent text-gray-500 hover:text-gray-300 hover:border-gray-500; }
+        .form-input { @apply mt-1 block w-full bg-gray-800 border-gray-600 rounded-md shadow-sm p-3 text-white; }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="bg-gray-900 shadow-md sticky top-0 z-50">
+      <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-16">
+          <div class="flex-shrink-0">
+            <a href="/" class="text-2xl font-bold text-white">
+                <span class="text-blue-500">the</span>player.gg
+            </a>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container mx-auto px-4 py-16">
+        <div class="card max-w-lg mx-auto rounded-lg shadow-xl overflow-hidden">
+            
+            <div class="border-b border-gray-700">
+                <nav class="flex" aria-label="Tabs">
+                    <button id="tab-login" class="tab-button tab-active">
+                        Iniciar Sesión
+                    </button>
+                    <button id="tab-register" class="tab-button tab-inactive">
+                        Crear Cuenta
+                    </button>
+                </nav>
+            </div>
+
+            <div id="message-container" class="p-4 rounded-md m-4 hidden"></div>
+
+            <div id="login-form" class="p-8">
+                <form id="form-login-element" class="space-y-6">
+                    <div>
+                        <label for="login-email" class="block text-sm font-medium text-gray-300">Email</label>
+                        <input type="email" id="login-email" name="email" required class="form-input">
+                    </div>
+                    <div>
+                        <label for="login-password" class="block text-sm font-medium text-gray-300">Contraseña</label>
+                        <input type="password" id="login-password" name="password" required class="form-input">
+                    </div>
+                    <div>
+                        <button type="submit" class="w-full flex justify-center py-3 px-4 rounded-md shadow-sm text-lg font-medium text-white bg-blue-600 hover:bg-blue-700">
+                            Iniciar Sesión
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <div id="register-form" class="p-8 hidden">
+                <form id="form-register-element" class="space-y-6">
+                    <div>
+                        <label for="register-username" class="block text-sm font-medium text-gray-300">Nombre de Usuario (Público)</label>
+                        <input type="text" id="register-username" name="username" required class="form-input">
+                    </div>
+                    <div>
+                        <label for="register-email" class="block text-sm font-medium text-gray-300">Email</label>
+                        <input type="email" id="register-email" name="email" required class="form-input">
+                    </div>
+                    <div>
+                        <label for="register-password" class="block text-sm font-medium text-gray-300">Contraseña</GTC></label>
+                        <input type="password" id="register-password" name="password" required class="form-input">
+                    </div>
+                    <div>
+                        <button type="submit" class="w-full flex justify-center py-3 px-4 rounded-md shadow-sm text-lg font-medium text-white bg-green-600 hover:bg-green-700">
+                            Crear Cuenta
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+    
+    <footer class="bg-gray-900 pt-16 pb-8 mt-16">
+      <div class="text-center text-gray-500 text-sm">
+         © 2025 theplayer.gg - Todos los derechos reservados.
+      </div>
+    </footer>
+
+    <script>
+        lucide.createIcons();
+
+        // --- ¡¡IMPORTANTE!! REEMPLAZA ESTO CON TUS LLAVES ---
+        const SUPABASE_URL = 'https://jaqrddkrtcvwbfrjukvj.supabase.co'; 
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImphcXJkZGtydGN2d2Jmcmp1a3ZqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI3ODkyNTgsImV4cCI6MjA3ODM2NTI1OH0.voPWXtJo2fTqWKCqfzFTvi4JXcwesT3q9iWkGeM2NBI';
+        // --------------------------------------------------
+
+        if (SUPABASE_URL.includes('PEGA_TU')) {
+            alert('ERROR: Debes editar el archivo .html y poner tus llaves de Supabase para que el login funcione.');
+        }
+
+        // 1. Inicializar el cliente de Supabase
+        const { createClient } = supabase;
+        const _supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // 2. Elementos del DOM
+        const tabLogin = document.getElementById('tab-login');
+        const tabRegister = document.getElementById('tab-register');
+        const loginForm = document.getElementById('login-form');
+        const registerForm = document.getElementById('register-form');
+        const formLoginEl = document.getElementById('form-login-element');
+        const formRegisterEl = document.getElementById('form-register-element');
+        const messageContainer = document.getElementById('message-container');
+
+        // 3. Lógica de Pestañas
+        tabLogin.addEventListener('click', () => {
+            tabLogin.classList.add('tab-active');
+            tabLogin.classList.remove('tab-inactive');
+            tabRegister.classList.add('tab-inactive');
+            tabRegister.classList.remove('tab-active');
+            loginForm.classList.remove('hidden');
+            registerForm.classList.add('hidden');
+        });
+        tabRegister.addEventListener('click', () => {
+            tabRegister.classList.add('tab-active');
+            tabRegister.classList.remove('tab-inactive');
+            tabLogin.classList.add('tab-inactive');
+            tabLogin.classList.remove('tab-active');
+            registerForm.classList.remove('hidden');
+            loginForm.classList.add('hidden');
+        });
+
+        // 4. Mostrar mensajes
+        function showMessage(type, text) {
+            messageContainer.classList.remove('hidden', 'bg-red-800', 'bg-green-800');
+            if (type === 'error') {
+                messageContainer.classList.add('bg-red-800');
+                messageContainer.textContent = `Error: ${text}`;
+            } else {
+                messageContainer.classList.add('bg-green-800');
+                messageContainer.textContent = text;
+            }
+        }
+
+        // 5. Lógica de Registro
+        formRegisterEl.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('register-username').value;
+            const email = document.getElementById('register-email').value;
+            const password = document.getElementById('register-password').value;
+
+            // ¡Aquí ocurre la magia!
+            const { data, error } = await _supabase.auth.signUp({
+                email: email,
+                password: password,
+                options: {
+                    // Aquí pasamos datos extra (el 'nombre_usuario') a Supabase
+                    data: {
+                        nombre_usuario: username
+                    }
+                }
+            });
+
+            if (error) {
+                showMessage('error', error.message);
+            } else {
+                showMessage('success', '¡Registro exitoso! Revisa tu email para confirmar tu cuenta.');
+                formRegisterEl.reset();
+            }
+        });
+
+        // 6. Lógica de Iniciar Sesión
+        formLoginEl.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+
+            const { data, error } = await _supabase.auth.signInWithPassword({
+                email: email,
+                password: password,
+            });
+
+            if (error) {
+                showMessage('error', error.message);
+            } else {
+                showMessage('success', '¡Inicio de sesión exitoso! Redirigiendo...');
+                // Redirigir al 'index.html' después de 1 segundo
+                setTimeout(() => {
+                    window.location.href = '/'; 
+                }, 1000);
+            }
+        });
+    </script>
+</body>
+</html>
