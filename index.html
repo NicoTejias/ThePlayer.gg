@@ -338,7 +338,7 @@
       </div>
     </footer>
 
-    <script>
+   <script>
         // --- ¡¡IMPORTANTE!! REEMPLAZA ESTO CON TUS LLAVES ---
         const SUPABASE_URL = 'https://jaqrddkrtcvwbfrjukvj.supabase.co'; 
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImphcXJkZGtydGN2d2Jmcmp1a3ZqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI3ODkyNTgsImV4cCI6MjA3ODM2NTI1OH0.voPWXtJo2fTqWKCqfzFTvi4JXcwesT3q9iWkGeM2NBI';
@@ -353,7 +353,7 @@
         const { createClient } = supabase;
         const _supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        // --- DOM Elements ---
+        // --- DOM Elements (Autenticación) ---
         const userMenuLoggedIn = document.getElementById('user-menu-logged-in');
         const userMenuLoggedOut = document.getElementById('user-menu-logged-out');
         const userNameEl = document.getElementById('user-name');
@@ -361,7 +361,13 @@
         const mobileMenuButton = document.getElementById('mobile-menu-button');
         const mobileMenu = document.getElementById('mobile-menu');
 
-        // --- Función para actualizar la UI ---
+        // --- DOM Elements (Rankings) ---
+        const playerListContainer = document.getElementById('ranking-player-list');
+        const caminanteListContainer = document.getElementById('ranking-caminante-list');
+
+        /**
+         * Función para actualizar la UI de Autenticación
+         */
         async function updateUserUI(session) {
             if (session) {
                 // Usuario CONECTADO
@@ -389,6 +395,102 @@
             }
         }
 
+
+        // --- Funciones para crear el HTML de los Rankings ---
+        function createPlayerHtml(jugador, index) {
+            const region = jugador.region || '---';
+            return `
+                <div class="flex items-center justify-between bg-gray-800/60 p-4 rounded-lg border border-gray-700/50 transition duration-300 card-hover">
+                    <div class="flex items-center space-x-4">
+                        <span class="text-xl font-bold text-gray-400">${index + 1}</span>
+                        <div>
+                            <p class="font-semibold text-white">${jugador.nombre_usuario}</p>
+                            <span class="text-sm text-gray-500">${region}</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <span class="font-bold text-blue-400">${jugador.total_puntos} pts</span>
+                        <i data-lucide="star" class="w-4 h-4 text-yellow-500 fill-current"></i>
+                    </div>
+                </div>
+            `;
+        }
+
+        function createCaminanteHtml(jugador, index) {
+            const region = jugador.region || '---';
+            const winRate = (jugador.win_rate * 100).toFixed(1);
+            return `
+                <div class="flex items-center justify-between bg-gray-800/60 p-4 rounded-lg border border-gray-700/50 transition duration-300 card-hover">
+                    <div class="flex items-center space-x-4">
+                        <span class="text-xl font-bold text-gray-400">${index + 1}</span>
+                        <div>
+                            <p class="font-semibold text-white">${jugador.nombre_usuario}</p>
+                            <span class="text-sm text-gray-500">${region}</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <span class="font-semibold text-green-400">${winRate}% Win Rate</span>
+                        <i data-lucide="trending-up" class="w-4 h-4 text-green-400"></i>
+                    </div>
+                </div>
+            `;
+        }
+        
+        /**
+         * Función principal para cargar TODOS los rankings
+         */
+        async function cargarRankings() {
+            // Asegurarse que los contenedores existen antes de usarlos
+            if (!playerListContainer || !caminanteListContainer) {
+                console.warn('No se encontraron los contenedores de ranking en esta página.');
+                return;
+            }
+
+            try {
+                // 1. Limpiamos los datos de ejemplo
+                playerListContainer.innerHTML = '<p class="text-gray-400">Cargando ranking...</p>';
+                caminanteListContainer.innerHTML = '<p class="text-gray-400">Cargando ranking...</p>';
+
+                // 2. Hacemos las 2 consultas a Supabase
+                const [pwpResponse, wrResponse] = await Promise.all([
+                    _supabase.rpc('get_ranking_pwp'),
+                    _supabase.rpc('get_ranking_winrate')
+                ]);
+
+                // 3. Procesamos Ranking "The Player"
+                if (pwpResponse.error) throw pwpResponse.error;
+                
+                if (pwpResponse.data && pwpResponse.data.length > 0) {
+                    playerListContainer.innerHTML = ''; 
+                    pwpResponse.data.forEach((jugador, index) => {
+                        playerListContainer.innerHTML += createPlayerHtml(jugador, index);
+                    });
+                } else {
+                    playerListContainer.innerHTML = '<p class="text-gray-400">No hay datos para este ranking aún.</p>';
+                }
+
+                // 4. Procesamos Ranking "Caminante de Planos"
+                if (wrResponse.error) throw wrResponse.error;
+                
+                if (wrResponse.data && wrResponse.data.length > 0) {
+                    caminanteListContainer.innerHTML = '';
+                    wrResponse.data.forEach((jugador, index) => {
+                        caminanteListContainer.innerHTML += createCaminanteHtml(jugador, index);
+                    });
+                } else {
+                    caminanteListContainer.innerHTML = '<p class="text-gray-400">No hay datos para este ranking aún.</p>';
+                }
+                
+                // 5. ¡MUY IMPORTANTE! Volver a crear los iconos
+                lucide.createIcons();
+
+            } catch (error) {
+                console.error('Error cargando rankings:', error);
+                playerListContainer.innerHTML = '<p class="text-red-400">Error al cargar el ranking.</p>';
+                caminanteListContainer.innerHTML = '<p class="text-red-400">Error al cargar el ranking.</p>';
+            }
+        }
+
         // --- Event Listeners ---
 
         // 1. Escuchar cuando la página cargue
@@ -398,6 +500,9 @@
             // Revisar el estado de la sesión al cargar la página
             const { data: { session } } = await _supabase.auth.getSession();
             updateUserUI(session);
+
+            // Cargar los rankings dinámicos
+            cargarRankings(); 
         });
 
         // 2. Escuchar cambios de estado (Login o Logout)
