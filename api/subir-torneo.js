@@ -11,7 +11,7 @@ const supabase = createClient(
 // --- 2. LA FUNCIÓN DEL "MOTOR" (Handler Principal) ---
 export default async function handler(request, response) {
   
-  console.log("--- Ejecutando Motor v5 (Sintaxis Corregida) ---");
+  console.log("--- Ejecutando Motor v6 (con Sanitizador de Nombres) ---");
 
   if (request.method !== 'POST') {
     return response.status(405).json({ message: 'Método no permitido.' });
@@ -70,16 +70,29 @@ export default async function handler(request, response) {
 // --- FUNCIONES DEL PARSER (El Cerebro) ---
 // --- ------------------------------- ---
 
+// ¡NUEVA FUNCIÓN PARA LIMPIAR NOMBRES!
+function sanitizarNombre(nombre) {
+  // 1. Reemplaza espacios "raros" (como &nbsp;) por espacios normales
+  let nombreLimpio = nombre.replace(/\s+/g, ' ');
+  // 2. Elimina emojis y caracteres no estándar (mantiene letras, números, espacios, guiones, paréntesis)
+  nombreLimpio = nombreLimpio.replace(/[^\p{L}\p{N}\p{Z}\(\)-_]/gu, '');
+  // 3. Quita espacios al inicio y al final
+  return nombreLimpio.trim();
+}
+
 function parsearEventlink(html) {
   const $ = cheerio.load(html);
   const jugadores = [];
   
   $('table.standings tr').each((i, fila) => {
     try {
-      const nombre = $(fila).find('td.standings__cell.name').text().trim();
+      let nombre = $(fila).find('td.standings__cell.name').text().trim();
       const wld_string = $(fila).find('td.standings__cell.wldb').text().trim();
       
       if (nombre && wld_string && nombre.length > 0) {
+        // ¡USAMOS EL SANITIZADOR!
+        nombre = sanitizarNombre(nombre); 
+        
         const partes = wld_string.split('/');
         const ganados = parseInt(partes[0]) || 0;
         const perdidos = parseInt(partes[1]) || 0;
@@ -99,10 +112,13 @@ function parsearMelee(html) {
 
   $('table#tournament-standings-table tbody > tr').each((i, fila) => {
     try {
-      const nombre = $(fila).find('td.Player-column a').text().trim();
+      let nombre = $(fila).find('td.Player-column a').text().trim();
       const wld_string = $(fila).find('td.MatchRecord-column').text().trim();
 
       if (nombre && wld_string && nombre.length > 0) {
+        // ¡USAMOS EL SANITIZADOR!
+        nombre = sanitizarNombre(nombre); 
+
         const partes = wld_string.split('-');
         const ganados = parseInt(partes[0]) || 0;
         const perdidos = parseInt(partes[1]) || 0;
@@ -164,6 +180,8 @@ async function guardarResultados(listaResultados, datosTorneo, tiendaID) {
   const filasParaGuardar = [];
   
   for (const jugador of listaResultados) {
+    
+    // (El nombre ya viene sanitizado desde el parser)
     
     // 3. Buscar el ID del jugador en la tabla 'perfiles'
     let { data: perfil } = await supabase
