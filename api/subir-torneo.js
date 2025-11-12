@@ -11,8 +11,7 @@ const supabase = createClient(
 // --- 2. LA FUNCIÓN DEL "MOTOR" (Handler Principal) ---
 export default async function handler(request, response) {
   
-  // ¡¡NUEVA LÍNEA PARA FORZAR LA ACTUALIZACIÓN DE VERCEL!!
-  console.log("--- Ejecutando Motor v3 (con Parser corregido) ---");
+  console.log("--- Ejecutando Motor v4 (con corrección de BD) ---");
 
   if (request.method !== 'POST') {
     return response.status(405).json({ message: 'Método no permitido.' });
@@ -47,9 +46,13 @@ export default async function handler(request, response) {
     console.log(`Parser encontró ${listaResultados.length} jugadores.`);
 
     // --- 5. GUARDAR TODO EN LA BASE DE DATOS ---
+    // Usamos la "Tienda de Prueba" (ID 1) que creamos con el SQL
+    const TIENDA_ID_DE_PRUEBA = 1; 
+
     const resultadoGuardado = await guardarResultados(
       listaResultados,
-      { formato, multiplicador_pwp, nro_jugadores }
+      datos, // Pasamos todos los datos del formulario
+      TIENDA_ID_DE_PRUEBA
     );
 
     // --- 6. RESPONDER CON ÉXITO ---
@@ -94,7 +97,7 @@ function parsearEventlink(html) {
       console.warn("Error parseando una fila de Eventlink:", e.message);
     }
   });
-  return jugadores; // -> [ {nombre: "Alexander...", ganados: 2, perdidos: 0, empatados: 1}, ... ]
+  return jugadores; 
 }
 
 // Parser para Melee.gg (Sin cambios)
@@ -119,7 +122,7 @@ function parsearMelee(html) {
       console.warn("Error parseando una fila de Melee:", e.message);
     }
   });
-  return jugadores; // -> [ {nombre: "Patricio Roman", ganados: 7, perdidos: 1, empatados: 1}, ... ]
+  return jugadores;
 }
 
 
@@ -149,15 +152,14 @@ function buscarPuntosPorTabla(nro_jugadores) {
   return 9; // 2048+
 }
 
-// Función final para guardar todo en Supabase
-async function guardarResultados(listaResultados, datosTorneo) {
+// Función final para guardar todo en Supabase (CORREGIDA)
+async function guardarResultados(listaResultados, datosTorneo, tiendaID) {
   
   // 1. Crear el torneo en la BD
-  // (Seguimos usando tienda_id: 1 como prueba)
   const { data: torneoData, error: torneoError } = await supabase
     .from('torneos')
     .insert({
-      tienda_id: 1, // <--- CAMBIO TEMPORAL
+      tienda_id: tiendaID, // Usamos el ID de la tienda
       formato: datosTorneo.formato,
       multiplicador_pwp: datosTorneo.multiplicador_pwp,
       nro_jugadores: datosTorneo.nro_jugadores
@@ -180,22 +182,23 @@ async function guardarResultados(listaResultados, datosTorneo) {
     let { data: perfil, error: perfilError } = await supabase
       .from('perfiles')
       .select('id')
-      .ilike('nombre_usuario', jugador.nombre) // 'ilike' busca sin importar mayúsculas
+      .ilike('nombre_usuario', jugador.nombre)
       .single();
 
     let jugadorID;
 
     if (!perfil) {
       // Si el jugador NO existe, lo creamos
+      // ¡Ya no fallará, porque el 'id' se genera solo!
       const { data: nuevoPerfil, error: nuevoPerfilError } = await supabase
         .from('perfiles')
         .insert({ nombre_usuario: jugador.nombre, rol: 'jugador' })
-        .select()
+        .select('id') // Solo necesitamos el nuevo ID
         .single();
         
       if (nuevoPerfilError) {
         console.warn(`No se pudo crear el perfil para ${jugador.nombre}: ${nuevoPerfilError.message}`);
-        continue; 
+        continue; // Saltar al siguiente jugador
       }
       jugadorID = nuevoPerfil.id;
     } else {
@@ -207,30 +210,4 @@ async function guardarResultados(listaResultados, datosTorneo) {
       jugador.ganados,
       jugador.empatados,
       datosTorneo.nro_jugadores,
-      datosTorneo.multiplicador_pwp
-    );
-
-    // 5. Agregar este jugador a la lista de "filas"
-    filasParaGuardar.push({
-      torneo_id: nuevoTorneoID,
-      player_id: jugadorID,
-      matches_ganados: jugador.ganados,
-      matches_perdidos: jugador.perdidos,
-      matches_empatados: jugador.empatados,
-      puntos_pwp_calculados: puntosCalculados
-    });
-  }
-
-  // 6. Guardar TODOS los resultados de los jugadores en la BD de una sola vez
-  const { data: resultadosData, error: resultadosError } = await supabase
-    .from('resultados_jugador')
-    .insert(filasParaGuardar)
-    .select();
-
-  if (resultadosError) {
-    console.error("Error al guardar resultados:", resultadosError);
-    throw new Error(`Error en Supabase al guardar resultados: ${resultadosError.message}`);
-  }
-
-  return { count: filasParaGuardar.length, torneoID: nuevoTorneoID };
-}
+      datosTorneo.multi
