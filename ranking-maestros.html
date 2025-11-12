@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ranking Maestros - theplayer.gg</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #111827; color: #E5E7EB; }
+        .card { background-color: #1F2937; border: 1px solid #374151; }
+        .nav-link { @apply px-3 py-2 rounded-md text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white; }
+        .nav-link-dropdown { @apply block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white; }
+        .dropdown:hover .dropdown-menu { display: block; }
+        .dropdown-menu { @apply hidden absolute z-10 mt-2 w-48 rounded-md shadow-lg py-1 bg-gray-800 ring-1 ring-black ring-opacity-5; }
+        input[type="text"], select { @apply bg-gray-800 border-gray-600 rounded-md shadow-sm p-2 text-white; }
+        
+        .ranking-table th { @apply p-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider; }
+        .ranking-table td { @apply p-4 whitespace-nowrap text-sm text-gray-200; }
+        .ranking-table tbody tr:nth-child(odd) { background-color: #1F2937; }
+        .ranking-table tbody tr:nth-child(even) { background-color: #1a2330; }
+        .top-3 { font-weight: 900; color: #F87171; } /* Estilo para Top 3 (Rojo) */
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- 
+      ¡TAREA PARA TI! 
+      Reemplaza este <header> y <footer> con los de tu 'index.html'
+    -->
+    <header class="bg-gray-900 shadow-md sticky top-0 z-50">
+      <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-16">
+          <div class="flex-shrink-0">
+            <a href="/" class="text-2xl font-bold text-white">
+                <span class="text-blue-500">the</span>player.gg
+            </a>
+          </div>
+          <div class="text-gray-400">(Menu de Navegación)</div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container mx-auto px-4 py-16">
+        
+        <h1 class="text-4xl font-bold text-white mb-2">Ranking de Maestros (Habilidad)</h1>
+        <p class="text-lg text-gray-400 mb-8">El ranking anual de Win-Rate. ¡Clasifica al Torneo de Planeswalkers! (Mínimo 10 matches jugados).</p>
+
+        <!-- Barra de Herramientas -->
+        <div class="card p-4 mb-6 flex flex-col md:flex-row gap-4">
+            <div class="flex-grow">
+                <label for="search-jugador" class="sr-only">Buscar jugador</label>
+                <input type="text" id="search-jugador" placeholder="Buscar jugador..." class="w-full">
+            </div>
+            <div class="flex-shrink-0">
+                <label for="filter-region" class="sr-only">Filtrar por Región</label>
+                <select id="filter-region" class="w-full md:w-auto">
+                    <option value="todas">Todas las Regiones</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Tabla del Ranking -->
+        <div class="card overflow-hidden shadow-xl rounded-lg">
+            <table class="min-w-full ranking-table">
+                <thead>
+                    <tr>
+                        <th class="w-1/12">Puesto</th>
+                        <th class="w-5/12">Nombre del Jugador</th>
+                        <th class="w-3/12">Total Matches</th>
+                        <th class="w-3/12">Win-Rate (%)</th>
+                    </tr>
+                </thead>
+                <!-- El cuerpo de la tabla se llenará con JavaScript -->
+                <tbody id="ranking-table-body">
+                    
+                    <!-- Estado de Carga -->
+                    <tr>
+                        <td colspan="4" class="text-center p-8">
+                            <div class="flex justify-center items-center">
+                                <i data-lucide="loader-2" class="animate-spin mr-2"></i>
+                                Cargando ranking...
+                            </div>
+                        </td>
+                    </tr>
+                    
+                </tbody>
+            </table>
+        </div>
+
+    </main>
+    
+    <footer class="bg-gray-900 pt-16 pb-8 mt-16">
+      <div class="text-center text-gray-500 text-sm">
+         © 2025 theplayer.gg - Todos los derechos reservados.
+      </div>
+    </footer>
+
+    <!--
+    || ==================================================================== ||
+    || SCRIPT DEL FRONTEND: Esto trae los datos a la página
+    || ==================================================================== ||
+    -->
+    <script>
+        lucide.createIcons(); // Iniciar iconos
+
+        window.addEventListener('DOMContentLoaded', () => {
+            cargarRankingMaestros();
+        });
+
+        async function cargarRankingMaestros() {
+            const tableBody = document.getElementById('ranking-table-body');
+            
+            try {
+                // 3. ¡Llamamos al NUEVO API que creamos!
+                const response = await fetch('/api/get-ranking-maestros');
+                if (!response.ok) {
+                    throw new Error('Error en la red al llamar al API');
+                }
+                
+                const rankingData = await response.json(); 
+
+                tableBody.innerHTML = ''; // Limpiar la tabla
+
+                if (rankingData && rankingData.length > 0) {
+                    // 5. Construir la tabla con los datos REALES
+                    rankingData.forEach((jugador) => {
+                        
+                        let puestoClass = (jugador.puesto <= 3) ? 'top-3' : '';
+                        
+                        // ¡Cambiamos las columnas para que coincidan con la nueva función!
+                        const fila = `
+                            <tr>
+                                <td class="p-4 whitespace-nowrap text-sm text-gray-200 ${puestoClass}">
+                                    #${jugador.puesto}
+                                </td>
+                                <td class="p-4 whitespace-nowrap text-sm text-gray-200 ${puestoClass}">
+                                    ${jugador.nombre_usuario || 'Jugador Anónimo'}
+                                </td>
+                                <td class="p-4 whitespace-nowrap text-sm text-gray-200">
+                                    ${jugador.total_matches}
+                                </td>
+                                <td class="p-4 whitespace-nowrap text-sm font-bold text-red-400">
+                                    ${parseFloat(jugador.win_rate).toFixed(2)} %
+                                </td>
+                            </tr>
+                        `;
+                        tableBody.innerHTML += fila;
+                    });
+                } else {
+                    // ¡Esto es lo que probablemente verás!
+                    tableBody.innerHTML = `
+                        <tr>
+                            <td colspan="4" class="text-center p-8 text-gray-500">
+                                Aún no hay jugadores elegibles para este ranking.
+                                <br>
+                                (Se necesita un mínimo de 10 matches jugados).
+                            </td>
+                        </tr>
+                    `;
+                }
+
+            } catch (error) {
+                console.error('Error al cargar el ranking:', error);
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="4" class="text-center p-8 text-red-400">
+                            Error al cargar el ranking. Revisa la consola (F12).
+                        </td>
+                    </tr>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>
