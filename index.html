@@ -1,36 +1,304 @@
-
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" class="dark">
 <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>theplayer.gg - Tu Comunidad TCG</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>theplayer.gg - El Hub de TCG en Chile</title>
+    <!-- Carga de Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Carga de Fuente Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+    <!-- Iconos (Lucide) -->
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    
+    <!-- ¡IMPORTANTE! Importamos la librería de Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
     <style>
-        body {
-            font-family: 'Inter', sans-serif;
-        }
-        h1, h2, h3, h4, h5, h6 {
-            font-family: 'Rajdhani', sans-serif;
-        }
+        body { font-family: 'Inter', sans-serif; background-color: #111827; color: #E5E7EB; }
+        .card { background-color: #1F2937; border: 1px solid #374151; }
+        .card-hover:hover { transform: translateY(-4px); border-color: #3B82F6; }
+        .nav-link { @apply px-3 py-2 rounded-md text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white; }
+        .nav-link-dropdown { @apply block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white; }
+        .dropdown:hover .dropdown-menu { display: block; }
+        .dropdown-menu { @apply hidden absolute z-10 mt-2 w-48 rounded-md shadow-lg py-1 bg-gray-800 ring-1 ring-black ring-opacity-5; }
+        .hero-gradient { background: linear-gradient(180deg, rgba(17, 24, 39, 0) 0%, #111827 100%), radial-gradient(100% 100% at 50% 0%, rgba(59, 130, 246, 0.15) 0%, rgba(17, 24, 39, 0) 100%); }
     </style>
-<script type="importmap">
-{
-  "imports": {
-    "react/": "https://aistudiocdn.com/react@^19.2.0/",
-    "react": "https://aistudiocdn.com/react@^19.2.0",
-    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
-    "react-router-dom": "https://aistudiocdn.com/react-router-dom@^7.9.5"
-  }
-}
-</script>
 </head>
-<body class="bg-gray-900">
-    <div id="root"></div>
-    <script type="module" src="/index.tsx"></script>
+<body class="antialiased">
+
+    <!-- Bloque 1: Navegación Principal -->
+    <header class="bg-gray-900 shadow-md sticky top-0 z-50">
+        <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <!-- Logo -->
+                <div class="flex-shrink-0">
+                    <a href="/" class="text-2xl font-bold text-white">
+                        <span class="text-blue-500">the</span>player.gg
+                    </a>
+                </div>
+
+                <!-- Menú Desktop (Oculto en móvil) -->
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="/" class="nav-link bg-gray-700 text-white" aria-current="page">Inicio</a>
+                        
+                        <!-- Dropdown Ranking -->
+                        <div class="dropdown relative">
+                            <button class="nav-link inline-flex items-center">
+                                <span>Ranking</span>
+                                <i data-lucide="chevron-down" class="w-4 h-4 ml-1"></i>
+                            </button>
+                            <div class="dropdown-menu">
+                                <a href="/ranking-pwp.html" class="nav-link-dropdown">Ranking PWP</a>
+                                <a href="/ranking-maestros.html" class="nav-link-dropdown">Ranking Maestros</a>
+                            </div>
+                        </div>
+
+                        <a href="#eventos" class="nav-link">Eventos</a>
+
+                        <!-- Dropdown Marketplace -->
+                        <div class="dropdown relative">
+                            <button class="nav-link inline-flex items-center">
+                                <span>Mercado</span>
+                                <i data-lucide="chevron-down" class="w-4 h-4 ml-1"></i>
+                            </button>
+                            <div class="dropdown-menu">
+                                <a href="#marketplace-venta" class="nav-link-dropdown">Compra/Venta</a>
+                                <a href="#marketplace-cambio" class="nav-link-dropdown">Cambios</a>
+                            </div>
+                        </div>
+
+                        <!-- Dropdown Comunidad -->
+                        <div class="dropdown relative">
+                            <button class="nav-link inline-flex items-center">
+                                <span>Media</span>
+                                <i data-lucide="chevron-down" class="w-4 h-4 ml-1"></i>
+                            </button>
+                            <div class="dropdown-menu">
+                                <a href="#articulos" class="nav-link-dropdown">Artículos</a>
+                                <a href="#videos" class="nav-link-dropdown">Videos</a>
+                                <a href="#commander" class="nav-link-dropdown">Commander</a>
+                            </div>
+                        </div>
+
+                        <a href="#academia-jueces" class="nav-link">Jueces</a>
+                        <a href="#tiendas" class="nav-link">Tiendas</a>
+                    </div>
+                </div>
+
+                <!-- Botones Login/Registro (Desktop) -->
+                <div class="hidden md:block">
+                    <div class="ml-4 flex items-center md:ml-6 space-x-2">
+                        
+                        <!-- ESTADO: Desconectado (Visible por defecto) -->
+                        <div id="user-menu-logged-out">
+                            <a href="/autenticacion.html" class="nav-link">
+                                Iniciar Sesión
+                            </a>
+                            <a href="/autenticacion.html" class="px-3 py-2 rounded-md text-sm font-medium text-white bg-blue-600 hover:bg-blue-700">
+                                Registrarse
+                            </a>
+                        </div>
+                        
+                        <!-- ESTADO: Conectado (Oculto por defecto) -->
+                        <div id="user-menu-logged-in" class="hidden items-center space-x-2">
+                            <span class="text-sm font-medium text-gray-300">Hola, <span id="user-name" class="font-bold text-white">...</span></span>
+                            <a href="#" class="nav-link bg-gray-700">Mi Panel</a>
+                            <button id="logout-button" class="nav-link !text-red-400 hover:!bg-red-700 hover:!text-white">
+                                <i data-lucide="log-out" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                        
+                    </div>
+                </div>
+
+                <!-- Botón Menú Móvil -->
+                <div class="-mr-2 flex md:hidden">
+                    <button id="mobile-menu-button" type="button" class="bg-gray-800 inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 focus:outline-none" aria-controls="mobile-menu" aria-expanded="false">
+                        <i data-lucide="menu" class="block h-6 w-6"></i>
+                        <i data-lucide="x" class="hidden h-6 w-6"></i>
+                    </button>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Menú Móvil (Desplegable) -->
+        <div class="md:hidden hidden" id="mobile-menu">
+            <!-- (Contenido del menú móvil, por ahora lo dejamos estático) -->
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                <a href="/" class="block px-3 py-2 rounded-md text-base font-medium text-white bg-gray-700">Inicio</a>
+                <a href="/ranking-pwp.html" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:bg-gray-700">Ranking PWP</a>
+                <a href="/ranking-maestros.html" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:bg-gray-700">Ranking Maestros</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Cuerpo Principal (Sin cambios) -->
+    <main>
+        <!-- Bloque 2: Hero Section -->
+        <div class="relative pt-16 pb-32 flex content-center items-center justify-center min-h-[75vh]">
+            <div class="absolute top-0 w-full h-full hero-gradient"></div>
+            <div class="container relative mx-auto px-4">
+                <div class="items-center flex flex-wrap">
+                    <div class="w-full lg:w-8/12 mx-auto text-center">
+                        <h1 class="text-white font-black text-5xl md:text-7xl leading-tight">
+                            El <span class="text-blue-500">Hub</span> de la Comunidad <span class="text-blue-500">TCG</span>
+                        </h1>
+                        <p class="mt-6 text-xl md:text-2xl text-gray-300 font-light">
+                            Tu punto de encuentro para rankings, torneos, artículos y el marketplace de TCGs en Chile.
+                        </p>
+                        <div class="mt-12 flex flex-col sm:flex-row gap-4 justify-center">
+                            <a href="/autenticacion.html" class="w-full sm:w-auto text-lg font-semibold px-8 py-4 rounded-lg shadow-lg bg-blue-600 hover:bg-blue-700 text-white transition duration-300">
+                                Únete a la Federación
+                            </a>
+                            <a href="#eventos" class="w-full sm:w-auto text-lg font-semibold px-8 py-4 rounded-lg shadow-lg bg-gray-700 hover:bg-gray-600 text-white transition duration-300">
+                                Encuentra un Evento
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bloque 3: Rankings (Snapshot) -->
+        <section id="rankings" class="container mx-auto px-4 -mt-24 pb-20">
+            <div class="flex flex-wrap -mx-4">
+                
+                <!-- Columna Ranking PWP -->
+                <div class="w-full lg:w-6/12 px-4 mb-6 lg:mb-0">
+                    <div class="card rounded-lg shadow-xl p-6 transition duration-300 card-hover h-full">
+                        <h3 class="text-2xl font-bold mb-4 text-white">
+                            <i data-lucide="shield-half" class="inline-block mr-2 text-blue-400"></i>Ranking PWP
+                        </h3>
+                        <p class="text-gray-400 mb-6 text-sm">El ranking anual que premia tu participación. ¡Clasifica al Torneo Nacional!</p>
+                        <!-- Aquí irán los datos -->
+                        <a href="/ranking-pwp.html" class="mt-auto font-semibold text-blue-400 hover:text-blue-300">Ver Ranking PWP Completo <i data-lucide="arrow-right" class="w-4 h-4 inline"></i></a>
+                    </div>
+                </div>
+
+                <!-- Columna Ranking Maestros -->
+                <div class="w-full lg:w-6/12 px-4">
+                    <div class="card rounded-lg shadow-xl p-6 transition duration-300 card-hover h-full">
+                        <h3 class="text-2xl font-bold mb-4 text-white">
+                            <i data-lucide="swords" class="inline-block mr-2 text-red-400"></i>Ranking Maestros
+                        </h3>
+                        <p class="text-gray-400 mb-6 text-sm">El ranking de Win-Rate. ¡Clasifica al Torneo de Planeswalkers!</p>
+                        <!-- Aquí irán los datos -->
+                        <a href="/ranking-maestros.html" class="mt-auto font-semibold text-red-400 hover:text-red-300">Ver Ranking de Maestros <i data-lucide="arrow-right" class="w-4 h-4 inline"></i></a>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- (Resto de la página principal sin cambios...) -->
+        
+    </main>
+    
+    <footer class="bg-gray-900 pt-16 pb-8 mt-16">
+      <div class="text-center text-gray-500 text-sm">
+         © 2025 theplayer.gg - Todos los derechos reservados.
+      </div>
+    </footer>
+
+    <!--
+    || ==================================================================== ||
+    || SCRIPT DE AUTENTICACIÓN: Esto hace que el menú sea dinámico
+    || ==================================================================== ||
+    -->
+    <script>
+        // --- ¡¡IMPORTANTE!! REEMPLAZA ESTO CON TUS LLAVES ---
+        const SUPABASE_URL = 'PEGA_TU_PROJECT_URL_AQUI'; 
+        const SUPABASE_ANON_KEY = 'PEGA_TU_LLAVE_ANON_PUBLIC_AQUI';
+        // --------------------------------------------------
+
+        if (SUPABASE_URL.includes('PEGA_TU')) {
+            console.warn('ADVERTENCIA: Debes editar index.html y poner tus llaves de Supabase para que el login funcione.');
+        }
+
+        const { createClient } = supabase;
+        const _supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // --- DOM Elements ---
+        const userMenuLoggedIn = document.getElementById('user-menu-logged-in');
+        const userMenuLoggedOut = document.getElementById('user-menu-logged-out');
+        const userNameEl = document.getElementById('user-name');
+        const logoutButton = document.getElementById('logout-button');
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+
+        // --- Función para actualizar la UI ---
+        async function updateUserUI(session) {
+            if (session) {
+                // Usuario CONECTADO
+                userMenuLoggedOut.classList.add('hidden');
+                userMenuLoggedIn.classList.remove('hidden');
+
+                // Buscar el nombre en nuestra tabla 'perfiles'
+                const { data: perfil, error } = await _supabase
+                    .from('perfiles')
+                    .select('nombre_usuario')
+                    .eq('auth_id', session.user.id) // Busca el perfil que coincida con el ID de autenticación
+                    .single();
+                
+                if (perfil) {
+                    userNameEl.textContent = perfil.nombre_usuario;
+                } else {
+                    userNameEl.textContent = session.user.email.split('@')[0];
+                }
+
+            } else {
+                // Usuario DESCONECTADO
+                userMenuLoggedOut.classList.remove('hidden');
+                userMenuLoggedIn.classList.add('hidden');
+                userNameEl.textContent = '...';
+            }
+        }
+
+        // --- Event Listeners ---
+
+        // 1. Escuchar cuando la página cargue
+        document.addEventListener('DOMContentLoaded', async () => {
+            lucide.createIcons(); // Iniciar iconos
+            
+            // Revisar el estado de la sesión al cargar la página
+            const { data: { session } } = await _supabase.auth.getSession();
+            updateUserUI(session);
+        });
+
+        // 2. Escuchar cambios de estado (Login o Logout)
+        _supabase.auth.onAuthStateChange((event, session) => {
+            console.log('Auth event:', event, session);
+            updateUserUI(session);
+        });
+
+        // 3. Botón de Cerrar Sesión
+        logoutButton.addEventListener('click', async (e) => {
+            e.preventDefault();
+            const { error } = await _supabase.auth.signOut();
+            if (error) {
+                console.error('Error al cerrar sesión:', error);
+            } else {
+                // onAuthStateChange se encargará de actualizar la UI
+                // Redirigir a la página principal por si acaso
+                window.location.href = '/';
+            }
+        });
+
+        // 4. Menú Móvil
+        mobileMenuButton.addEventListener('click', () => {
+            const isExpanded = mobileMenuButton.getAttribute('aria-expanded') === 'true';
+            mobileMenuButton.setAttribute('aria-expanded', !isExpanded);
+            mobileMenu.classList.toggle('hidden');
+            // Intercambiar iconos de menú (hamburguesa / X)
+            mobileMenuButton.querySelector('i[data-lucide="menu"]').classList.toggle('hidden');
+            mobileMenuButton.querySelector('i[data-lucide="x"]').classList.toggle('hidden');
+        });
+
+    </script>
+
 </body>
 </html>
