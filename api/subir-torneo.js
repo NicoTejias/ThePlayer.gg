@@ -11,6 +11,9 @@ const supabase = createClient(
 // --- 2. LA FUNCIÓN DEL "MOTOR" (Handler Principal) ---
 export default async function handler(request, response) {
   
+  // ¡¡NUEVA LÍNEA PARA FORZAR LA ACTUALIZACIÓN DE VERCEL!!
+  console.log("--- Ejecutando Motor v3 (con Parser corregido) ---");
+
   if (request.method !== 'POST') {
     return response.status(405).json({ message: 'Método no permitido.' });
   }
