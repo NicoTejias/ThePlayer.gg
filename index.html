@@ -51,7 +51,7 @@
                                 <i data-lucide="chevron-down" class="w-4 h-4 ml-1"></i>
                             </button>
                             <div class="hidden group-hover:block absolute z-10 mt-2 w-48 rounded-md shadow-lg py-1 bg-gray-800 ring-1 ring-black ring-opacity-5">
-                                <a href="ranking-pwp.html" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white">Ranking PWP</a>
+                                <a href="ranking-the-player.html" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white">Ranking The Player</a>
                                 <a href="ranking-maestros.html" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white">Ranking Maestros</a>
                             </div>
                         </div>
@@ -91,13 +91,11 @@
 
                 <div class="hidden md:block">
                     <div class="ml-4 flex items-center md:ml-6 space-x-2">
-                        
                         <div id="user-menu-logged-out">
                             <a href="/autenticacion.html" class="px-3 py-2 rounded-md text-sm font-medium text-white bg-blue-600 hover:bg-blue-700">
                                 Login
                             </a>
                         </div>
-                        
                         <div id="user-menu-logged-in" class="hidden items-center space-x-2">
                             <span class="text-sm font-medium text-gray-300">Hola, <span id="user-name" class="font-bold text-white">...</span></span>
                             <a href="#" class="nav-link bg-gray-700">Mi Panel</a>
@@ -105,7 +103,6 @@
                                 <i data-lucide="log-out" class="w-4 h-4"></i>
                             </button>
                         </div>
-                        
                     </div>
                 </div>
 
@@ -121,7 +118,7 @@
         <div class="md:hidden hidden" id="mobile-menu">
             <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
                 <a href="/" class="block px-3 py-2 rounded-md text-base font-medium text-white bg-gray-700">Inicio</a>
-                <a href="ranking-pwp.html" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:bg-gray-700">Ranking PWP</a>
+                <a href="ranking-the-player.html" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:bg-gray-700">Ranking The Player</a>
                 <a href="ranking-maestros.html" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:bg-gray-700">Ranking Maestros</a>
             </div>
         </div>
@@ -150,7 +147,6 @@
         </div>
 
         <section id="rankings" class="container mx-auto px-4 -mt-24 pb-20">
-            
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
         
                 <div class="w-full">
@@ -158,62 +154,30 @@
                         <h2 class="text-lg font-bold uppercase tracking-wider text-gray-300">
                             Ranking The Player
                         </h2>
-                        <a href="ranking-pwp.html" class="text-sm font-medium text-blue-400 hover:text-blue-300 transition duration-200">
+                        <a href="ranking-the-player.html" class="text-sm font-medium text-blue-400 hover:text-blue-300 transition duration-200">
                             Ver más →
                         </a>
                     </div>
-                    
                     <div id="ranking-player-list" class="space-y-3">
-        
-                        <div class="flex items-center justify-between bg-gray-800/60 p-4 rounded-lg border border-gray-700/50">
-                            <div class="flex items-center space-x-4">
-                                <span class="text-xl font-bold text-gray-400">1</span>
-                                <div>
-                                    <p class="font-semibold text-white">MageSlayer92</p>
-                                    <span class="text-sm text-gray-500">Santiago</span>
-                                </div>
-                            </div>
-                            <div class="flex items-center space-x-2">
-                                <span class="font-bold text-blue-400">1250 pts</span>
-                                <i data-lucide="star" class="w-4 h-4 text-yellow-500 fill-current"></i>
-                            </div>
-                        </div>
                         </div>
                 </div>
         
                 <div class="w-full">
                     <div class="flex justify-between items-center mb-4">
                         <h2 class="text-lg font-bold uppercase tracking-wider text-gray-300">
-                            Ranking Caminante de Planos
+                            Ranking Maestros
                         </h2>
                         <a href="ranking-maestros.html" class="text-sm font-medium text-blue-400 hover:text-blue-300 transition duration-200">
                             Ver más →
                         </a>
                     </div>
-                    
                     <div id="ranking-caminante-list" class="space-y-3">
-                        
-                        <div class="flex items-center justify-between bg-gray-800/60 p-4 rounded-lg border border-gray-700/50">
-                            <div class="flex items-center space-x-4">
-                                <span class="text-xl font-bold text-gray-400">1</span>
-                                <div>
-                                    <p class="font-semibold text-white">ProdigyMTG</p>
-                                    <span class="text-sm text-gray-500">Viña del Mar</span>
-                                </div>
-                            </div>
-                            <div class="flex items-center space-x-2">
-                                <span class="font-semibold text-green-400">78.5% Win Rate</span>
-                                <i data-lucide="trending-up" class="w-4 h-4 text-green-400"></i>
-                            </div>
-                        </div>
                         </div>
                 </div>
-        
             </div>
         </section>
 
         <section id="eventos" class="container mx-auto px-4 mt-16 lg:mt-24 pb-12">
-        
             <div class="flex justify-between items-center mb-6">
                 <h2 class="text-2xl md:text-3xl font-bold text-white">
                     Próximos Eventos
@@ -222,35 +186,8 @@
                     Ver todos →
                 </a>
             </div>
-
             <div id="eventos-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-
-                <div class="card rounded-lg shadow-xl overflow-hidden transition duration-300 card-hover">
-                    <a href="#">
-                        <img src="https://images.unsplash.com/photo-1511884642898-4c92249e20b6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=800" 
-                             alt="Imagen de torneo" 
-                             class="w-full h-48 object-cover">
-                    </a>
-                    <div class="p-5">
-                        <div class="flex justify-between items-center mb-2">
-                            <span class="text-xs font-semibold uppercase tracking-wider text-blue-400">
-                                Standard
-                            </span>
-                            <span class="text-xs text-gray-400">
-                                Nov 15, 2025
-                            </span>
-                        </div>
-                        <h3 class="text-xl font-bold text-white mb-2">
-                            <a href="#">Torneo de Apertura "El Portal"</a>
-                        </h3>
-                        <p class="text-sm text-gray-400 flex items-center">
-                            <i data-lucide="map-pin" class="w-4 h-4 mr-2 text-gray-500"></i>
-                            Tienda "El Portal", Santiago
-                        </p>
-                    </div>
                 </div>
-
-            </div>
         </section>
         
     </main>
@@ -264,33 +201,22 @@
     <script>
         // --- ¡¡IMPORTANTE!! TUS LLAVES DE SUPABASE ---
         const SUPABASE_URL = 'https://jaqrddkrtcvwbfrjukvj.supabase.co'; 
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImphcXJkZGtydGN2d2Jmcmp1a3ZqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI3ODkyNTgsImV4cCI6MjA3ODM2NTI1OH0.voPWXtJo2fTqWKCqfzFTvi4JXcwesT3q9iWkGeM2NBI';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImphcXJkZGtydGN2d2Jmcmp1a3ZqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI3ODkyNTgsImV4cCI6MjA3ODM2NTI1OH0.voPWXtJo2fTqWKCqfzFTvi4JXcwesT3q9iWkGeM2NBI';
         // --------------------------------------------------
-
-        if (SUPABASE_URL.includes('jaqrddkrtcvwbfrjukvj')) {
-            console.log('Supabase conectado.');
-        } else {
-             console.warn('ADVERTENCIA: Debes editar index.html y poner tus llaves de Supabase para que el login funcione.');
-        }
 
         const { createClient } = supabase;
         const _supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        // --- DOM Elements (Autenticación) ---
+        // --- DOM Elements ---
         const userMenuLoggedIn = document.getElementById('user-menu-logged-in');
         const userMenuLoggedOut = document.getElementById('user-menu-logged-out');
         const userNameEl = document.getElementById('user-name');
         const logoutButton = document.getElementById('logout-button');
         const mobileMenuButton = document.getElementById('mobile-menu-button');
         const mobileMenu = document.getElementById('mobile-menu');
-
-        // --- DOM Elements (Rankings) ---
         const playerListContainer = document.getElementById('ranking-player-list');
         const caminanteListContainer = document.getElementById('ranking-caminante-list');
-
-        // --- DOM Elements (Eventos) ---
         const eventosListContainer = document.getElementById('eventos-list');
-
 
         /**
          * ======================================
@@ -301,19 +227,16 @@
             if (session) {
                 userMenuLoggedOut.classList.add('hidden');
                 userMenuLoggedIn.classList.remove('hidden');
-
-                const { data: perfil, error } = await _supabase
+                const { data: perfil } = await _supabase
                     .from('perfiles')
                     .select('nombre_usuario')
                     .eq('auth_id', session.user.id)
                     .single();
-                
                 if (perfil) {
                     userNameEl.textContent = perfil.nombre_usuario;
                 } else {
                     userNameEl.textContent = session.user.email.split('@')[0];
                 }
-
             } else {
                 userMenuLoggedOut.classList.remove('hidden');
                 userMenuLoggedIn.classList.add('hidden');
@@ -321,10 +244,9 @@
             }
         }
 
-
         /**
          * ======================================
-         * FUNCIONES DE RANKINGS
+         * FUNCIONES DE RANKINGS (TOP 5)
          * ======================================
          */
         function createPlayerHtml(jugador, index) {
@@ -367,17 +289,15 @@
         }
         
         async function cargarRankings() {
-            if (!playerListContainer || !caminanteListContainer) {
-                console.warn('No se encontraron los contenedores de ranking en esta página.');
-                return;
-            }
+            if (!playerListContainer || !caminanteListContainer) return;
             try {
                 playerListContainer.innerHTML = '<p class="text-gray-400">Cargando ranking...</p>';
                 caminanteListContainer.innerHTML = '<p class="text-gray-400">Cargando ranking...</p>';
 
+                // ¡LLAMADAS A RPC ACTUALIZADAS!
                 const [pwpResponse, wrResponse] = await Promise.all([
-                    _supabase.rpc('get_ranking_pwp'),
-                    _supabase.rpc('get_ranking_winrate')
+                    _supabase.rpc('get_ranking_the_player_top5'),
+                    _supabase.rpc('get_ranking_maestros_top5')
                 ]);
 
                 if (pwpResponse.error) throw pwpResponse.error;
@@ -406,13 +326,11 @@
             }
         }
 
-
         /**
          * ======================================
          * FUNCIONES DE EVENTOS
          * ======================================
          */
-
         function formatEventDate(dateString) {
             const options = { year: 'numeric', month: 'short', day: 'numeric' };
             return new Date(dateString).toLocaleDateString('es-CL', options);
@@ -422,7 +340,6 @@
             const region = evento.region || '---';
             const formato = evento.formato || '---';
             const fecha = formatEventDate(evento.fecha);
-            
             const imagen = evento.imagen_url || 'https://images.unsplash.com/photo-1511884642898-4c92249e20b6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=800';
 
             return `
@@ -432,16 +349,10 @@
                     </a>
                     <div class="p-5">
                         <div class="flex justify-between items-center mb-2">
-                            <span class="text-xs font-semibold uppercase tracking-wider text-blue-400">
-                                ${formato}
-                            </span>
-                            <span class="text-xs text-gray-400">
-                                ${fecha}
-                            </span>
+                            <span class="text-xs font-semibold uppercase tracking-wider text-blue-400">${formato}</span>
+                            <span class="text-xs text-gray-400">${fecha}</span>
                         </div>
-                        <h3 class="text-xl font-bold text-white mb-2">
-                            <a href="#">${evento.nombre_torneo}</a>
-                        </h3>
+                        <h3 class="text-xl font-bold text-white mb-2"><a href="#">${evento.nombre_torneo}</a></h3>
                         <p class="text-sm text-gray-400 flex items-center">
                             <i data-lucide="map-pin" class="w-4 h-4 mr-2 text-gray-500"></i>
                             ${evento.nombre_tienda}, ${region}
@@ -452,17 +363,11 @@
         }
 
         async function cargarEventos() {
-            if (!eventosListContainer) {
-                console.warn('No se encontró el contenedor de eventos en esta página.');
-                return;
-            }
-
+            if (!eventosListContainer) return;
             try {
                 eventosListContainer.innerHTML = '<p class="text-gray-400">Cargando eventos...</p>';
-
                 const { data, error } = await _supabase.rpc('get_proximos_eventos');
                 if (error) throw error;
-
                 if (data && data.length > 0) {
                     eventosListContainer.innerHTML = ''; 
                     data.forEach(evento => {
@@ -471,13 +376,11 @@
                 } else {
                     eventosListContainer.innerHTML = '<p class="text-gray-400">No hay eventos programados por ahora.</p>';
                 }
-
             } catch (error) {
                 console.error('Error cargando eventos:', error);
                 eventosListContainer.innerHTML = '<p class="text-red-400">Error al cargar los eventos.</p>';
             }
         }
-
 
         /**
          * ======================================
@@ -485,38 +388,21 @@
          * ======================================
          */
         document.addEventListener('DOMContentLoaded', async () => {
-            // 1. Revisar el estado de la sesión
             const { data: { session } } = await _supabase.auth.getSession();
             updateUserUI(session);
-
-            // 2. Cargar los rankings dinámicos
             await cargarRankings(); 
-
-            // 3. Cargar los eventos dinámicos
             await cargarEventos();
-
-            // 4. Iniciar todos los iconos
             lucide.createIcons();
         });
 
-        // Escuchar cambios de estado (Login o Logout)
-        _supabase.auth.onAuthStateChange((event, session) => {
-            console.log('Auth event:', event, session);
-            updateUserUI(session);
-        });
+        _supabase.auth.onAuthStateChange((event, session) => updateUserUI(session));
 
-        // Botón de Cerrar Sesión
         logoutButton.addEventListener('click', async (e) => {
             e.preventDefault();
-            const { error } = await _supabase.auth.signOut();
-            if (error) {
-                console.error('Error al cerrar sesión:', error);
-            } else {
-                window.location.href = '/';
-            }
+            await _supabase.auth.signOut();
+            window.location.href = '/';
         });
 
-        // Menú Móvil
         mobileMenuButton.addEventListener('click', () => {
             const isExpanded = mobileMenuButton.getAttribute('aria-expanded') === 'true';
             mobileMenuButton.setAttribute('aria-expanded', !isExpanded);
@@ -524,8 +410,6 @@
             mobileMenuButton.querySelector('i[data-lucide="menu"]').classList.toggle('hidden');
             mobileMenuButton.querySelector('i[data-lucide="x"]').classList.toggle('hidden');
         });
-
     </script>
-
 </body>
 </html>
