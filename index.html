@@ -164,36 +164,180 @@
         </div>
 
         <!-- Bloque 3: Rankings (Snapshot) -->
-        <section id="rankings" class="container mx-auto px-4 -mt-24 pb-20">
-            <div class="flex flex-wrap -mx-4">
-                
-                <!-- Columna Ranking PWP -->
-                <div class="w-full lg:w-6/12 px-4 mb-6 lg:mb-0">
-                    <div class="card rounded-lg shadow-xl p-6 transition duration-300 card-hover h-full">
-                        <h3 class="text-2xl font-bold mb-4 text-white">
-                            <i data-lucide="shield-half" class="inline-block mr-2 text-blue-400"></i>Ranking PWP
-                        </h3>
-                        <p class="text-gray-400 mb-6 text-sm">El ranking anual que premia tu participación. ¡Clasifica al Torneo Nacional!</p>
-                        <!-- Aquí irán los datos -->
-                        <a href="/ranking-pwp.html" class="mt-auto font-semibold text-blue-400 hover:text-blue-300">Ver Ranking PWP Completo <i data-lucide="arrow-right" class="w-4 h-4 inline"></i></a>
-                    </div>
-                </div>
+      <section id="rankings" class="container mx-auto px-4 -mt-24 pb-20">
+    
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
 
-                <!-- Columna Ranking Maestros -->
-                <div class="w-full lg:w-6/12 px-4">
-                    <div class="card rounded-lg shadow-xl p-6 transition duration-300 card-hover h-full">
-                        <h3 class="text-2xl font-bold mb-4 text-white">
-                            <i data-lucide="swords" class="inline-block mr-2 text-red-400"></i>Ranking Maestros
-                        </h3>
-                        <p class="text-gray-400 mb-6 text-sm">El ranking de Win-Rate. ¡Clasifica al Torneo de Planeswalkers!</p>
-                        <!-- Aquí irán los datos -->
-                        <a href="/ranking-maestros.html" class="mt-auto font-semibold text-red-400 hover:text-red-300">Ver Ranking de Maestros <i data-lucide="arrow-right" class="w-4 h-4 inline"></i></a>
-                    </div>
-                </div>
-
+        <div class="w-full">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-lg font-bold uppercase tracking-wider text-gray-300">
+                    Ranking The Player
+                </h2>
+                <a href="#" class="text-sm font-medium text-blue-400 hover:text-blue-300 transition duration-200">
+                    Ver más →
+                </a>
             </div>
-        </section>
+            
+            <div id="ranking-player-list" class="space-y-3">
 
+                <div class="flex items-center justify-between bg-gray-800/60 p-4 rounded-lg border border-gray-700/50 transition duration-300 card-hover">
+                    <div class="flex items-center space-x-4">
+                        <span class="text-xl font-bold text-gray-400">1</span>
+                        <div>
+                            <p class="font-semibold text-white">MageSlayer92</p>
+                            <span class="text-sm text-gray-500">Santiago</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <span class="font-bold text-blue-400">1250 pts</span>
+                        <i data-lucide="star" class="w-4 h-4 text-yellow-500"></i>
+                    </div>
+                </div>
+                
+                <div class="flex items-center justify-between bg-gray-800/60 p-4 rounded-lg border border-gray-700/50 transition duration-300 card-hover">
+                    <div class="flex items-center space-x-4">
+                        <span class="text-xl font-bold text-gray-400">2</span>
+                        <div>
+                            <p class="font-semibold text-white">ElfoNocturno</p>
+                            <span class="text-sm text-gray-500">Valparaíso</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <span class="font-bold text-blue-400">1180 pts</span>
+                        <i data-lucide="star" class="w-4 h-4 text-yellow-500"></i>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between bg-gray-800/60 p-4 rounded-lg border border-gray-700/50 transition duration-300 card-hover">
+                    <div class="flex items-center space-x-4">
+                        <span class="text-xl font-bold text-gray-400">3</span>
+                        <div>
+                            <p class="font-semibold text-white">GoblinKing</p>
+                            <span class="text-sm text-gray-500">Concepción</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <span class="font-bold text-blue-400">1155 pts</span>
+                        <i data-lucide="star" class="w-4 h-4 text-yellow-500"></i>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between bg-gray-800/60 p-4 rounded-lg border border-gray-700/50 transition duration-300 card-hover">
+                    <div class="flex items-center space-x-4">
+                        <span class="text-xl font-bold text-gray-400">4</span>
+                        <div>
+                            <p class="font-semibold text-white">AetherFlux</p>
+                            <span class="text-sm text-gray-500">Antofagasta</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <span class="font-bold text-blue-400">1090 pts</span>
+                        <i data-lucide="star" class="w-4 h-4 text-yellow-500"></i>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between bg-gray-800/60 p-4 rounded-lg border border-gray-700/50 transition duration-300 card-hover">
+                    <div class="flex items-center space-x-4">
+                        <span class="text-xl font-bold text-gray-400">5</span>
+                        <div>
+                            <p class="font-semibold text-white">JaceMind</p>
+                            <span class="text-sm text-gray-500">Santiago</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <span class="font-bold text-blue-400">1075 pts</span>
+                        <i data-lucide="star" class="w-4 h-4 text-yellow-500"></i>
+                    </div>
+                </div>
+                
+            </div> </div>
+
+        <div class="w-full">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-lg font-bold uppercase tracking-wider text-gray-300">
+                    Ranking Caminante de Planos
+                </h2>
+                <a href="#" class="text-sm font-medium text-blue-400 hover:text-blue-300 transition duration-200">
+                    Ver más →
+                </a>
+            </div>
+            
+            <div id="ranking-caminante-list" class="space-y-3">
+                
+                <div class="flex items-center justify-between bg-gray-800/60 p-4 rounded-lg border border-gray-700/50 transition duration-300 card-hover">
+                    <div class="flex items-center space-x-4">
+                        <span class="text-xl font-bold text-gray-400">1</span>
+                        <div>
+                            <p class="font-semibold text-white">ProdigyMTG</p>
+                            <span class="text-sm text-gray-500">Viña del Mar</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <span class="font-semibold text-green-400">78.5% Win Rate</span>
+                        <i data-lucide="trending-up" class="w-4 h-4 text-green-400"></i>
+                    </div>
+                </div>
+                
+                <div class="flex items-center justify-between bg-gray-800/60 p-4 rounded-lg border border-gray-700/50 transition duration-300 card-hover">
+                    <div class="flex items-center space-x-4">
+                        <span class="text-xl font-bold text-gray-400">2</span>
+                        <div>
+                            <p class="font-semibold text-white">Strategist</p>
+                            <span class="text-sm text-gray-500">Santiago</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <span class="font-semibold text-green-400">75.2% Win Rate</span>
+                        <i data-lucide="trending-up" class="w-4 h-4 text-green-400"></i>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between bg-gray-800/60 p-4 rounded-lg border border-gray-700/50 transition duration-300 card-hover">
+                    <div class="flex items-center space-x-4">
+                        <span class="text-xl font-bold text-gray-400">3</span>
+                        <div>
+                            <p class="font-semibold text-white">LaHechicera</p>
+                            <span class="text-sm text-gray-500">La Serena</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <span class="font-semibold text-green-400">74.8% Win Rate</span>
+                        <i data-lucide="trending-up" class="w-4 h-4 text-green-400"></i>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between bg-gray-800/60 p-4 rounded-lg border border-gray-700/50 transition duration-300 card-hover">
+                    <div class="flex items-center space-x-4">
+                        <span class="text-xl font-bold text-gray-400">4</span>
+                        <div>
+                            <p class="font-semibold text-white">ControlFreak</p>
+                            <span class="text-sm text-gray-500">Temuco</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <span class="font-semibold text-green-400">72.1% Win Rate</span>
+                        <i data-lucide="trending-up" class="w-4 h-4 text-green-400"></i>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between bg-gray-800/60 p-4 rounded-lg border border-gray-700/50 transition duration-300 card-hover">
+                    <div class="flex items-center space-x-4">
+                        <span class="text-xl font-bold text-gray-400">5</span>
+                        <div>
+                            <p class="font-semibold text-white">ComboMaster</p>
+                            <span class="text-sm text-gray-500">Santiago</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <span class="font-semibold text-green-400">71.8% Win Rate</span>
+                        <i data-lucide="trending-up" class="w-4 h-4 text-green-400"></i>
+                    </div>
+                </div>
+                
+            </div> </div>
+
+    </div>
+</section>
         <!-- (Resto de la página principal sin cambios...) -->
         
     </main>
