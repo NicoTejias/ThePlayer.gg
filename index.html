@@ -572,6 +572,261 @@
         });
 
     </script>
+<script>
+        // --- ¡¡IMPORTANTE!! TUS LLAVES DE SUPABASE ---
+        const SUPABASE_URL = 'https://jaqrddkrtcvwbfrjukvj.supabase.co'; 
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImphcXJkZGtydGN2d2Jmcmp1a3ZqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI3ODkyNTgsImV4cCI6MjA3ODM2NTI1OH0.voPWXtJo2fTqWKCqfzFTvi4JXcwesT3q9iWkGeM2NBI';
+        // --------------------------------------------------
 
+        if (SUPABASE_URL.includes('jaqrddkrtcvwbfrjukvj')) {
+            console.log('Supabase conectado.');
+        } else {
+             console.warn('ADVERTENCIA: Debes editar index.html y poner tus llaves de Supabase para que el login funcione.');
+        }
+
+        const { createClient } = supabase;
+        const _supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // --- DOM Elements (Autenticación) ---
+        const userMenuLoggedIn = document.getElementById('user-menu-logged-in');
+        const userMenuLoggedOut = document.getElementById('user-menu-logged-out');
+        const userNameEl = document.getElementById('user-name');
+        const logoutButton = document.getElementById('logout-button');
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+
+        // --- DOM Elements (Rankings) ---
+        const playerListContainer = document.getElementById('ranking-player-list');
+        const caminanteListContainer = document.getElementById('ranking-caminante-list');
+
+        // --- DOM Elements (Eventos) ¡NUEVO! ---
+        const eventosListContainer = document.getElementById('eventos-list');
+
+
+        /**
+         * ======================================
+         * FUNCIÓN DE AUTENTICACIÓN
+         * ======================================
+         */
+        async function updateUserUI(session) {
+            if (session) {
+                userMenuLoggedOut.classList.add('hidden');
+                userMenuLoggedIn.classList.remove('hidden');
+
+                const { data: perfil, error } = await _supabase
+                    .from('perfiles')
+                    .select('nombre_usuario')
+                    .eq('auth_id', session.user.id)
+                    .single();
+                
+                if (perfil) {
+                    userNameEl.textContent = perfil.nombre_usuario;
+                } else {
+                    userNameEl.textContent = session.user.email.split('@')[0];
+                }
+
+            } else {
+                userMenuLoggedOut.classList.remove('hidden');
+                userMenuLoggedIn.classList.add('hidden');
+                userNameEl.textContent = '...';
+            }
+        }
+
+
+        /**
+         * ======================================
+         * FUNCIONES DE RANKINGS
+         * ======================================
+         */
+        function createPlayerHtml(jugador, index) {
+            const region = jugador.region || '---';
+            return `
+                <div class... (código HTML del jugador PWP)... </div>
+            `; // (Omitido por brevedad, es el mismo que te di antes)
+        }
+
+        function createCaminanteHtml(jugador, index) {
+            const region = jugador.region || '---';
+            const winRate = (jugador.win_rate * 100).toFixed(1);
+            return `
+                <div class... (código HTML del jugador WR)... </div>
+            `; // (Omitido por brevedad, es el mismo que te di antes)
+        }
+        
+        async function cargarRankings() {
+            if (!playerListContainer || !caminanteListContainer) {
+                console.warn('No se encontraron los contenedores de ranking en esta página.');
+                return;
+            }
+            try {
+                playerListContainer.innerHTML = '<p class="text-gray-400">Cargando ranking...</p>';
+                caminanteListContainer.innerHTML = '<p class="text-gray-400">Cargando ranking...</p>';
+
+                const [pwpResponse, wrResponse] = await Promise.all([
+                    _supabase.rpc('get_ranking_pwp'),
+                    _supabase.rpc('get_ranking_winrate')
+                ]);
+
+                if (pwpResponse.error) throw pwpResponse.error;
+                if (pwpResponse.data && pwpResponse.data.length > 0) {
+                    playerListContainer.innerHTML = ''; 
+                    pwpResponse.data.forEach((jugador, index) => {
+                        playerListContainer.innerHTML += createPlayerHtml(jugador, index);
+                    });
+                } else {
+                    playerListContainer.innerHTML = '<p class="text-gray-400">No hay datos para este ranking aún.</p>';
+                }
+
+                if (wrResponse.error) throw wrResponse.error;
+                if (wrResponse.data && wrResponse.data.length > 0) {
+                    caminanteListContainer.innerHTML = '';
+                    wrResponse.data.forEach((jugador, index) => {
+                        caminanteListContainer.innerHTML += createCaminanteHtml(jugador, index);
+                    });
+                } else {
+                    caminanteListContainer.innerHTML = '<p class="text-gray-400">No hay datos para este ranking aún.</p>';
+                }
+            } catch (error) {
+                console.error('Error cargando rankings:', error);
+                playerListContainer.innerHTML = '<p class="text-red-400">Error al cargar el ranking.</p>';
+                caminanteListContainer.innerHTML = '<p class="text-red-400">Error al cargar el ranking.</p>';
+            }
+        }
+
+
+        /**
+         * ======================================
+         * FUNCIONES DE EVENTOS (¡NUEVO!)
+         * ======================================
+         */
+
+        /**
+         * Formatea la fecha de Supabase a algo legible (ej: "Nov 15, 2025")
+         */
+        function formatEventDate(dateString) {
+            const options = { year: 'numeric', month: 'short', day: 'numeric' };
+            return new Date(dateString).toLocaleDateString('es-CL', options);
+        }
+
+        /**
+         * Crea el HTML para una tarjeta de evento
+         */
+        function createEventoHtml(evento) {
+            const region = evento.region || '---';
+            const formato = evento.formato || '---';
+            const fecha = formatEventDate(evento.fecha);
+            
+            // Si no hay imagen_url, usamos una imagen genérica
+            const imagen = evento.imagen_url || 'https://images.unsplash.com/photo-1511884642898-4c92249e20b6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=800';
+
+            return `
+                <div class="card rounded-lg shadow-xl overflow-hidden transition duration-300 card-hover">
+                    <a href="#">
+                        <img src="${imagen}" alt="Imagen de ${evento.nombre_torneo}" class="w-full h-48 object-cover">
+                    </a>
+                    <div class="p-5">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-xs font-semibold uppercase tracking-wider text-blue-400">
+                                ${formato}
+                            </span>
+                            <span class="text-xs text-gray-400">
+                                ${fecha}
+                            </span>
+                        </div>
+                        <h3 class="text-xl font-bold text-white mb-2">
+                            <a href="#">${evento.nombre_torneo}</a>
+                        </h3>
+                        <p class="text-sm text-gray-400 flex items-center">
+                            <i data-lucide="map-pin" class="w-4 h-4 mr-2 text-gray-500"></i>
+                            ${evento.nombre_tienda}, ${region}
+                        </p>
+                    </div>
+                </div>
+            `;
+        }
+
+        /**
+         * Carga los próximos eventos desde Supabase
+         */
+        async function cargarEventos() {
+            if (!eventosListContainer) {
+                console.warn('No se encontró el contenedor de eventos en esta página.');
+                return;
+            }
+
+            try {
+                // Borramos el ejemplo estático y ponemos "Cargando..."
+                eventosListContainer.innerHTML = '<p class="text-gray-400">Cargando eventos...</p>';
+
+                // 1. Llamamos a la función SQL que creaste
+                const { data, error } = await _supabase.rpc('get_proximos_eventos');
+
+                if (error) throw error;
+
+                // 2. Revisamos si Supabase devolvió eventos
+                if (data && data.length > 0) {
+                    eventosListContainer.innerHTML = ''; // Limpiamos el "Cargando..."
+                    data.forEach(evento => {
+                        eventosListContainer.innerHTML += createEventoHtml(evento);
+                    });
+                } else {
+                    eventosListContainer.innerHTML = '<p class="text-gray-400">No hay eventos programados por ahora.</p>';
+                }
+
+            } catch (error) {
+                console.error('Error cargando eventos:', error);
+                eventosListContainer.innerHTML = '<p class="text-red-400">Error al cargar los eventos.</p>';
+            }
+        }
+
+
+        /**
+         * ======================================
+         * INICIO DE LA PÁGINA (Event Listeners)
+         * ======================================
+         */
+        document.addEventListener('DOMContentLoaded', async () => {
+            // 1. Revisar el estado de la sesión
+            const { data: { session } } = await _supabase.auth.getSession();
+            updateUserUI(session);
+
+            // 2. Cargar los rankings dinámicos
+            cargarRankings(); 
+
+            // 3. Cargar los eventos dinámicos (¡NUEVO!)
+            cargarEventos();
+
+            // 4. Iniciar todos los iconos (¡Importante!)
+            // Lo movemos al final para que cargue los iconos de rankings Y eventos
+            lucide.createIcons();
+        });
+
+        // Escuchar cambios de estado (Login o Logout)
+        _supabase.auth.onAuthStateChange((event, session) => {
+            console.log('Auth event:', event, session);
+            updateUserUI(session);
+        });
+
+        // Botón de Cerrar Sesión
+        logoutButton.addEventListener('click', async (e) => {
+            e.preventDefault();
+            const { error } = await _supabase.auth.signOut();
+            if (error) {
+                console.error('Error al cerrar sesión:', error);
+            } else {
+                window.location.href = '/';
+            }
+        });
+
+        // Menú Móvil
+        mobileMenuButton.addEventListener('click', () => {
+            const isExpanded = mobileMenuButton.getAttribute('aria-expanded') === 'true';
+            mobileMenuButton.setAttribute('aria-expanded', !isExpanded);
+            mobileMenu.classList.toggle('hidden');
+            mobileMenuButton.querySelector('i[data-lucide="menu"]').classList.toggle('hidden');
+            mobileMenuButton.querySelector('i[data-lucide="x"]').classList.toggle('hidden');
+        });
+
+    </script>
 </body>
 </html>
