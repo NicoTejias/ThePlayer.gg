@@ -21,7 +21,7 @@
         .form-label {
             @apply block text-sm font-medium text-gray-300;
         }
-        input[type="file"] { @apply file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700; }
+        input[type="file"] { @apply form-input file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700; }
 
         .message-box { @apply mt-6 p-4 rounded-md; }
         .message-error { @apply bg-red-800 text-red-200; }
@@ -54,7 +54,7 @@
                         <a href="#torneos" class="nav-link">Torneos</a>
                         <a href="#jueces" class="nav-link">Jueces</a>
                         <a href="#tiendas" class="nav-link">Tiendas</a>
-                        <a href="#admin" class="nav-link bg-gray-700 text-white">Admin</a>
+                        <a href="subir-torneo.html" class="nav-link bg-gray-700 text-white">Admin</a>
                     </div>
                 </div>
                 <div class="hidden md:block">
@@ -180,8 +180,16 @@
                 userMenuLoggedIn.classList.remove('hidden');
                 
                 // Pedimos el perfil completo
-                const { data: perfil } = await _supabase.from('perfiles').select('*').eq('auth_id', session.user.id).single();
+                const { data: perfil, error } = await _supabase.from('perfiles').select('*').eq('auth_id', session.user.id).single();
                 
+                // Si hay un error (como el 406), 'perfil' será null
+                if (error) {
+                    console.warn('Error al buscar perfil (RLS?):', error.message);
+                    userNameEl.textContent = session.user.email.split('@')[0];
+                    currentUserPerfil = null;
+                    return; // Salimos de la función si hay error
+                }
+
                 currentUserPerfil = perfil; // Guardamos el perfil para usarlo después
 
                 if (perfil && perfil.nombre_usuario) {
@@ -218,8 +226,15 @@
             const { data: { session } } = await _supabase.auth.getSession();
             await updateUserUI(session); // Actualizar la barra de nav y currentUserPerfil
 
-            if (!session || !currentUserPerfil) {
+            if (!session) {
                 showMessage('error', 'Acceso denegado. Debes iniciar sesión para subir un torneo.');
+                return;
+            }
+
+            // Esta es la comprobación clave.
+            // Si updateUserUI falló (por RLS), currentUserPerfil será null.
+            if (!currentUserPerfil) {
+                showMessage('error', 'Error al verificar tu perfil. (¿RLS? No se puede leer la tabla `perfiles`).');
                 return;
             }
 
@@ -272,7 +287,6 @@
             // --- 2. PROCESAR EL ARCHIVO ---
             let resultados = [];
             try {
-                // Usamos un DOMParser nativo del navegador para "leer" el HTML
                 const parser = new DOMParser();
                 const doc = parser.parseFromString(htmlText, 'text/html');
 
@@ -283,7 +297,7 @@
                     showMessage('loading', 'Archivo Melee.gg detectado. Extrayendo resultados...');
                     resultados = parseMelee(doc);
                 } else {
-                    throw new Error('Archivo HTML no reconocido. Asegúrate de que sea un reporte de EventLink o Melee.');
+                    throw new Error('Archivo HTML no reconocido. Asegúrate de que sea un reporte de Standings de EventLink o Melee.');
                 }
                 
                 if (resultados.length === 0) {
@@ -301,7 +315,6 @@
             try {
                 showMessage('loading', `Encontrados ${resultados.length} jugadores. Subiendo a Supabase...`);
                 
-                // A. Creamos el torneo
                 const formData = new FormData(form);
                 const torneoData = {
                     nombre_torneo: formData.get('nombre_torneo'),
@@ -311,29 +324,33 @@
                     nro_jugadores: resultados.length,
                     tienda_id: currentUserPerfil.tienda_id // ¡Importante! Asigna la tienda del usuario logeado
                 };
+
+                // Validar que la tienda_id exista (si no es admin)
+                if (currentUserPerfil.rol === 'tienda' && !torneoData.tienda_id) {
+                     throw new Error('Tu perfil de tienda no tiene un ID de tienda asignado. Contacta al administrador.');
+                }
+                // (Un admin podría tener un dropdown para elegir la tienda, pero por ahora usamos la suya)
+
                 
                 const { data: torneoCreado, error: torneoError } = await _supabase
                     .from('torneos')
                     .insert(torneoData)
-                    .select('id') // Pedimos que nos devuelva el ID del torneo recién creado
+                    .select('id') 
                     .single();
 
                 if (torneoError) throw new Error(`Error RLS al crear torneo: ${torneoError.message}`);
                 
                 const torneoId = torneoCreado.id;
 
-                // B. Preparamos los resultados de los jugadores
                 const resultadosParaSubir = resultados.map(r => ({
                     torneo_id: torneoId,
-                    player_name_raw: r.nombre, // Guardamos el nombre tal como viene
+                    player_name_raw: r.nombre, 
                     matches_ganados: r.victorias,
                     matches_perdidos: r.derrotas,
                     matches_empatados: r.empates,
                     puntos_pwp_calculados: (r.victorias * 3 + r.empates * 1) * torneoData.multiplicador_pwp,
-                    // Dejamos que el backend (trigger) se encargue de buscar o crear el player_id
                 }));
 
-                // C. Insertamos todos los resultados
                 const { error: resultadosError } = await _supabase
                     .from('resultados_jugador')
                     .insert(resultadosParaSubir);
@@ -358,15 +375,14 @@
          */
         function parseEventLink(doc) {
             const jugadores = [];
-            // Buscamos la tabla de standings y todas sus filas (<tbody><tr>)
             const filas = doc.querySelectorAll('.standings tbody tr');
             
             filas.forEach(fila => {
                 try {
                     const celdas = fila.querySelectorAll('td');
-                    // Columna 1: Nombre (ej: "Alexander Ghio' The Fury")
+                    if (celdas.length < 4) return; // Omitir filas raras
+
                     const nombre = celdas[1].textContent.trim();
-                    // Columna 3: V/D/E (ej: "2/0/1")
                     const vde = celdas[3].textContent.trim().split('/');
                     
                     if (nombre && vde.length === 3) {
@@ -391,15 +407,14 @@
          */
         function parseMelee(doc) {
             const jugadores = [];
-            // Buscamos la tabla de standings y todas sus filas (<tbody><tr>)
             const filas = doc.querySelectorAll('#tournament-standings-table tbody tr');
             
             filas.forEach(fila => {
                 try {
                     const celdas = fila.querySelectorAll('td');
-                    // Columna 1: Nombre (ej: "Patricio Roman")
+                    if (celdas.length < 3) return; // Omitir filas raras
+
                     const nombre = celdas[1].textContent.trim();
-                    // Columna 2: Match Record (ej: "7-1-1")
                     const vde = celdas[2].textContent.trim().split('-');
                     
                     if (nombre && vde.length === 3) {
