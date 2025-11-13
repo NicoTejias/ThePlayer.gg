@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ranking Maestros - theplayer.gg</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #0F141E; color: #E5E7EB; }
+        .card { background-color: #1F2937; border: 1px solid #374151; }
+        .card-hover:hover { transform: translateY(-4px); border-color: #3B82F6; }
+        .nav-link { @apply px-3 py-2 rounded-md text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white; }
+        /* Estilos para la tabla del ranking */
+        .ranking-table { @apply w-full min-w-full divide-y divide-gray-700; }
+        .ranking-table th { @apply px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-400; }
+        .ranking-table td { @apply px-4 py-4 text-sm; }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="bg-gray-900/50 backdrop-blur-md shadow-md sticky top-0 z-50 border-b border-gray-700/50">
+        <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex-shrink-0">
+                    <a href="/" class="text-2xl font-bold text-white"><span class="text-blue-500">the</span>player</a>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="/" class="nav-link">Inicio</a>
+                        <div class="relative group">
+                            <button class="nav-link inline-flex items-center bg-gray-700 text-white">
+                                <span>Ranking</span>
+                                <i data-lucide="chevron-down" class="w-4 h-4 ml-1"></i>
+                            </button>
+                            <div class="hidden group-hover:block absolute z-10 mt-2 w-48 rounded-md shadow-lg py-1 bg-gray-800 ring-1 ring-black ring-opacity-5">
+                                <a href="ranking-the-player.html" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white">Ranking The Player</a>
+                                <a href="ranking-maestros.html" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white">Ranking Maestros</a>
+                            </div>
+                        </div>
+                        <a href="/#eventos" class="nav-link">Eventos</a>
+                        <a href="#torneos" class="nav-link">Torneos</a>
+                        <div class="relative group">
+                            <button class="nav-link inline-flex items-center">
+                                <span>Mercado</span>
+                                <i data-lucide="chevron-down" class="w-4 h-4 ml-1"></i>
+                            </button>
+                            <div class="hidden group-hover:block absolute z-10 mt-2 w-48 rounded-md shadow-lg py-1 bg-gray-800 ring-1 ring-black ring-opacity-5">
+                                <a href="#marketplace-venta" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white">Compra/Venta</a>
+                                <a href="#marketplace-cambio" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white">Cambios</a>
+                            </div>
+                        </div>
+                        <a href="#jueces" class="nav-link">Jueces</a>
+                        <a href="#tiendas" class="nav-link">Tiendas</a>
+                    </div>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-4 flex items-center md:ml-6 space-x-2">
+                        <div id="user-menu-logged-out"><a href="/autenticacion.html" class="px-3 py-2 rounded-md text-sm font-medium text-white bg-blue-600 hover:bg-blue-700">Login</a></div>
+                        <div id="user-menu-logged-in" class="hidden items-center space-x-2">
+                            <span class="text-sm font-medium text-gray-300">Hola, <span id="user-name" class="font-bold text-white">...</span></span>
+                            <a href="#" class="nav-link bg-gray-700">Mi Panel</a>
+                            <button id="logout-button" class="nav-link !text-red-400 hover:!bg-red-700 hover:!text-white"><i data-lucide="log-out" class="w-4 h-4"></i></button>
+                        </div>
+                    </div>
+                </div>
+                <div class="-mr-2 flex md:hidden">
+                    <button id="mobile-menu-button" type="button" class="bg-gray-800 inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 focus:outline-none" aria-controls="mobile-menu" aria-expanded="false">
+                        <i data-lucide="menu" class="block h-6 w-6"></i><i data-lucide="x" class="hidden h-6 w-6"></i>
+                    </button>
+                </div>
+            </div>
+        </nav>
+        <div class="md:hidden hidden" id="mobile-menu">
+            </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-16">
+        
+        <h1 class="text-4xl font-black text-white mb-4">Ranking Maestros</h1>
+        <p class="text-lg text-gray-400 mb-8">El ranking de estrategas. Demuestra tu consistencia con el mejor porcentaje de victorias.</p>
+
+        <div class="card rounded-lg shadow-xl overflow-hidden">
+            <table class="ranking-table">
+                <thead>
+                    <tr>
+                        <th class="w-16">#</th>
+                        <th>Jugador</th>
+                        <th>Región</th>
+                        <th class="w-32">Win Rate</th>
+                    </tr>
+                </thead>
+                <tbody id="full-ranking-list" class="divide-y divide-gray-800">
+                    <tr>
+                        <td colspan="4" class="py-12 text-center text-gray-400">
+                            <i data-lucide="loader-2" class="w-6 h-6 animate-spin inline-block mr-2"></i>
+                            Cargando ranking...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+    </main>
+    
+    <footer class="bg-gray-900/50 pt-16 pb-8 mt-16 border-t border-gray-700/50">
+      <div class="text-center text-gray-500 text-sm">
+          © 2025 theplayer.gg - Todos los derechos reservados.
+      </div>
+    </footer>
+
+    <script>
+        const SUPABASE_URL = 'https://jaqrddkrtcvwbfrjukvj.supabase.co'; 
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImphcXJkZGtydGN2d2Jmcmp1a3ZqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI3ODkyNTgsImV4cCI6MjA3ODM2NTI1OH0.voPWXtJo2fTqWKCqfzFTvi4JXcwesT3q9iWkGeM2NBI';
+
+        const { createClient } = supabase;
+        const _supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // --- DOM Elements (Autenticación) ---
+        let userMenuLoggedIn, userMenuLoggedOut, userNameEl, logoutButton, mobileMenuButton, mobileMenu;
+
+        // --- DOM Element (Ranking) ---
+        let fullRankingList;
+
+        /**
+         * ======================================
+         * FUNCIÓN DE AUTENTICACIÓN (La misma del index)
+         * ======================================
+         */
+        async function updateUserUI(session) {
+            if (session) {
+                userMenuLoggedOut.classList.add('hidden');
+                userMenuLoggedIn.classList.remove('hidden');
+                // Ignoramos el error 406 por ahora, tal como acordamos
+                const { data: perfil } = await _supabase.from('perfiles').select('nombre_usuario').eq('auth_id', session.user.id).single();
+                if (perfil) {
+                    userNameEl.textContent = perfil.nombre_usuario;
+                } else {
+                    userNameEl.textContent = session.user.email.split('@')[0];
+                }
+            } else {
+                userMenuLoggedOut.classList.remove('hidden');
+                userMenuLoggedIn.classList.add('hidden');
+                userNameEl.textContent = '...';
+            }
+        }
+
+        /**
+         * ======================================
+         * FUNCIÓN PARA LA TABLA DE RANKING COMPLETO
+         * ======================================
+         */
+        function createFullRankingHtmlRow(jugador, index) {
+            const region = jugador.region || '---';
+            // ¡LÓGICA ACTUALIZADA!
+            const winRate = (jugador.win_rate * 100).toFixed(1);
+
+            return `
+                <tr class="hover:bg-gray-800/50">
+                    <td class="font-bold text-gray-300 text-center">${index + 1}</td>
+                    <td class="font-semibold text-white">${jugador.nombre_usuario}</td>
+                    <td class="text-gray-400">${region}</td>
+                    <td class="font-bold text-green-400">${winRate}%</td>
+                </tr>
+            `;
+        }
+
+        async function cargarRankingCompleto() {
+            if (!fullRankingList) return;
+            try {
+                // ¡FUNCIÓN RPC ACTUALIZADA!
+                const { data, error } = await _supabase.rpc('get_ranking_maestros_full');
+
+                if (error) throw error;
+
+                if (data && data.length > 0) {
+                    fullRankingList.innerHTML = ''; // Limpiamos el "Cargando..."
+                    data.forEach((jugador, index) => {
+                        fullRankingList.innerHTML += createFullRankingHtmlRow(jugador, index);
+                    });
+                } else {
+                    fullRankingList.innerHTML = '<tr><td colspan="4" class="py-12 text-center text-gray-400">No hay datos para este ranking aún.</td></tr>';
+                }
+            } catch (error) {
+                console.error('Error cargando ranking completo:', error);
+                fullRankingList.innerHTML = '<tr><td colspan="4" class="py-12 text-center text-red-400">Error al cargar el ranking.</td></tr>';
+            }
+        }
+
+        /**
+         * ======================================
+         * INICIO DE LA PÁGINA (Event Listeners)
+         * ======================================
+         */
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Asignar variables
+            userMenuLoggedIn = document.getElementById('user-menu-logged-in');
+            userMenuLoggedOut = document.getElementById('user-menu-logged-out');
+            userNameEl = document.getElementById('user-name');
+            logoutButton = document.getElementById('logout-button');
+            mobileMenuButton = document.getElementById('mobile-menu-button');
+            mobileMenu = document.getElementById('mobile-menu');
+            fullRankingList = document.getElementById('full-ranking-list');
+
+            lucide.createIcons(); // Iniciar iconos
+            
+            // Revisar el estado de la sesión
+            const { data: { session } } = await _supabase.auth.getSession();
+            updateUserUI(session);
+
+            // Cargar el ranking completo
+            await cargarRankingCompleto();
+            
+            // Asignar listeners
+            if (logoutButton) {
+                logoutButton.addEventListener('click', async (e) => {
+                    e.preventDefault();
+                    await _supabase.auth.signOut();
+                    window.location.href = '/';
+                });
+            }
+            if (mobileMenuButton) {
+                mobileMenuButton.addEventListener('click', () => {
+                    mobileMenu.classList.toggle('hidden');
+                    mobileMenuButton.querySelector('i[data-lucide="menu"]').classList.toggle('hidden');
+                    mobileMenuButton.querySelector('i[data-lucide="x"]').classList.toggle('hidden');
+                });
+            }
+        });
+
+        _supabase.auth.onAuthStateChange((event, session) => {
+            if (userMenuLoggedIn && userMenuLoggedOut) {
+                updateUserUI(session);
+            }
+        });
+    </script>
+</body>
+</html>
