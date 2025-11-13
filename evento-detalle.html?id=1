@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalle del Evento - theplayer.gg</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎮</text></svg>">
+    
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #0F141E; color: #E5E7EB; }
+        .card { background-color: #1F2937; border: 1px solid #374151; }
+        .nav-link { @apply px-3 py-2 rounded-md text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white; }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="bg-gray-900/50 backdrop-blur-md shadow-md sticky top-0 z-50 border-b border-gray-700/50">
+        <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex-shrink-0">
+                    <a href="/" class="text-2xl font-bold text-white"><span class="text-blue-500">the</span>player</a>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="/" class="nav-link">Inicio</a>
+                        <div class="relative group">
+                            <button class="nav-link inline-flex items-center">
+                                <span>Ranking</span>
+                                <i data-lucide="chevron-down" class="w-4 h-4 ml-1"></i>
+                            </button>
+                            <div class="hidden group-hover:block absolute z-10 mt-2 w-48 rounded-md shadow-lg py-1 bg-gray-800 ring-1 ring-black ring-opacity-5">
+                                <a href="ranking-the-player.html" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white">Ranking The Player</a>
+                                <a href="ranking-maestros.html" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white">Ranking Maestros</a>
+                            </div>
+                        </div>
+                        <a href="eventos.html" class="nav-link bg-gray-700 text-white">Eventos</a>
+                        <a href="#torneos" class="nav-link">Torneos</a>
+                        <a href="#jueces" class="nav-link">Jueces</a>
+                        <a href="#tiendas" class="nav-link">Tiendas</a>
+                    </div>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-4 flex items-center md:ml-6 space-x-2">
+                        <div id="user-menu-logged-out"><a href="/autenticacion.html" class="px-3 py-2 rounded-md text-sm font-medium text-white bg-blue-600 hover:bg-blue-700">Login</a></div>
+                        <div id="user-menu-logged-in" class="hidden items-center space-x-2">
+                            <span class="text-sm font-medium text-gray-300">Hola, <span id="user-name" class="font-bold text-white">...</span></span>
+                            <a href="#" class="nav-link bg-gray-700">Mi Panel</a>
+                            <button id="logout-button" class="nav-link !text-red-400 hover:!bg-red-700 hover:!text-white"><i data-lucide="log-out" class="w-4 h-4"></i></button>
+                        </div>
+                    </div>
+                </div>
+                <div class="-mr-2 flex md:hidden">
+                    <button id="mobile-menu-button" type="button" class="bg-gray-800 inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 focus:outline-none" aria-controls="mobile-menu" aria-expanded="false">
+                        <i data-lucide="menu" class="block h-6 w-6"></i><i data-lucide="x" class="hidden h-6 w-6"></i>
+                    </button>
+                </div>
+            </div>
+        </nav>
+        <div class="md:hidden hidden" id="mobile-menu">
+            </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-16">
+        
+        <div id="loading-message" class="text-center py-12">
+            <p class="text-gray-400 text-lg">
+                <i data-lucide="loader-2" class="w-6 h-6 animate-spin inline-block mr-2"></i>
+                Buscando evento...
+            </p>
+        </div>
+
+        <div id="evento-container" class="hidden">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12">
+                
+                <div class="md:col-span-1">
+                    <img id="evento-imagen" src="" alt="Imagen del evento" class="w-full h-auto rounded-lg shadow-lg object-cover aspect-square">
+                </div>
+
+                <div class="md:col-span-2">
+                    <h1 id="evento-nombre" class="text-4xl lg:text-5xl font-black text-white mb-6">...</h1>
+                    
+                    <div class="card rounded-lg p-6 grid grid-cols-1 sm:grid-cols-3 gap-6">
+                        <div>
+                            <h3 class="text-sm font-semibold uppercase text-gray-400 tracking-wider">Fecha y Hora</h3>
+                            <p id="evento-fecha" class="text-lg font-semibold text-white mt-1">...</p>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-semibold uppercase text-gray-400 tracking-wider">Lugar</h3>
+                            <p id="evento-lugar" class="text-lg font-semibold text-white mt-1">...</p>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-semibold uppercase text-gray-400 tracking-wider">Formato</h3>
+                            <p id="evento-formato" class="text-lg font-semibold text-white mt-1">...</p>
+                        </div>
+                    </div>
+
+                    <div class="mt-10">
+                        <h2 class="text-2xl font-bold text-white mb-4">Detalles del Evento</h2>
+                        <div id="evento-descripcion" class="prose prose-invert text-gray-300 max-w-none">
+                            <p>Aún no hay una descripción detallada para este evento.</p>
+                            </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        
+    </main>
+    
+    <footer class="bg-gray-900/50 pt-16 pb-8 mt-16 border-t border-gray-700/50">
+      <div class="text-center text-gray-500 text-sm">
+          © 2025 theplayer.gg - Todos los derechos reservados.
+      </div>
+    </footer>
+
+    <script>
+        const SUPABASE_URL = 'https://jaqrddkrtcvwbfrjukvj.supabase.co'; 
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImphcXJkZGtydGN2d2Jmcmp1a3ZqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI3ODkyNTgsImV4cCI6MjA3ODM2NTI1OH0.voPWXtJo2fTqWKCqfzFTvi4JXcwesT3q9iWkGeM2NBI';
+
+        const { createClient } = supabase;
+        const _supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // --- DOM Elements (Autenticación) ---
+        let userMenuLoggedIn, userMenuLoggedOut, userNameEl, logoutButton, mobileMenuButton, mobileMenu;
+
+        // --- DOM Elements (Detalle de Evento) ---
+        let loadingMessage, eventoContainer, eventoImagen, eventoNombre, eventoFecha, eventoLugar, eventoFormato;
+
+        /**
+         * ======================================
+         * FUNCIÓN DE AUTENTICACIÓN
+         * ======================================
+         */
+        async function updateUserUI(session) {
+            if (session) {
+                userMenuLoggedOut.classList.add('hidden');
+                userMenuLoggedIn.classList.remove('hidden');
+                const { data: perfil } = await _supabase.from('perfiles').select('nombre_usuario').eq('auth_id', session.user.id).single();
+                if (perfil) {
+                    userNameEl.textContent = perfil.nombre_usuario;
+                } else {
+                    userNameEl.textContent = session.user.email.split('@')[0];
+                }
+            } else {
+                userMenuLoggedOut.classList.remove('hidden');
+                userMenuLoggedIn.classList.add('hidden');
+                userNameEl.textContent = '...';
+            }
+        }
+
+        /**
+         * ======================================
+         * FUNCIÓN PARA LA PÁGINA DE DETALLE
+         * ======================================
+         */
+        
+        function formatEventDate(dateString) {
+            // Formato más completo: 15 nov. 2025, 14:30
+            const options = { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+            return new Date(dateString).toLocaleDateString('es-CL', options);
+        }
+
+        async function cargarDetalleEvento() {
+            // 1. Obtener el ID de la URL
+            const params = new URLSearchParams(window.location.search);
+            const eventoId = params.get('id');
+
+            if (!eventoId) {
+                loadingMessage.innerHTML = '<p class="text-red-400 text-center text-lg">Error: No se encontró un ID de evento en la URL.</p>';
+                return;
+            }
+
+            try {
+                // 2. Llamar a la nueva función SQL
+                const { data, error } = await _supabase.rpc('get_evento_detalle', { evento_id: eventoId });
+
+                if (error) throw error;
+
+                if (data && data.length > 0) {
+                    const evento = data[0];
+
+                    // 3. Rellenar el HTML con los datos
+                    eventoNombre.textContent = evento.nombre_torneo;
+                    eventoFecha.textContent = formatEventDate(evento.fecha);
+                    eventoLugar.textContent = `${evento.nombre_tienda}, ${evento.region || '---'}`;
+                    eventoFormato.textContent = evento.formato || '---';
+                    eventoImagen.src = evento.imagen_url || 'https://images.unsplash.com/photo-1511884642898-4c92249e20b6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=800';
+                    eventoImagen.alt = `Imagen de ${evento.nombre_torneo}`;
+
+                    // 4. Mostrar el contenedor del evento y ocultar el "Cargando..."
+                    loadingMessage.classList.add('hidden');
+                    eventoContainer.classList.remove('hidden');
+
+                } else {
+                    loadingMessage.innerHTML = '<p class="text-yellow-400 text-center text-lg">Error: No se encontró ningún evento con ese ID.</p>';
+                }
+            } catch (error) {
+                console.error('Error cargando detalle de evento:', error);
+                loadingMessage.innerHTML = '<p class="text-red-400 text-center text-lg">Error al cargar el evento.</p>';
+            }
+        }
+
+        /**
+         * ======================================
+         * INICIO DE LA PÁGINA (Event Listeners)
+         * ======================================
+         */
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Asignar variables de Autenticación
+            userMenuLoggedIn = document.getElementById('user-menu-logged-in');
+            userMenuLoggedOut = document.getElementById('user-menu-logged-out');
+            userNameEl = document.getElementById('user-name');
+            logoutButton = document.getElementById('logout-button');
+            mobileMenuButton = document.getElementById('mobile-menu-button');
+            mobileMenu = document.getElementById('mobile-menu');
+
+            // Asignar variables de Detalle de Evento
+            loadingMessage = document.getElementById('loading-message');
+            eventoContainer = document.getElementById('evento-container');
+            eventoImagen = document.getElementById('evento-imagen');
+            eventoNombre = document.getElementById('evento-nombre');
+            eventoFecha = document.getElementById('evento-fecha');
+            eventoLugar = document.getElementById('evento-lugar');
+            eventoFormato = document.getElementById('evento-formato');
+            
+            lucide.createIcons(); // Iniciar iconos (para el loader)
+            
+            // Revisar el estado de la sesión
+            const { data: { session } } = await _supabase.auth.getSession();
+            updateUserUI(session);
+
+            // Cargar los datos del evento
+            await cargarDetalleEvento();
+            
+            // Re-crear iconos (por si acaso)
+            lucide.createIcons();
+            
+            // Asignar listeners de botones
+            if (logoutButton) {
+                logoutButton.addEventListener('click', async (e) => {
+                    e.preventDefault();
+                    await _supabase.auth.signOut();
+                    window.location.href = '/';
+                });
+            }
+            if (mobileMenuButton) {
+                mobileMenuButton.addEventListener('click', () => {
+                    mobileMenu.classList.toggle('hidden');
+                    mobileMenuButton.querySelector('i[data-lucide="menu"]').classList.toggle('hidden');
+                    mobileMenuButton.querySelector('i[data-lucide="x"]').classList.toggle('hidden');
+                });
+            }
+        });
+
+        _supabase.auth.onAuthStateChange((event, session) => {
+            if (userMenuLoggedIn && userMenuLoggedOut) {
+                updateUserUI(session);
+            }
+        });
+    </script>
+</body>
+</html>
