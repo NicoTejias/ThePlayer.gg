@@ -7,19 +7,22 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
-    
-    <!-- ¡IMPORTANTE! Importamos la librería de Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎮</text></svg>">
 
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #111827; color: #E5E7EB; }
+        body { font-family: 'Inter', sans-serif; background-color: #0F141E; color: #E5E7EB; }
         .card { background-color: #1F2937; border: 1px solid #374151; }
         .nav-link { @apply px-3 py-2 rounded-md text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white; }
-        .nav-link-dropdown { @apply block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white; }
-        .dropdown:hover .dropdown-menu { display: block; }
-        .dropdown-menu { @apply hidden absolute z-10 mt-2 w-48 rounded-md shadow-lg py-1 bg-gray-800 ring-1 ring-black ring-opacity-5; }
-        input[type="number"], select, input[type="file"] { @apply mt-1 block w-full bg-gray-800 border-gray-600 rounded-md shadow-sm p-2 text-white; }
+        
+        .form-input, .form-select {
+            @apply mt-1 block w-full bg-gray-900 border-gray-700 rounded-md shadow-sm p-3 text-white focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50;
+        }
+        .form-label {
+            @apply block text-sm font-medium text-gray-300;
+        }
         input[type="file"] { @apply file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700; }
+
         .message-box { @apply mt-6 p-4 rounded-md; }
         .message-error { @apply bg-red-800 text-red-200; }
         .message-success { @apply bg-green-800 text-green-200; }
@@ -28,56 +31,103 @@
 </head>
 <body class="antialiased">
 
-    <!-- 
-      ¡TAREA PARA TI! 
-      Reemplaza este <header> y <footer> con los de tu 'index.html'
-    -->
-    <header class="bg-gray-900 shadow-md sticky top-0 z-50">
-      <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex items-center justify-between h-16">
-          <div class="flex-shrink-0">
-            <a href="/" class="text-2xl font-bold text-white">
-                <span class="text-blue-500">the</span>player.gg
-            </a>
-          </div>
-        </div>
-      </nav>
+    <header class="bg-gray-900/50 backdrop-blur-md shadow-md sticky top-0 z-50 border-b border-gray-700/50">
+        <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex-shrink-0">
+                    <a href="/" class="text-2xl font-bold text-white"><span class="text-blue-500">the</span>player</a>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="/" class="nav-link">Inicio</a>
+                        <div class="relative group">
+                            <button class="nav-link inline-flex items-center">
+                                <span>Ranking</span>
+                                <i data-lucide="chevron-down" class="w-4 h-4 ml-1"></i>
+                            </button>
+                            <div class="hidden group-hover:block absolute z-10 mt-2 w-48 rounded-md shadow-lg py-1 bg-gray-800 ring-1 ring-black ring-opacity-5">
+                                <a href="ranking-the-player.html" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white">Ranking The Player</a>
+                                <a href="ranking-maestros.html" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white">Ranking Maestros</a>
+                            </div>
+                        </div>
+                        <a href="eventos.html" class="nav-link">Eventos</a>
+                        <a href="#torneos" class="nav-link">Torneos</a>
+                        <a href="#jueces" class="nav-link">Jueces</a>
+                        <a href="#tiendas" class="nav-link">Tiendas</a>
+                        <a href="#admin" class="nav-link bg-gray-700 text-white">Admin</a>
+                    </div>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-4 flex items-center md:ml-6 space-x-2">
+                        <div id="user-menu-logged-out"><a href="/autenticacion.html" class="px-3 py-2 rounded-md text-sm font-medium text-white bg-blue-600 hover:bg-blue-700">Login</a></div>
+                        <div id="user-menu-logged-in" class="hidden items-center space-x-2">
+                            <span class="text-sm font-medium text-gray-300">Hola, <span id="user-name" class="font-bold text-white">...</span></span>
+                            <a href="#" class="nav-link bg-gray-700">Mi Panel</a>
+                            <button id="logout-button" class="nav-link !text-red-400 hover:!bg-red-700 hover:!text-white"><i data-lucide="log-out" class="w-4 h-4"></i></button>
+                        </div>
+                    </div>
+                </div>
+                <div class="-mr-2 flex md:hidden">
+                    <button id="mobile-menu-button" type="button" class="bg-gray-800 inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 focus:outline-none" aria-controls="mobile-menu" aria-expanded="false">
+                        <i data-lucide="menu" class="block h-6 w-6"></i><i data-lucide="x" class="hidden h-6 w-6"></i>
+                    </button>
+                </div>
+            </div>
+        </nav>
+        <div class="md:hidden hidden" id="mobile-menu"></div>
     </header>
 
     <main class="container mx-auto px-4 py-16">
         <div class="card max-w-2xl mx-auto rounded-lg shadow-xl overflow-hidden">
             
-            <!-- Mensaje de respuesta (Ahora está arriba) -->
             <div id="message-container" class="message-box m-4 hidden"></div>
 
-            <!-- Formulario de Subida -->
-            <div id="form-container" class="p-8">
-                <h1 class="text-3xl font-bold text-white mb-6">Subir Resultados de Torneo</h1>
-                <p class="text-gray-400 mb-6">Esta herramienta es solo para Tiendas Asociadas. Sube el archivo .html de Eventlink o Melee.</p>
+            <div id="form-container" class="p-8 hidden"> <h1 class="text-3xl font-bold text-white mb-6">Subir Resultados de Torneo</h1>
+                <p class="text-gray-400 mb-6">Sube el archivo .html de Eventlink o Melee para procesar los resultados y actualizar el ranking.</p>
 
                 <form id="torneo-form" class="space-y-6">
+                    
                     <div>
-                        <label for="formato" class="block text-sm font-medium text-gray-300">Formato del Torneo</label>
-                        <select id="formato" name="formato" required>
-                            <option value="standard">Standard</option>
-                            <option value="pioneer">Pioneer</option>
-                            <option value="modern">Modern</option>
-                            <option value="draft">Draft</option>
-                            <option value="sellado">Sellado</option>
+                        <label for="nombre_torneo" class="form-label">Nombre del Evento (ej: "Pioneer Semanal")</label>
+                        <input type="text" id="nombre_torneo" name="nombre_torneo" class="form-input" required>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="fecha" class="form-label">Fecha del Evento</label>
+                            <input type="datetime-local" id="fecha" name="fecha" class="form-input" required>
+                        </div>
+                        <div>
+                            <label for="formato" class="form-label">Formato</label>
+                            <select id="formato" name="formato" class="form-select" required>
+                                <option value="standard">Standard</option>
+                                <option value="pioneer">Pioneer</option>
+                                <option value="modern">Modern</option>
+                                <option value="legacy">Legacy</option>
+                                <option value="pauper">Pauper</option>
+                                <option value="draft">Draft</option>
+                                <option value="sealed">Sellado</option>
+                                <option value="commander">Commander</option>
+                                <option value="otro">Otro</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label for="multiplicador_pwp" class="form-label">Multiplicador de Puntos</label>
+                        <select id="multiplicador_pwp" name="multiplicador_pwp" class="form-select" required>
+                            <option value="1">1x (Evento regular)</option>
+                            <option value="2">2x (Evento Especial)</option>
+                            <option value="3">3x (Clasificatorio)</option>
+                            <option value="4">4x (Premium)</option>
                         </select>
                     </div>
+
                     <div>
-                        <label for="multiplicador" class="block text-sm font-medium text-gray-300">Multiplicador PWP</label>
-                        <input type="number" id="multiplicador" name="multiplicador" value="1" min="1" required>
+                        <label for="archivo_html" class="form-label">Archivo de Resultados (.html)</label>
+                        <input type="file" id="archivo_html" name="archivo_html" class="form-input" accept=".html" required>
                     </div>
-                    <div>
-                        <label for="nro_jugadores" class="block text-sm font-medium text-gray-300">Número de Jugadores</label>
-                        <input type="number" id="nro_jugadores" name="nro_jugadores" min="4" required>
-                    </div>
-                    <div>
-                        <label for="archivo_html" class="block text-sm font-medium text-gray-300">Archivo de Resultados (.html)</label>
-                        <input type="file" id="archivo_html" name="archivo_html" accept=".html" required>
-                    </div>
+                    
                     <div>
                         <button type="submit" id="submit-button" class="w-full flex justify-center py-3 px-4 rounded-md shadow-sm text-lg font-medium text-white bg-blue-600 hover:bg-blue-700">
                             Subir y Procesar Torneo
@@ -88,94 +138,127 @@
         </div>
     </main>
     
-    <footer class="bg-gray-900 pt-16 pb-8 mt-16">
+    <footer class="bg-gray-900/50 pt-16 pb-8 mt-16 border-t border-gray-700/50">
       <div class="text-center text-gray-500 text-sm">
-         © 2025 theplayer.gg - Todos los derechos reservados.
+          © 2025 theplayer.gg - Todos los derechos reservados.
       </div>
     </footer>
 
-    <!--
-    || ==================================================================== ||
-    || SCRIPT DE AUTENTICACIÓN: Esto protege la página
-    || ==================================================================== ||
-    -->
     <script>
-        // --- ¡¡IMPORTANTE!! REEMPLAZA ESTO CON TUS LLAVES ---
         const SUPABASE_URL = 'https://jaqrddkrtcvwbfrjukvj.supabase.co'; 
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImphcXJkZGtydGN2d2Jmcmp1a3ZqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI3ODkyNTgsImV4cCI6MjA3ODM2NTI1OH0.voPWXtJo2fTqWKCqfzFTvi4JXcwesT3q9iWkGeM2NBI';
-        // --------------------------------------------------
-
-        if (SUPABASE_URL.includes('PEGA_TU')) {
-            alert('ERROR: Debes editar el archivo .html y poner tus llaves de Supabase para que el login funcione.');
-        }
 
         const { createClient } = supabase;
         const _supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         // --- Elementos del DOM ---
+        let userMenuLoggedIn, userMenuLoggedOut, userNameEl, logoutButton, mobileMenuButton, mobileMenu;
         const formContainer = document.getElementById('form-container');
         const form = document.getElementById('torneo-form');
         const messageContainer = document.getElementById('message-container');
         const submitButton = document.getElementById('submit-button');
 
+        let currentUserPerfil = null; // Guardaremos el perfil del usuario (con su rol y ID de tienda)
+
         // --- Función para mostrar mensajes ---
         function showMessage(type, text) {
             messageContainer.classList.remove('hidden', 'message-error', 'message-success', 'message-loading');
-            if (type === 'error') {
-                messageContainer.classList.add('message-error');
-            } else if (type === 'success') {
-                messageContainer.classList.add('message-success');
-            } else {
-                messageContainer.classList.add('message-loading');
-            }
+            if (type === 'error') messageContainer.classList.add('message-error');
+            else if (type === 'success') messageContainer.classList.add('message-success');
+            else messageContainer.classList.add('message-loading');
             messageContainer.textContent = text;
         }
 
-        // --- 1. VERIFICAR PERMISOS AL CARGAR LA PÁGINA ---
-        window.addEventListener('DOMContentLoaded', async () => {
-            lucide.createIcons(); // Iniciar iconos
+        /**
+         * ======================================
+         * FUNCIÓN DE AUTENTICACIÓN
+         * ======================================
+         */
+        async function updateUserUI(session) {
+            if (session) {
+                userMenuLoggedOut.classList.add('hidden');
+                userMenuLoggedIn.classList.remove('hidden');
+                
+                // Pedimos el perfil completo
+                const { data: perfil } = await _supabase.from('perfiles').select('*').eq('auth_id', session.user.id).single();
+                
+                currentUserPerfil = perfil; // Guardamos el perfil para usarlo después
+
+                if (perfil && perfil.nombre_usuario) {
+                    userNameEl.textContent = perfil.nombre_usuario;
+                } else if (session.user.email) {
+                    userNameEl.textContent = session.user.email.split('@')[0];
+                }
+            } else {
+                userMenuLoggedOut.classList.remove('hidden');
+                userMenuLoggedIn.classList.add('hidden');
+                userNameEl.textContent = '...';
+                currentUserPerfil = null;
+            }
+        }
+
+        /**
+         * ======================================
+         * 1. VERIFICAR PERMISOS AL CARGAR LA PÁGINA
+         * ======================================
+         */
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Asignar variables de Autenticación
+            userMenuLoggedIn = document.getElementById('user-menu-logged-in');
+            userMenuLoggedOut = document.getElementById('user-menu-logged-out');
+            userNameEl = document.getElementById('user-name');
+            logoutButton = document.getElementById('logout-button');
+            mobileMenuButton = document.getElementById('mobile-menu-button');
+            mobileMenu = document.getElementById('mobile-menu');
+            
+            lucide.createIcons();
             
             showMessage('loading', 'Verificando permisos...');
-            formContainer.classList.add('hidden'); // Ocultar formulario por defecto
+            
+            const { data: { session } } = await _supabase.auth.getSession();
+            await updateUserUI(session); // Actualizar la barra de nav y currentUserPerfil
 
-            const { data: { session }, error: sessionError } = await _supabase.auth.getSession();
-
-            if (!session) {
+            if (!session || !currentUserPerfil) {
                 showMessage('error', 'Acceso denegado. Debes iniciar sesión para subir un torneo.');
                 return;
             }
 
-            // Si hay sesión, buscamos el ROL en nuestra tabla 'perfiles'
-            const { data: perfil, error: perfilError } = await _supabase
-                .from('perfiles')
-                .select('rol')
-                .eq('auth_id', session.user.id)
-                .single();
-
-            if (perfilError || !perfil) {
-                showMessage('error', 'No se pudo encontrar tu perfil de usuario.');
-                return;
-            }
-
             // --- ¡EL CONTROL DE SEGURIDAD! ---
-            if (perfil.rol === 'admin' || perfil.rol === 'tienda') {
-                // El usuario SÍ tiene permisos
+            if (currentUserPerfil.rol === 'admin' || currentUserPerfil.rol === 'tienda') {
                 showMessage('success', 'Permiso verificado. Listo para subir torneo.');
                 formContainer.classList.remove('hidden'); // Mostrar formulario
             } else {
-                // El usuario es un simple "jugador"
-                showMessage('error', 'Acceso denegado. No tienes permisos de "Tienda" o "Admin" para subir torneos.');
+                showMessage('error', 'Acceso denegado. No tienes permisos de "Tienda" o "Admin".');
+            }
+
+            // Asignar listeners de botones de nav
+            if (logoutButton) {
+                logoutButton.addEventListener('click', async (e) => {
+                    e.preventDefault();
+                    await _supabase.auth.signOut();
+                    window.location.href = '/';
+                });
             }
         });
 
+        _supabase.auth.onAuthStateChange((event, session) => {
+            if (userMenuLoggedIn && userMenuLoggedOut) {
+                updateUserUI(session);
+            }
+        });
 
-        // --- 2. LÓGICA DE SUBIDA (CON TOKEN DE AUTENTICACIÓN) ---
+        /**
+         * ======================================
+         * 2. LÓGICA DEL "MOTOR" DE SUBIDA
+         * ======================================
+         */
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
             submitButton.disabled = true;
             submitButton.textContent = 'Procesando...';
-            
-            // 1. LEER EL ARCHIVO HTML
+            showMessage('loading', 'Leyendo archivo HTML...');
+
+            // --- 1. LEER EL ARCHIVO ---
             const fileInput = document.getElementById('archivo_html');
             if (fileInput.files.length === 0) {
                 showMessage('error', 'Por favor, selecciona un archivo .html');
@@ -184,53 +267,155 @@
                 return;
             }
             const file = fileInput.files[0];
-            const archivoHTMLComoTexto = await file.text();
-            
-            // 2. OBTENER EL TOKEN DE SESIÓN (La "Credencial")
-            const { data: { session } } = await _supabase.auth.getSession();
-            if (!session) {
-                showMessage('error', 'Tu sesión expiró. Por favor, recarga la página e inicia sesión de nuevo.');
-                return;
-            }
+            const htmlText = await file.text();
 
-            // 3. PREPARAR DATOS PARA EL "MOTOR"
-            const datosParaEnviar = {
-                formato: document.getElementById('formato').value,
-                multiplicador_pwp: parseInt(document.getElementById('multiplicador').value),
-                nro_jugadores: parseInt(document.getElementById('nro_jugadores').value),
-                contenidoHTML: archivoHTMLComoTexto
-            };
-
+            // --- 2. PROCESAR EL ARCHIVO ---
+            let resultados = [];
             try {
-                // 4. LLAMAR AL "MOTOR" (¡AHORA INCLUYE EL TOKEN!)
-                const response = await fetch('/api/subir-torneo', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        // ¡LA NUEVA LÍNEA DE SEGURIDAD!
-                        'Authorization': `Bearer ${session.access_token}`
-                    },
-                    body: JSON.stringify(datosParaEnviar),
-                });
+                // Usamos un DOMParser nativo del navegador para "leer" el HTML
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(htmlText, 'text/html');
 
-                const data = await response.json();
-
-                if (response.ok) {
-                    showMessage('success', data.message);
-                    form.reset();
+                if (doc.title.includes('EventLink')) {
+                    showMessage('loading', 'Archivo EventLink detectado. Extrayendo resultados...');
+                    resultados = parseEventLink(doc);
+                } else if (doc.title.includes('Melee')) {
+                    showMessage('loading', 'Archivo Melee.gg detectado. Extrayendo resultados...');
+                    resultados = parseMelee(doc);
                 } else {
-                    // Mostrar error (ej. 403 Prohibido)
-                    showMessage('error', data.message || 'Error desconocido del servidor');
+                    throw new Error('Archivo HTML no reconocido. Asegúrate de que sea un reporte de EventLink o Melee.');
+                }
+                
+                if (resultados.length === 0) {
+                    throw new Error('No se encontraron jugadores en el archivo. ¿Es el reporte de Standings correcto?');
                 }
 
             } catch (error) {
-                console.error('Error de red:', error);
-                showMessage('error', 'Error fatal de conexión. Revisa la consola.');
+                showMessage('error', `Error al leer el archivo: ${error.message}`);
+                submitButton.disabled = false;
+                submitButton.textContent = 'Subir y Procesar Torneo';
+                return;
+            }
+
+            // --- 3. SUBIR A SUPABASE ---
+            try {
+                showMessage('loading', `Encontrados ${resultados.length} jugadores. Subiendo a Supabase...`);
+                
+                // A. Creamos el torneo
+                const formData = new FormData(form);
+                const torneoData = {
+                    nombre_torneo: formData.get('nombre_torneo'),
+                    fecha: formData.get('fecha'),
+                    formato: formData.get('formato'),
+                    multiplicador_pwp: parseInt(formData.get('multiplicador_pwp')),
+                    nro_jugadores: resultados.length,
+                    tienda_id: currentUserPerfil.tienda_id // ¡Importante! Asigna la tienda del usuario logeado
+                };
+                
+                const { data: torneoCreado, error: torneoError } = await _supabase
+                    .from('torneos')
+                    .insert(torneoData)
+                    .select('id') // Pedimos que nos devuelva el ID del torneo recién creado
+                    .single();
+
+                if (torneoError) throw new Error(`Error RLS al crear torneo: ${torneoError.message}`);
+                
+                const torneoId = torneoCreado.id;
+
+                // B. Preparamos los resultados de los jugadores
+                const resultadosParaSubir = resultados.map(r => ({
+                    torneo_id: torneoId,
+                    player_name_raw: r.nombre, // Guardamos el nombre tal como viene
+                    matches_ganados: r.victorias,
+                    matches_perdidos: r.derrotas,
+                    matches_empatados: r.empates,
+                    puntos_pwp_calculados: (r.victorias * 3 + r.empates * 1) * torneoData.multiplicador_pwp,
+                    // Dejamos que el backend (trigger) se encargue de buscar o crear el player_id
+                }));
+
+                // C. Insertamos todos los resultados
+                const { error: resultadosError } = await _supabase
+                    .from('resultados_jugador')
+                    .insert(resultadosParaSubir);
+
+                if (resultadosError) throw new Error(`Error RLS al subir resultados: ${resultadosError.message}`);
+
+                showMessage('success', `¡Éxito! Torneo ID ${torneoId} y ${resultados.length} resultados fueron subidos.`);
+                form.reset();
+
+            } catch (error) {
+                showMessage('error', `Error al subir a Supabase: ${error.message}`);
             }
 
             submitButton.disabled = false;
             submitButton.textContent = 'Subir y Procesar Torneo';
         });
+
+        /**
+         * ======================================
+         * "MOTOR": LECTOR DE EVENTLINK
+         * ======================================
+         */
+        function parseEventLink(doc) {
+            const jugadores = [];
+            // Buscamos la tabla de standings y todas sus filas (<tbody><tr>)
+            const filas = doc.querySelectorAll('.standings tbody tr');
+            
+            filas.forEach(fila => {
+                try {
+                    const celdas = fila.querySelectorAll('td');
+                    // Columna 1: Nombre (ej: "Alexander Ghio' The Fury")
+                    const nombre = celdas[1].textContent.trim();
+                    // Columna 3: V/D/E (ej: "2/0/1")
+                    const vde = celdas[3].textContent.trim().split('/');
+                    
+                    if (nombre && vde.length === 3) {
+                        jugadores.push({
+                            nombre: nombre,
+                            victorias: parseInt(vde[0]),
+                            derrotas: parseInt(vde[1]),
+                            empates: parseInt(vde[2])
+                        });
+                    }
+                } catch(e) {
+                    console.warn("Se omitió una fila de EventLink por formato inesperado:", fila, e);
+                }
+            });
+            return jugadores;
+        }
+
+        /**
+         * ======================================
+         * "MOTOR": LECTOR DE MELEE.GG
+         * ======================================
+         */
+        function parseMelee(doc) {
+            const jugadores = [];
+            // Buscamos la tabla de standings y todas sus filas (<tbody><tr>)
+            const filas = doc.querySelectorAll('#tournament-standings-table tbody tr');
+            
+            filas.forEach(fila => {
+                try {
+                    const celdas = fila.querySelectorAll('td');
+                    // Columna 1: Nombre (ej: "Patricio Roman")
+                    const nombre = celdas[1].textContent.trim();
+                    // Columna 2: Match Record (ej: "7-1-1")
+                    const vde = celdas[2].textContent.trim().split('-');
+                    
+                    if (nombre && vde.length === 3) {
+                        jugadores.push({
+                            nombre: nombre,
+                            victorias: parseInt(vde[0]),
+                            derrotas: parseInt(vde[1]),
+                            empates: parseInt(vde[2])
+                        });
+                    }
+                } catch (e) {
+                     console.warn("Se omitió una fila de Melee por formato inesperado:", fila, e);
+                }
+            });
+            return jugadores;
+        }
 
     </script>
 </body>
