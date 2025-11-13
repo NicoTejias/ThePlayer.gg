@@ -170,7 +170,7 @@
                             Ver más →
                         </a>
                     </div>
-                     <div id="ranking-caminante-list" class="space-y-3"></div>
+                    <div id="ranking-caminante-list" class="space-y-3"></div>
                 </div>
             </div>
         </section>
@@ -184,7 +184,7 @@
                     Ver todos →
                 </a>
             </div>
-             <div id="eventos-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8"></div>
+            <div id="eventos-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8"></div>
         </section>
         
     </main>
@@ -196,23 +196,15 @@
     </footer>
 
     <script>
-        // --- ¡¡IMPORTANTE!! TUS LLAVES DE SUPABASE ---
         const SUPABASE_URL = 'https://jaqrddkrtcvwbfrjukvj.supabase.co'; 
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImphcXJkZGtydGN2d2Jmcmp1a3ZqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI3ODkyNTgsImV4cCI6MjA3ODM2NTI1OH0.voPWXtJo2fTqWKCqfzFTvi4JXcwesT3q9iWkGeM2NBI';
-        // --------------------------------------------------
 
         const { createClient } = supabase;
         const _supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        // --- DOM Elements (Se declaran aquí, pero se asignan dentro del listener) ---
         let userMenuLoggedIn, userMenuLoggedOut, userNameEl, logoutButton, mobileMenuButton, mobileMenu;
         let playerListContainer, caminanteListContainer, eventosListContainer;
 
-        /**
-         * ======================================
-         * FUNCIÓN DE AUTENTICACIÓN
-         * ======================================
-         */
         async function updateUserUI(session) {
             if (session) {
                 userMenuLoggedOut.classList.add('hidden');
@@ -234,11 +226,6 @@
             }
         }
 
-        /**
-         * ======================================
-         * FUNCIONES DE RANKINGS (TOP 5)
-         * ======================================
-         */
         function createPlayerHtml(jugador, index) {
             const region = jugador.region || '---';
             return `
@@ -318,11 +305,6 @@
             }
         }
 
-        /**
-         * ======================================
-         * FUNCIONES DE EVENTOS
-         * ======================================
-         */
         function formatEventDate(dateString) {
             const options = { year: 'numeric', month: 'short', day: 'numeric' };
             return new Date(dateString).toLocaleDateString('es-CL', options);
@@ -377,15 +359,8 @@
             }
         }
 
-        /**
-         * ======================================
-         * INICIO DE LA PÁGINA (Event Listeners)
-         * ======================================
-         */
         document.addEventListener('DOMContentLoaded', async () => {
             
-            // ¡¡¡CAMBIO CLAVE!!!
-            // Asignamos las variables DESPUÉS de que el DOM esté cargado.
             userMenuLoggedIn = document.getElementById('user-menu-logged-in');
             userMenuLoggedOut = document.getElementById('user-menu-logged-out');
             userNameEl = document.getElementById('user-name');
@@ -396,18 +371,14 @@
             caminanteListContainer = document.getElementById('ranking-caminante-list');
             eventosListContainer = document.getElementById('eventos-list');
 
-            // 1. Revisar el estado de la sesión
             const { data: { session } } = await _supabase.auth.getSession();
             updateUserUI(session);
             
-            // 2. Cargar los rankings y eventos
             await cargarRankings(); 
             await cargarEventos();
             
-            // 3. Iniciar todos los iconos
             lucide.createIcons();
 
-            // 4. Asignar listeners a los botones
             if (logoutButton) {
                 logoutButton.addEventListener('click', async (e) => {
                     e.preventDefault();
@@ -427,12 +398,10 @@
         });
 
         _supabase.auth.onAuthStateChange((event, session) => {
-            // Asegurarse que los elementos del UI existan antes de actualizarlos
             if (userMenuLoggedIn && userMenuLoggedOut) {
                 updateUserUI(session);
             }
         });
-
     </script>
 </body>
 </html>
