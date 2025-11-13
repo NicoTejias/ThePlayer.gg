@@ -202,7 +202,7 @@
         // --- ¡¡IMPORTANTE!! TUS LLAVES DE SUPABASE ---
         const SUPABASE_URL = 'https://jaqrddkrtcvwbfrjukvj.supabase.co'; 
         
-        // ¡¡¡AQUÍ ESTABA EL ERROR!!! Esta es la llave corregida:
+        // ¡¡ESTA ES LA LLAVE CORRECTA SIN EL ERROR DE TIPEO!!
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImphcXJkZGtydGN2d2Jmcmp1a3ZqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI3ODkyNTgsImV4cCI6MjA3ODM2NTI1OH0.voPWXtJo2fTqWKCqfzFTvi4JXcwesT3q9iWkGeM2NBI';
         // --------------------------------------------------
 
@@ -291,12 +291,15 @@
         }
         
         async function cargarRankings() {
-            if (!playerListContainer || !caminanteListContainer) return;
+            // Verificamos que los contenedores existan en esta página
+            if (!playerListContainer || !caminanteListContainer) {
+                console.log('No se cargarán rankings (no es la página principal).');
+                return;
+            }
             try {
                 playerListContainer.innerHTML = '<p class="text-gray-400">Cargando ranking...</p>';
                 caminanteListContainer.innerHTML = '<p class="text-gray-400">Cargando ranking...</p>';
 
-                // ¡LLAMADAS A RPC ACTUALIZADAS!
                 const [pwpResponse, wrResponse] = await Promise.all([
                     _supabase.rpc('get_ranking_the_player_top5'),
                     _supabase.rpc('get_ranking_maestros_top5')
@@ -365,7 +368,11 @@
         }
 
         async function cargarEventos() {
-            if (!eventosListContainer) return;
+            // Verificamos que el contenedor exista en esta página
+            if (!eventosListContainer) {
+                console.log('No se cargarán eventos (no es la página principal).');
+                return;
+            }
             try {
                 eventosListContainer.innerHTML = '<p class="text-gray-400">Cargando eventos...</p>';
                 const { data, error } = await _supabase.rpc('get_proximos_eventos');
@@ -392,26 +399,34 @@
         document.addEventListener('DOMContentLoaded', async () => {
             const { data: { session } } = await _supabase.auth.getSession();
             updateUserUI(session);
+            
+            // Estas funciones ahora solo se ejecutan si encuentran sus contenedores
             await cargarRankings(); 
             await cargarEventos();
+            
             lucide.createIcons();
         });
 
         _supabase.auth.onAuthStateChange((event, session) => updateUserUI(session));
 
-        logoutButton.addEventListener('click', async (e) => {
-            e.preventDefault();
-            await _supabase.auth.signOut();
-            window.location.href = '/';
-        });
-
-        mobileMenuButton.addEventListener('click', () => {
-            const isExpanded = mobileMenuButton.getAttribute('aria-expanded') === 'true';
-            mobileMenuButton.setAttribute('aria-expanded', !isExpanded);
-            mobileMenu.classList.toggle('hidden');
-            mobileMenuButton.querySelector('i[data-lucide="menu"]').classList.toggle('hidden');
-            mobileMenuButton.querySelector('i[data-lucide="x"]').classList.toggle('hidden');
-        });
+        // Nos aseguramos que el botón exista antes de agregarle el listener
+        if (logoutButton) {
+            logoutButton.addEventListener('click', async (e) => {
+                e.preventDefault();
+                await _supabase.auth.signOut();
+                window.location.href = '/';
+            });
+        }
+        
+        if (mobileMenuButton) {
+            mobileMenuButton.addEventListener('click', () => {
+                const isExpanded = mobileMenuButton.getAttribute('aria-expanded') === 'true';
+                mobileMenuButton.setAttribute('aria-expanded', !isExpanded);
+                mobileMenu.classList.toggle('hidden');
+                mobileMenuButton.querySelector('i[data-lucide="menu"]').classList.toggle('hidden');
+                mobileMenuButton.querySelector('i[data-lucide="x"]').classList.toggle('hidden');
+            });
+        }
     </script>
 </body>
 </html>
