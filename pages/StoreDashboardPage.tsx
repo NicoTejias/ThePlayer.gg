@@ -4,6 +4,7 @@ import CheckCircleIcon from '../components/icons/CheckCircleIcon';
 import { TournamentParseResult, TournamentResult } from '../types';
 import { parseEventLinkPdf } from '../utils/PdfParser';
 import { parseEventLinkText } from '../utils/TextParser';
+import { parseEventLinkHtml } from '../utils/HtmlParser';
 
 interface StoreDashboardPageProps {
     onTournamentUpload: (tournamentData: Omit<TournamentResult, 'id'>, players: TournamentParseResult[]) => void;
@@ -79,51 +80,82 @@ const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpl
     };
 
     const handleProcessFile = async () => {
-        if (!pastedText.trim()) {
-            setError('Por favor, pega el texto de los resultados.');
-            return;
-        }
-        if (!tournamentType || !tournamentDate) {
-            setError('Por favor, completa todos los campos.');
-            return;
-        }
+        // Prioritize file upload
+        if (selectedFile) {
+            setIsProcessing(true);
+            setError(null);
+            try {
+                let parsedRows: any[] = [];
+                if (selectedFile.name.endsWith('.html') || selectedFile.name.endsWith('.htm')) {
+                    parsedRows = await parseEventLinkHtml(selectedFile);
+                } else {
+                    throw new Error("Formato de archivo no soportado. Por favor sube un archivo HTML de EventLink.");
+                }
 
-        setIsProcessing(true);
-        setError(null);
+                if (parsedRows.length === 0) {
+                    throw new Error("No se encontraron jugadores en el archivo. Verifica que sea un export válido de EventLink.");
+                }
 
-        try {
-            // Parse pasted text - strictly text now
-            const parsedRows = parseEventLinkText(pastedText);
+                const multiplier = getTournamentMultiplier(tournamentType);
+                const participationPoints = getParticipationPoints(parsedRows.length);
 
-            if (parsedRows.length === 0) {
-                throw new Error("No se pudieron leer datos válidos del texto. Asegúrate de copiar la tabla completa desde EventLink.");
+                const results: TournamentParseResult[] = parsedRows.map(row => {
+                    const pwpEarned = ((row.wins * 3) + (row.draws * 1) + participationPoints) * multiplier;
+                    return {
+                        playerName: row.name,
+                        matchRecord: `${row.wins}-${row.losses}-${row.draws}`,
+                        wins: row.wins,
+                        losses: row.losses,
+                        draws: row.draws,
+                        pwpEarned: Math.round(pwpEarned)
+                    };
+                });
+
+                setParsedData(results);
+                setStep('confirm');
+
+            } catch (e: any) {
+                console.error(e);
+                setError(e.message || "Error al procesar el archivo.");
+            } finally {
+                setIsProcessing(false);
             }
-
-            const multiplier = getTournamentMultiplier(tournamentType);
-            const participationPoints = getParticipationPoints(parsedRows.length);
-
-            const results: TournamentParseResult[] = parsedRows.map(row => {
-                const pwpEarned = ((row.wins * 3) + (row.draws * 1) + participationPoints) * multiplier;
-
-                return {
-                    playerName: row.name,
-                    matchRecord: `${row.wins}-${row.losses}-${row.draws}`,
-                    wins: row.wins,
-                    losses: row.losses,
-                    draws: row.draws,
-                    pwpEarned: Math.round(pwpEarned)
-                };
-            });
-
-            setParsedData(results);
-            setStep('confirm');
-
-        } catch (e: any) {
-            console.error(e);
-            setError(e.message || "Ocurrió un error al procesar los datos.");
-        } finally {
-            setIsProcessing(false);
+            return;
         }
+
+        // Fallback to text if valid
+        if (pastedText.trim()) {
+            setIsProcessing(true);
+            setError(null);
+            try {
+                const parsedRows = parseEventLinkText(pastedText);
+                if (parsedRows.length === 0) {
+                    throw new Error("No se pudieron leer datos válidos del texto.");
+                }
+                const multiplier = getTournamentMultiplier(tournamentType);
+                const participationPoints = getParticipationPoints(parsedRows.length);
+                const results: TournamentParseResult[] = parsedRows.map(row => {
+                    const pwpEarned = ((row.wins * 3) + (row.draws * 1) + participationPoints) * multiplier;
+                    return {
+                        playerName: row.name,
+                        matchRecord: `${row.wins}-${row.losses}-${row.draws}`,
+                        wins: row.wins,
+                        losses: row.losses,
+                        draws: row.draws,
+                        pwpEarned: Math.round(pwpEarned)
+                    };
+                });
+                setParsedData(results);
+                setStep('confirm');
+            } catch (e: any) {
+                setError(e.message);
+            } finally {
+                setIsProcessing(false);
+            }
+            return;
+        }
+
+        setError('Por favor, selecciona un archivo HTML o pega los resultados.');
     };
 
     const handleCancel = () => {
@@ -209,33 +241,63 @@ const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpl
                                     <input type="date" name="tournament-date" id="tournament-date" value={tournamentDate} onChange={e => setTournamentDate(e.target.value)} className="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500" />
                                 </div>
 
-                                {/* Paste Button */}
-                                <div className="space-y-4">
-                                    <div className="flex gap-2">
-                                        <button
-                                            type="button"
-                                            onClick={handlePaste}
-                                            className="w-full py-3 px-4 bg-slate-700 hover:bg-slate-600 text-white font-medium rounded-lg transition flex items-center justify-center gap-2 border border-slate-600"
-                                        >
-                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                                <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
-                                                <path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" />
-                                            </svg>
-                                            Pegar desde Portapapeles
-                                        </button>
+                                {/* File Upload Section */}
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-300 mb-2">Archivo de Resultados (HTML)</label>
+                                    <div className={`relative border-2 border-dashed rounded-lg p-6 text-center transition-colors ${selectedFile ? 'border-sky-500 bg-sky-900/20' : 'border-slate-600 hover:border-slate-500 bg-slate-900'}`}>
+                                        <input
+                                            type="file"
+                                            id="tournament-file"
+                                            accept=".html,.htm"
+                                            onChange={handleFileChange}
+                                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                                        />
+                                        <div className="space-y-2 pointer-events-none">
+                                            <UploadIcon className={`w-10 h-10 mx-auto ${selectedFile ? 'text-sky-400' : 'text-slate-400'}`} />
+                                            {selectedFile ? (
+                                                <div className="text-sky-300 font-medium">
+                                                    {selectedFile.name}
+                                                    <p className="text-xs text-sky-400/70 mt-1">Listo para procesar</p>
+                                                </div>
+                                            ) : (
+                                                <div className="text-slate-400">
+                                                    <p className="font-medium text-slate-300">Haz clic o arrastra el archivo aquí</p>
+                                                    <p className="text-xs mt-1">Soporta exportaciones HTML de EventLink</p>
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
+                                </div>
 
-                                    {pastedText && (
-                                        <div className="relative">
-                                            <textarea
-                                                value={pastedText}
-                                                readOnly
-                                                className="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-lg text-slate-400 font-mono text-xs cursor-not-allowed opacity-80"
-                                                rows={5}
-                                            />
-                                            <div className="absolute top-2 right-2">
-                                                <span className="bg-slate-800 text-xs text-slate-400 px-2 py-1 rounded border border-slate-700">Solo Lectura</span>
+                                {/* Legacy Paste (Collapsed/Secondary) */}
+                                <div className="border-t border-slate-700 pt-4">
+                                    <button
+                                        type="button"
+                                        onClick={() => setIsTextLocked(!isTextLocked)}
+                                        className="text-xs text-slate-400 underline hover:text-slate-300 flex items-center gap-1"
+                                    >
+                                        <span>¿Problemas con el archivo? Usar copiar y pegar</span>
+                                    </button>
+
+                                    {isTextLocked && (
+                                        <div className="mt-4 space-y-4 animate-in fade-in slide-in-from-top-2">
+                                            <div className="flex gap-2">
+                                                <button
+                                                    type="button"
+                                                    onClick={handlePaste}
+                                                    className="w-full py-2 px-4 bg-slate-800 hover:bg-slate-700 text-white text-sm font-medium rounded-lg transition border border-slate-600"
+                                                >
+                                                    Pegar desde Portapapeles
+                                                </button>
                                             </div>
+                                            {pastedText && (
+                                                <textarea
+                                                    value={pastedText}
+                                                    readOnly
+                                                    className="w-full px-4 py-2 bg-slate-950 border border-slate-800 rounded-lg text-slate-400 font-mono text-xs"
+                                                    rows={3}
+                                                />
+                                            )}
                                         </div>
                                     )}
                                 </div>
@@ -303,11 +365,21 @@ const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpl
                                     </table>
                                 </div>
                                 <div className="flex gap-4 pt-4">
-                                    <button onClick={handleCancel} className="w-full py-3 px-4 font-bold rounded-lg transition duration-300 bg-slate-600 text-white hover:bg-slate-700">
+                                    <button onClick={handleCancel} disabled={isUploading} className="w-full py-3 px-4 font-bold rounded-lg transition duration-300 bg-slate-600 text-white hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed">
                                         Cancelar
                                     </button>
-                                    <button onClick={handleConfirm} className="w-full py-3 px-4 font-bold rounded-lg transition duration-300 bg-green-600 text-white hover:bg-green-700">
-                                        Confirmar y Subir Resultados
+                                    <button onClick={handleConfirm} disabled={isUploading} className="w-full py-3 px-4 font-bold rounded-lg transition duration-300 bg-green-600 text-white hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+                                        {isUploading ? (
+                                            <>
+                                                <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                                </svg>
+                                                Subiendo...
+                                            </>
+                                        ) : (
+                                            'Confirmar y Subir Resultados'
+                                        )}
                                     </button>
                                 </div>
                             </div>
