@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import GoogleIcon from '../components/icons/GoogleIcon';
 import TermsModal from '../components/TermsModal';
+import { supabase } from '../supabaseClient';
 
 const playerTerms = `Términos y Condiciones para Jugadores:
 
@@ -52,6 +53,8 @@ const AuthPage: React.FC<AuthPageProps> = ({ handleLogin }) => {
     const [role, setRole] = useState<'player' | 'store'>('player');
     const [termsAccepted, setTermsAccepted] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+    const [authError, setAuthError] = useState<string | null>(null);
 
     const commonInputClass = "w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 transition duration-200";
     const commonButtonClass = "w-full py-3 px-4 font-bold rounded-lg transition duration-300";
@@ -76,6 +79,33 @@ const AuthPage: React.FC<AuthPageProps> = ({ handleLogin }) => {
         handleLogin(role);
     };
 
+    const handleGoogleSignIn = async () => {
+        try {
+            setIsLoading(true);
+            setAuthError(null);
+
+            // Save selected role to localStorage for post-login profile creation
+            localStorage.setItem('signup_role', role);
+
+            const { error } = await supabase.auth.signInWithOAuth({
+                provider: 'google',
+                options: {
+                    redirectTo: `${window.location.origin}/`,
+                    queryParams: {
+                        access_type: 'offline',
+                        prompt: 'consent',
+                    },
+                },
+            });
+
+            if (error) throw error;
+
+        } catch (error: any) {
+            console.error('Error logging in with Google:', error);
+            setAuthError(error.message || 'Error al iniciar sesión con Google');
+            setIsLoading(false);
+        }
+    };
 
     const LoginForm = () => (
         <form onSubmit={onLoginSubmit} className="space-y-6">
@@ -106,7 +136,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ handleLogin }) => {
     const RegisterForm = () => (
         <form onSubmit={onRegisterSubmit} className="space-y-4">
             <h2 className="text-3xl font-bold text-center text-white uppercase">Crear Cuenta</h2>
-             <div>
+            <div>
                 <label htmlFor="username" className="sr-only">Nombre de Usuario</label>
                 <input type="text" name="username" id="username" placeholder="Nombre de Usuario" className={commonInputClass} required />
             </div>
@@ -118,11 +148,11 @@ const AuthPage: React.FC<AuthPageProps> = ({ handleLogin }) => {
                 <label htmlFor="reg-password" className="sr-only">Contraseña</label>
                 <input type="password" name="reg-password" id="reg-password" placeholder="Contraseña" className={commonInputClass} required />
             </div>
-             <div>
+            <div>
                 <label htmlFor="confirm-password" className="sr-only">Confirmar Contraseña</label>
                 <input type="password" name="confirm-password" id="confirm-password" placeholder="Confirmar Contraseña" className={commonInputClass} required />
             </div>
-             <div className="relative">
+            <div className="relative">
                 <select name="region" id="region" className={`${commonInputClass} appearance-none`} required>
                     <option value="" disabled selected>Selecciona tu Región</option>
                     <option value="Metropolitana">Metropolitana</option>
@@ -139,7 +169,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ handleLogin }) => {
                         <input type="radio" name="role" id="role-player" value="player" className="h-4 w-4 text-sky-600 border-slate-600 focus:ring-sky-500" checked={role === 'player'} onChange={() => setRole('player')} />
                         <span className="ml-3 text-sm font-medium text-white">Jugador</span>
                     </label>
-                     <label htmlFor="role-store" className="flex items-center p-3 bg-slate-900 border border-slate-700 rounded-lg cursor-pointer hover:bg-slate-800 has-[:checked]:ring-2 has-[:checked]:ring-sky-500">
+                    <label htmlFor="role-store" className="flex items-center p-3 bg-slate-900 border border-slate-700 rounded-lg cursor-pointer hover:bg-slate-800 has-[:checked]:ring-2 has-[:checked]:ring-sky-500">
                         <input type="radio" name="role" id="role-store" value="store" className="h-4 w-4 text-sky-600 border-slate-600 focus:ring-sky-500" checked={role === 'store'} onChange={() => setRole('store')} />
                         <span className="ml-3 text-sm font-medium text-white">Tienda</span>
                     </label>
@@ -148,18 +178,18 @@ const AuthPage: React.FC<AuthPageProps> = ({ handleLogin }) => {
             </div>
 
             <div className="flex items-start space-x-3 pt-2">
-                <input 
-                    id="terms" 
-                    name="terms" 
-                    type="checkbox" 
-                    className="h-5 w-5 rounded border-slate-600 bg-slate-800 text-sky-600 focus:ring-sky-500 mt-0.5 flex-shrink-0" 
+                <input
+                    id="terms"
+                    name="terms"
+                    type="checkbox"
+                    className="h-5 w-5 rounded border-slate-600 bg-slate-800 text-sky-600 focus:ring-sky-500 mt-0.5 flex-shrink-0"
                     checked={termsAccepted}
                     onChange={(e) => setTermsAccepted(e.target.checked)}
                 />
                 <label htmlFor="terms" className="text-sm text-slate-400">
                     He leído y acepto los{' '}
-                    <button 
-                        type="button" 
+                    <button
+                        type="button"
                         onClick={() => setIsModalOpen(true)}
                         className="font-medium text-sky-400 hover:text-sky-300 underline"
                     >
@@ -170,8 +200,8 @@ const AuthPage: React.FC<AuthPageProps> = ({ handleLogin }) => {
             </div>
 
             <div>
-                <button 
-                    type="submit" 
+                <button
+                    type="submit"
                     className={`${commonButtonClass} bg-sky-600 text-white hover:bg-sky-700 mt-2 disabled:bg-slate-600 disabled:cursor-not-allowed`}
                     disabled={!termsAccepted}
                 >
@@ -180,7 +210,6 @@ const AuthPage: React.FC<AuthPageProps> = ({ handleLogin }) => {
             </div>
         </form>
     );
-
 
     return (
         <>
@@ -200,9 +229,9 @@ const AuthPage: React.FC<AuthPageProps> = ({ handleLogin }) => {
                             Registrarse
                         </button>
                     </div>
-                    
+
                     {isLoginView ? <LoginForm /> : <RegisterForm />}
-                    
+
                     <div className="relative">
                         <div className="absolute inset-0 flex items-center">
                             <div className="w-full border-t border-slate-600"></div>
@@ -213,10 +242,63 @@ const AuthPage: React.FC<AuthPageProps> = ({ handleLogin }) => {
                     </div>
 
                     <div>
-                        <button type="button" className={`${commonButtonClass} bg-white text-slate-800 hover:bg-slate-200 flex items-center justify-center gap-3`}>
-                            <GoogleIcon className="w-5 h-5" />
-                            <span>Ingresar con Google</span>
+                        <div className="mb-4">
+                            <label className="block text-sm font-medium text-slate-400 mb-2 text-center">Ingresar con Google como:</label>
+                            <div className="grid grid-cols-2 gap-4">
+                                <label className={`flex items-center justify-center p-2 border rounded-lg cursor-pointer transition-colors ${role === 'player' ? 'bg-sky-900 border-sky-500 text-white' : 'bg-slate-800 border-slate-600 text-slate-400 hover:bg-slate-700'}`}>
+                                    <input type="radio" name="google-role" value="player" className="sr-only" checked={role === 'player'} onChange={() => setRole('player')} />
+                                    <span className="text-sm font-bold">Jugador</span>
+                                </label>
+                                <label className={`flex items-center justify-center p-2 border rounded-lg cursor-pointer transition-colors ${role === 'store' ? 'bg-sky-900 border-sky-500 text-white' : 'bg-slate-800 border-slate-600 text-slate-400 hover:bg-slate-700'}`}>
+                                    <input type="radio" name="google-role" value="store" className="sr-only" checked={role === 'store'} onChange={() => setRole('store')} />
+                                    <span className="text-sm font-bold">Tienda</span>
+                                </label>
+                            </div>
+                        </div>
+                        {!isLoginView && (
+                            <div className="flex items-start space-x-3 mb-4 justify-center">
+                                <input
+                                    id="google-terms"
+                                    name="google-terms"
+                                    type="checkbox"
+                                    className="h-4 w-4 rounded border-slate-600 bg-slate-800 text-sky-600 focus:ring-sky-500 mt-1"
+                                    checked={termsAccepted}
+                                    onChange={(e) => setTermsAccepted(e.target.checked)}
+                                />
+                                <label htmlFor="google-terms" className="text-sm text-slate-400">
+                                    Acepto los{' '}
+                                    <button
+                                        type="button"
+                                        onClick={() => setIsModalOpen(true)}
+                                        className="font-medium text-sky-400 hover:text-sky-300 underline"
+                                    >
+                                        Términos y Condiciones
+                                    </button>
+                                </label>
+                            </div>
+                        )}
+
+                        <button
+                            type="button"
+                            onClick={handleGoogleSignIn}
+                            disabled={isLoading || (!isLoginView && !termsAccepted)}
+                            className={`${commonButtonClass} bg-white text-slate-800 hover:bg-slate-200 flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed`}
+                        >
+                            {isLoading ? (
+                                <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-slate-800" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                            ) : (
+                                <GoogleIcon className="w-5 h-5" />
+                            )}
+                            <span>{isLoading ? 'Conectando...' : `Ingresar como ${role === 'player' ? 'Jugador' : 'Tienda'}`}</span>
                         </button>
+                        {authError && (
+                            <p className="mt-2 text-center text-sm text-red-400">
+                                {authError}
+                            </p>
+                        )}
                     </div>
 
                     <p className="mt-6 text-center text-sm text-slate-400">
@@ -227,7 +309,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ handleLogin }) => {
                     </p>
                 </div>
             </div>
-            <TermsModal 
+            <TermsModal
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
                 title={`Términos y Condiciones para ${role === 'player' ? 'Jugadores' : 'Tiendas'}`}

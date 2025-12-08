@@ -28,13 +28,12 @@ const Header: React.FC<HeaderProps> = ({ isLoggedIn, userRole, handleLogout }) =
   const profileMenuRef = useRef<HTMLDivElement>(null);
 
   const navLinkClass = ({ isActive }: { isActive: boolean }) =>
-    `block py-2 px-3 rounded transition-colors duration-200 ${
-      isActive
-        ? 'text-white bg-sky-600'
-        : 'text-slate-300 hover:bg-slate-700 hover:text-white'
+    `block py-2 px-3 rounded transition-colors duration-200 ${isActive
+      ? 'text-white bg-sky-600'
+      : 'text-slate-300 hover:bg-slate-700 hover:text-white'
     }`;
-  
-    useEffect(() => {
+
+  useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (profileMenuRef.current && !profileMenuRef.current.contains(event.target as Node)) {
         setProfileMenuOpen(false);
@@ -47,12 +46,12 @@ const Header: React.FC<HeaderProps> = ({ isLoggedIn, userRole, handleLogout }) =
   }, []);
 
   const getDashboardPath = () => {
-      switch(userRole) {
-          case 'admin': return '/admin';
-          case 'store': return '/dashboard/tienda';
-          case 'player': return '/dashboard/jugador';
-          default: return '/';
-      }
+    switch (userRole) {
+      case 'admin': return '/admin';
+      case 'store': return '/dashboard/tienda';
+      case 'player': return '/dashboard/jugador';
+      default: return '/dashboard/jugador'; // Fallback to player dashboard
+    }
   }
 
   return (
@@ -79,7 +78,7 @@ const Header: React.FC<HeaderProps> = ({ isLoggedIn, userRole, handleLogout }) =
                 <button onClick={() => setProfileMenuOpen(!isProfileMenuOpen)} className="flex items-center space-x-2 bg-slate-700 p-2 rounded-full hover:bg-slate-600 transition-colors">
                   <UserCircleIcon className="w-8 h-8 text-slate-300" />
                   <span className="text-white font-semibold">MageSlayer92</span>
-                   <svg className={`w-4 h-4 text-slate-300 transition-transform ${isProfileMenuOpen ? 'rotate-180' : ''}`} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                  <svg className={`w-4 h-4 text-slate-300 transition-transform ${isProfileMenuOpen ? 'rotate-180' : ''}`} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                     <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
                   </svg>
                 </button>
@@ -90,7 +89,7 @@ const Header: React.FC<HeaderProps> = ({ isLoggedIn, userRole, handleLogout }) =
                         <ShieldCheckIcon className="w-5 h-5" />
                         Mi Panel
                       </Link>
-                      <Link to="#" className="flex items-center gap-3 px-4 py-2 text-sm text-slate-200 hover:bg-slate-700" role="menuitem">
+                      <Link to="/settings" className="flex items-center gap-3 px-4 py-2 text-sm text-slate-200 hover:bg-slate-700" role="menuitem">
                         <CogIcon className="w-5 h-5" />
                         Configuración
                       </Link>
@@ -140,16 +139,17 @@ const Header: React.FC<HeaderProps> = ({ isLoggedIn, userRole, handleLogout }) =
               </NavLink>
             ))}
             <div className="pt-4">
-                 {isLoggedIn ? (
-                     <div className="space-y-1">
-                        <Link to={getDashboardPath()} onClick={() => setMobileMenuOpen(false)} className="w-full text-left block text-slate-300 hover:bg-slate-700 hover:text-white py-2 px-3 rounded-md">Mi Panel</Link>
-                        <button onClick={() => { handleLogout(); setMobileMenuOpen(false); }} className="w-full text-left block text-slate-300 hover:bg-slate-700 hover:text-white py-2 px-3 rounded-md">Cerrar Sesión</button>
-                    </div>
-                ) : (
-                    <Link to="/login" onClick={() => setMobileMenuOpen(false)} className="w-full text-center block bg-sky-500 text-white font-bold py-2 px-4 rounded-md hover:bg-sky-600 transition duration-300">
-                        Login
-                    </Link>
-                )}
+              {isLoggedIn ? (
+                <div className="space-y-1">
+                  <Link to={getDashboardPath()} onClick={() => setMobileMenuOpen(false)} className="w-full text-left block text-slate-300 hover:bg-slate-700 hover:text-white py-2 px-3 rounded-md">Mi Panel</Link>
+                  <Link to="/settings" onClick={() => setMobileMenuOpen(false)} className="w-full text-left block text-slate-300 hover:bg-slate-700 hover:text-white py-2 px-3 rounded-md">Configuración</Link>
+                  <button onClick={() => { handleLogout(); setMobileMenuOpen(false); }} className="w-full text-left block text-slate-300 hover:bg-slate-700 hover:text-white py-2 px-3 rounded-md">Cerrar Sesión</button>
+                </div>
+              ) : (
+                <Link to="/login" onClick={() => setMobileMenuOpen(false)} className="w-full text-center block bg-sky-500 text-white font-bold py-2 px-4 rounded-md hover:bg-sky-600 transition duration-300">
+                  Login
+                </Link>
+              )}
             </div>
           </div>
         </div>
