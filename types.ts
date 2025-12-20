@@ -8,6 +8,7 @@ export interface PlayerProfile {
   matchesLost: number;
   matchesDrew: number;
   winRate?: number; // Optional, can be calculated
+  team?: string;
 }
 
 // FIX: Add RankingEntry and WinRateRankingEntry types used in HomePage.tsx
@@ -37,7 +38,7 @@ export interface CommunityEvent {
 
 export interface MediaArticle {
   id: string;
-  title:string;
+  title: string;
   author: string;
   excerpt: string;
   imageUrl: string;
@@ -53,6 +54,15 @@ export interface MediaVideo {
   category: string;
 }
 
+export interface MarketplaceItem {
+  id: string;
+  name: string;
+  set?: string;
+  condition?: string;
+  price?: number;
+  imageUrl: string;
+}
+
 export interface MarketplacePost {
   id: string;
   title: string;
@@ -61,6 +71,9 @@ export interface MarketplacePost {
   price?: number;
   region: string;
   imageUrl: string;
+  items?: MarketplaceItem[];
+  description?: string;
+  contactInfo?: string;
 }
 
 export interface Judge {
@@ -91,12 +104,12 @@ export interface Store {
 }
 
 export interface PlayerTournamentRecord {
-    id: string;
-    tournamentName: string;
-    date: string;
-    format: string;
-    result: string; // e.g., "3-1-0"
-    pointsEarned: number;
+  id: string;
+  tournamentName: string;
+  date: string;
+  format: string;
+  result: string; // e.g., "3-1-0"
+  pointsEarned: number;
 }
 
 export interface TournamentParseResult {
@@ -113,9 +126,24 @@ export interface TournamentResult {
   name: string;
   date: string;
   storeName: string;
-  format: string;
+  format: TournamentFormat | string;
   playerCount: number;
 }
+
+export type TournamentFormat =
+  | 'Standard'
+  | 'Modern'
+  | 'Pioneer'
+  | 'Legacy'
+  | 'Vintage'
+  | 'Commander'
+  | 'Pauper'
+  | 'Limited'
+  | 'Sealed'
+  | 'Draft'
+  | 'Pre-Release'
+  | 'Store Championship'
+  | 'RCQ';
 
 export interface TournamentStanding {
   rank: number;

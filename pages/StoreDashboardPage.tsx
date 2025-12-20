@@ -28,10 +28,12 @@ const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpl
     const tournamentTypes = [
         { value: 'semanal', label: 'Semanal', multiplier: 1 },
         { value: 'fnm', label: 'FNM', multiplier: 1 },
-        { value: 'draft', label: 'Draft', multiplier: 1 },
-        { value: 'prerelease', label: 'Prerelease', multiplier: 3 },
+        { value: 'showdown', label: 'Showdown', multiplier: 2 },
+        { value: 'draft', label: 'Draft', multiplier: 3 },
         { value: 'sellado', label: 'Sellado', multiplier: 3 },
-        { value: 'premier', label: 'Premier', multiplier: 5 },
+        { value: 'prerelease', label: 'Prerelease', multiplier: 3 },
+        { value: 'premier', label: 'Premier', multiplier: 4 },
+        { value: 'rcq', label: 'RCQ', multiplier: 4 },
     ];
 
     const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -58,12 +60,14 @@ const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpl
 
     const getTournamentMultiplier = (type: string): number => {
         switch (type) {
-            case 'premier': return 5;
+            case 'premier':
+            case 'rcq': return 4;
             case 'prerelease':
-            case 'sellado': return 3;
+            case 'sellado':
+            case 'draft': return 3;
+            case 'showdown': return 2;
             case 'semanal':
             case 'fnm':
-            case 'draft':
             default: return 1;
         }
     };
@@ -88,8 +92,10 @@ const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpl
                 let parsedRows: any[] = [];
                 if (selectedFile.name.endsWith('.html') || selectedFile.name.endsWith('.htm')) {
                     parsedRows = await parseEventLinkHtml(selectedFile);
+                } else if (selectedFile.name.endsWith('.pdf')) {
+                    parsedRows = await parseEventLinkPdf(selectedFile);
                 } else {
-                    throw new Error("Formato de archivo no soportado. Por favor sube un archivo HTML de EventLink.");
+                    throw new Error("Formato de archivo no soportado. Por favor sube un archivo HTML o PDF de EventLink.");
                 }
 
                 if (parsedRows.length === 0) {
@@ -100,13 +106,18 @@ const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpl
                 const participationPoints = getParticipationPoints(parsedRows.length);
 
                 const results: TournamentParseResult[] = parsedRows.map(row => {
-                    const pwpEarned = ((row.wins * 3) + (row.draws * 1) + participationPoints) * multiplier;
+                    const estimatedWins = row.wins ?? Math.floor(row.points / 3);
+                    const estimatedDraws = row.draws ?? (row.points % 3);
+                    const estimatedLosses = row.losses ?? 0;
+
+                    const pwpEarned = ((estimatedWins * 3) + (estimatedDraws * 1) + participationPoints) * multiplier;
+
                     return {
                         playerName: row.name,
-                        matchRecord: `${row.wins}-${row.losses}-${row.draws}`,
-                        wins: row.wins,
-                        losses: row.losses,
-                        draws: row.draws,
+                        matchRecord: `${estimatedWins}-${estimatedLosses}-${estimatedDraws}`,
+                        wins: estimatedWins,
+                        losses: estimatedLosses,
+                        draws: estimatedDraws,
                         pwpEarned: Math.round(pwpEarned)
                     };
                 });
@@ -155,7 +166,7 @@ const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpl
             return;
         }
 
-        setError('Por favor, selecciona un archivo HTML o pega los resultados.');
+        setError('Por favor, selecciona un archivo HTML/PDF o pega los resultados.');
     };
 
     const handleCancel = () => {
@@ -183,7 +194,7 @@ const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpl
 
         const tournamentData = {
             name: autoName,
-            date: new Date(tournamentDate).toLocaleDateString('es-CL', { year: 'numeric', month: '2-digit', day: '2-digit' }),
+            date: tournamentDate,
             storeName: 'Mi Tienda',
             format: tournamentType.charAt(0).toUpperCase() + tournamentType.slice(1),
             playerCount: parsedData.length
@@ -248,7 +259,7 @@ const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpl
                                         <input
                                             type="file"
                                             id="tournament-file"
-                                            accept=".html,.htm"
+                                            accept=".html,.htm,.pdf"
                                             onChange={handleFileChange}
                                             className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                                         />
@@ -262,7 +273,7 @@ const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpl
                                             ) : (
                                                 <div className="text-slate-400">
                                                     <p className="font-medium text-slate-300">Haz clic o arrastra el archivo aquí</p>
-                                                    <p className="text-xs mt-1">Soporta exportaciones HTML de EventLink</p>
+                                                    <p className="text-xs mt-1">Soporta exportaciones HTML y PDF de EventLink</p>
                                                 </div>
                                             )}
                                         </div>

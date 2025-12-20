@@ -14,8 +14,8 @@ const mockTournamentHistory: PlayerTournamentRecord[] = [
 ];
 
 const mockPlayerMarketplacePosts: MarketplacePost[] = [
-    { id: 'mp1', title: 'Vendo Force of Will [2XM]', type: 'Venta', seller: 'MageSlayer92', price: 45000, region: 'Metropolitana', imageUrl: ''},
-    { id: 'mp2', title: 'Busco 4x Ragavan', type: 'Compra', seller: 'MageSlayer92', price: 35000, region: 'Metropolitana', imageUrl: ''},
+    { id: 'mp1', title: 'Vendo Force of Will [2XM]', type: 'Venta', seller: 'MageSlayer92', price: 45000, region: 'Metropolitana', imageUrl: '' },
+    { id: 'mp2', title: 'Busco 4x Ragavan', type: 'Compra', seller: 'MageSlayer92', price: 35000, region: 'Metropolitana', imageUrl: '' },
 ];
 
 const StatCard: React.FC<{ icon: React.ReactNode, title: string, value: string | number, rank: string | number, color: string }> = ({ icon, title, value, rank, color }) => (
@@ -34,11 +34,15 @@ const StatCard: React.FC<{ icon: React.ReactNode, title: string, value: string |
 );
 
 
-const PlayerDashboardPage: React.FC = () => {
+const PlayerDashboardPage: React.FC<{ profile?: any }> = ({ profile }) => {
+    const greetingName = profile
+        ? (profile.first_name && profile.last_name ? `${profile.first_name} ${profile.last_name}` : profile.username)
+        : 'Jugador';
+
     return (
         <div className="space-y-12">
             <div>
-                <h1 className="text-4xl sm:text-5xl font-bold text-white tracking-tighter uppercase">Hola, MageSlayer92</h1>
+                <h1 className="text-4xl sm:text-5xl font-bold text-white tracking-tighter uppercase">Hola, {greetingName}</h1>
                 <p className="text-lg text-slate-300 mt-2">
                     Bienvenido a tu panel. Aquí puedes ver tu progreso, historial de torneos y gestionar tus publicaciones.
                 </p>
@@ -46,15 +50,15 @@ const PlayerDashboardPage: React.FC = () => {
 
             {/* Key Metrics */}
             <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <StatCard icon={<TrophyIcon className="w-8 h-8"/>} title="Ranking The Player" value="1250 pts" rank="1" color="sky" />
-                <StatCard icon={<SparklesIcon className="w-8 h-8"/>} title="Ranking Caminante de Planos" value="75.2%" rank="2" color="violet" />
+                <StatCard icon={<TrophyIcon className="w-8 h-8" />} title="Ranking The Player" value="1250 pts" rank="1" color="sky" />
+                <StatCard icon={<SparklesIcon className="w-8 h-8" />} title="Ranking Caminante de Planos" value="75.2%" rank="2" color="violet" />
             </section>
 
-             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
                 {/* Tournament History */}
                 <section>
                     <h2 className="text-3xl font-bold text-white uppercase tracking-wider mb-6">Historial de Torneos</h2>
-                     <div className="overflow-x-auto bg-slate-800 rounded-lg shadow-xl border border-slate-700">
+                    <div className="overflow-x-auto bg-slate-800 rounded-lg shadow-xl border border-slate-700">
                         <table className="min-w-full divide-y divide-slate-700">
                             <thead className="bg-slate-700/50">
                                 <tr>
@@ -79,10 +83,10 @@ const PlayerDashboardPage: React.FC = () => {
                     </div>
                 </section>
 
-                 {/* Marketplace Management */}
+                {/* Marketplace Management */}
                 <section>
                     <h2 className="text-3xl font-bold text-white uppercase tracking-wider mb-6">Mis Publicaciones</h2>
-                     <div className="overflow-x-auto bg-slate-800 rounded-lg shadow-xl border border-slate-700">
+                    <div className="overflow-x-auto bg-slate-800 rounded-lg shadow-xl border border-slate-700">
                         <table className="min-w-full divide-y divide-slate-700">
                             <thead className="bg-slate-700/50">
                                 <tr>
@@ -96,11 +100,10 @@ const PlayerDashboardPage: React.FC = () => {
                                     <tr key={post.id} className="hover:bg-slate-700/40">
                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">{post.title}</td>
                                         <td className="px-6 py-4 whitespace-nowrap">
-                                            <span className={`font-semibold text-xs px-2 py-1 rounded-full ${
-                                                post.type === 'Venta' ? 'bg-red-500/20 text-red-300' : 
-                                                post.type === 'Compra' ? 'bg-green-500/20 text-green-300' : 
-                                                'bg-blue-500/20 text-blue-300'
-                                            }`}>
+                                            <span className={`font-semibold text-xs px-2 py-1 rounded-full ${post.type === 'Venta' ? 'bg-red-500/20 text-red-300' :
+                                                    post.type === 'Compra' ? 'bg-green-500/20 text-green-300' :
+                                                        'bg-blue-500/20 text-blue-300'
+                                                }`}>
                                                 {post.type}
                                             </span>
                                         </td>
@@ -122,7 +125,7 @@ const PlayerDashboardPage: React.FC = () => {
                     </div>
                 </section>
 
-             </div>
+            </div>
         </div>
     );
 };

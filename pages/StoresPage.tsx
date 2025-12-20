@@ -45,11 +45,22 @@ const StoresPage: React.FC = () => {
                 <div className="relative">
                     <select className="bg-slate-900/80 text-white rounded-md py-2.5 px-4 w-full appearance-none focus:outline-none focus:ring-2 focus:ring-sky-500 border border-slate-700">
                         <option>Todas las Regiones</option>
-                        <option>Metropolitana</option>
+                        <option>Arica y Parinacota</option>
+                        <option>Tarapacá</option>
+                        <option>Antofagasta</option>
+                        <option>Atacama</option>
+                        <option>Coquimbo</option>
                         <option>Valparaíso</option>
+                        <option>Metropolitana</option>
+                        <option>O'Higgins</option>
+                        <option>Maule</option>
+                        <option>Ñuble</option>
                         <option>Biobío</option>
-                        <option>Sur</option>
-                        <option>Norte</option>
+                        <option>La Araucanía</option>
+                        <option>Los Ríos</option>
+                        <option>Los Lagos</option>
+                        <option>Aysén</option>
+                        <option>Magallanes</option>
                     </select>
                 </div>
             </div>
@@ -71,8 +82,8 @@ const StoresPage: React.FC = () => {
                                 </div>
                             </div>
                         </div>
-                         <div className="px-6 py-4 bg-slate-800/50 mt-auto border-t border-slate-700">
-                           <a href={store.website} target="_blank" rel="noopener noreferrer" className="w-full inline-flex items-center justify-center gap-2 bg-sky-600 text-white font-bold py-2 px-4 rounded-md hover:bg-sky-700 transition duration-300">
+                        <div className="px-6 py-4 bg-slate-800/50 mt-auto border-t border-slate-700">
+                            <a href={store.website} target="_blank" rel="noopener noreferrer" className="w-full inline-flex items-center justify-center gap-2 bg-sky-600 text-white font-bold py-2 px-4 rounded-md hover:bg-sky-700 transition duration-300">
                                 <GlobeAltIcon className="w-5 h-5" />
                                 Visitar Sitio Web
                             </a>

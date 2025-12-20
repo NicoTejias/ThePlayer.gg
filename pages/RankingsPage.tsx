@@ -47,15 +47,15 @@ const RankingsPage: React.FC<RankingsPageProps> = ({ players }) => {
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 items-start">
                 {/* Ranking The Player */}
                 <div className="space-y-4">
-                    <div className="text-center md:text-left">
-                        <h2 className="text-3xl font-bold text-white uppercase tracking-wider">Ranking The Player</h2>
+                    <div className="text-center md:text-left h-28 flex flex-col justify-center">
+                        <h2 className="text-3xl font-bold text-white uppercase tracking-wider">Player Latam Series</h2>
                         <p className="text-md text-slate-400 mt-1">El ranking anual que premia tu participación y clasifica a los Top 32 para el Torneo Nacional.</p>
                     </div>
-                     {/* Toolbar */}
-                    <div className="flex flex-col sm:flex-row gap-4 justify-between items-center bg-slate-800/50 p-4 rounded-lg border border-slate-700">
+                    {/* Toolbar */}
+                    <div className="flex flex-col sm:flex-row gap-4 justify-between items-center bg-slate-800/50 p-4 rounded-lg border border-slate-700 h-auto xl:h-20">
                         <div className="relative w-full sm:w-auto flex-grow">
                             <input
                                 type="search"
@@ -66,11 +66,22 @@ const RankingsPage: React.FC<RankingsPageProps> = ({ players }) => {
                         <div className="relative w-full sm:w-auto">
                             <select className="bg-slate-900/80 text-white rounded-md py-2 px-4 w-full appearance-none focus:outline-none focus:ring-2 focus:ring-sky-500 border border-slate-700">
                                 <option value="Todas">Todas las Regiones</option>
-                                <option value="Metropolitana">Metropolitana</option>
+                                <option value="Arica y Parinacota">Arica y Parinacota</option>
+                                <option value="Tarapacá">Tarapacá</option>
+                                <option value="Antofagasta">Antofagasta</option>
+                                <option value="Atacama">Atacama</option>
+                                <option value="Coquimbo">Coquimbo</option>
                                 <option value="Valparaíso">Valparaíso</option>
+                                <option value="Metropolitana">Metropolitana</option>
+                                <option value="O'Higgins">O'Higgins</option>
+                                <option value="Maule">Maule</option>
+                                <option value="Ñuble">Ñuble</option>
                                 <option value="Biobío">Biobío</option>
-                                <option value="Sur">Sur</option>
-                                <option value="Norte">Norte</option>
+                                <option value="La Araucanía">La Araucanía</option>
+                                <option value="Los Ríos">Los Ríos</option>
+                                <option value="Los Lagos">Los Lagos</option>
+                                <option value="Aysén">Aysén</option>
+                                <option value="Magallanes">Magallanes</option>
                             </select>
                         </div>
                     </div>
@@ -87,13 +98,12 @@ const RankingsPage: React.FC<RankingsPageProps> = ({ players }) => {
                             </thead>
                             <tbody className="divide-y divide-slate-700">
                                 {pwpRanking.slice(0, 20).map((player, index) => (
-                                    <tr key={`${player.id}-pwp`} className="hover:bg-slate-700/40 transition-colors duration-150">
+                                    <tr key={`${player.id}-pwp`} className="hover:bg-slate-700/40 transition-colors duration-150 h-16">
                                         <td className="px-6 py-4 whitespace-nowrap">
-                                            <span className={`text-lg font-bold w-8 text-center ${
-                                                index === 0 ? 'text-yellow-400' :
+                                            <span className={`text-lg font-bold w-8 text-center ${index === 0 ? 'text-yellow-400' :
                                                 index === 1 ? 'text-gray-300' :
-                                                index === 2 ? 'text-yellow-600' : 'text-slate-400'
-                                            }`}>{player.rank}</span>
+                                                    index === 2 ? 'text-yellow-600' : 'text-slate-400'
+                                                }`}>{player.rank}</span>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">{player.name}</td>
                                         <td className="px-6 py-4 whitespace-nowrap">
@@ -112,14 +122,14 @@ const RankingsPage: React.FC<RankingsPageProps> = ({ players }) => {
                     </div>
                 </div>
 
-                 {/* Ranking Caminante de Planos */}
-                 <div className="space-y-4">
-                    <div className="text-center md:text-left">
-                        <h2 className="text-3xl font-bold text-white uppercase tracking-wider">Ranking Caminante de Planos</h2>
-                         <p className="text-md text-slate-400 mt-1">El ranking de temporada que premia la habilidad y clasifica al Top 16 para el Torneo de Planeswalkers.</p>
+                {/* PLS Winrate */}
+                <div className="space-y-4">
+                    <div className="text-center md:text-left h-28 flex flex-col justify-center">
+                        <h2 className="text-3xl font-bold text-white uppercase tracking-wider">PLS Winrate</h2>
+                        <p className="text-md text-slate-400 mt-1">El ranking de temporada que premia la habilidad y clasifica al Top 16 para el Torneo de Planeswalkers.</p>
                     </div>
-                     {/* Toolbar */}
-                    <div className="flex flex-col sm:flex-row gap-4 justify-between items-center bg-slate-800/50 p-4 rounded-lg border border-slate-700">
+                    {/* Toolbar */}
+                    <div className="flex flex-col sm:flex-row gap-4 justify-between items-center bg-slate-800/50 p-4 rounded-lg border border-slate-700 h-auto xl:h-20">
                         <div className="relative w-full sm:w-auto flex-grow">
                             <input
                                 type="search"
@@ -130,11 +140,22 @@ const RankingsPage: React.FC<RankingsPageProps> = ({ players }) => {
                         <div className="relative w-full sm:w-auto">
                             <select className="bg-slate-900/80 text-white rounded-md py-2 px-4 w-full appearance-none focus:outline-none focus:ring-2 focus:ring-violet-500 border border-slate-700">
                                 <option value="Todas">Todas las Regiones</option>
-                                <option value="Metropolitana">Metropolitana</option>
+                                <option value="Arica y Parinacota">Arica y Parinacota</option>
+                                <option value="Tarapacá">Tarapacá</option>
+                                <option value="Antofagasta">Antofagasta</option>
+                                <option value="Atacama">Atacama</option>
+                                <option value="Coquimbo">Coquimbo</option>
                                 <option value="Valparaíso">Valparaíso</option>
+                                <option value="Metropolitana">Metropolitana</option>
+                                <option value="O'Higgins">O'Higgins</option>
+                                <option value="Maule">Maule</option>
+                                <option value="Ñuble">Ñuble</option>
                                 <option value="Biobío">Biobío</option>
-                                <option value="Sur">Sur</option>
-                                <option value="Norte">Norte</option>
+                                <option value="La Araucanía">La Araucanía</option>
+                                <option value="Los Ríos">Los Ríos</option>
+                                <option value="Los Lagos">Los Lagos</option>
+                                <option value="Aysén">Aysén</option>
+                                <option value="Magallanes">Magallanes</option>
                             </select>
                         </div>
                     </div>
@@ -151,13 +172,12 @@ const RankingsPage: React.FC<RankingsPageProps> = ({ players }) => {
                             </thead>
                             <tbody className="divide-y divide-slate-700">
                                 {winRateRanking.slice(0, 20).map((player, index) => (
-                                    <tr key={`${player.id}-wr`} className="hover:bg-slate-700/40 transition-colors duration-150">
+                                    <tr key={`${player.id}-wr`} className="hover:bg-slate-700/40 transition-colors duration-150 h-16">
                                         <td className="px-6 py-4 whitespace-nowrap">
-                                            <span className={`text-lg font-bold w-8 text-center ${
-                                                index === 0 ? 'text-yellow-400' :
+                                            <span className={`text-lg font-bold w-8 text-center ${index === 0 ? 'text-yellow-400' :
                                                 index === 1 ? 'text-gray-300' :
-                                                index === 2 ? 'text-yellow-600' : 'text-slate-400'
-                                            }`}>{player.rank}</span>
+                                                    index === 2 ? 'text-yellow-600' : 'text-slate-400'
+                                                }`}>{player.rank}</span>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">{player.name}</td>
                                         <td className="px-6 py-4 whitespace-nowrap">

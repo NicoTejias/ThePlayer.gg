@@ -4,11 +4,20 @@ import { supabase } from './supabaseClient';
 import type { Database } from './database.types';
 import Header from './components/Header';
 import Footer from './components/Footer';
+import ParticlesBackground from './components/ParticlesBackground';
 import HomePage from './pages/HomePage';
 import RankingsPage from './pages/RankingsPage';
 import EventsPage from './pages/EventsPage';
 import MarketplacePage from './pages/MarketplacePage';
+import MarketplaceDetailPage from './pages/MarketplaceDetailPage';
+import CommanderPage from './pages/CommanderPage';
 import MediaPage from './pages/MediaPage';
+import MediaArticlesPage from './pages/MediaArticlesPage';
+import MediaVideosPage from './pages/MediaVideosPage';
+import PLSPage from './pages/PLSPage';
+// ... existing code ...
+
+
 import JudgesPage from './pages/JudgesPage';
 import StoresPage from './pages/StoresPage';
 import AuthPage from './pages/AuthPage';
@@ -18,6 +27,7 @@ import PlayerDashboardPage from './pages/PlayerDashboardPage';
 import TournamentsListPage from './pages/TournamentsListPage';
 import TournamentStandingsPage from './pages/TournamentStandingsPage';
 import SettingsPage from './pages/SettingsPage';
+import LiveStreamPage from './pages/LiveStreamPage';
 import type { TournamentResult, CommunityEvent, PlayerProfile, TournamentParseResult } from './types';
 
 const mockInitialPlayers: PlayerProfile[] = [];
@@ -28,9 +38,12 @@ const mockInitialEvents: CommunityEvent[] = [];
 const AppContent: React.FC = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userRole, setUserRole] = useState<'player' | 'store' | 'admin' | null>(null);
+  const [userProfile, setUserProfile] = useState<any>(null); // Store full profile
   const [tournamentResults, setTournamentResults] = useState<TournamentResult[]>([]);
   const [communityEvents, setCommunityEvents] = useState<CommunityEvent[]>([]);
   const [players, setPlayers] = useState<PlayerProfile[]>([]);
+  // Hardcoded for now. In future, fetch this from Supabase 'system_status' table or similar.
+  const [isLiveSignal, setIsLiveSignal] = useState(true);
   const navigate = useNavigate();
 
   // Fetch data on load
@@ -53,6 +66,7 @@ const AppContent: React.FC = () => {
 
         if (profile) {
           setUserRole(profile.role as 'player' | 'store' | 'admin');
+          setUserProfile(profile);
           console.log("Logged in as:", profile.role);
         } else {
           // Create new profile for OAuth user
@@ -73,11 +87,13 @@ const AppContent: React.FC = () => {
             console.error("Error creating profile:", insertError);
           } else {
             setUserRole('player');
+            if (newProfile) setUserProfile(newProfile);
           }
         }
       } else {
         setIsLoggedIn(false);
         setUserRole(null);
+        setUserProfile(null);
       }
     });
 
@@ -102,6 +118,7 @@ const AppContent: React.FC = () => {
         matchesWon: p.matches_won || 0,
         matchesLost: p.matches_lost || 0,
         matchesDrew: p.matches_drew || 0,
+        team: p.team // Add team
         // winRate calc could happen here if needed, or in the component
       }));
       setPlayers(mappedPlayers);
@@ -227,97 +244,22 @@ const AppContent: React.FC = () => {
       for (let i = 0; i < playerResults.length; i++) {
         const result = playerResults[i];
         console.log(`  Procesando jugador ${i + 1}/${playerResults.length}: ${result.playerName}`);
-        let playerId = null;
 
         try {
-          // Check if player exists
-          const { data: existingPlayers, error: searchError } = await supabase
-            .from('profiles')
-            .select('id, matches_won, matches_lost, matches_drew, pwp')
-            .ilike('username', result.playerName)
-            .limit(1);
+          const { error: rpcError } = await supabase.rpc('process_player_result', {
+            p_tournament_id: newTournamentId,
+            p_player_name: result.playerName,
+            p_wins: result.wins,
+            p_losses: result.losses,
+            p_draws: result.draws,
+            p_pwp_earned: result.pwpEarned
+          });
 
-          if (searchError) {
-            console.error(`    ❌ Error buscando jugador:`, searchError);
-            throw new Error(`Error searching for ${result.playerName}: ${searchError.message}`);
+          if (rpcError) {
+            console.error(`    ❌ Error RPC:`, rpcError);
+            throw new Error(rpcError.message);
           }
-
-          if (existingPlayers && existingPlayers.length > 0) {
-            const p = existingPlayers[0];
-            playerId = p.id;
-            console.log(`    ℹ️ Jugador existente encontrado, actualizando stats...`);
-
-            const { error: updateError } = await supabase
-              .from('profiles')
-              .update({
-                matches_won: (p.matches_won || 0) + result.wins,
-                matches_lost: (p.matches_lost || 0) + result.losses,
-                matches_drew: (p.matches_drew || 0) + result.draws,
-                pwp: (p.pwp || 0) + result.pwpEarned
-              })
-              .eq('id', playerId);
-
-            if (updateError) {
-              console.error(`    ❌ Error actualizando:`, updateError);
-              throw new Error(`Error updating ${result.playerName}: ${updateError.message}`);
-            }
-            console.log(`    ✅ Stats actualizados`);
-
-          } else {
-            console.log(`    ℹ️ Jugador nuevo, creando perfil...`);
-            const { count } = await supabase
-              .from('profiles')
-              .select('*', { count: 'exact', head: true });
-
-            const guestNumber = (count || 0) + 1;
-            const guestUsername = `Player${String(guestNumber).padStart(3, '0')}`;
-            const newProfileId = crypto.randomUUID();
-
-            const { data: newProfile, error: profileError } = await supabase
-              .from('profiles')
-              .insert({
-                id: newProfileId,
-                username: result.playerName || guestUsername,
-                role: 'player',
-                pwp: result.pwpEarned,
-                matches_won: result.wins,
-                matches_lost: result.losses,
-                matches_drew: result.draws
-              })
-              .select()
-              .single();
-
-            if (profileError) {
-              console.error(`    ❌ Error creando perfil:`, profileError);
-              throw new Error(`Error creating ${result.playerName}: ${profileError.message}`);
-            }
-            if (newProfile) {
-              playerId = newProfile.id;
-              console.log(`    ✅ Perfil creado con ID: ${playerId}`);
-            }
-          }
-
-          // Insert Result
-          if (playerId) {
-            console.log(`    Guardando resultado en tournament_results...`);
-            const { error: resultError } = await supabase
-              .from('tournament_results')
-              .insert({
-                tournament_id: newTournamentId,
-                player_id: playerId,
-                player_name: result.playerName,
-                wins: result.wins,
-                losses: result.losses,
-                draws: result.draws,
-                pwp_earned: result.pwpEarned
-              });
-
-            if (resultError) {
-              console.error(`    ❌ Error guardando resultado:`, resultError);
-              throw new Error(`Error saving result for ${result.playerName}: ${resultError.message}`);
-            }
-            console.log(`    ✅ Resultado guardado`);
-          }
+          console.log(`    ✅ Procesado correctamente`);
 
         } catch (innerError: any) {
           console.error(`  ❌ ERROR PROCESANDO ${result.playerName}:`, innerError);
@@ -345,27 +287,31 @@ const AppContent: React.FC = () => {
   };
 
   return (
-    <div className="bg-slate-900 text-slate-200 min-h-screen flex flex-col">
-      <Header isLoggedIn={isLoggedIn} userRole={userRole} handleLogout={handleLogout} />
+    <div className="bg-slate-900 text-slate-200 min-h-screen flex flex-col relative isolate">
+      <ParticlesBackground />
+      <Header isLoggedIn={isLoggedIn} userRole={userRole} handleLogout={handleLogout} isLiveSignal={isLiveSignal} />
       <main className="flex-grow container mx-auto px-4 py-8">
         <Routes>
           <Route path="/" element={<HomePage players={players} events={communityEvents} />} />
+          <Route path="/envivo" element={<LiveStreamPage />} />
+          <Route path="/pls" element={<PLSPage />} />
           <Route path="/ranking/pwp" element={<RankingsPage players={players} />} />
           <Route path="/eventos" element={<EventsPage events={communityEvents} />} />
           <Route path="/torneos" element={<TournamentsListPage tournaments={tournamentResults} />} />
           <Route path="/torneos/:tournamentId" element={<TournamentStandingsPage />} />
           <Route path="/mercado" element={<MarketplacePage />} />
+          <Route path="/mercado/:id" element={<MarketplaceDetailPage />} />
+          <Route path="/commander" element={<CommanderPage />} />
           <Route path="/media" element={<MediaPage />} />
-          <Route path="/media/articulos" element={<div className="text-center text-4xl mt-20">Artículos (En Construcción)</div>} />
-          <Route path="/media/videos" element={<div className="text-center text-4xl mt-20">Videos (En Construcción)</div>} />
-          <Route path="/media/commander" element={<div className="text-center text-4xl mt-20">Rincón de Commander (En Construcción)</div>} />
+          <Route path="/media/articulos" element={<MediaArticlesPage />} />
+          <Route path="/media/videos" element={<MediaVideosPage />} />
           <Route path="/jueces" element={<JudgesPage />} />
           <Route path="/tiendas" element={<StoresPage />} />
           <Route path="/login" element={<AuthPage handleLogin={handleLogin} />} />
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="/admin" element={<AdminDashboardPage />} />
           <Route path="/dashboard/tienda" element={<StoreDashboardPage onTournamentUpload={handleTournamentUpload} userRole={userRole} tournaments={tournamentResults} />} />
-          <Route path="/dashboard/jugador" element={<PlayerDashboardPage />} />
+          <Route path="/dashboard/jugador" element={<PlayerDashboardPage profile={userProfile} />} />
         </Routes>
       </main>
       <Footer />

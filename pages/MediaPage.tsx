@@ -9,10 +9,10 @@ import PlayIcon from '../components/icons/PlayIcon';
 
 // Mock Data for the Media Page
 const mockFullArticles: MediaArticle[] = [
-  { id: '1', title: 'Análisis del Metajuego Moderno Post-Baneos', author: 'Admin', excerpt: 'Exploramos cómo los últimos cambios han afectado el panorama competitivo de Modern.', imageUrl: 'https://picsum.photos/seed/article1/400/300', category: 'Modern' },
-  { id: '2', title: 'Top 5 Cartas de Commander que Deberías Jugar', author: 'Invitado', excerpt: 'Un ranking de las cartas más impactantes y versátiles para tu próximo mazo de Commander.', imageUrl: 'https://picsum.photos/seed/article2/400/300', category: 'Commander' },
-  { id: '3', title: 'Guía de Draft: Dominando March of the Machine', author: 'ExpertoLimitado', excerpt: 'Consejos y estrategias para construir mazos ganadores en el último formato de draft.', imageUrl: 'https://picsum.photos/seed/article3/400/300', category: 'Limitado' },
-  { id: '4', title: 'Historia de Magic: El Conflicto de los Hermanos', author: 'LoreMaster', excerpt: 'Un viaje al pasado para entender uno de los arcos argumentales más importantes de Magic.', imageUrl: 'https://picsum.photos/seed/article4/400/300', category: 'Lore' },
+    { id: '1', title: 'Análisis del Metajuego Moderno Post-Baneos', author: 'Admin', excerpt: 'Exploramos cómo los últimos cambios han afectado el panorama competitivo de Modern.', imageUrl: 'https://picsum.photos/seed/article1/400/300', category: 'Modern' },
+    { id: '2', title: 'Top 5 Cartas de Commander que Deberías Jugar', author: 'Invitado', excerpt: 'Un ranking de las cartas más impactantes y versátiles para tu próximo mazo de Commander.', imageUrl: 'https://picsum.photos/seed/article2/400/300', category: 'Commander' },
+    { id: '3', title: 'Guía de Draft: Dominando March of the Machine', author: 'ExpertoLimitado', excerpt: 'Consejos y estrategias para construir mazos ganadores en el último formato de draft.', imageUrl: 'https://picsum.photos/seed/article3/400/300', category: 'Limitado' },
+    { id: '4', title: 'Historia de Magic: El Conflicto de los Hermanos', author: 'LoreMaster', excerpt: 'Un viaje al pasado para entender uno de los arcos argumentales más importantes de Magic.', imageUrl: 'https://picsum.photos/seed/article4/400/300', category: 'Lore' },
 ];
 
 const mockVideos: MediaVideo[] = [
@@ -21,7 +21,7 @@ const mockVideos: MediaVideo[] = [
     { id: '3', title: 'Cómo Empezar a Jugar Pauper en 2024', channel: 'El Rincón del Pobre', youtubeId: 'dQw4w9WgXcQ', thumbnailUrl: 'https://picsum.photos/seed/video3/400/300', category: 'Pauper' },
 ];
 
-const SectionHeader: React.FC<{title: string, linkTo: string}> = ({title, linkTo}) => (
+const SectionHeader: React.FC<{ title: string, linkTo: string }> = ({ title, linkTo }) => (
     <div className="flex justify-between items-center mb-6">
         <h2 className="text-3xl font-bold text-white uppercase tracking-wider">{title}</h2>
         <Link to={linkTo} className="text-sky-400 hover:text-sky-300 transition-colors">
@@ -65,9 +65,9 @@ const MediaPage: React.FC = () => {
             {/* Videos Destacados */}
             <section>
                 <SectionHeader title="Videos Destacados" linkTo="/media/videos" />
-                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
                     {mockVideos.map(video => (
-                         <a key={video.id} href={`https://www.youtube.com/watch?v=${video.youtubeId}`} target="_blank" rel="noopener noreferrer" className="block group">
+                        <a key={video.id} href={`https://www.youtube.com/watch?v=${video.youtubeId}`} target="_blank" rel="noopener noreferrer" className="block group">
                             <div className="bg-slate-800 rounded-lg overflow-hidden shadow-lg hover:shadow-sky-500/20 transition-all duration-300 ease-in-out transform hover:-translate-y-1 border border-slate-700">
                                 <div className="relative">
                                     <img className="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-105" src={video.thumbnailUrl} alt={video.title} />
@@ -90,37 +90,8 @@ const MediaPage: React.FC = () => {
                     ))}
                 </div>
             </section>
-            
-             {/* Rincón de Commander */}
-            <section>
-                <SectionHeader title="Rincón de Commander" linkTo="/media/commander" />
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <Card imageUrl="https://picsum.photos/seed/cmd-article/400/300" title="Guía de construcción de mazos cEDH">
-                        <p className="text-slate-400 mb-4">Aprende los principios para llevar tu mazo de Commander al nivel competitivo.</p>
-                         <div className="flex items-center gap-2 text-sm text-slate-500">
-                            <UserIcon className="w-4 h-4" />
-                            <span>Por: Comandante Informado</span>
-                        </div>
-                    </Card>
-                     <a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ" target="_blank" rel="noopener noreferrer" className="block group">
-                        <div className="bg-slate-800 rounded-lg overflow-hidden shadow-lg hover:shadow-sky-500/20 transition-all duration-300 ease-in-out transform hover:-translate-y-1 border border-slate-700 h-full flex flex-col">
-                            <div className="relative">
-                                <img className="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-105" src="https://picsum.photos/seed/cmd-video/400/300" alt="Commander Gameplay" />
-                                <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                    <PlayIcon className="w-16 h-16 text-white/80" />
-                                </div>
-                            </div>
-                            <div className="p-6 flex-grow flex flex-col">
-                                <h3 className="font-bold text-xl mb-3 text-white uppercase group-hover:text-sky-400 transition-colors">Gameplay: Partida de Commander de 4 jugadores</h3>
-                                 <div className="flex items-center gap-2 text-sm text-slate-400 mt-auto">
-                                    <PlayIcon className="w-5 h-5 text-slate-500" />
-                                    <span>Mesas de Batalla</span>
-                                </div>
-                            </div>
-                        </div>
-                    </a>
-                </div>
-            </section>
+
+
         </div>
     );
 };
