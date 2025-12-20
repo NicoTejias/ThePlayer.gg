@@ -9,7 +9,7 @@ const playerTerms = `Términos y Condiciones para Jugadores:
 1.  **Aceptación de Visibilidad:** Al registrarte, aceptas que tu nombre de usuario y resultados de torneos sean públicos en los rankings y perfiles del sitio.
 2.  **Código de Conducta:** Te comprometes a mantener un comportamiento deportivo, respetuoso y libre de acoso en todos los eventos asociados y dentro de la plataforma digital theplayer.gg.
 3.  **Veracidad de la Información:** Eres el único responsable de que la información proporcionada en tu perfil sea verídica y esté actualizada.
-4.  **Responsabilidad en el Mercado:** Todas las transacciones (compra, venta o cambio) realizadas a través del Mercado son de tu exclusiva responsabilidad. theplayer.gg actúa únicamente como un tablero de anuncios y no interviene ni se responsabiliza por las transacciones.
+4.  **Responsabilidad en el Mercado TCG:** Todas las transacciones (compra, venta o cambio) realizadas a través del Mercado TCG son de tu exclusiva responsabilidad. theplayer.gg actúa únicamente como un tablero de anuncios y no interviene ni se responsabiliza por las transacciones.
 5.  **Sanciones:** El incumplimiento de estas normas, así como de las reglas específicas de cada torneo, puede resultar en sanciones que van desde advertencias hasta la suspensión permanente de tu cuenta.`;
 
 const storeTerms = `Términos y Condiciones para Tiendas/Organizadores en theplayer.gg

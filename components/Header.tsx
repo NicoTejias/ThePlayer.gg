@@ -15,12 +15,11 @@ type NavLinkType = {
 
 const NavLinks: NavLinkType[] = [
   { name: 'Inicio', path: '/' },
-  { name: 'Señal Online', path: '/envivo', isLive: true }, // New Live Link
   { name: 'PLS', path: '/pls' },
   { name: 'Ranking', path: '/ranking/pwp' },
   { name: 'Eventos', path: '/eventos' },
   { name: 'Commander', path: '/commander' },
-  { name: 'Mercado', path: '/mercado' },
+  { name: 'Mercado TCG', path: '/mercado' },
   {
     name: 'Media',
     path: '/media',
@@ -32,6 +31,7 @@ const NavLinks: NavLinkType[] = [
   },
   { name: 'Jueces', path: '/jueces' },
   { name: 'Tiendas', path: '/tiendas' },
+  { name: 'Señal Online', path: '/envivo', isLive: true },
 ];
 
 interface HeaderProps {

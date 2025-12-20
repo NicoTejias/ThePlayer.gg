@@ -2,10 +2,8 @@ import React from 'react';
 
 const LiveStreamPage: React.FC = () => {
     // TODO: Replace with actual Channel ID for "Streamcaster Mage"
-    // We couldn't find "Streamcaster Mage" on YouTube. 
-    // If it's "Mattcaster Mage", the ID would be different.
-    // For now, we'll keep a placeholder or you can put your specific ID here.
-    const channelId = "UCxxxxxxxxxxxx"; // REPLACE THIS WITH REAL ID
+    // Using the real Channel ID retrieved from @streamcastermage
+    const channelId = "UC-ymLrXBUoNFhku0d8tWCVA";
 
     return (
         <div className="space-y-8 animate-in fade-in zoom-in duration-500">

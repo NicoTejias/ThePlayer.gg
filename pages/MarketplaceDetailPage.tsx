@@ -63,7 +63,7 @@ const MarketplaceDetailPage: React.FC = () => {
         return (
             <div className="flex flex-col items-center justify-center min-h-[50vh] text-slate-300">
                 <h2 className="text-2xl font-bold mb-4">Publicación no encontrada</h2>
-                <Link to="/mercado" className="text-sky-500 hover:underline">Volver al Mercado</Link>
+                <Link to="/mercado" className="text-sky-500 hover:underline">Volver al Mercado TCG</Link>
             </div>
         );
     }
@@ -84,7 +84,7 @@ const MarketplaceDetailPage: React.FC = () => {
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                     </svg>
-                    Volver al Mercado
+                    Volver al Mercado TCG
                 </Link>
             </div>
 

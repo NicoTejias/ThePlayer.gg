@@ -43,7 +43,7 @@ const sliderItems = [
   { id: 1, title: 'Últimas Noticias', link: '/media', imageUrl: 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?auto=format&fit=crop&q=80&w=800', color: 'from-blue-600/80' },
   { id: 2, title: 'Videos', link: '/media/videos', imageUrl: 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&q=80&w=800', color: 'from-red-600/80' },
   { id: 3, title: 'Artículos', link: '/media/articulos', imageUrl: 'https://images.unsplash.com/photo-1585241936939-be05368a5bcb?auto=format&fit=crop&q=80&w=800', color: 'from-green-600/80' },
-  { id: 4, title: 'Promociones', link: '/mercado', imageUrl: 'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?auto=format&fit=crop&q=80&w=800', color: 'from-purple-600/80' },
+  { id: 4, title: 'MERCADO TCG', link: '/mercado', imageUrl: 'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?auto=format&fit=crop&q=80&w=800', color: 'from-purple-600/80' },
 ];
 
 const SectionHeader: React.FC<{ title: string, linkTo: string }> = ({ title, linkTo }) => (
@@ -76,10 +76,11 @@ const HomePage: React.FC<HomePageProps> = ({ players, events }) => {
     .slice(0, 10)
     .map((p, i) => ({
       rank: i + 1,
-      playerName: p.name,
+      // Anonymous Name Logic
+      playerName: p.acceptedTerms ? p.name : `Jugador ${p.id.slice(-4)}`,
       pwp: p.pwp || 0,
       region: p.region || 'Unknown',
-      team: p.team
+      team: p.team || 'Unknown' // Adding team to the mapped object
     }));
 
   // Derive Top 10 Win Rate Ranking (PLS Winrate)
@@ -93,10 +94,11 @@ const HomePage: React.FC<HomePageProps> = ({ players, events }) => {
     .slice(0, 10)
     .map((p, i) => ({
       rank: i + 1,
-      playerName: p.name,
+      // Anonymous Name Logic: "Jugador " + last 4 chars of ID (simulated or real)
+      playerName: p.acceptedTerms ? p.name : `Jugador ${p.id.slice(-4)}`,
       winRate: `${p.winRate.toFixed(1)}%`,
       region: p.region || 'Unknown',
-      team: p.team
+      team: p.team || 'Unknown' // Adding team to the mapped object
     }));
 
   // Combine real events with mock events to ensure we show 6 items for layout verification
@@ -169,11 +171,16 @@ const HomePage: React.FC<HomePageProps> = ({ players, events }) => {
                       </span>
                       <div className="flex flex-col">
                         <div className="flex items-center gap-2">
-                          <span className="text-base text-white font-medium truncate max-w-[120px] sm:max-w-xs">{player.playerName}</span>
-                          {player.team && <span className="text-[10px] text-sky-300 bg-sky-900/30 border border-sky-800 px-1.5 rounded">{player.team}</span>}
+                          {/* Anonymize logic handled in map */}
+                          <span className="text-base text-white font-medium truncate max-w-[120px] sm:max-w-xs">
+                            {player.playerName}
+                          </span>
                         </div>
                       </div>
-                      <span className="text-xs text-slate-400 bg-slate-700 px-1.5 py-0.5 rounded border border-slate-600 ml-auto mr-2">{player.region}</span>
+                      {/* Show TEAM instead of REGION */}
+                      <span className="text-[10px] text-sky-300 bg-sky-900/30 border border-sky-800 px-1.5 py-0.5 rounded ml-auto mr-2">
+                        {player.team || 'Unknown'}
+                      </span>
                     </div>
                     <div className="flex items-center space-x-2 text-sky-400 font-semibold text-sm">
                       <span>{player.pwp} pts</span>
@@ -202,11 +209,16 @@ const HomePage: React.FC<HomePageProps> = ({ players, events }) => {
                       </span>
                       <div className="flex flex-col">
                         <div className="flex items-center gap-2">
-                          <span className="text-base text-white font-medium truncate max-w-[120px] sm:max-w-xs">{player.playerName}</span>
-                          {player.team && <span className="text-[10px] text-violet-300 bg-violet-900/30 border border-violet-800 px-1.5 rounded">{player.team}</span>}
+                          {/* Anonymize logic handled in map */}
+                          <span className="text-base text-white font-medium truncate max-w-[120px] sm:max-w-xs">
+                            {player.playerName}
+                          </span>
                         </div>
                       </div>
-                      <span className="text-xs text-slate-400 bg-slate-700 px-1.5 py-0.5 rounded border border-slate-600 ml-auto mr-2">{player.region}</span>
+                      {/* Show TEAM instead of REGION */}
+                      <span className="text-[10px] text-violet-300 bg-violet-900/30 border border-violet-800 px-1.5 py-0.5 rounded ml-auto mr-2">
+                        {player.team || 'Unknown'}
+                      </span>
                     </div>
                     <div className="flex items-center space-x-2 text-violet-400 font-semibold text-sm">
                       <span>{player.winRate}</span>
@@ -277,7 +289,7 @@ const HomePage: React.FC<HomePageProps> = ({ players, events }) => {
 
         {/* Column 3: Mercado */}
         <section className="flex flex-col h-full">
-          <SectionHeader title="Mercado" linkTo="/mercado" />
+          <SectionHeader title="Mercado TCG" linkTo="/mercado" />
           <div className="bg-slate-800 rounded-lg p-4 shadow-xl border border-slate-700 flex-1 flex flex-col">
             <ul className="space-y-2 divide-y divide-slate-700/50 mb-2">
               {mockMarketplace.slice(0, 9).map(post => (

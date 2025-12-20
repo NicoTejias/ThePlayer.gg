@@ -261,7 +261,7 @@ const EventsPage: React.FC<EventsPageProps> = ({ events }) => {
                     <table className="min-w-full divide-y divide-slate-700">
                         <thead className="bg-slate-700/50">
                             <tr>
-                                <th scope="col" className="px-6 py-4 text-left text-xs font-bold text-slate-300 uppercase tracking-wider">Fecha</th>
+                                <th scope="col" className="px-6 py-4 text-left text-xs font-bold text-slate-300 uppercase tracking-wider sticky left-0 bg-slate-800 z-20 border-r border-slate-700/50">Fecha</th>
                                 <th scope="col" className="px-6 py-4 text-left text-xs font-bold text-slate-300 uppercase tracking-wider">Hora</th>
                                 <th scope="col" className="px-6 py-4 text-left text-xs font-bold text-slate-300 uppercase tracking-wider">Evento</th>
                                 <th scope="col" className="px-6 py-4 text-left text-xs font-bold text-slate-300 uppercase tracking-wider">Formato</th>
@@ -280,8 +280,8 @@ const EventsPage: React.FC<EventsPageProps> = ({ events }) => {
                                 const isFull = registered >= mockLimit;
 
                                 return (
-                                    <tr key={event.id} className="hover:bg-slate-700/30 transition-colors">
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-300 font-medium">
+                                    <tr key={event.id} className="group hover:bg-slate-700/30 transition-colors">
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-300 font-medium sticky left-0 bg-slate-800 group-hover:bg-slate-700 transition-colors z-10 border-r border-slate-700/50">
                                             {event.date}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-400">
@@ -389,7 +389,7 @@ const EventsPage: React.FC<EventsPageProps> = ({ events }) => {
                     <table className="min-w-full divide-y divide-slate-800">
                         <thead className="bg-slate-800/50">
                             <tr>
-                                <th className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Fecha</th>
+                                <th className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider sticky left-0 bg-slate-900 z-20 border-r border-slate-800">Fecha</th>
                                 <th className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Evento</th>
                                 <th className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Formato</th>
                                 <th className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Lugar</th>
@@ -403,14 +403,15 @@ const EventsPage: React.FC<EventsPageProps> = ({ events }) => {
                                 pastEvents.map((event) => {
                                     const details = getTournamentTypeDetails(event);
                                     const isExpanded = expandedEventId === event.id;
+                                    const showDecklists = details.type.includes('Premier') || details.type.includes('RCQ');
 
                                     return (
                                         <React.Fragment key={event.id}>
                                             <tr
-                                                className={`transition-colors cursor-pointer ${isExpanded ? 'bg-slate-800/50' : 'hover:bg-slate-800/30'}`}
+                                                className={`transition-colors cursor-pointer group ${isExpanded ? 'bg-slate-800/50' : 'hover:bg-slate-800/30'}`}
                                                 onClick={() => setExpandedEventId(isExpanded ? null : event.id)}
                                             >
-                                                <td className="px-6 py-4 text-sm text-slate-500">{event.date}</td>
+                                                <td className="px-6 py-4 text-sm text-slate-500 sticky left-0 bg-slate-900 group-hover:bg-slate-800 z-10 border-r border-slate-800 transition-colors">{event.date}</td>
                                                 <td className="px-6 py-4">
                                                     <div className="flex flex-col">
                                                         <span className="text-slate-400 font-bold">{event.title}</span>
@@ -439,7 +440,14 @@ const EventsPage: React.FC<EventsPageProps> = ({ events }) => {
                                                                     <span className="w-1.5 h-1.5 rounded-full bg-sky-500"></span>
                                                                     Resultados y Posiciones
                                                                 </h4>
-                                                                <span className="text-xs text-slate-500">Top 8 Mostrado</span>
+                                                                <div className="flex items-center gap-4">
+                                                                    {showDecklists && (
+                                                                        <button className="text-xs bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1 rounded transition-colors font-medium shadow-sm">
+                                                                            Ver Decklists
+                                                                        </button>
+                                                                    )}
+                                                                    <span className="text-xs text-slate-500">Top 8 Mostrado</span>
+                                                                </div>
                                                             </div>
                                                             <div className="overflow-x-auto">
                                                                 <table className="min-w-full text-sm text-left">

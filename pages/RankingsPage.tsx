@@ -90,24 +90,29 @@ const RankingsPage: React.FC<RankingsPageProps> = ({ players }) => {
                         <table className="min-w-full divide-y divide-slate-700">
                             <thead className="bg-slate-700/50">
                                 <tr>
-                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Puesto</th>
-                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Jugador</th>
-                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Región</th>
+                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider sticky left-0 bg-slate-800 z-20 shadow-r">Puesto</th>
+                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider sticky left-[4rem] bg-slate-800 z-20 shadow-r">Jugador</th>
+                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Team</th>
                                     <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-slate-300 uppercase tracking-wider">Puntos</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-700">
                                 {pwpRanking.slice(0, 20).map((player, index) => (
-                                    <tr key={`${player.id}-pwp`} className="hover:bg-slate-700/40 transition-colors duration-150 h-16">
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <span className={`text-lg font-bold w-8 text-center ${index === 0 ? 'text-yellow-400' :
+                                    <tr key={`${player.id}-pwp`} className="hover:bg-slate-700/40 transition-colors duration-150 h-16 relative">
+                                        <td className="px-6 py-4 whitespace-nowrap sticky left-0 bg-slate-800 z-10 border-r border-slate-700/50">
+                                            <span className={`text-lg font-bold w-8 text-center block ${index === 0 ? 'text-yellow-400' :
                                                 index === 1 ? 'text-gray-300' :
                                                     index === 2 ? 'text-yellow-600' : 'text-slate-400'
                                                 }`}>{player.rank}</span>
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">{player.name}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white sticky left-[4rem] bg-slate-800 z-10 border-r border-slate-700/50">
+                                            {player.acceptedTerms ? player.name : `Jugador ${player.id.slice(-4)}`}
+                                        </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
-                                            <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-slate-700 text-slate-300">{player.region}</span>
+                                            {/* Show TEAM instead of REGION */}
+                                            <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-slate-700 text-slate-300">
+                                                {player.team || 'Unknown'}
+                                            </span>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-bold text-sky-400">
                                             <div className="flex items-center justify-end space-x-2">
@@ -164,24 +169,29 @@ const RankingsPage: React.FC<RankingsPageProps> = ({ players }) => {
                         <table className="min-w-full divide-y divide-slate-700">
                             <thead className="bg-slate-700/50">
                                 <tr>
-                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Puesto</th>
-                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Jugador</th>
-                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Región</th>
+                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider sticky left-0 bg-slate-800 z-20 shadow-r">Puesto</th>
+                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider sticky left-[4rem] bg-slate-800 z-20 shadow-r">Jugador</th>
+                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Team</th>
                                     <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-slate-300 uppercase tracking-wider">Win Rate</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-700">
                                 {winRateRanking.slice(0, 20).map((player, index) => (
-                                    <tr key={`${player.id}-wr`} className="hover:bg-slate-700/40 transition-colors duration-150 h-16">
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <span className={`text-lg font-bold w-8 text-center ${index === 0 ? 'text-yellow-400' :
+                                    <tr key={`${player.id}-wr`} className="hover:bg-slate-700/40 transition-colors duration-150 h-16 relative">
+                                        <td className="px-6 py-4 whitespace-nowrap sticky left-0 bg-slate-800 z-10 border-r border-slate-700/50">
+                                            <span className={`text-lg font-bold w-8 text-center block ${index === 0 ? 'text-yellow-400' :
                                                 index === 1 ? 'text-gray-300' :
                                                     index === 2 ? 'text-yellow-600' : 'text-slate-400'
                                                 }`}>{player.rank}</span>
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">{player.name}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white sticky left-[4rem] bg-slate-800 z-10 border-r border-slate-700/50">
+                                            {player.acceptedTerms ? player.name : `Jugador ${player.id.slice(-4)}`}
+                                        </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
-                                            <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-slate-700 text-slate-300">{player.region}</span>
+                                            {/* Show TEAM instead of REGION */}
+                                            <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-slate-700 text-slate-300">
+                                                {player.team || 'Unknown'}
+                                            </span>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-bold text-violet-400">
                                             <div className="flex items-center justify-end space-x-2">
