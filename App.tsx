@@ -135,71 +135,79 @@ const AppContent: React.FC = () => {
   }, []);
 
   const handleSessionState = async (session: any) => {
-    if (session?.user) {
-      setIsLoggedIn(true);
+    try {
+      if (session?.user) {
+        setIsLoggedIn(true);
 
-      // Fetch or create profile
-      const { data: profile, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', session.user.id)
-        .single();
+        // Fetch or create profile
+        const { data: profile, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', session.user.id)
+          .single();
 
-      if (profile) {
-        setUserRole(profile.role as 'player' | 'store' | 'admin');
-        setUserProfile(profile);
-        console.log("Logged in as:", profile.role);
+        if (profile) {
+          setUserRole(profile.role as 'player' | 'store' | 'admin');
+          setUserProfile(profile);
+          console.log("Logged in as:", profile.role);
 
-        // Check for Alias (Onboarding)
-        if (profile.role === 'player') {
-          const { count } = await supabase
-            .from('player_aliases')
-            .select('*', { count: 'exact', head: true })
-            .eq('player_id', session.user.id);
+          // Check for Alias (Onboarding)
+          if (profile.role === 'player') {
+            const { count } = await supabase
+              .from('player_aliases')
+              .select('*', { count: 'exact', head: true })
+              .eq('player_id', session.user.id);
 
-          if (count === 0) {
-            setShowOnboarding(true);
+            if (count === 0) {
+              setShowOnboarding(true);
+            }
+          }
+        } else {
+          // Profile missing (could be new OAuth user or Email user with failed profile creation)
+          console.log("Profile not found, creating new profile...");
+
+          const fullName = session.user.user_metadata.full_name || session.user.user_metadata.username || session.user.email?.split('@')[0] || 'User';
+          const userRole = (session.user.user_metadata.role as 'player' | 'store') || (localStorage.getItem('signup_role') as 'player' | 'store') || 'player';
+
+          const newProfile = {
+            id: session.user.id,
+            username: fullName,
+            role: userRole,
+            email: session.user.email,
+            avatar_url: session.user.user_metadata.avatar_url,
+            pwp: 0,
+            matches_won: 0,
+            matches_lost: 0,
+            matches_drew: 0
+          };
+
+          const { error: insertError } = await supabase
+            .from('profiles')
+            .insert(newProfile);
+
+          if (insertError) {
+            console.error("Error creating profile automatically (likely RLS). Using temp profile:", insertError);
+            // Fallback: Set profile in memory anyway so the user can use the site temporarily
+            setUserRole(userRole);
+            setUserProfile(newProfile);
+          } else {
+            console.log("Profile created successfully.");
+            setUserRole(userRole);
+            setUserProfile(newProfile);
           }
         }
       } else {
-        // Profile missing (could be new OAuth user or Email user with failed profile creation)
-        console.log("Profile not found, creating new profile...");
-
-        const fullName = session.user.user_metadata.full_name || session.user.user_metadata.username || session.user.email?.split('@')[0] || 'User';
-        const userRole = (session.user.user_metadata.role as 'player' | 'store') || (localStorage.getItem('signup_role') as 'player' | 'store') || 'player';
-
-        const newProfile = {
-          id: session.user.id,
-          username: fullName,
-          role: userRole,
-          email: session.user.email,
-          avatar_url: session.user.user_metadata.avatar_url,
-          pwp: 0,
-          matches_won: 0,
-          matches_lost: 0,
-          matches_drew: 0
-        };
-
-        const { error: insertError } = await supabase
-          .from('profiles')
-          .insert(newProfile);
-
-        if (insertError) {
-          console.error("Error creating profile automatically (likely RLS). Using temp profile:", insertError);
-          // Fallback: Set profile in memory anyway so the user can use the site temporarily
-          setUserRole(userRole);
-          setUserProfile(newProfile);
-        } else {
-          console.log("Profile created successfully.");
-          setUserRole(userRole);
-          setUserProfile(newProfile);
-        }
+        setIsLoggedIn(false);
+        setUserRole(null);
+        setUserProfile(null);
+        setShowOnboarding(false);
       }
-    } else {
+    } catch (error) {
+      console.error("Error in handleSessionState:", error);
+      // Ensure we don't break the app - set to logged out state
       setIsLoggedIn(false);
       setUserRole(null);
       setUserProfile(null);
-      setShowOnboarding(false);
     }
   };
 
