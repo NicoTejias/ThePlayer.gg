@@ -35,9 +35,17 @@ const StatCard: React.FC<{ icon: React.ReactNode, title: string, value: string |
 
 
 const PlayerDashboardPage: React.FC<{ profile?: any }> = ({ profile }) => {
-    const greetingName = profile
-        ? (profile.first_name && profile.last_name ? `${profile.first_name} ${profile.last_name}` : profile.username)
-        : 'Jugador';
+    // Determine greeting name: Prioritize First Name, then Username
+    const greetingName = profile?.first_name || profile?.username || 'Jugador';
+
+    // Calculate Win Rate
+    const totalMatches = (profile?.matches_won || 0) + (profile?.matches_lost || 0) + (profile?.matches_drew || 0);
+    const winRate = totalMatches > 0
+        ? ((profile?.matches_won || 0) / totalMatches * 100).toFixed(1)
+        : '0.0';
+
+    // Filter Marketplace Posts for this user (Mock logic for now, using username matching)
+    const userPosts = mockPlayerMarketplacePosts.filter(post => post.seller === profile?.username);
 
     return (
         <div className="space-y-12">
@@ -50,8 +58,20 @@ const PlayerDashboardPage: React.FC<{ profile?: any }> = ({ profile }) => {
 
             {/* Key Metrics */}
             <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <StatCard icon={<TrophyIcon className="w-8 h-8" />} title="Ranking The Player" value="1250 pts" rank="1" color="sky" />
-                <StatCard icon={<SparklesIcon className="w-8 h-8" />} title="Ranking Caminante de Planos" value="75.2%" rank="2" color="violet" />
+                <StatCard
+                    icon={<TrophyIcon className="w-8 h-8" />}
+                    title="Puntos PWP"
+                    value={`${profile?.pwp || 0} pts`}
+                    rank="-"
+                    color="sky"
+                />
+                <StatCard
+                    icon={<SparklesIcon className="w-8 h-8" />}
+                    title="Win Rate Global"
+                    value={`${winRate}%`}
+                    rank="-"
+                    color="violet"
+                />
             </section>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
@@ -68,16 +88,22 @@ const PlayerDashboardPage: React.FC<{ profile?: any }> = ({ profile }) => {
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-700">
-                                {mockTournamentHistory.map(t => (
-                                    <tr key={t.id} className="hover:bg-slate-700/40">
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <p className="text-sm font-medium text-white">{t.tournamentName}</p>
-                                            <p className="text-xs text-slate-400">{t.date} - {t.format}</p>
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-300 font-mono">{t.result}</td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-bold text-sky-400">+{t.pointsEarned} pts</td>
+                                {mockTournamentHistory.length > 0 ? (
+                                    mockTournamentHistory.map(t => (
+                                        <tr key={t.id} className="hover:bg-slate-700/40">
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <p className="text-sm font-medium text-white">{t.tournamentName}</p>
+                                                <p className="text-xs text-slate-400">{t.date} - {t.format}</p>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-300 font-mono">{t.result}</td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-bold text-sky-400">+{t.pointsEarned} pts</td>
+                                        </tr>
+                                    ))
+                                ) : (
+                                    <tr>
+                                        <td colSpan={3} className="px-6 py-4 text-center text-slate-400">No hay torneos registrados.</td>
                                     </tr>
-                                ))}
+                                )}
                             </tbody>
                         </table>
                     </div>
@@ -96,30 +122,36 @@ const PlayerDashboardPage: React.FC<{ profile?: any }> = ({ profile }) => {
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-700">
-                                {mockPlayerMarketplacePosts.map(post => (
-                                    <tr key={post.id} className="hover:bg-slate-700/40">
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">{post.title}</td>
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <span className={`font-semibold text-xs px-2 py-1 rounded-full ${post.type === 'Venta' ? 'bg-red-500/20 text-red-300' :
+                                {userPosts.length > 0 ? (
+                                    userPosts.map(post => (
+                                        <tr key={post.id} className="hover:bg-slate-700/40">
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">{post.title}</td>
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <span className={`font-semibold text-xs px-2 py-1 rounded-full ${post.type === 'Venta' ? 'bg-red-500/20 text-red-300' :
                                                     post.type === 'Compra' ? 'bg-green-500/20 text-green-300' :
                                                         'bg-blue-500/20 text-blue-300'
-                                                }`}>
-                                                {post.type}
-                                            </span>
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium space-x-2">
-                                            <button className="p-2 text-slate-400 hover:text-green-400 transition-colors" title="Marcar como Vendido/Completado">
-                                                <CheckCircleIcon className="w-5 h-5" />
-                                            </button>
-                                            <button className="p-2 text-slate-400 hover:text-yellow-400 transition-colors" title="Editar">
-                                                <PencilIcon className="w-5 h-5" />
-                                            </button>
-                                            <button className="p-2 text-slate-400 hover:text-red-400 transition-colors" title="Eliminar">
-                                                <TrashIcon className="w-5 h-5" />
-                                            </button>
-                                        </td>
+                                                    }`}>
+                                                    {post.type}
+                                                </span>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium space-x-2">
+                                                <button className="p-2 text-slate-400 hover:text-green-400 transition-colors" title="Marcar como Vendido/Completado">
+                                                    <CheckCircleIcon className="w-5 h-5" />
+                                                </button>
+                                                <button className="p-2 text-slate-400 hover:text-yellow-400 transition-colors" title="Editar">
+                                                    <PencilIcon className="w-5 h-5" />
+                                                </button>
+                                                <button className="p-2 text-slate-400 hover:text-red-400 transition-colors" title="Eliminar">
+                                                    <TrashIcon className="w-5 h-5" />
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    ))
+                                ) : (
+                                    <tr>
+                                        <td colSpan={3} className="px-6 py-4 text-center text-slate-400">No tienes publicaciones activas.</td>
                                     </tr>
-                                ))}
+                                )}
                             </tbody>
                         </table>
                     </div>

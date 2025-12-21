@@ -54,8 +54,108 @@ const SettingsPage: React.FC = () => {
     const [favoriteFormat, setFavoriteFormat] = useState('');
     const [team, setTeam] = useState('');
 
+    // Password State
+    const [newPassword, setNewPassword] = useState('');
+    const [confirmNewPassword, setConfirmNewPassword] = useState('');
+
+    // Alias State
+    const [aliases, setAliases] = useState<any[]>([]);
+    const [newAlias, setNewAlias] = useState('');
+    const [aliasLoading, setAliasLoading] = useState(false);
+
+    const fetchAliases = async (userId: string) => {
+        const { data, error } = await supabase
+            .from('player_aliases')
+            .select('*')
+            .eq('player_id', userId);
+
+        if (data) setAliases(data);
+    };
+
+    const handleAddAlias = async () => {
+        if (!newAlias.trim()) return;
+        setAliasLoading(true);
+        try {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) return;
+
+            const { error } = await supabase.from('player_aliases').insert({
+                player_id: user.id,
+                alias_name: newAlias.trim()
+            });
+
+            if (error) {
+                if (error.code === '23505') { // Unique violation
+                    setMessage({ type: 'error', text: 'Este alias ya está registrado por otro usuario o por ti mismo.' });
+                } else {
+                    throw error;
+                }
+            } else {
+                setNewAlias('');
+                fetchAliases(user.id);
+                setMessage({ type: 'success', text: 'Alias agregado correctamente.' });
+            }
+        } catch (error: any) {
+            setMessage({ type: 'error', text: error.message });
+        } finally {
+            setAliasLoading(false);
+        }
+    };
+
+    const handleDeleteAlias = async (id: string) => {
+        if (!confirm('¿Estás seguro de eliminar este alias?')) return;
+        try {
+            const { error } = await supabase.from('player_aliases').delete().eq('id', id);
+            if (error) throw error;
+            setAliases(aliases.filter(a => a.id !== id));
+        } catch (error: any) {
+            setMessage({ type: 'error', text: error.message });
+        }
+    };
+
+    const handlePasswordUpdate = async () => {
+        if (!newPassword || newPassword.length < 6) {
+            setMessage({ type: 'error', text: 'La contraseña debe tener al menos 6 caracteres.' });
+            return;
+        }
+        if (newPassword !== confirmNewPassword) {
+            setMessage({ type: 'error', text: 'Las contraseñas no coinciden.' });
+            return;
+        }
+
+        setUpdating(true);
+        setMessage(null);
+
+        try {
+            const { error } = await supabase.auth.updateUser({ password: newPassword });
+            if (error) throw error;
+
+            setMessage({ type: 'success', text: 'Contraseña actualizada correctamente.' });
+            setNewPassword('');
+            setConfirmNewPassword('');
+        } catch (error: any) {
+            setMessage({ type: 'error', text: error.message || 'Error al actualizar la contraseña.' });
+        } finally {
+            setUpdating(false);
+        }
+    };
+
     useEffect(() => {
+        // Force loading to false after 10 seconds just in case
+        const timer = setTimeout(() => {
+            setLoading((current) => {
+                if (current) {
+                    console.warn("Forcing loading to false due to timeout");
+                    setMessage({ type: 'error', text: 'La carga del perfil tardó demasiado. Por favor recarga la página.' });
+                    return false;
+                }
+                return current;
+            });
+        }, 10000);
+
         getProfile();
+
+        return () => clearTimeout(timer);
     }, []);
 
     const getProfile = async () => {
@@ -91,6 +191,9 @@ const SettingsPage: React.FC = () => {
                 setPreferredGames(data.preferred_games || []);
                 setFavoriteFormat(data.favorite_format || '');
                 setTeam(data.team || '');
+
+                // Fetch aliases once profile is loaded
+                fetchAliases(user.id);
             }
         } catch (error) {
             console.error(error);
@@ -127,7 +230,10 @@ const SettingsPage: React.FC = () => {
                 updated_at: new Date().toISOString(),
             };
 
-            const { error } = await supabase.from('profiles').upsert(updates);
+            const { error } = await supabase
+                .from('profiles')
+                .update(updates)
+                .eq('id', user.id);
 
             if (error) throw error;
             setMessage({ type: 'success', text: 'Perfil actualizado correctamente.' });
@@ -278,7 +384,66 @@ const SettingsPage: React.FC = () => {
                         </div>
                     </section>
 
-                    {/* Sección 4: Cuenta */}
+
+                    {/* Sección 4: Alias de Competencia */}
+                    <section>
+                        <h2 className="text-xl font-bold text-white mb-4 border-b border-slate-700 pb-2">Nombres de Competencia (Alias)</h2>
+                        <div className="bg-slate-900/50 p-6 rounded-lg border border-slate-700 space-y-4">
+                            <p className="text-sm text-slate-400">
+                                Agrega aquí los nombres exactos que usas en las apps de torneos (Companion, Melee, etc.).
+                                Esto nos permite sumar tus puntos automáticamente aunque el organizador escriba tu nombre de forma distinta.
+                            </p>
+
+                            <div className="flex flex-col md:flex-row gap-3 items-end">
+                                <div className="flex-grow w-full">
+                                    <label className={labelClass}>Nuevo Alias / Nombre en App</label>
+                                    <input
+                                        type="text"
+                                        value={newAlias}
+                                        onChange={(e) => setNewAlias(e.target.value)}
+                                        className={commonInputClass}
+                                        placeholder='Ej: "Juan Perez", "Juan P.", "DarkMage99"'
+                                    />
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={handleAddAlias}
+                                    disabled={!newAlias.trim() || aliasLoading}
+                                    className="w-full md:w-auto px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-lg transition-colors disabled:opacity-50"
+                                >
+                                    {aliasLoading ? '...' : 'Agregar Alias'}
+                                </button>
+                            </div>
+
+                            {/* Alias List */}
+                            <div className="mt-4">
+                                <h4 className="text-sm font-semibold text-white mb-2">Tus Alias Registrados:</h4>
+                                {aliases.length > 0 ? (
+                                    <div className="flex flex-wrap gap-2">
+                                        {aliases.map((alias) => (
+                                            <div key={alias.id} className="group relative flex items-center gap-2 bg-slate-800 text-indigo-300 px-3 py-1.5 rounded-full border border-indigo-900/50 pr-8">
+                                                <span className="text-sm font-medium">{alias.alias_name}</span>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleDeleteAlias(alias.id)}
+                                                    className="absolute right-1 top-1/2 -translate-y-1/2 p-1 text-slate-500 hover:text-red-400 rounded-full transition-colors"
+                                                    title="Eliminar alias"
+                                                >
+                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
+                                                        <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" />
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <p className="text-sm text-slate-500 italic">No tienes alias registrados. Agrega uno arriba.</p>
+                                )}
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* Sección 5: Cuenta */}
                     <section>
                         <h2 className="text-xl font-bold text-white mb-4 border-b border-slate-700 pb-2">Cuenta</h2>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -301,12 +466,44 @@ const SettingsPage: React.FC = () => {
                             </div>
                         </div>
                         {/* Placeholder for Password Change - Functional logic would require more complex auth flow */}
-                        <div className="mt-6">
-                            <h3 className="text-sm font-bold text-slate-300 mb-3">Seguridad</h3>
-                            <button type="button" className="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white text-sm rounded transition-colors duration-200">
-                                Cambiar Contraseña
-                            </button>
-                            <p className="text-xs text-slate-500 mt-2">Si te registraste con Google, no necesitas contraseña.</p>
+                        <div className="mt-8 pt-6 border-t border-slate-700">
+                            <h3 className="text-lg font-bold text-white mb-4">Seguridad</h3>
+                            <div className="bg-slate-900/50 p-6 rounded-lg border border-slate-700">
+                                <h4 className="text-sm font-semibold text-sky-400 mb-4 uppercase tracking-wider">Cambiar Contraseña</h4>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
+                                    <div>
+                                        <label className={labelClass}>Nueva Contraseña</label>
+                                        <input
+                                            type="password"
+                                            value={newPassword}
+                                            onChange={(e) => setNewPassword(e.target.value)}
+                                            className={commonInputClass}
+                                            placeholder="Mínimo 6 caracteres"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className={labelClass}>Confirmar Nueva Contraseña</label>
+                                        <input
+                                            type="password"
+                                            value={confirmNewPassword}
+                                            onChange={(e) => setConfirmNewPassword(e.target.value)}
+                                            className={commonInputClass}
+                                            placeholder="Repite la contraseña"
+                                        />
+                                    </div>
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={handlePasswordUpdate}
+                                    disabled={!newPassword || updating}
+                                    className="px-6 py-2 bg-slate-700 hover:bg-emerald-600 text-white font-medium rounded-lg transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                                >
+                                    Actualizar Contraseña
+                                </button>
+                                <p className="text-xs text-slate-500 mt-3">
+                                    Nota: Si iniciaste sesión con Google, no necesitas establecer una contraseña aquí, pero puedes hacerlo si deseas habilitar el inicio de sesión con correo.
+                                </p>
+                            </div>
                         </div>
                     </section>
 

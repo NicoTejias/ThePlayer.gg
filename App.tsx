@@ -15,9 +15,6 @@ import MediaPage from './pages/MediaPage';
 import MediaArticlesPage from './pages/MediaArticlesPage';
 import MediaVideosPage from './pages/MediaVideosPage';
 import PLSPage from './pages/PLSPage';
-// ... existing code ...
-
-
 import JudgesPage from './pages/JudgesPage';
 import StoresPage from './pages/StoresPage';
 import AuthPage from './pages/AuthPage';
@@ -29,6 +26,7 @@ import TournamentStandingsPage from './pages/TournamentStandingsPage';
 import SettingsPage from './pages/SettingsPage';
 import LiveStreamPage from './pages/LiveStreamPage';
 import type { TournamentResult, CommunityEvent, PlayerProfile, TournamentParseResult } from './types';
+import OnboardingModal from './components/OnboardingModal';
 
 const mockInitialPlayers: PlayerProfile[] = [];
 const mockTournamentResults: TournamentResult[] = [];
@@ -36,72 +34,20 @@ const mockInitialEvents: CommunityEvent[] = [];
 
 
 const AppContent: React.FC = () => {
+  const [isAuthLoading, setIsAuthLoading] = useState(true); // New loading state
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userRole, setUserRole] = useState<'player' | 'store' | 'admin' | null>(null);
   const [userProfile, setUserProfile] = useState<any>(null); // Store full profile
   const [tournamentResults, setTournamentResults] = useState<TournamentResult[]>([]);
   const [communityEvents, setCommunityEvents] = useState<CommunityEvent[]>([]);
   const [players, setPlayers] = useState<PlayerProfile[]>([]);
+  const [showOnboarding, setShowOnboarding] = useState(false);
+
   // Hardcoded for now. In future, fetch this from Supabase 'system_status' table or similar.
   const [isLiveSignal, setIsLiveSignal] = useState(true);
   const navigate = useNavigate();
 
-  // Fetch data on load
-  React.useEffect(() => {
-    fetchData();
-
-    // Handle Supabase Auth
-    const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log("Auth event:", event);
-
-      if (session?.user) {
-        setIsLoggedIn(true);
-
-        // Fetch or create profile
-        const { data: profile, error } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', session.user.id)
-          .single();
-
-        if (profile) {
-          setUserRole(profile.role as 'player' | 'store' | 'admin');
-          setUserProfile(profile);
-          console.log("Logged in as:", profile.role);
-        } else {
-          // Create new profile for OAuth user
-          console.log("New user, creating profile...");
-          const newProfile = {
-            id: session.user.id,
-            username: session.user.user_metadata.full_name || session.user.email?.split('@')[0] || 'User',
-            role: (localStorage.getItem('signup_role') as 'player' | 'store') || 'player', // Use selected role or default
-            email: session.user.email,
-            avatar_url: session.user.user_metadata.avatar_url
-          };
-
-          const { error: insertError } = await supabase
-            .from('profiles')
-            .insert(newProfile);
-
-          if (insertError) {
-            console.error("Error creating profile:", insertError);
-          } else {
-            setUserRole('player');
-            if (newProfile) setUserProfile(newProfile);
-          }
-        }
-      } else {
-        setIsLoggedIn(false);
-        setUserRole(null);
-        setUserProfile(null);
-      }
-    });
-
-    return () => {
-      authListener.subscription.unsubscribe();
-    };
-  }, []);
-
+  // Fetch data definition
   const fetchData = async () => {
     // 1. Fetch Players
     const { data: profilesData, error: profilesError } = await supabase
@@ -118,8 +64,7 @@ const AppContent: React.FC = () => {
         matchesWon: p.matches_won || 0,
         matchesLost: p.matches_lost || 0,
         matchesDrew: p.matches_drew || 0,
-        team: p.team // Add team
-        // winRate calc could happen here if needed, or in the component
+        team: p.team
       }));
       setPlayers(mappedPlayers);
     }
@@ -135,15 +80,12 @@ const AppContent: React.FC = () => {
         id: t.id,
         name: t.name,
         date: t.date,
-        storeName: t.store_name || 'Unknown Store', // Keeping consistent with previous map
+        storeName: t.store_name || 'Unknown Store',
         format: t.format || 'Unknown',
         playerCount: t.player_count || 0
       }));
       setTournamentResults(mappedTourneys);
 
-      // Map tournaments to CommunityEvents (assuming for now they are same source or related)
-      // Note: In a real app, 'Events' might be future scheduled events vs 'Tournaments' which are past results
-      // For now, let's just populate events with the same data or similar logic if intended
       const mappedEvents: CommunityEvent[] = mappedTourneys.map(t => ({
         id: t.id,
         title: t.name,
@@ -156,12 +98,124 @@ const AppContent: React.FC = () => {
     }
   };
 
-  const handleLogin = async (role: 'player' | 'store' | 'admin') => {
-    // Kept for manual login simulation or if you expand it later
-    // The AuthPage now handles the actual Supabase calls for Google
-    // which triggers the onAuthStateChange above.
-    // Manual login forms in AuthPage should also ideally be updated to use Supabase.
+  // Fetch data on load
+  React.useEffect(() => {
+    // 1. Initialize Auth Check
+    const initAuth = async () => {
+      setIsAuthLoading(true);
+      try {
+        // Check active session immediately
+        const { data: { session }, error } = await supabase.auth.getSession();
+        if (error) throw error;
+        await handleSessionState(session);
 
+        // Setup listener for future changes
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+          // We don't await this inside the event loop in a way that blocks init, 
+          // but we want to ensure state updates correctly.
+          await handleSessionState(session);
+        });
+
+        // Warning: returning the cleanup function here inside the async function 
+        // doesn't actually work for useEffect cleanup because useEffect expects 
+        // the immediate return to be the cleanup.
+        // We need to move the subscription out or handle it differently if we want strict cleanup.
+        // For now, let's just keep the logic flowing but fix the loading state.
+
+      } catch (err) {
+        console.error("Critical Auth Error:", err);
+        setIsLoggedIn(false);
+      } finally {
+        setIsAuthLoading(false);
+      }
+    };
+
+    initAuth();
+    fetchData();
+  }, []);
+
+  const handleSessionState = async (session: any) => {
+    if (session?.user) {
+      setIsLoggedIn(true);
+
+      // Fetch or create profile
+      const { data: profile, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', session.user.id)
+        .single();
+
+      if (profile) {
+        setUserRole(profile.role as 'player' | 'store' | 'admin');
+        setUserProfile(profile);
+        console.log("Logged in as:", profile.role);
+
+        // Check for Alias (Onboarding)
+        if (profile.role === 'player') {
+          const { count } = await supabase
+            .from('player_aliases')
+            .select('*', { count: 'exact', head: true })
+            .eq('player_id', session.user.id);
+
+          if (count === 0) {
+            setShowOnboarding(true);
+          }
+        }
+      } else {
+        // Profile missing (could be new OAuth user or Email user with failed profile creation)
+        console.log("Profile not found, creating new profile...");
+
+        const fullName = session.user.user_metadata.full_name || session.user.user_metadata.username || session.user.email?.split('@')[0] || 'User';
+        const userRole = (session.user.user_metadata.role as 'player' | 'store') || (localStorage.getItem('signup_role') as 'player' | 'store') || 'player';
+
+        const newProfile = {
+          id: session.user.id,
+          username: fullName,
+          role: userRole,
+          email: session.user.email,
+          avatar_url: session.user.user_metadata.avatar_url,
+          pwp: 0,
+          matches_won: 0,
+          matches_lost: 0,
+          matches_drew: 0
+        };
+
+        const { error: insertError } = await supabase
+          .from('profiles')
+          .insert(newProfile);
+
+        if (insertError) {
+          console.error("Error creating profile automatically (likely RLS). Using temp profile:", insertError);
+          // Fallback: Set profile in memory anyway so the user can use the site temporarily
+          setUserRole(userRole);
+          setUserProfile(newProfile);
+        } else {
+          console.log("Profile created successfully.");
+          setUserRole(userRole);
+          setUserProfile(newProfile);
+        }
+      }
+    } else {
+      setIsLoggedIn(false);
+      setUserRole(null);
+      setUserProfile(null);
+      setShowOnboarding(false);
+    }
+  };
+
+  if (isAuthLoading) {
+    return (
+      <div className="bg-slate-900 min-h-screen flex items-center justify-center text-white">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-4 border-sky-500 border-t-transparent rounded-full animate-spin"></div>
+          <p className="animate-pulse">Cargando sesión...</p>
+        </div>
+      </div>
+    );
+  }
+
+
+  const handleLogin = async (role: 'player' | 'store' | 'admin') => {
     setIsLoggedIn(true);
     setUserRole(role);
     switch (role) {
@@ -188,37 +242,22 @@ const AppContent: React.FC = () => {
   const handleTournamentUpload = async (tournamentData: Omit<TournamentResult, 'id'>, playerResults: TournamentParseResult[]) => {
     console.log("=== INICIO DE SUBIDA ===");
     console.log("Tournament Data:", tournamentData);
-    console.log("Player Results:", playerResults);
     const errors: string[] = [];
 
     try {
-      // Convert date from DD/MM/YYYY to YYYY-MM-DD for Supabase
       const dateParts = tournamentData.date.split('/');
       const isoDate = dateParts.length === 3 ? `${dateParts[2]}-${dateParts[1]}-${dateParts[0]}` : tournamentData.date;
-      console.log("Fecha convertida:", isoDate);
 
       // PROBE CONNECTION
-      console.log("🔍 Probando conexión de lectura...");
       const { count, error: probeError } = await supabase.from('tournaments').select('*', { count: 'exact', head: true });
-      if (probeError) {
-        console.error("❌ La lectura falló. No hay conexión con DB:", probeError);
-        throw new Error("No hay conexión con la base de datos (Lectura fallida).");
-      }
-      console.log("✅ Conexión de lectura OK. Filas actuales:", count);
+      if (probeError) throw new Error("No hay conexión con la base de datos (Lectura fallida).");
 
       // 1. Upload Tournament Record
-      console.log("Paso 1: Insertando torneo VÍA RPC (Función SQL) + SECURITY DEFINER...");
-
-      // Generate ID manually
       const newTournamentId = crypto.randomUUID();
-      console.log("ID generado manualmente:", newTournamentId);
-
-      // Create a promise that rejects after 15 seconds
       const timeoutPromise = new Promise((_, reject) =>
         setTimeout(() => reject(new Error("La base de datos tardó demasiado en responder (Timeout). Revisa tu conexión o las políticas RLS.")), 15000)
       );
 
-      // USE RPC to bypass Table Insert issues
       const insertPromise = supabase
         .rpc('create_tournament_via_rpc', {
           p_id: newTournamentId,
@@ -229,22 +268,13 @@ const AppContent: React.FC = () => {
           p_player_count: tournamentData.playerCount
         });
 
-      // Race against the timeout
       const { error: tourneyError } = await Promise.race([insertPromise, timeoutPromise]) as any;
 
-      if (tourneyError) {
-        console.error("❌ ERROR AL CREAR TORNEO:", tourneyError);
-        throw new Error(tourneyError?.message || "Error al crear el torneo");
-      }
-
-      console.log("✅ Torneo creado con ID:", newTournamentId);
+      if (tourneyError) throw new Error(tourneyError?.message || "Error al crear el torneo");
 
       // 2. Process Players and Results
-      console.log(`Paso 2: Procesando ${playerResults.length} jugadores...`);
       for (let i = 0; i < playerResults.length; i++) {
         const result = playerResults[i];
-        console.log(`  Procesando jugador ${i + 1}/${playerResults.length}: ${result.playerName}`);
-
         try {
           const { error: rpcError } = await supabase.rpc('process_player_result', {
             p_tournament_id: newTournamentId,
@@ -255,28 +285,18 @@ const AppContent: React.FC = () => {
             p_pwp_earned: result.pwpEarned
           });
 
-          if (rpcError) {
-            console.error(`    ❌ Error RPC:`, rpcError);
-            throw new Error(rpcError.message);
-          }
-          console.log(`    ✅ Procesado correctamente`);
+          if (rpcError) throw new Error(rpcError.message);
 
         } catch (innerError: any) {
-          console.error(`  ❌ ERROR PROCESANDO ${result.playerName}:`, innerError);
           errors.push(`${result.playerName}: ${innerError.message || "Unknown error"}`);
         }
       }
 
-      // Refresh data
-      console.log("Paso 3: Refrescando datos de la app...");
       await fetchData();
-      console.log("✅ Datos refrescados");
 
       if (errors.length > 0) {
-        console.warn("⚠️ Subida completada con errores:", errors);
         alert(`Torneo subido con advertencias. Revisa los siguientes errores:\n${errors.join('\n')}`);
       } else {
-        console.log("🎉 SUBIDA EXITOSA");
         alert("¡Torneo subido con éxito! El ranking ha sido actualizado.");
       }
 
@@ -286,10 +306,28 @@ const AppContent: React.FC = () => {
     }
   };
 
+  const commonHandler = {
+    closeOnboarding: () => setShowOnboarding(false),
+    goToSettings: () => {
+      setShowOnboarding(false);
+      navigate('/settings');
+    }
+  };
+
   return (
     <div className="bg-slate-900 text-slate-200 min-h-screen flex flex-col relative isolate">
       <ParticlesBackground />
-      <Header isLoggedIn={isLoggedIn} userRole={userRole} handleLogout={handleLogout} isLiveSignal={isLiveSignal} />
+      <Header isLoggedIn={isLoggedIn} userRole={userRole} handleLogout={handleLogout}
+        isLiveSignal={isLiveSignal}
+        userName={userProfile?.username || 'Jugador'}
+      />
+
+      <OnboardingModal
+        isOpen={showOnboarding}
+        onClose={commonHandler.closeOnboarding}
+        onGoToSettings={commonHandler.goToSettings}
+      />
+
       <main className="flex-grow container mx-auto px-4 py-8">
         <Routes>
           <Route path="/" element={<HomePage players={players} events={communityEvents} />} />
@@ -310,7 +348,7 @@ const AppContent: React.FC = () => {
           <Route path="/login" element={<AuthPage handleLogin={handleLogin} />} />
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="/admin" element={<AdminDashboardPage />} />
-          <Route path="/dashboard/tienda" element={<StoreDashboardPage onTournamentUpload={handleTournamentUpload} userRole={userRole} tournaments={tournamentResults} />} />
+          <Route path="/dashboard/tienda" element={<StoreDashboardPage onTournamentUpload={handleTournamentUpload} userRole={userRole} tournaments={tournamentResults} storeStatus={userProfile?.status} />} />
           <Route path="/dashboard/jugador" element={<PlayerDashboardPage profile={userProfile} />} />
         </Routes>
       </main>

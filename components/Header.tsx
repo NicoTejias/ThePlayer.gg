@@ -37,11 +37,12 @@ const NavLinks: NavLinkType[] = [
 interface HeaderProps {
   isLoggedIn: boolean;
   userRole: 'player' | 'store' | 'admin' | null;
+  userName?: string; // New prop
   handleLogout: () => void;
-  isLiveSignal?: boolean; // New prop to control the global blink state
+  isLiveSignal?: boolean;
 }
 
-const Header: React.FC<HeaderProps> = ({ isLoggedIn, userRole, handleLogout, isLiveSignal = false }) => {
+const Header: React.FC<HeaderProps> = ({ isLoggedIn, userRole, userName = 'Jugador', handleLogout, isLiveSignal = false }) => {
   const [isProfileMenuOpen, setProfileMenuOpen] = useState(false);
   const profileMenuRef = useRef<HTMLDivElement>(null);
   const location = useLocation();
@@ -160,7 +161,7 @@ const Header: React.FC<HeaderProps> = ({ isLoggedIn, userRole, handleLogout, isL
                   className="flex items-center gap-2 bg-slate-700/50 p-1.5 pr-3 rounded-full hover:bg-slate-700 transition-all border border-slate-600 hover:border-slate-500"
                 >
                   <UserCircleIcon className="w-8 h-8 text-sky-400" />
-                  <span className="text-white font-semibold text-sm hidden sm:block">MageSlayer92</span>
+                  <span className="text-white font-semibold text-sm hidden sm:block">{userName}</span>
                   <svg className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${isProfileMenuOpen ? 'rotate-180' : ''}`} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                     <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
                   </svg>
@@ -171,7 +172,7 @@ const Header: React.FC<HeaderProps> = ({ isLoggedIn, userRole, handleLogout, isL
                     <div className="py-2">
                       <div className="px-4 py-2 sm:hidden border-b border-slate-700/50 mb-2">
                         <p className="text-xs text-slate-400">Logueado como</p>
-                        <p className="text-white font-bold truncate">MageSlayer92</p>
+                        <p className="text-white font-bold truncate">{userName}</p>
                       </div>
                       <Link to={getDashboardPath()} className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-200 hover:bg-slate-700/50 transition-colors" role="menuitem">
                         <ShieldCheckIcon className="w-5 h-5 text-sky-400" />

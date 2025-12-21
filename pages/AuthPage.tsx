@@ -50,33 +50,134 @@ interface AuthPageProps {
 
 const AuthPage: React.FC<AuthPageProps> = ({ handleLogin }) => {
     const [isLoginView, setIsLoginView] = useState(true);
+    const [isForgotPasswordView, setIsForgotPasswordView] = useState(false);
     const [role, setRole] = useState<'player' | 'store'>('player');
     const [termsAccepted, setTermsAccepted] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [authError, setAuthError] = useState<string | null>(null);
+    const [resetEmailSent, setResetEmailSent] = useState(false);
 
     const commonInputClass = "w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 transition duration-200";
     const commonButtonClass = "w-full py-3 px-4 font-bold rounded-lg transition duration-300";
 
-    const onLoginSubmit = (e: React.FormEvent) => {
+    const onLoginSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        // Here you would normally validate credentials
-        // For simulation, we'll just log in as a player.
-        // In a real app, you'd get the role from the server.
-        handleLogin('player');
+        setIsLoading(true);
+        setAuthError(null);
+
+        const formData = new FormData(e.currentTarget);
+        const email = formData.get('email') as string;
+        const password = formData.get('password') as string;
+
+        try {
+            const { data: { user }, error } = await supabase.auth.signInWithPassword({
+                email,
+                password,
+            });
+
+            if (error) throw error;
+
+            if (user) {
+                const { data: profile, error: profileError } = await supabase
+                    .from('profiles')
+                    .select('role')
+                    .eq('id', user.id)
+                    .single();
+
+                if (profileError) {
+                    console.error("Error fetching profile on login:", profileError);
+                    handleLogin('player');
+                } else {
+                    handleLogin(profile.role as 'player' | 'store' | 'admin');
+                }
+            }
+        } catch (error: any) {
+            console.error('Login error:', error);
+            setAuthError(error.message || 'Error al iniciar sesión.');
+            setIsLoading(false);
+        }
     };
 
-    const onRegisterSubmit = (e: React.FormEvent) => {
+    const onRegisterSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
+        setAuthError(null);
+
         if (!termsAccepted) {
             alert("Debes aceptar los términos y condiciones para registrarte.");
             return;
         }
-        // Here you would handle the registration logic
-        alert(`Registro simulado como ${role}.`);
-        // For simulation, we could log the user in directly after registration
-        handleLogin(role);
+
+        const formData = new FormData(e.currentTarget);
+        const username = formData.get('username') as string;
+        const email = formData.get('reg-email') as string;
+        const password = formData.get('reg-password') as string;
+        const confirmPassword = formData.get('confirm-password') as string;
+        const region = formData.get('region') as string;
+
+        if (password !== confirmPassword) {
+            setAuthError("Las contraseñas no coinciden.");
+            return;
+        }
+
+        setIsLoading(true);
+
+        try {
+            localStorage.setItem('signup_role', role);
+
+            const { data, error } = await supabase.auth.signUp({
+                email,
+                password,
+                options: {
+                    data: {
+                        full_name: username,
+                        role: role,
+                        region: region
+                    }
+                }
+            });
+
+            if (error) throw error;
+
+            if (data.user) {
+                if (data.session) {
+                    handleLogin(role);
+                } else {
+                    alert("Registro exitoso. Por favor revisa tu correo electrónico para confirmar tu cuenta.");
+                    setIsLoginView(true);
+                    setIsLoading(false);
+                }
+            }
+
+        } catch (error: any) {
+            console.error('Registration error:', error);
+            setAuthError(error.message || 'Error al registrarse.');
+            setIsLoading(false);
+        }
+    };
+
+    const onPasswordResetSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        setIsLoading(true);
+        setAuthError(null);
+
+        const formData = new FormData(e.currentTarget);
+        const email = formData.get('email') as string;
+
+        try {
+            const { error } = await supabase.auth.resetPasswordForEmail(email, {
+                redirectTo: `${window.location.origin}/#/settings`, // Redirect to settings to update password
+            });
+
+            if (error) throw error;
+
+            setResetEmailSent(true);
+            setIsLoading(false);
+        } catch (error: any) {
+            console.error('Password reset error:', error);
+            setAuthError(error.message || 'Error al solicitar restablecimiento.');
+            setIsLoading(false);
+        }
     };
 
     const handleGoogleSignIn = async () => {
@@ -84,7 +185,6 @@ const AuthPage: React.FC<AuthPageProps> = ({ handleLogin }) => {
             setIsLoading(true);
             setAuthError(null);
 
-            // Save selected role to localStorage for post-login profile creation
             localStorage.setItem('signup_role', role);
 
             const { error } = await supabase.auth.signInWithOAuth({
@@ -107,206 +207,237 @@ const AuthPage: React.FC<AuthPageProps> = ({ handleLogin }) => {
         }
     };
 
-    const LoginForm = () => (
-        <form onSubmit={onLoginSubmit} className="space-y-6">
-            <h2 className="text-3xl font-bold text-center text-white uppercase">Iniciar Sesión</h2>
-            <div>
-                <label htmlFor="email" className="sr-only">Correo Electrónico</label>
-                <input type="email" name="email" id="email" placeholder="Correo Electrónico" className={commonInputClass} />
-            </div>
-            <div>
-                <label htmlFor="password" className="sr-only">Contraseña</label>
-                <input type="password" name="password" id="password" placeholder="Contraseña" className={commonInputClass} />
-            </div>
-            <div className="flex items-center justify-between text-sm">
-                <div className="flex items-center">
-                    <input id="remember-me" name="remember-me" type="checkbox" className="h-4 w-4 rounded border-slate-600 bg-slate-800 text-sky-600 focus:ring-sky-500" />
-                    <label htmlFor="remember-me" className="ml-2 block text-slate-400">Recordarme</label>
-                </div>
-                <a href="#" className="font-medium text-sky-400 hover:text-sky-300">¿Olvidaste tu contraseña?</a>
-            </div>
-            <div>
-                <button type="submit" className={`${commonButtonClass} bg-sky-600 text-white hover:bg-sky-700`}>
-                    Ingresar
-                </button>
-            </div>
-        </form>
-    );
-
-    const RegisterForm = () => (
-        <form onSubmit={onRegisterSubmit} className="space-y-4">
-            <h2 className="text-3xl font-bold text-center text-white uppercase">Crear Cuenta</h2>
-            <div>
-                <label htmlFor="username" className="sr-only">Nombre de Usuario</label>
-                <input type="text" name="username" id="username" placeholder="Nombre de Usuario" className={commonInputClass} required />
-            </div>
-            <div>
-                <label htmlFor="reg-email" className="sr-only">Correo Electrónico</label>
-                <input type="email" name="reg-email" id="reg-email" placeholder="Correo Electrónico" className={commonInputClass} required />
-            </div>
-            <div>
-                <label htmlFor="reg-password" className="sr-only">Contraseña</label>
-                <input type="password" name="reg-password" id="reg-password" placeholder="Contraseña" className={commonInputClass} required />
-            </div>
-            <div>
-                <label htmlFor="confirm-password" className="sr-only">Confirmar Contraseña</label>
-                <input type="password" name="confirm-password" id="confirm-password" placeholder="Confirmar Contraseña" className={commonInputClass} required />
-            </div>
-            <div className="relative">
-                <select name="region" id="region" className={`${commonInputClass} appearance-none`} required>
-                    <option value="" disabled selected>Selecciona tu Región</option>
-                    <option value="Metropolitana">Metropolitana</option>
-                    <option value="Valparaíso">Valparaíso</option>
-                    <option value="Biobío">Biobío</option>
-                    <option value="Sur">Sur</option>
-                    <option value="Norte">Norte</option>
-                </select>
-            </div>
-            <div className="pt-2">
-                <label className="text-sm font-medium text-slate-300">Tipo de Cuenta</label>
-                <div className="mt-2 grid grid-cols-2 gap-4">
-                    <label htmlFor="role-player" className="flex items-center p-3 bg-slate-900 border border-slate-700 rounded-lg cursor-pointer hover:bg-slate-800 has-[:checked]:ring-2 has-[:checked]:ring-sky-500">
-                        <input type="radio" name="role" id="role-player" value="player" className="h-4 w-4 text-sky-600 border-slate-600 focus:ring-sky-500" checked={role === 'player'} onChange={() => setRole('player')} />
-                        <span className="ml-3 text-sm font-medium text-white">Jugador</span>
-                    </label>
-                    <label htmlFor="role-store" className="flex items-center p-3 bg-slate-900 border border-slate-700 rounded-lg cursor-pointer hover:bg-slate-800 has-[:checked]:ring-2 has-[:checked]:ring-sky-500">
-                        <input type="radio" name="role" id="role-store" value="store" className="h-4 w-4 text-sky-600 border-slate-600 focus:ring-sky-500" checked={role === 'store'} onChange={() => setRole('store')} />
-                        <span className="ml-3 text-sm font-medium text-white">Tienda</span>
-                    </label>
-                </div>
-                <p className="text-xs text-slate-500 mt-2">Las cuentas de Tienda requieren aprobación del administrador.</p>
-            </div>
-
-            <div className="flex items-start space-x-3 pt-2">
-                <input
-                    id="terms"
-                    name="terms"
-                    type="checkbox"
-                    className="h-5 w-5 rounded border-slate-600 bg-slate-800 text-sky-600 focus:ring-sky-500 mt-0.5 flex-shrink-0"
-                    checked={termsAccepted}
-                    onChange={(e) => setTermsAccepted(e.target.checked)}
-                />
-                <label htmlFor="terms" className="text-sm text-slate-400">
-                    He leído y acepto los{' '}
-                    <button
-                        type="button"
-                        onClick={() => setIsModalOpen(true)}
-                        className="font-medium text-sky-400 hover:text-sky-300 underline"
-                    >
-                        Términos y Condiciones
-                    </button>
-                    {' '}para {role === 'player' ? 'Jugadores' : 'Tiendas'}.
-                </label>
-            </div>
-
-            <div>
-                <button
-                    type="submit"
-                    className={`${commonButtonClass} bg-sky-600 text-white hover:bg-sky-700 mt-2 disabled:bg-slate-600 disabled:cursor-not-allowed`}
-                    disabled={!termsAccepted}
-                >
-                    Registrarse
-                </button>
-            </div>
-        </form>
-    );
-
     return (
         <>
             <div className="flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
                 <div className="max-w-md w-full space-y-8 bg-slate-800 p-10 rounded-xl shadow-2xl border border-slate-700">
-                    <div className="flex border-b border-slate-700">
-                        <button
-                            onClick={() => setIsLoginView(true)}
-                            className={`flex-1 py-2 font-bold uppercase tracking-wider transition-colors duration-300 ${isLoginView ? 'text-sky-400 border-b-2 border-sky-400' : 'text-slate-400 hover:text-white'}`}
-                        >
-                            Iniciar Sesión
-                        </button>
-                        <button
-                            onClick={() => setIsLoginView(false)}
-                            className={`flex-1 py-2 font-bold uppercase tracking-wider transition-colors duration-300 ${!isLoginView ? 'text-sky-400 border-b-2 border-sky-400' : 'text-slate-400 hover:text-white'}`}
-                        >
-                            Registrarse
-                        </button>
-                    </div>
-
-                    {isLoginView ? <LoginForm /> : <RegisterForm />}
-
-                    <div className="relative">
-                        <div className="absolute inset-0 flex items-center">
-                            <div className="w-full border-t border-slate-600"></div>
-                        </div>
-                        <div className="relative flex justify-center text-sm">
-                            <span className="px-2 bg-slate-800 text-slate-400">O continúa con</span>
-                        </div>
-                    </div>
-
-                    <div>
-                        <div className="mb-4">
-                            <label className="block text-sm font-medium text-slate-400 mb-2 text-center">Ingresar con Google como:</label>
-                            <div className="grid grid-cols-2 gap-4">
-                                <label className={`flex items-center justify-center p-2 border rounded-lg cursor-pointer transition-colors ${role === 'player' ? 'bg-sky-900 border-sky-500 text-white' : 'bg-slate-800 border-slate-600 text-slate-400 hover:bg-slate-700'}`}>
-                                    <input type="radio" name="google-role" value="player" className="sr-only" checked={role === 'player'} onChange={() => setRole('player')} />
-                                    <span className="text-sm font-bold">Jugador</span>
-                                </label>
-                                <label className={`flex items-center justify-center p-2 border rounded-lg cursor-pointer transition-colors ${role === 'store' ? 'bg-sky-900 border-sky-500 text-white' : 'bg-slate-800 border-slate-600 text-slate-400 hover:bg-slate-700'}`}>
-                                    <input type="radio" name="google-role" value="store" className="sr-only" checked={role === 'store'} onChange={() => setRole('store')} />
-                                    <span className="text-sm font-bold">Tienda</span>
-                                </label>
+                    {!isForgotPasswordView ? (
+                        <>
+                            <div className="flex border-b border-slate-700">
+                                <button
+                                    onClick={() => setIsLoginView(true)}
+                                    className={`flex-1 py-2 font-bold uppercase tracking-wider transition-colors duration-300 ${isLoginView ? 'text-sky-400 border-b-2 border-sky-400' : 'text-slate-400 hover:text-white'}`}
+                                >
+                                    Iniciar Sesión
+                                </button>
+                                <button
+                                    onClick={() => setIsLoginView(false)}
+                                    className={`flex-1 py-2 font-bold uppercase tracking-wider transition-colors duration-300 ${!isLoginView ? 'text-sky-400 border-b-2 border-sky-400' : 'text-slate-400 hover:text-white'}`}
+                                >
+                                    Registrarse
+                                </button>
                             </div>
-                        </div>
-                        {!isLoginView && (
-                            <div className="flex items-start space-x-3 mb-4 justify-center">
-                                <input
-                                    id="google-terms"
-                                    name="google-terms"
-                                    type="checkbox"
-                                    className="h-4 w-4 rounded border-slate-600 bg-slate-800 text-sky-600 focus:ring-sky-500 mt-1"
-                                    checked={termsAccepted}
-                                    onChange={(e) => setTermsAccepted(e.target.checked)}
-                                />
-                                <label htmlFor="google-terms" className="text-sm text-slate-400">
-                                    Acepto los{' '}
-                                    <button
-                                        type="button"
-                                        onClick={() => setIsModalOpen(true)}
-                                        className="font-medium text-sky-400 hover:text-sky-300 underline"
-                                    >
-                                        Términos y Condiciones
-                                    </button>
-                                </label>
-                            </div>
-                        )}
 
-                        <button
-                            type="button"
-                            onClick={handleGoogleSignIn}
-                            disabled={isLoading || (!isLoginView && !termsAccepted)}
-                            className={`${commonButtonClass} bg-white text-slate-800 hover:bg-slate-200 flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed`}
-                        >
-                            {isLoading ? (
-                                <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-slate-800" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                </svg>
+                            {isLoginView ? (
+                                <form onSubmit={onLoginSubmit} className="space-y-6">
+                                    <h2 className="text-3xl font-bold text-center text-white uppercase">Iniciar Sesión</h2>
+                                    <div>
+                                        <label htmlFor="email" className="sr-only">Correo Electrónico</label>
+                                        <input type="email" name="email" id="email" placeholder="Correo Electrónico" className={commonInputClass} required />
+                                    </div>
+                                    <div>
+                                        <label htmlFor="password" className="sr-only">Contraseña</label>
+                                        <input type="password" name="password" id="password" placeholder="Contraseña" className={commonInputClass} required />
+                                    </div>
+                                    <div className="flex items-center justify-between text-sm">
+                                        <div className="flex items-center">
+                                            <input id="remember-me" name="remember-me" type="checkbox" className="h-4 w-4 rounded border-slate-600 bg-slate-800 text-sky-600 focus:ring-sky-500" />
+                                            <label htmlFor="remember-me" className="ml-2 block text-slate-400">Recordarme</label>
+                                        </div>
+                                        <button type="button" onClick={() => setIsForgotPasswordView(true)} className="font-medium text-sky-400 hover:text-sky-300">¿Olvidaste tu contraseña?</button>
+                                    </div>
+                                    <div>
+                                        <button type="submit" className={`${commonButtonClass} bg-sky-600 text-white hover:bg-sky-700`}>
+                                            Ingresar
+                                        </button>
+                                    </div>
+                                </form>
                             ) : (
-                                <GoogleIcon className="w-5 h-5" />
-                            )}
-                            <span>{isLoading ? 'Conectando...' : `Ingresar como ${role === 'player' ? 'Jugador' : 'Tienda'}`}</span>
-                        </button>
-                        {authError && (
-                            <p className="mt-2 text-center text-sm text-red-400">
-                                {authError}
-                            </p>
-                        )}
-                    </div>
+                                <form onSubmit={onRegisterSubmit} className="space-y-4">
+                                    <h2 className="text-3xl font-bold text-center text-white uppercase">Crear Cuenta</h2>
+                                    <div>
+                                        <label htmlFor="username" className="sr-only">Nombre de Usuario</label>
+                                        <input type="text" name="username" id="username" placeholder="Nombre de Usuario" className={commonInputClass} required />
+                                    </div>
+                                    <div>
+                                        <label htmlFor="reg-email" className="sr-only">Correo Electrónico</label>
+                                        <input type="email" name="reg-email" id="reg-email" placeholder="Correo Electrónico" className={commonInputClass} required />
+                                    </div>
+                                    <div>
+                                        <label htmlFor="reg-password" className="sr-only">Contraseña</label>
+                                        <input type="password" name="reg-password" id="reg-password" placeholder="Contraseña" className={commonInputClass} required />
+                                    </div>
+                                    <div>
+                                        <label htmlFor="confirm-password" className="sr-only">Confirmar Contraseña</label>
+                                        <input type="password" name="confirm-password" id="confirm-password" placeholder="Confirmar Contraseña" className={commonInputClass} required />
+                                    </div>
+                                    <div className="relative">
+                                        <select name="region" id="region" className={`${commonInputClass} appearance-none`} required>
+                                            <option value="" disabled selected>Selecciona tu Región</option>
+                                            <option value="Metropolitana">Metropolitana</option>
+                                            <option value="Valparaíso">Valparaíso</option>
+                                            <option value="Biobío">Biobío</option>
+                                            <option value="Sur">Sur</option>
+                                            <option value="Norte">Norte</option>
+                                        </select>
+                                    </div>
+                                    <div className="pt-2">
+                                        <label className="text-sm font-medium text-slate-300">Tipo de Cuenta</label>
+                                        <div className="mt-2 grid grid-cols-2 gap-4">
+                                            <label htmlFor="role-player" className="flex items-center p-3 bg-slate-900 border border-slate-700 rounded-lg cursor-pointer hover:bg-slate-800 has-[:checked]:ring-2 has-[:checked]:ring-sky-500">
+                                                <input type="radio" name="role" id="role-player" value="player" className="h-4 w-4 text-sky-600 border-slate-600 focus:ring-sky-500" checked={role === 'player'} onChange={() => setRole('player')} />
+                                                <span className="ml-3 text-sm font-medium text-white">Jugador</span>
+                                            </label>
+                                            <label htmlFor="role-store" className="flex items-center p-3 bg-slate-900 border border-slate-700 rounded-lg cursor-pointer hover:bg-slate-800 has-[:checked]:ring-2 has-[:checked]:ring-sky-500">
+                                                <input type="radio" name="role" id="role-store" value="store" className="h-4 w-4 text-sky-600 border-slate-600 focus:ring-sky-500" checked={role === 'store'} onChange={() => setRole('store')} />
+                                                <span className="ml-3 text-sm font-medium text-white">Tienda</span>
+                                            </label>
+                                        </div>
+                                        <p className="text-xs text-slate-500 mt-2">Las cuentas de Tienda requieren aprobación del administrador.</p>
+                                    </div>
 
-                    <p className="mt-6 text-center text-sm text-slate-400">
-                        {isLoginView ? '¿No tienes una cuenta?' : '¿Ya tienes una cuenta?'}
-                        <button onClick={() => setIsLoginView(!isLoginView)} className="font-medium text-sky-400 hover:text-sky-300 ml-1">
-                            {isLoginView ? 'Regístrate aquí' : 'Inicia sesión aquí'}
-                        </button>
-                    </p>
+                                    <div className="flex items-start space-x-3 pt-2">
+                                        <input
+                                            id="terms"
+                                            name="terms"
+                                            type="checkbox"
+                                            className="h-5 w-5 rounded border-slate-600 bg-slate-800 text-sky-600 focus:ring-sky-500 mt-0.5 flex-shrink-0"
+                                            checked={termsAccepted}
+                                            onChange={(e) => setTermsAccepted(e.target.checked)}
+                                        />
+                                        <label htmlFor="terms" className="text-sm text-slate-400">
+                                            He leído y acepto los{' '}
+                                            <button
+                                                type="button"
+                                                onClick={() => setIsModalOpen(true)}
+                                                className="font-medium text-sky-400 hover:text-sky-300 underline"
+                                            >
+                                                Términos y Condiciones
+                                            </button>
+                                            {' '}para {role === 'player' ? 'Jugadores' : 'Tiendas'}.
+                                        </label>
+                                    </div>
+
+                                    <div>
+                                        <button
+                                            type="submit"
+                                            className={`${commonButtonClass} bg-sky-600 text-white hover:bg-sky-700 mt-2 disabled:bg-slate-600 disabled:cursor-not-allowed`}
+                                            disabled={!termsAccepted}
+                                        >
+                                            Registrarse
+                                        </button>
+                                    </div>
+                                </form>
+                            )}
+
+                            <div className="relative">
+                                <div className="absolute inset-0 flex items-center">
+                                    <div className="w-full border-t border-slate-600"></div>
+                                </div>
+                                <div className="relative flex justify-center text-sm">
+                                    <span className="px-2 bg-slate-800 text-slate-400">O continúa con</span>
+                                </div>
+                            </div>
+
+                            <div>
+                                <div className="mb-4">
+                                    <label className="block text-sm font-medium text-slate-400 mb-2 text-center">Ingresar con Google como:</label>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <label className={`flex items-center justify-center p-2 border rounded-lg cursor-pointer transition-colors ${role === 'player' ? 'bg-sky-900 border-sky-500 text-white' : 'bg-slate-800 border-slate-600 text-slate-400 hover:bg-slate-700'}`}>
+                                            <input type="radio" name="google-role" value="player" className="sr-only" checked={role === 'player'} onChange={() => setRole('player')} />
+                                            <span className="text-sm font-bold">Jugador</span>
+                                        </label>
+                                        <label className={`flex items-center justify-center p-2 border rounded-lg cursor-pointer transition-colors ${role === 'store' ? 'bg-sky-900 border-sky-500 text-white' : 'bg-slate-800 border-slate-600 text-slate-400 hover:bg-slate-700'}`}>
+                                            <input type="radio" name="google-role" value="store" className="sr-only" checked={role === 'store'} onChange={() => setRole('store')} />
+                                            <span className="text-sm font-bold">Tienda</span>
+                                        </label>
+                                    </div>
+                                </div>
+                                {!isLoginView && (
+                                    <div className="flex items-start space-x-3 mb-4 justify-center">
+                                        <input
+                                            id="google-terms"
+                                            name="google-terms"
+                                            type="checkbox"
+                                            className="h-4 w-4 rounded border-slate-600 bg-slate-800 text-sky-600 focus:ring-sky-500 mt-1"
+                                            checked={termsAccepted}
+                                            onChange={(e) => setTermsAccepted(e.target.checked)}
+                                        />
+                                        <label htmlFor="google-terms" className="text-sm text-slate-400">
+                                            Acepto los{' '}
+                                            <button
+                                                type="button"
+                                                onClick={() => setIsModalOpen(true)}
+                                                className="font-medium text-sky-400 hover:text-sky-300 underline"
+                                            >
+                                                Términos y Condiciones
+                                            </button>
+                                        </label>
+                                    </div>
+                                )}
+
+                                <button
+                                    type="button"
+                                    onClick={handleGoogleSignIn}
+                                    disabled={isLoading || (!isLoginView && !termsAccepted)}
+                                    className={`${commonButtonClass} bg-white text-slate-800 hover:bg-slate-200 flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed`}
+                                >
+                                    {isLoading ? (
+                                        <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-slate-800" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                    ) : (
+                                        <GoogleIcon className="w-5 h-5" />
+                                    )}
+                                    <span>{isLoading ? 'Conectando...' : `Ingresar como ${role === 'player' ? 'Jugador' : 'Tienda'}`}</span>
+                                </button>
+                                {authError && (
+                                    <p className="mt-2 text-center text-sm text-red-400">
+                                        {authError}
+                                    </p>
+                                )}
+                            </div>
+
+                            <p className="mt-6 text-center text-sm text-slate-400">
+                                {isLoginView ? '¿No tienes una cuenta?' : '¿Ya tienes una cuenta?'}
+                                <button onClick={() => setIsLoginView(!isLoginView)} className="font-medium text-sky-400 hover:text-sky-300 ml-1">
+                                    {isLoginView ? 'Regístrate aquí' : 'Inicia sesión aquí'}
+                                </button>
+                            </p>
+                        </>
+                    ) : (
+                        <form onSubmit={onPasswordResetSubmit} className="space-y-6">
+                            <h2 className="text-2xl font-bold text-center text-white uppercase">Recuperar Contraseña</h2>
+
+                            {!resetEmailSent ? (
+                                <>
+                                    <p className="text-slate-400 text-sm text-center">Ingresa tu correo electrónico y te enviaremos un enlace para restablecer tu contraseña.</p>
+                                    <div>
+                                        <label htmlFor="email" className="sr-only">Correo Electrónico</label>
+                                        <input type="email" name="email" id="email" placeholder="Correo Electrónico" className={commonInputClass} required />
+                                    </div>
+                                    <div className="flex flex-col gap-3">
+                                        <button type="submit" disabled={isLoading} className={`${commonButtonClass} bg-sky-600 text-white hover:bg-sky-700`}>
+                                            {isLoading ? 'Enviando...' : 'Enviar Enlace'}
+                                        </button>
+                                        <button type="button" onClick={() => setIsForgotPasswordView(false)} className="text-slate-400 hover:text-white text-sm">
+                                            Volver al inicio de sesión
+                                        </button>
+                                    </div>
+                                </>
+                            ) : (
+                                <div className="text-center space-y-4">
+                                    <div className="bg-green-900/30 p-4 rounded-lg border border-green-800 text-green-300 text-sm">
+                                        ¡Enlace enviado! Revisa tu correo electrónico para restablecer tu contraseña.
+                                    </div>
+                                    <button type="button" onClick={() => { setIsForgotPasswordView(false); setResetEmailSent(false); }} className={`${commonButtonClass} bg-slate-700 text-white hover:bg-slate-600`}>
+                                        Volver a Iniciar Sesión
+                                    </button>
+                                </div>
+                            )}
+                        </form>
+                    )}
                 </div>
             </div>
             <TermsModal

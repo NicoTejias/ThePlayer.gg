@@ -10,10 +10,12 @@ interface StoreDashboardPageProps {
     onTournamentUpload: (tournamentData: Omit<TournamentResult, 'id'>, players: TournamentParseResult[]) => void;
     userRole: 'player' | 'store' | 'admin' | null;
     tournaments: TournamentResult[]; // Real data from database
+    storeStatus?: string;
 }
 
-const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpload, userRole, tournaments }) => {
+const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpload, userRole, tournaments, storeStatus }) => {
     const [step, setStep] = useState<'upload' | 'confirm'>('upload');
+    // ... existing state ...
     const [uploadMethod, setUploadMethod] = useState<'text'>('text');
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [pastedText, setPastedText] = useState('');
@@ -25,6 +27,41 @@ const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpl
     const [error, setError] = useState<string | null>(null);
     const [isUploading, setIsUploading] = useState(false);
 
+    // BLOCKED VIEW FOR PENDING STORES
+    if (storeStatus === 'pending_approval') {
+        return (
+            <div className="flex flex-col items-center justify-center min-h-[60vh] text-center space-y-6">
+                <div className="p-6 bg-yellow-500/10 rounded-full">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-20 w-20 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                </div>
+                <h1 className="text-4xl font-bold text-white uppercase tracking-tighter">Cuenta en Revisión</h1>
+                <p className="text-xl text-slate-300 max-w-2xl">
+                    Tu solicitud de tienda ha sido recibida y está siendo revisada por nuestro equipo de administración.
+                </p>
+                <div className="bg-slate-800 p-6 rounded-lg border border-slate-700 max-w-lg w-full text-left space-y-4">
+                    <p className="text-slate-400 text-sm">
+                        Para acelerar el proceso, por favor asegúrate de haber completado tu perfil o enviarnos un correo con:
+                    </p>
+                    <ul className="list-disc list-inside text-slate-300 space-y-2 text-sm">
+                        <li>Nombre de la Tienda</li>
+                        <li>Dirección Física</li>
+                        <li>Enlace a Redes Sociales o Web</li>
+                    </ul>
+                    <div className="pt-4 border-t border-slate-700 text-center">
+                        <a href="mailto:contacto@theplayer.gg" className="text-sky-400 hover:text-sky-300 font-bold">
+                            Contactar Soporte
+                        </a>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    // ... rest of logic
+
+    // Arrays and handlers...
     const tournamentTypes = [
         { value: 'semanal', label: 'Semanal', multiplier: 1 },
         { value: 'fnm', label: 'FNM', multiplier: 1 },
