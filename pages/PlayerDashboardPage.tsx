@@ -1,22 +1,11 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { supabase } from '../supabaseClient';
 import type { PlayerTournamentRecord, MarketplacePost } from '../types';
 import TrophyIcon from '../components/icons/TrophyIcon';
 import SparklesIcon from '../components/icons/SparklesIcon';
 import PencilIcon from '../components/icons/PencilIcon';
 import TrashIcon from '../components/icons/TrashIcon';
 import CheckCircleIcon from '../components/icons/CheckCircleIcon';
-
-const mockTournamentHistory: PlayerTournamentRecord[] = [
-    { id: 'pt1', tournamentName: 'FNM Modern Julio', date: '2024-07-26', format: 'Modern', result: '3-1-0', pointsEarned: 45 },
-    { id: 'pt2', tournamentName: 'Clasificatorio RCQ', date: '2024-07-20', format: 'Pioneer', result: '4-2-0', pointsEarned: 120 },
-    { id: 'pt3', tournamentName: 'Draft de Outlaws', date: '2024-07-12', format: 'Draft', result: '2-1-0', pointsEarned: 30 },
-    { id: 'pt4', tournamentName: 'Semanal Legacy', date: '2024-07-05', format: 'Legacy', result: '1-2-0', pointsEarned: 15 },
-];
-
-const mockPlayerMarketplacePosts: MarketplacePost[] = [
-    { id: 'mp1', title: 'Vendo Force of Will [2XM]', type: 'Venta', seller: 'MageSlayer92', price: 45000, region: 'Metropolitana', imageUrl: '' },
-    { id: 'mp2', title: 'Busco 4x Ragavan', type: 'Compra', seller: 'MageSlayer92', price: 35000, region: 'Metropolitana', imageUrl: '' },
-];
 
 const StatCard: React.FC<{ icon: React.ReactNode, title: string, value: string | number, rank: string | number, color: string }> = ({ icon, title, value, rank, color }) => (
     <div className={`bg-slate-800 p-6 rounded-lg shadow-lg border border-slate-700`}>
@@ -35,6 +24,53 @@ const StatCard: React.FC<{ icon: React.ReactNode, title: string, value: string |
 
 
 const PlayerDashboardPage: React.FC<{ profile?: any }> = ({ profile }) => {
+    const [tournamentHistory, setTournamentHistory] = useState<any[]>([]);
+    const [ranking, setRanking] = useState<{ pwpRank: number; winRateRank: number }>({ pwpRank: 0, winRateRank: 0 });
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        if (profile?.id) {
+            fetchPlayerData();
+        }
+    }, [profile?.id]);
+
+    const fetchPlayerData = async () => {
+        setLoading(true);
+        try {
+            // 1. Fetch tournament history for this player
+            const { data: tournamentResults } = await supabase
+                .from('tournament_results')
+                .select(`
+                    *,
+                    tournaments:tournament_id (
+                        name,
+                        date,
+                        format
+                    )
+                `)
+                .eq('player_id', profile.id)
+                .order('created_at', { ascending: false })
+                .limit(10);
+
+            setTournamentHistory(tournamentResults || []);
+
+            // 2. Calculate PWP ranking
+            const { data: allPlayers } = await supabase
+                .from('profiles')
+                .select('id, pwp')
+                .order('pwp', { ascending: false });
+
+            const pwpRank = (allPlayers?.findIndex(p => p.id === profile.id) || 0) + 1;
+
+            setRanking({ pwpRank, winRateRank: 0 }); // Win rate ranking can be calculated similarly if needed
+
+        } catch (error) {
+            console.error("Error fetching player data:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     // Determine greeting name: Prioritize First Name, then Username
     const greetingName = profile?.first_name || profile?.username || 'Jugador';
 
@@ -44,8 +80,8 @@ const PlayerDashboardPage: React.FC<{ profile?: any }> = ({ profile }) => {
         ? ((profile?.matches_won || 0) / totalMatches * 100).toFixed(1)
         : '0.0';
 
-    // Filter Marketplace Posts for this user (Mock logic for now, using username matching)
-    const userPosts = mockPlayerMarketplacePosts.filter(post => post.seller === profile?.username);
+    // Marketplace posts - to be implemented
+    const userPosts: any[] = [];
 
     return (
         <div className="space-y-12">
@@ -62,14 +98,14 @@ const PlayerDashboardPage: React.FC<{ profile?: any }> = ({ profile }) => {
                     icon={<TrophyIcon className="w-8 h-8" />}
                     title="Puntos PWP"
                     value={`${profile?.pwp || 0} pts`}
-                    rank="-"
+                    rank={ranking.pwpRank || '-'}
                     color="sky"
                 />
                 <StatCard
                     icon={<SparklesIcon className="w-8 h-8" />}
                     title="Win Rate Global"
                     value={`${winRate}%`}
-                    rank="-"
+                    rank={ranking.winRateRank || '-'}
                     color="violet"
                 />
             </section>
@@ -88,15 +124,21 @@ const PlayerDashboardPage: React.FC<{ profile?: any }> = ({ profile }) => {
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-700">
-                                {mockTournamentHistory.length > 0 ? (
-                                    mockTournamentHistory.map(t => (
+                                {loading ? (
+                                    <tr>
+                                        <td colSpan={3} className="px-6 py-4 text-center text-slate-400">Cargando...</td>
+                                    </tr>
+                                ) : tournamentHistory.length > 0 ? (
+                                    tournamentHistory.map(t => (
                                         <tr key={t.id} className="hover:bg-slate-700/40">
                                             <td className="px-6 py-4 whitespace-nowrap">
-                                                <p className="text-sm font-medium text-white">{t.tournamentName}</p>
-                                                <p className="text-xs text-slate-400">{t.date} - {t.format}</p>
+                                                <p className="text-sm font-medium text-white">{t.tournaments?.name || 'Torneo'}</p>
+                                                <p className="text-xs text-slate-400">{t.tournaments?.date || ''} - {t.tournaments?.format || ''}</p>
                                             </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-300 font-mono">{t.result}</td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-bold text-sky-400">+{t.pointsEarned} pts</td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-300 font-mono">
+                                                {t.wins}-{t.losses}-{t.draws}
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-bold text-sky-400">+{t.pwp_earned} pts</td>
                                         </tr>
                                     ))
                                 ) : (
