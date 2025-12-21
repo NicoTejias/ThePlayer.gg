@@ -4,6 +4,8 @@ import UserCircleIcon from './icons/UserCircleIcon';
 import CogIcon from './icons/CogIcon';
 import LogoutIcon from './icons/LogoutIcon';
 import ShieldCheckIcon from './icons/ShieldCheckIcon';
+import MenuIcon from './icons/MenuIcon';
+import CloseIcon from './icons/CloseIcon';
 
 // Define the structure for navigation items
 type NavLinkType = {
@@ -44,6 +46,7 @@ interface HeaderProps {
 
 const Header: React.FC<HeaderProps> = ({ isLoggedIn, userRole, userName = 'Jugador', handleLogout, isLiveSignal = false }) => {
   const [isProfileMenuOpen, setProfileMenuOpen] = useState(false);
+  const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
   const profileMenuRef = useRef<HTMLDivElement>(null);
   const location = useLocation();
 
