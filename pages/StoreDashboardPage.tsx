@@ -4,6 +4,7 @@ import CheckCircleIcon from '../components/icons/CheckCircleIcon';
 import { TournamentParseResult, TournamentResult } from '../types';
 import { parseEventLinkPdf } from '../utils/PdfParser';
 import { parseEventLinkText } from '../utils/TextParser';
+import { parseMeleeCSV } from '../utils/CSVParser';
 import { parseEventLinkHtml } from '../utils/HtmlParser';
 
 interface StoreDashboardPageProps {
@@ -127,16 +128,22 @@ const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpl
             setError(null);
             try {
                 let parsedRows: any[] = [];
-                if (selectedFile.name.endsWith('.html') || selectedFile.name.endsWith('.htm')) {
+                const fileName = selectedFile.name.toLowerCase();
+
+                if (fileName.endsWith('.html') || fileName.endsWith('.htm')) {
                     parsedRows = await parseEventLinkHtml(selectedFile);
-                } else if (selectedFile.name.endsWith('.pdf')) {
+                } else if (fileName.endsWith('.pdf')) {
                     parsedRows = await parseEventLinkPdf(selectedFile);
+                } else if (fileName.endsWith('.csv')) {
+                    // Read CSV file
+                    const text = await selectedFile.text();
+                    parsedRows = parseMeleeCSV(text);
                 } else {
-                    throw new Error("Formato de archivo no soportado. Por favor sube un archivo HTML o PDF de EventLink.");
+                    throw new Error("Formato de archivo no soportado. Por favor sube un archivo HTML, PDF o CSV.");
                 }
 
                 if (parsedRows.length === 0) {
-                    throw new Error("No se encontraron jugadores en el archivo. Verifica que sea un export válido de EventLink.");
+                    throw new Error("No se encontraron jugadores en el archivo. Verifica que sea un export válido.");
                 }
 
                 const multiplier = getTournamentMultiplier(tournamentType);
@@ -291,12 +298,12 @@ const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpl
 
                                 {/* File Upload Section */}
                                 <div>
-                                    <label className="block text-sm font-medium text-slate-300 mb-2">Archivo de Resultados (HTML)</label>
+                                    <label className="block text-sm font-medium text-slate-300 mb-2">Archivo de Resultados</label>
                                     <div className={`relative border-2 border-dashed rounded-lg p-6 text-center transition-colors ${selectedFile ? 'border-sky-500 bg-sky-900/20' : 'border-slate-600 hover:border-slate-500 bg-slate-900'}`}>
                                         <input
                                             type="file"
                                             id="tournament-file"
-                                            accept=".html,.htm,.pdf"
+                                            accept=".html,.htm,.pdf,.csv"
                                             onChange={handleFileChange}
                                             className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                                         />
@@ -310,7 +317,7 @@ const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpl
                                             ) : (
                                                 <div className="text-slate-400">
                                                     <p className="font-medium text-slate-300">Haz clic o arrastra el archivo aquí</p>
-                                                    <p className="text-xs mt-1">Soporta exportaciones HTML y PDF de EventLink</p>
+                                                    <p className="text-xs mt-1">Soporta HTML/PDF de EventLink y CSV de Melee</p>
                                                 </div>
                                             )}
                                         </div>
