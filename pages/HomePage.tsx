@@ -77,7 +77,7 @@ const HomePage: React.FC<HomePageProps> = ({ players, events }) => {
     .map((p, i) => ({
       rank: i + 1,
       // Anonymous Name Logic
-      playerName: p.acceptedTerms ? p.name : `Jugador ${p.id.slice(-4)}`,
+      playerName: p.isPublic ? p.name : `Jugador ${p.id.slice(-4)}`,
       pwp: p.pwp || 0,
       region: p.region || 'Unknown',
       team: p.team || 'Unknown' // Adding team to the mapped object
@@ -95,7 +95,7 @@ const HomePage: React.FC<HomePageProps> = ({ players, events }) => {
     .map((p, i) => ({
       rank: i + 1,
       // Anonymous Name Logic: "Jugador " + last 4 chars of ID (simulated or real)
-      playerName: p.acceptedTerms ? p.name : `Jugador ${p.id.slice(-4)}`,
+      playerName: p.isPublic ? p.name : `Jugador ${p.id.slice(-4)}`,
       winRate: `${p.winRate.toFixed(1)}%`,
       region: p.region || 'Unknown',
       team: p.team || 'Unknown' // Adding team to the mapped object
