@@ -46,6 +46,10 @@ $$;
 -- 2. Si encuentra match, actualizar el PWP del perfil encontrado
 -- 3. Insertar el resultado en tournament_results con o sin player_id
 -- -----------------------------------------------------------------------------
+
+-- IMPORTANTE: Eliminar la función existente primero (tiene un tipo de retorno diferente)
+DROP FUNCTION IF EXISTS public.process_tournament_results_bulk(uuid, jsonb);
+
 CREATE OR REPLACE FUNCTION public.process_tournament_results_bulk(
     p_tournament_id uuid,
     p_results jsonb
