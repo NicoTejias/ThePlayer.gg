@@ -7,6 +7,7 @@ import UsersIcon from '../components/icons/UserIcon';
 import ScaleIcon from '../components/icons/ScaleIcon';
 import { supabase } from '../supabaseClient';
 import { useNavigate } from 'react-router-dom';
+import { isAdminEmail } from '../config/adminConfig';
 
 const StatCard: React.FC<{ icon: React.ReactNode, title: string, value: string | number, color: string }> = ({ icon, title, value, color }) => (
     <div className={`bg-slate-800 p-6 rounded-lg shadow-lg border border-slate-700 flex items-center space-x-4`}>
@@ -49,6 +50,14 @@ const AdminDashboardPage: React.FC = () => {
             const { data: { session } } = await supabase.auth.getSession();
             if (!session) {
                 navigate('/login');
+                return;
+            }
+
+            // Verify admin access
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user || !isAdminEmail(user.email)) {
+                console.warn('Unauthorized access attempt to admin panel');
+                navigate('/');
                 return;
             }
 

@@ -18,14 +18,19 @@ export const parseMeleeCSV = (csvText: string): ParsedRow[] => {
     // Parse header to find column indices
     const header = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
 
+    console.log('CSV Header:', header);
+
     // Find column indices (case-insensitive)
     const rankIdx = header.findIndex(h => h.toLowerCase().includes('rank'));
     const playerIdx = header.findIndex(h => h.toLowerCase().includes('player') || h.toLowerCase().includes('name'));
     const matchRecordIdx = header.findIndex(h => h.toLowerCase().includes('match') && h.toLowerCase().includes('record'));
     const pointsIdx = header.findIndex(h => h.toLowerCase().includes('point'));
 
+    console.log('Column Indices:', { rankIdx, playerIdx, matchRecordIdx, pointsIdx });
+
     // Validate we found the essential columns
     if (rankIdx === -1 || playerIdx === -1 || matchRecordIdx === -1) {
+        console.error('Missing required columns. Header:', header);
         throw new Error('CSV no tiene las columnas requeridas (Rank, Player, Match Record)');
     }
 
@@ -45,6 +50,8 @@ export const parseMeleeCSV = (csvText: string): ParsedRow[] => {
         // Parse player name and remove pronouns
         let name = parts[playerIdx].replace(/"/g, '').trim();
         name = name.replace(/\s+(He\/Him|She\/Her|They\/Them|he\/him|she\/her|they\/them)\s*$/i, '').trim();
+
+        console.log(`Row ${i}: playerIdx=${playerIdx}, parts[playerIdx]="${parts[playerIdx]}", parsed name="${name}"`);
 
         // Parse match record (format: W-L-D)
         const matchRecord = parts[matchRecordIdx].replace(/"/g, '').trim();
