@@ -64,7 +64,8 @@ const AppContent: React.FC = () => {
         matchesWon: p.matches_won || 0,
         matchesLost: p.matches_lost || 0,
         matchesDrew: p.matches_drew || 0,
-        team: p.team
+        team: p.team,
+        isPublic: p.is_public || false
       }));
       setPlayers(mappedPlayers);
     }

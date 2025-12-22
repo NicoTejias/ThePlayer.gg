@@ -1,4 +1,5 @@
 
+
 export interface PlayerProfile {
   id: string;
   name: string;
@@ -9,7 +10,7 @@ export interface PlayerProfile {
   matchesDrew: number;
   winRate?: number; // Optional, can be calculated
   team?: string;
-  acceptedTerms?: boolean; // New prop: if false, should display as anonymous
+  isPublic?: boolean; // If true, show full name. If false, show as anonymous
 }
 
 // FIX: Add RankingEntry and WinRateRankingEntry types used in HomePage.tsx

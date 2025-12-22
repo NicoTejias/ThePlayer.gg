@@ -106,7 +106,7 @@ const RankingsPage: React.FC<RankingsPageProps> = ({ players }) => {
                                                 }`}>{player.rank}</span>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white sticky left-[4rem] bg-slate-800 z-10 border-r border-slate-700/50">
-                                            {player.acceptedTerms ? player.name : `Jugador ${player.id.slice(-4)}`}
+                                            {player.isPublic ? player.name : `Jugador ${player.id.slice(-4)}`}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             {/* Show TEAM instead of REGION */}
@@ -185,7 +185,7 @@ const RankingsPage: React.FC<RankingsPageProps> = ({ players }) => {
                                                 }`}>{player.rank}</span>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white sticky left-[4rem] bg-slate-800 z-10 border-r border-slate-700/50">
-                                            {player.acceptedTerms ? player.name : `Jugador ${player.id.slice(-4)}`}
+                                            {player.isPublic ? player.name : `Jugador ${player.id.slice(-4)}`}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             {/* Show TEAM instead of REGION */}
