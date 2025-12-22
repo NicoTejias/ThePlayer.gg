@@ -1,51 +1,95 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { supabase } from '../supabaseClient';
 import type { TournamentResult, TournamentStanding } from '../types';
 import TrophyIcon from '../components/icons/TrophyIcon';
 
-// This would typically come from an API call, but we'll mock it here.
-const mockAllTournaments: TournamentResult[] = [
-    { id: 'tr1', name: 'Clasificatorio Nacional - Stgo', date: '2024-07-28', storeName: 'Magicsur', format: 'Standard', playerCount: 64 },
-    { id: 'tr2', name: 'Store Championship Viña', date: '2024-07-27', storeName: 'Guildreams', format: 'Modern', playerCount: 32 },
-];
-
-// PWP points are now calculated based on the formula:
-// Pts = ((Wins*3 + Draws*1) + ParticipationPts) * Multiplier
-// tr1: 64 players -> 4 participation pts, Premier event -> x5 multiplier
-// tr2: 32 players -> 3 participation pts, Store Championship -> x3 multiplier (assumed)
-const mockStandingsData: { [key: string]: TournamentStanding[] } = {
-    'tr1': [
-        { rank: 1, playerName: 'MageSlayer92', matchRecord: '5-0-1', pwpEarned: 100 }, // ((5*3+1)+4)*5
-        { rank: 2, playerName: 'ElfoNocturno', matchRecord: '5-1-0', pwpEarned: 95 },  // ((5*3+0)+4)*5
-        { rank: 3, playerName: 'GoblinKing', matchRecord: '4-1-1', pwpEarned: 85 },  // ((4*3+1)+4)*5
-        { rank: 4, playerName: 'AetherFlux', matchRecord: '4-2-0', pwpEarned: 80 },  // ((4*3+0)+4)*5
-        { rank: 5, playerName: 'JaceMind', matchRecord: '4-2-0', pwpEarned: 80 },  // ((4*3+0)+4)*5
-        { rank: 6, playerName: 'ShadowBlade', matchRecord: '4-2-0', pwpEarned: 80 },  // ((4*3+0)+4)*5
-        { rank: 7, playerName: 'ArcaneWeaver', matchRecord: '3-2-1', pwpEarned: 70 },  // ((3*3+1)+4)*5
-        { rank: 8, playerName: 'DragonHeart', matchRecord: '3-3-0', pwpEarned: 65 },  // ((3*3+0)+4)*5
-        // ... more players
-    ],
-    'tr2': [
-        { rank: 1, playerName: 'ProdigyMTG', matchRecord: '4-0-1', pwpEarned: 48 }, // ((4*3+1)+3)*3
-        { rank: 2, playerName: 'Strategist', matchRecord: '4-1-0', pwpEarned: 45 }, // ((4*3+0)+3)*3
-        { rank: 3, playerName: 'LaHechicera', matchRecord: '3-1-1', pwpEarned: 39 }, // ((3*3+1)+3)*3
-        { rank: 4, playerName: 'ControlFreak', matchRecord: '3-2-0', pwpEarned: 36 }, // ((3*3+0)+3)*3
-        // ... more players
-    ],
-};
-
 const TournamentStandingsPage: React.FC = () => {
     const { tournamentId } = useParams<{ tournamentId: string }>();
-    
-    const tournamentInfo = mockAllTournaments.find(t => t.id === tournamentId);
-    const standings = tournamentId ? mockStandingsData[tournamentId] : [];
+    const [tournament, setTournament] = useState<TournamentResult | null>(null);
+    const [standings, setStandings] = useState<TournamentStanding[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
-    if (!tournamentInfo) {
+    useEffect(() => {
+        const fetchData = async () => {
+            if (!tournamentId) return;
+
+            try {
+                setLoading(true);
+                setError(null);
+
+                // 1. Fetch Tournament Details
+                const { data: tournamentData, error: tournamentError } = await supabase
+                    .from('tournaments')
+                    .select('*')
+                    .eq('id', tournamentId)
+                    .single();
+
+                if (tournamentError) {
+                    // Check specifically for PGRST116 (0 rows) which means not found
+                    if (tournamentError.code === 'PGRST116') {
+                        throw new Error("No se encontró el torneo.");
+                    }
+                    throw tournamentError;
+                }
+
+                if (!tournamentData) throw new Error("Torneo no encontrado");
+
+                const mappedTournament: TournamentResult = {
+                    id: tournamentData.id,
+                    name: tournamentData.name,
+                    date: tournamentData.date,
+                    storeName: tournamentData.store_name || 'Desconocido',
+                    format: tournamentData.format || 'Otro',
+                    playerCount: tournamentData.player_count || 0
+                };
+                setTournament(mappedTournament);
+
+                // 2. Fetch Results/Standings
+                const { data: resultsData, error: resultsError } = await supabase
+                    .from('tournament_results')
+                    .select('*')
+                    .eq('tournament_id', tournamentId)
+                    .order('rank', { ascending: true });
+
+                if (resultsError) throw resultsError;
+
+                const mappedStandings: TournamentStanding[] = (resultsData || []).map((r, index) => ({
+                    rank: r.rank || index + 1,
+                    playerName: r.player_name,
+                    matchRecord: `${r.wins}-${r.losses}-${r.draws}`,
+                    pwpEarned: r.pwp_earned
+                }));
+
+                setStandings(mappedStandings);
+
+            } catch (err: any) {
+                console.error("Error fetching tournament details:", err);
+                setError(err.message || "Error al cargar la información del torneo.");
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchData();
+    }, [tournamentId]);
+
+    if (loading) {
         return (
-            <div className="text-center">
-                <h1 className="text-4xl font-bold text-white">Torneo no encontrado</h1>
-                <p className="text-slate-400 mt-4">El torneo que buscas no existe o ha sido eliminado.</p>
-                <Link to="/torneos" className="mt-8 inline-block bg-sky-600 text-white font-bold py-2 px-4 rounded-md hover:bg-sky-700">
+            <div className="flex flex-col items-center justify-center min-h-[50vh] text-slate-400">
+                <div className="w-12 h-12 border-4 border-sky-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+                <p>Cargando resultados...</p>
+            </div>
+        );
+    }
+
+    if (error || !tournament) {
+        return (
+            <div className="text-center py-12">
+                <h1 className="text-4xl font-bold text-white mb-4">Torneo no encontrado</h1>
+                <p className="text-slate-400 mb-8">{error || "El torneo que buscas no existe o ha sido eliminado."}</p>
+                <Link to="/torneos" className="inline-flex items-center gap-2 bg-sky-600 text-white font-bold py-2 px-6 rounded-md hover:bg-sky-700 transition-colors">
                     Volver al Repositorio
                 </Link>
             </div>
@@ -53,23 +97,23 @@ const TournamentStandingsPage: React.FC = () => {
     }
 
     return (
-        <div className="space-y-8">
+        <div className="space-y-8 animate-fade-in">
             <div>
-                 <Link to="/torneos" className="inline-flex items-center gap-2 text-sky-400 hover:text-sky-300 mb-6">
+                <Link to="/torneos" className="inline-flex items-center gap-2 text-sky-400 hover:text-sky-300 mb-6 transition-colors">
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                         <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
                     </svg>
                     Volver al Repositorio de Torneos
                 </Link>
-                <h1 className="text-4xl sm:text-5xl font-bold text-white tracking-tighter uppercase">{tournamentInfo.name}</h1>
+                <h1 className="text-4xl sm:text-5xl font-bold text-white tracking-tighter uppercase">{tournament.name}</h1>
                 <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-2 text-slate-400">
-                    <span>{tournamentInfo.date}</span>
+                    <span>{tournament.date}</span>
                     <span className="hidden md:inline">|</span>
-                    <span>Organizado por: <span className="font-semibold text-slate-300">{tournamentInfo.storeName}</span></span>
+                    <span>Organizado por: <span className="font-semibold text-slate-300">{tournament.storeName}</span></span>
                     <span className="hidden md:inline">|</span>
-                    <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-sky-800 text-sky-200">{tournamentInfo.format}</span>
-                     <span className="hidden md:inline">|</span>
-                    <span>{tournamentInfo.playerCount} Jugadores</span>
+                    <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-sky-800 text-sky-200">{tournament.format}</span>
+                    <span className="hidden md:inline">|</span>
+                    <span>{tournament.playerCount} Jugadores</span>
                 </div>
             </div>
 
@@ -85,32 +129,34 @@ const TournamentStandingsPage: React.FC = () => {
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-700">
-                        {standings?.map((player, index) => (
-                            <tr key={player.playerName} className={`transition-colors duration-150 ${index < 8 ? 'bg-sky-900/20 hover:bg-sky-800/30' : 'hover:bg-slate-700/40'}`}>
-                                <td className="px-6 py-4 whitespace-nowrap">
-                                    <span className={`text-lg font-bold w-8 text-center ${
-                                        index === 0 ? 'text-yellow-400' :
-                                        index === 1 ? 'text-gray-300' :
-                                        index === 2 ? 'text-yellow-600' : 'text-slate-400'
-                                    }`}>{player.rank}</span>
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">{player.playerName}</td>
-                                <td className="px-6 py-4 whitespace-nowrap text-center text-sm text-slate-300 font-mono">{player.matchRecord}</td>
-                                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-bold text-sky-400">
-                                    <div className="flex items-center justify-end space-x-2">
-                                        <span>{player.pwpEarned} pts</span>
-                                        <TrophyIcon className="w-5 h-5 text-sky-500/70" />
-                                    </div>
+                        {standings.length > 0 ? (
+                            standings.map((player, index) => (
+                                <tr key={index} className={`transition-colors duration-150 ${index < 8 ? 'bg-sky-900/20 hover:bg-sky-800/30' : 'hover:bg-slate-700/40'}`}>
+                                    <td className="px-6 py-4 whitespace-nowrap">
+                                        <span className={`text-lg font-bold w-8 text-center inline-block ${player.rank === 1 ? 'text-yellow-400' :
+                                                player.rank === 2 ? 'text-gray-300' :
+                                                    player.rank === 3 ? 'text-yellow-600' : 'text-slate-400'
+                                            }`}>{player.rank}</span>
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">{player.playerName}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-center text-sm text-slate-300 font-mono">{player.matchRecord}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-bold text-sky-400">
+                                        <div className="flex items-center justify-end space-x-2">
+                                            <span>{player.pwpEarned} pts</span>
+                                            <TrophyIcon className="w-5 h-5 text-sky-500/70" />
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))
+                        ) : (
+                            <tr>
+                                <td colSpan={4} className="px-6 py-12 text-center text-slate-400">
+                                    No hay resultados registrados para este torneo.
                                 </td>
                             </tr>
-                        ))}
+                        )}
                     </tbody>
                 </table>
-                 {(!standings || standings.length === 0) && (
-                    <div className="text-center py-12 text-slate-400">
-                        <p>No hay datos de standings disponibles para este torneo.</p>
-                    </div>
-                 )}
             </div>
         </div>
     );

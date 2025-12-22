@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Toaster, toast } from 'sonner';
 import { HashRouter, Routes, Route, useNavigate } from 'react-router-dom';
 import { supabase } from './supabaseClient';
 import type { Database } from './database.types';
@@ -282,37 +283,41 @@ const AppContent: React.FC = () => {
 
       if (tourneyError) throw new Error(tourneyError?.message || "Error al crear el torneo");
 
-      // 2. Process Players and Results
-      for (let i = 0; i < playerResults.length; i++) {
-        const result = playerResults[i];
-        try {
-          const { error: rpcError } = await supabase.rpc('process_player_result', {
-            p_tournament_id: newTournamentId,
-            p_player_name: result.playerName,
-            p_wins: result.wins,
-            p_losses: result.losses,
-            p_draws: result.draws,
-            p_pwp_earned: result.pwpEarned
-          });
+      // 2. Process Players and Results (Bulk Upload)
+      const resultsToUpload = playerResults.map((result, index) => ({
+        player_name: result.playerName,
+        wins: result.wins,
+        losses: result.losses,
+        draws: result.draws,
+        pwp_earned: result.pwpEarned,
+        rank: index + 1
+      }));
 
-          if (rpcError) throw new Error(rpcError.message);
+      const { error: rpcError } = await supabase.rpc('process_tournament_results_bulk', {
+        p_tournament_id: newTournamentId,
+        p_results: resultsToUpload
+      });
 
-        } catch (innerError: any) {
-          errors.push(`${result.playerName}: ${innerError.message || "Unknown error"}`);
-        }
-      }
+      if (rpcError) throw new Error(rpcError.message);
 
       await fetchData();
 
       if (errors.length > 0) {
-        alert(`Torneo subido con advertencias. Revisa los siguientes errores:\n${errors.join('\n')}`);
+        toast.warning('Torneo subido con advertencias', {
+          description: errors.join('\n'),
+          duration: 10000,
+        });
       } else {
-        alert("¡Torneo subido con éxito! El ranking ha sido actualizado.");
+        toast.success('¡Torneo subido con éxito!', {
+          description: 'El ranking ha sido actualizado correctamente.',
+        });
       }
 
     } catch (error: any) {
       console.error("💥 ERROR CRÍTICO:", error);
-      alert(`Error crítico al crear el torneo: ${error.message || 'Error desconocido'}`);
+      toast.error('Error al crear el torneo', {
+        description: error.message || 'Error desconocido',
+      });
     }
   };
 
@@ -326,6 +331,7 @@ const AppContent: React.FC = () => {
 
   return (
     <div className="bg-slate-900 text-slate-200 min-h-screen flex flex-col relative isolate">
+      <Toaster position="top-center" richColors theme="dark" />
       <ParticlesBackground />
       <Header isLoggedIn={isLoggedIn} userRole={userRole} handleLogout={handleLogout}
         isLiveSignal={isLiveSignal}
