@@ -293,10 +293,17 @@ const AppContent: React.FC = () => {
         rank: index + 1
       }));
 
-      const { error: rpcError } = await supabase.rpc('process_tournament_results_bulk', {
+      // Wrap RPC in timeout to prevent hanging UI
+      const bulkUploadPromise = supabase.rpc('process_tournament_results_bulk', {
         p_tournament_id: newTournamentId,
         p_results: resultsToUpload
       });
+
+      const timeoutPromiseBulk = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error("La subida masiva tardó demasiado (Timeout).")), 30000)
+      );
+
+      const { error: rpcError } = await Promise.race([bulkUploadPromise, timeoutPromiseBulk]) as any;
 
       if (rpcError) throw new Error(rpcError.message);
 

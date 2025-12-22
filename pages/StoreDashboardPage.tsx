@@ -232,6 +232,20 @@ const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpl
             return;
         }
 
+        // Validation: Check for duplicates or invalid names
+        const nameCounts: { [key: string]: number } = {};
+        for (const player of parsedData) {
+            const name = player.playerName.trim();
+            if (!name) continue;
+            nameCounts[name] = (nameCounts[name] || 0) + 1;
+        }
+
+        const duplicates = Object.keys(nameCounts).filter(name => nameCounts[name] > 1);
+        if (duplicates.length > 0) {
+            setError(`Error de validación: Se han detectado nombres duplicados (${duplicates[0]}). Esto suele indicar que el archivo no se leyó correctamente. Revisa la columna de nombres.`);
+            return;
+        }
+
         setIsUploading(true);
         const typeLabel = tournamentTypes.find(t => t.value === tournamentType)?.label || tournamentType;
         const autoName = `${typeLabel} - ${tournamentDate}`;
