@@ -371,7 +371,7 @@ const AppContent: React.FC = () => {
           <Route path="/login" element={<AuthPage handleLogin={handleLogin} />} />
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="/admin" element={<AdminDashboardPage />} />
-          <Route path="/dashboard/tienda" element={<StoreDashboardPage onTournamentUpload={handleTournamentUpload} userRole={userRole} tournaments={tournamentResults} storeStatus={userProfile?.status} />} />
+          <Route path="/dashboard/tienda" element={<StoreDashboardPage onTournamentUpload={handleTournamentUpload} userRole={userRole} tournaments={tournamentResults} storeStatus={userProfile?.status} storeName={userProfile?.username} />} />
           <Route path="/dashboard/jugador" element={<PlayerDashboardPage profile={userProfile} />} />
         </Routes>
       </main>

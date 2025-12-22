@@ -12,9 +12,10 @@ interface StoreDashboardPageProps {
     userRole: 'player' | 'store' | 'admin' | null;
     tournaments: TournamentResult[]; // Real data from database
     storeStatus?: string;
+    storeName?: string; // Nombre de la tienda (viene del perfil del usuario)
 }
 
-const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpload, userRole, tournaments, storeStatus }) => {
+const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpload, userRole, tournaments, storeStatus, storeName }) => {
     const [step, setStep] = useState<'upload' | 'confirm'>('upload');
     // ... existing state ...
     const [uploadMethod, setUploadMethod] = useState<'text'>('text');
@@ -253,7 +254,7 @@ const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpl
         const tournamentData = {
             name: autoName,
             date: tournamentDate,
-            storeName: 'Mi Tienda',
+            storeName: storeName || 'Tienda sin nombre',
             format: tournamentType.charAt(0).toUpperCase() + tournamentType.slice(1),
             playerCount: parsedData.length
         };
