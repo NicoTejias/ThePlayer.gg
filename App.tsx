@@ -49,10 +49,11 @@ const AppContent: React.FC = () => {
 
   // Fetch data definition
   const fetchData = async () => {
-    // 1. Fetch Players
+    // 1. Fetch Players (only role='player')
     const { data: profilesData, error: profilesError } = await supabase
       .from('profiles')
-      .select('*')
+      .select('id, username, region, pwp, matches_won, matches_lost, matches_drew, team, is_public')
+      .eq('role', 'player')
       .order('pwp', { ascending: false });
 
     if (profilesData) {
