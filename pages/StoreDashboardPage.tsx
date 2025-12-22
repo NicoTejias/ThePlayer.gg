@@ -433,6 +433,19 @@ const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpl
                                         </tbody>
                                     </table>
                                 </div>
+
+                                {error && (
+                                    <div className="p-4 bg-red-900/50 border border-red-700/50 rounded-lg flex items-start gap-3 animate-in fade-in slide-in-from-top-2">
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-red-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                        </svg>
+                                        <div className="space-y-1">
+                                            <p className="text-red-200 font-medium">Validación Fallida</p>
+                                            <p className="text-sm text-red-300/80">{error}</p>
+                                        </div>
+                                    </div>
+                                )}
+
                                 <div className="flex gap-4 pt-4">
                                     <button onClick={handleCancel} disabled={isUploading} className="w-full py-3 px-4 font-bold rounded-lg transition duration-300 bg-slate-600 text-white hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed">
                                         Cancelar
