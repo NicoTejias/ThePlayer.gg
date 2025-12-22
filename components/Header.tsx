@@ -179,8 +179,17 @@ const Header: React.FC<HeaderProps> = ({ isLoggedIn, userRole, userName = 'Jugad
                       </div>
                       <Link to={getDashboardPath()} className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-200 hover:bg-slate-700/50 transition-colors" role="menuitem">
                         <ShieldCheckIcon className="w-5 h-5 text-sky-400" />
-                        Mi Panel
+                        Mi Panel ({userRole === 'admin' ? 'Admin' : userRole === 'store' ? 'Tienda' : 'Jugador'})
                       </Link>
+                      {userRole === 'admin' && (
+                        <Link to="/dashboard/tienda" className="flex items-center gap-3 px-4 py-2.5 text-sm text-yellow-200 hover:bg-slate-700/50 transition-colors" role="menuitem">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z" />
+                            <path fillRule="evenodd" d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z" clipRule="evenodd" />
+                          </svg>
+                          Panel Tienda (Test)
+                        </Link>
+                      )}
                       <Link to="/settings" className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-200 hover:bg-slate-700/50 transition-colors" role="menuitem">
                         <CogIcon className="w-5 h-5 text-slate-400" />
                         Configuración
