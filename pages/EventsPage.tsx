@@ -49,6 +49,9 @@ const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [
     const [expandedEventId, setExpandedEventId] = React.useState<string | null>(null);
     // State for schedule tournament modal
     const [showScheduleModal, setShowScheduleModal] = React.useState(false);
+    // State for registration confirmation modal
+    const [showRegisterModal, setShowRegisterModal] = React.useState(false);
+    const [selectedEvent, setSelectedEvent] = React.useState<CommunityEvent | null>(null);
 
     // State for calendar navigation
     const today = new Date();
@@ -300,6 +303,52 @@ const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [
             console.error('Error al eliminar evento:', error);
             toast.error('Error inesperado', {
                 description: error.message || 'No se pudo eliminar el evento'
+            });
+        }
+    };
+
+    // Handler para abrir modal de inscripción
+    const handleRegisterClick = (event: CommunityEvent) => {
+        if (!userId) {
+            toast.error('Debes iniciar sesión', {
+                description: 'Inicia sesión para inscribirte a eventos'
+            });
+            return;
+        }
+        setSelectedEvent(event);
+        setShowRegisterModal(true);
+    };
+
+    // Handler para confirmar inscripción
+    const handleConfirmRegistration = async () => {
+        if (!selectedEvent) return;
+
+        try {
+            const { data, error } = await supabase
+                .rpc('register_to_event', { p_event_id: selectedEvent.id });
+
+            if (error) {
+                console.error('Error al inscribirse:', error);
+                toast.error('Error al inscribirse', {
+                    description: error.message
+                });
+                return;
+            }
+
+            toast.success('¡Inscripción exitosa!', {
+                description: `Te has inscrito a "${selectedEvent.title}"`
+            });
+
+            setShowRegisterModal(false);
+            setSelectedEvent(null);
+
+            // Recargar para actualizar el contador
+            window.location.reload();
+
+        } catch (error: any) {
+            console.error('Error al inscribirse:', error);
+            toast.error('Error inesperado', {
+                description: error.message || 'No se pudo completar la inscripción'
             });
         }
     };
@@ -572,7 +621,10 @@ const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [
                                                     )}
 
                                                     {/* Botón de inscribirse - para todos */}
-                                                    <button className="text-sky-400 hover:text-sky-300 font-bold border border-sky-600/50 hover:border-sky-500 px-4 py-2 rounded-md hover:bg-sky-900/20 transition-all">
+                                                    <button
+                                                        onClick={() => handleRegisterClick(event)}
+                                                        className="text-sky-400 hover:text-sky-300 font-bold border border-sky-600/50 hover:border-sky-500 px-4 py-2 rounded-md hover:bg-sky-900/20 transition-all"
+                                                    >
                                                         Inscribirse
                                                     </button>
                                                 </div>
@@ -715,6 +767,55 @@ const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [
                 onClose={() => setShowScheduleModal(false)}
                 onSchedule={handleScheduleTournament}
             />
+
+            {/* Modal de Confirmación de Inscripción */}
+            {showRegisterModal && selectedEvent && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+                    <div className="bg-slate-800 rounded-xl shadow-2xl border border-slate-700 max-w-md w-full">
+                        {/* Header */}
+                        <div className="bg-gradient-to-r from-sky-600 to-blue-600 px-6 py-4 rounded-t-xl">
+                            <h2 className="text-2xl font-bold text-white">Confirmar Inscripción</h2>
+                        </div>
+
+                        {/* Content */}
+                        <div className="p-6">
+                            <p className="text-slate-300 text-lg mb-4">
+                                ¿Confirmas que asistirás al torneo:
+                            </p>
+                            <div className="bg-slate-900 rounded-lg p-4 mb-6 border border-slate-700">
+                                <h3 className="text-xl font-bold text-white mb-2">{selectedEvent.title}</h3>
+                                <div className="space-y-1 text-sm text-slate-400">
+                                    <p>📅 Fecha: {selectedEvent.date}</p>
+                                    <p>🎮 Formato: {selectedEvent.format}</p>
+                                    <p>🏪 Lugar: {selectedEvent.storeName}</p>
+                                </div>
+                            </div>
+                            <p className="text-xs text-slate-500">
+                                Al confirmar, te comprometes a asistir al evento. Si no puedes asistir, por favor cancela tu inscripción con anticipación.
+                            </p>
+                        </div>
+
+                        {/* Buttons */}
+                        <div className="flex gap-3 px-6 pb-6">
+                            <button
+                                onClick={() => {
+                                    setShowRegisterModal(false);
+                                    setSelectedEvent(null);
+                                }}
+                                className="flex-1 px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white font-medium rounded-lg transition-colors"
+                            >
+                                Cancelar
+                            </button>
+                            <button
+                                onClick={handleConfirmRegistration}
+                                className="flex-1 px-4 py-2 bg-sky-600 hover:bg-sky-500 text-white font-bold rounded-lg transition-colors shadow-lg"
+                            >
+                                Confirmar Asistencia
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
