@@ -106,12 +106,11 @@ const RankingsPage: React.FC<RankingsPageProps> = ({ players }) => {
                                                 }`}>{player.rank}</span>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white sticky left-[4rem] bg-slate-800 z-10 border-r border-slate-700/50">
-                                            {player.isPublic ? player.name : `Jugador ${player.id.slice(-4)}`}
+                                            {player.name}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
-                                            {/* Show TEAM instead of REGION */}
                                             <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-slate-700 text-slate-300">
-                                                {player.team || 'Unknown'}
+                                                {player.team || 'Sin Team'}
                                             </span>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-bold text-sky-400">
@@ -185,12 +184,11 @@ const RankingsPage: React.FC<RankingsPageProps> = ({ players }) => {
                                                 }`}>{player.rank}</span>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white sticky left-[4rem] bg-slate-800 z-10 border-r border-slate-700/50">
-                                            {player.isPublic ? player.name : `Jugador ${player.id.slice(-4)}`}
+                                            {player.name}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
-                                            {/* Show TEAM instead of REGION */}
                                             <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-slate-700 text-slate-300">
-                                                {player.team || 'Unknown'}
+                                                {player.team || 'Sin Team'}
                                             </span>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-bold text-violet-400">

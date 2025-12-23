@@ -50,25 +50,127 @@ const AppContent: React.FC = () => {
 
   // Fetch data definition
   const fetchData = async () => {
-    // 1. Fetch Players (only role='player')
-    const { data: profilesData, error: profilesError } = await supabase
-      .from('profiles')
-      .select('id, username, region, pwp, matches_won, matches_lost, matches_drew, team, is_public')
-      .eq('role', 'player')
-      .order('pwp', { ascending: false });
+    // =====================================================================
+    // NUEVO ENFOQUE: Construir ranking desde tournament_results
+    // Esto permite que TODOS los jugadores de torneos aparezcan en el ranking
+    // incluso si no tienen cuenta registrada.
+    // =====================================================================
 
-    if (profilesData) {
-      const mappedPlayers: PlayerProfile[] = profilesData.map(p => ({
-        id: p.id,
-        name: p.username || 'Unknown',
-        region: p.region || 'Unknown',
-        pwp: p.pwp || 0,
-        matchesWon: p.matches_won || 0,
-        matchesLost: p.matches_lost || 0,
-        matchesDrew: p.matches_drew || 0,
-        team: p.team,
-        isPublic: p.is_public || false
-      }));
+    // 1. Fetch tournament results agrupados por player_name
+    const { data: resultsData, error: resultsError } = await supabase
+      .from('tournament_results')
+      .select(`
+        player_name,
+        player_id,
+        pwp_earned,
+        wins,
+        losses,
+        draws
+      `);
+
+    if (resultsData) {
+      // Agrupar resultados por player_name (o player_id si existe)
+      const playerMap: Record<string, {
+        name: string;
+        playerId: string | null;
+        pwp: number;
+        wins: number;
+        losses: number;
+        draws: number;
+      }> = {};
+
+      for (const result of resultsData) {
+        // Usar player_id como key si existe, sino usar player_name
+        const key = result.player_id || result.player_name;
+
+        if (!playerMap[key]) {
+          playerMap[key] = {
+            name: result.player_name,
+            playerId: result.player_id,
+            pwp: 0,
+            wins: 0,
+            losses: 0,
+            draws: 0
+          };
+        }
+
+        playerMap[key].pwp += result.pwp_earned || 0;
+        playerMap[key].wins += result.wins || 0;
+        playerMap[key].losses += result.losses || 0;
+        playerMap[key].draws += result.draws || 0;
+      }
+
+      // Obtener información adicional de profiles para jugadores vinculados
+      const playerIds = Object.values(playerMap)
+        .map(p => p.playerId)
+        .filter(id => id !== null) as string[];
+
+      let profilesMap: Record<string, {
+        firstName: string;
+        lastName: string;
+        username: string;
+        region: string;
+        team: string | null;
+        isPublic: boolean
+      }> = {};
+
+      if (playerIds.length > 0) {
+        const { data: profilesData } = await supabase
+          .from('profiles')
+          .select('id, username, first_name, last_name, region, team, is_public')
+          .in('id', playerIds);
+
+        if (profilesData) {
+          for (const profile of profilesData) {
+            profilesMap[profile.id] = {
+              firstName: profile.first_name || '',
+              lastName: profile.last_name || '',
+              username: profile.username || 'Unknown',
+              region: profile.region || 'Unknown',
+              team: profile.team,
+              isPublic: profile.is_public ?? false
+            };
+          }
+        }
+      }
+
+      // Mapear a PlayerProfile
+      // IMPORTANTE: Ordenar primero para asignar números consistentes
+      const sortedEntries = Object.entries(playerMap).sort((a, b) => b[1].pwp - a[1].pwp);
+
+      const mappedPlayers: PlayerProfile[] = sortedEntries.map(([key, data], index) => {
+        const profile = data.playerId ? profilesMap[data.playerId] : null;
+        const hasAccount = profile !== null;
+
+        // Generar número de jugador anónimo (basado en posición del ranking)
+        const anonymousNumber = String(index + 1).padStart(3, '0');
+
+        // Determinar el nombre a mostrar
+        let displayName: string;
+        if (hasAccount) {
+          // Si tiene cuenta → mostrar Nombre Apellido (o username como fallback)
+          const fullName = `${profile.firstName} ${profile.lastName}`.trim();
+          displayName = fullName || profile.username;
+        } else {
+          // Si NO tiene cuenta → mostrar "Jugador XXX" (anónimo)
+          displayName = `Jugador ${anonymousNumber}`;
+        }
+
+        return {
+          id: data.playerId || key, // Usar player_name como ID si no tiene cuenta
+          name: displayName,
+          region: hasAccount ? profile.region : 'Sin Región',
+          pwp: data.pwp,
+          matchesWon: data.wins,
+          matchesLost: data.losses,
+          matchesDrew: data.draws,
+          team: profile?.team || null,
+          // isPublic = true si tiene cuenta vinculada
+          isPublic: hasAccount
+        };
+      });
+
+      // Ya está ordenado por PWP descendente
       setPlayers(mappedPlayers);
     }
 
