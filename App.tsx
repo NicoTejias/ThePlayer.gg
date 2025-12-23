@@ -220,7 +220,8 @@ const AppContent: React.FC = () => {
         date: e.date,
         storeName: e.store_name,
         format: e.format,
-        playerCount: 0 // Los eventos agendados no tienen inscritos aún
+        playerCount: 0, // Los eventos agendados no tienen inscritos aún
+        createdBy: e.created_by // ID del creador del evento
       })) || [];
 
       // Combinar torneos futuros con eventos agendados
@@ -485,7 +486,7 @@ const AppContent: React.FC = () => {
           <Route path="/envivo" element={<LiveStreamPage />} />
           <Route path="/pls" element={<PLSPage />} />
           <Route path="/ranking/pwp" element={<RankingsPage players={players} />} />
-          <Route path="/eventos" element={<EventsPage events={communityEvents} finishedTournaments={tournamentResults} userRole={userRole} />} />
+          <Route path="/eventos" element={<EventsPage events={communityEvents} finishedTournaments={tournamentResults} userRole={userRole} userId={userProfile?.id} />} />
           <Route path="/torneos" element={<TournamentsListPage tournaments={tournamentResults} />} />
           <Route path="/torneos/:tournamentId" element={<TournamentStandingsPage />} />
           <Route path="/mercado" element={<MarketplacePage />} />

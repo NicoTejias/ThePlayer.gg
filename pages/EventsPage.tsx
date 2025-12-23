@@ -13,6 +13,7 @@ interface EventsPageProps {
     events: CommunityEvent[];
     finishedTournaments?: TournamentResult[]; // Torneos subidos desde el panel de tienda
     userRole?: 'player' | 'store' | 'admin' | null;
+    userId?: string; // ID del usuario actual
 }
 
 const getTournamentTypeDetails = (event: CommunityEvent) => {
@@ -41,7 +42,8 @@ const getWeekNumber = (d: Date) => {
 };
 
 
-const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [], userRole }) => {
+
+const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [], userRole, userId }) => {
     const navigate = useNavigate();
     // State for expanded past tournament view
     const [expandedEventId, setExpandedEventId] = React.useState<string | null>(null);
@@ -263,6 +265,41 @@ const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [
             console.error('Error al agendar torneo:', error);
             toast.error('Error inesperado', {
                 description: error.message || 'No se pudo agendar el torneo'
+            });
+        }
+    };
+
+    // Handler para eliminar evento
+    const handleDeleteEvent = async (eventId: string, eventTitle: string) => {
+        if (!confirm(`¿Estás seguro de que quieres eliminar el evento "${eventTitle}"?`)) {
+            return;
+        }
+
+        try {
+            const { error } = await supabase
+                .from('scheduled_events')
+                .delete()
+                .eq('id', eventId);
+
+            if (error) {
+                console.error('Error al eliminar evento:', error);
+                toast.error('Error al eliminar evento', {
+                    description: error.message
+                });
+                return;
+            }
+
+            toast.success('Evento eliminado', {
+                description: `El evento "${eventTitle}" fue eliminado correctamente`
+            });
+
+            // Recargar la página
+            window.location.reload();
+
+        } catch (error: any) {
+            console.error('Error al eliminar evento:', error);
+            toast.error('Error inesperado', {
+                description: error.message || 'No se pudo eliminar el evento'
             });
         }
     };
@@ -520,9 +557,25 @@ const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                                <button className="text-sky-400 hover:text-sky-300 font-bold border border-sky-600/50 hover:border-sky-500 px-4 py-2 rounded-md hover:bg-sky-900/20 transition-all">
-                                                    Inscribirse
-                                                </button>
+                                                <div className="flex items-center justify-end gap-2">
+                                                    {/* Botón de eliminar - solo para creador o admin */}
+                                                    {(event.createdBy && (event.createdBy === userId || userRole === 'admin')) && (
+                                                        <button
+                                                            onClick={() => handleDeleteEvent(event.id, event.title)}
+                                                            className="text-red-400 hover:text-red-300 font-bold border border-red-600/50 hover:border-red-500 px-3 py-2 rounded-md hover:bg-red-900/20 transition-all"
+                                                            title="Eliminar evento"
+                                                        >
+                                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                            </svg>
+                                                        </button>
+                                                    )}
+
+                                                    {/* Botón de inscribirse - para todos */}
+                                                    <button className="text-sky-400 hover:text-sky-300 font-bold border border-sky-600/50 hover:border-sky-500 px-4 py-2 rounded-md hover:bg-sky-900/20 transition-all">
+                                                        Inscribirse
+                                                    </button>
+                                                </div>
                                             </td>
                                         </tr>
                                     );

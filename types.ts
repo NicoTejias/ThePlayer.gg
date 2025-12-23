@@ -36,6 +36,7 @@ export interface CommunityEvent {
   format: string;
   playerCount: number;
   imageUrl?: string;
+  createdBy?: string; // ID del usuario que creó el evento (solo para eventos agendados)
 }
 
 export interface MediaArticle {
