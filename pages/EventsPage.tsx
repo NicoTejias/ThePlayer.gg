@@ -184,6 +184,7 @@ const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [
 
     // Filter upcoming events (incluye eventos de hoy que no han pasado)
     const now = new Date();
+    console.log('Current time:', now);
 
     const allUpcomingEvents = events
         .filter(e => {
@@ -195,8 +196,15 @@ const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [
                 const eventDateTime = new Date(eventDate);
                 eventDateTime.setHours(hours, minutes, 0, 0);
 
+                const shouldInclude = eventDateTime >= now;
+                console.log(`Event "${e.title}" (${e.date} ${e.time}):`, {
+                    eventDateTime,
+                    now,
+                    shouldInclude
+                });
+
                 // Incluir si la fecha+hora es futura
-                return eventDateTime >= now;
+                return shouldInclude;
             }
 
             // Si no tiene hora, incluir si es hoy o futuro
@@ -217,6 +225,8 @@ const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [
             }
             return 0;
         });
+
+    console.log('All upcoming events after filter:', allUpcomingEvents);
 
     // Paginate upcoming events
     const totalUpcomingPages = Math.ceil(allUpcomingEvents.length / EVENTS_PER_PAGE);
