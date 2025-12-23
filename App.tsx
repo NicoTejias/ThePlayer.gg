@@ -196,7 +196,7 @@ const AppContent: React.FC = () => {
       const today = new Date();
       today.setHours(0, 0, 0, 0);
 
-      const mappedEvents: CommunityEvent[] = mappedTourneys
+      const futureTournaments: CommunityEvent[] = mappedTourneys
         .filter(t => new Date(t.date) >= today) // Solo eventos futuros
         .map(t => ({
           id: t.id,
@@ -206,7 +206,26 @@ const AppContent: React.FC = () => {
           format: t.format,
           playerCount: t.playerCount
         }));
-      setCommunityEvents(mappedEvents);
+
+      // 3. Fetch Scheduled Events (eventos agendados)
+      const { data: scheduledData, error: scheduledError } = await supabase
+        .from('scheduled_events')
+        .select('*')
+        .gte('date', today.toISOString().split('T')[0])
+        .order('date', { ascending: true });
+
+      const scheduledEvents: CommunityEvent[] = scheduledData?.map(e => ({
+        id: e.id,
+        title: e.title,
+        date: e.date,
+        storeName: e.store_name,
+        format: e.format,
+        playerCount: 0 // Los eventos agendados no tienen inscritos aún
+      })) || [];
+
+      // Combinar torneos futuros con eventos agendados
+      const allEvents = [...futureTournaments, ...scheduledEvents];
+      setCommunityEvents(allEvents);
     }
   };
 

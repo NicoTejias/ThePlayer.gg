@@ -6,6 +6,8 @@ import MapPinIcon from '../components/icons/MapPinIcon';
 import TagIcon from '../components/icons/TagIcon';
 import { useNavigate } from 'react-router-dom';
 import ScheduleTournamentModal from '../components/ScheduleTournamentModal';
+import { supabase } from '../supabaseClient';
+import { toast } from 'sonner';
 
 interface EventsPageProps {
     events: CommunityEvent[];
@@ -155,9 +157,11 @@ const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [
                     eventsToCreate.push({
                         title: eventData.title,
                         date: currentDate.toISOString().split('T')[0],
+                        time: eventData.time,
                         format: eventData.format,
-                        storeName: eventData.storeName,
-                        playerCount: 0 // Inicialmente sin jugadores inscritos
+                        store_name: eventData.storeName,
+                        max_players: eventData.maxPlayers,
+                        description: eventData.description || null
                     });
 
                     // Calcular siguiente fecha según tipo de recurrencia
@@ -174,22 +178,40 @@ const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [
                 eventsToCreate.push({
                     title: eventData.title,
                     date: eventData.date,
+                    time: eventData.time,
                     format: eventData.format,
-                    storeName: eventData.storeName,
-                    playerCount: 0
+                    store_name: eventData.storeName,
+                    max_players: eventData.maxPlayers,
+                    description: eventData.description || null
                 });
             }
 
-            // TODO: Guardar en Supabase cuando esté lista la tabla scheduled_events
-            console.log('Eventos a crear:', eventsToCreate);
-            console.log(`Se crearán ${eventsToCreate.length} eventos`);
+            // Guardar en Supabase
+            const { error } = await supabase
+                .from('scheduled_events')
+                .insert(eventsToCreate);
 
-            // Por ahora solo mostramos en consola
-            // Cuando implementes Supabase:
-            // const { error } = await supabase.from('scheduled_events').insert(eventsToCreate);
+            if (error) {
+                console.error('Error al guardar eventos:', error);
+                toast.error('Error al agendar torneo', {
+                    description: error.message
+                });
+                return;
+            }
 
-        } catch (error) {
+            // Éxito
+            toast.success('¡Torneo agendado!', {
+                description: `Se ${eventsToCreate.length === 1 ? 'agendó 1 evento' : `agendaron ${eventsToCreate.length} eventos`} correctamente`
+            });
+
+            // Recargar la página para mostrar los nuevos eventos
+            window.location.reload();
+
+        } catch (error: any) {
             console.error('Error al agendar torneo:', error);
+            toast.error('Error inesperado', {
+                description: error.message || 'No se pudo agendar el torneo'
+            });
         }
     };
 
