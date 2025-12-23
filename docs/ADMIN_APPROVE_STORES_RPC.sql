@@ -17,7 +17,7 @@ BEGIN
         WHERE id = auth.uid() AND role = 'admin'
     ) INTO is_admin;
 
-    IF NOT is_admin THEN
+    IF is_admin = false THEN
         RAISE EXCEPTION 'Solo los administradores pueden aprobar tiendas';
     END IF;
 
@@ -47,7 +47,7 @@ BEGIN
         WHERE id = auth.uid() AND role = 'admin'
     ) INTO is_admin;
 
-    IF NOT is_admin THEN
+    IF is_admin = false THEN
         RAISE EXCEPTION 'Solo los administradores pueden rechazar tiendas';
     END IF;
 
@@ -61,7 +61,3 @@ BEGIN
     END IF;
 END;
 $$;
-
--- Comentarios
-COMMENT ON FUNCTION public.approve_store IS 'Permite a los admins aprobar tiendas pendientes';
-COMMENT ON FUNCTION public.reject_store IS 'Permite a los admins rechazar tiendas pendientes';
