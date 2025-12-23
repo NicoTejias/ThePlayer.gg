@@ -188,13 +188,14 @@ const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [
 
     const allUpcomingEvents = events
         .filter(e => {
-            const eventDate = new Date(e.date);
+            // Parsear fecha correctamente (evitar problemas de zona horaria)
+            const [year, month, day] = e.date.split('-').map(Number);
+            const eventDate = new Date(year, month - 1, day); // month es 0-indexed
 
             // Si el evento tiene hora, crear fecha+hora completa
             if (e.time) {
                 const [hours, minutes] = e.time.split(':').map(Number);
-                const eventDateTime = new Date(eventDate);
-                eventDateTime.setHours(hours, minutes, 0, 0);
+                const eventDateTime = new Date(year, month - 1, day, hours, minutes, 0, 0);
 
                 const shouldInclude = eventDateTime >= now;
                 console.log(`Event "${e.title}" (${e.date} ${e.time}):`, {
@@ -216,7 +217,12 @@ const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [
         })
         .sort((a, b) => {
             // Ordenar por fecha y luego por hora
-            const dateCompare = new Date(a.date).getTime() - new Date(b.date).getTime();
+            const [yearA, monthA, dayA] = a.date.split('-').map(Number);
+            const [yearB, monthB, dayB] = b.date.split('-').map(Number);
+            const dateA = new Date(yearA, monthA - 1, dayA);
+            const dateB = new Date(yearB, monthB - 1, dayB);
+
+            const dateCompare = dateA.getTime() - dateB.getTime();
             if (dateCompare !== 0) return dateCompare;
 
             // Si tienen la misma fecha, ordenar por hora
