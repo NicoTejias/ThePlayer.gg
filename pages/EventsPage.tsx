@@ -158,17 +158,40 @@ const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [
     const topStoreEntry = Object.entries(storeCounts).sort((a, b) => (b[1] as number) - (a[1] as number))[0];
     const topStore = topStoreEntry ? topStoreEntry[0] : 'N/A';
 
-    // Filter upcoming events (future dates only) - limit to 5
+
+    // State for upcoming events pagination
+    const [upcomingPage, setUpcomingPage] = React.useState(0);
+    const EVENTS_PER_PAGE = 5;
+
+    // Filter upcoming events (future dates only)
     const todayForFilter = new Date();
     todayForFilter.setHours(0, 0, 0, 0);
 
-    const upcomingEvents = events
+    const allUpcomingEvents = events
         .filter(e => {
             const eventDate = new Date(e.date);
             return eventDate >= todayForFilter;
         })
-        .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
-        .slice(0, 5); // Limit to 5 events
+        .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+    // Paginate upcoming events
+    const totalUpcomingPages = Math.ceil(allUpcomingEvents.length / EVENTS_PER_PAGE);
+    const upcomingEvents = allUpcomingEvents.slice(
+        upcomingPage * EVENTS_PER_PAGE,
+        (upcomingPage + 1) * EVENTS_PER_PAGE
+    );
+
+    const goToPreviousEvents = () => {
+        if (upcomingPage > 0) {
+            setUpcomingPage(upcomingPage - 1);
+        }
+    };
+
+    const goToNextEvents = () => {
+        if (upcomingPage < totalUpcomingPages - 1) {
+            setUpcomingPage(upcomingPage + 1);
+        }
+    };
 
     // Handler para agendar torneo
     const handleScheduleTournament = async (eventData: any) => {
@@ -381,7 +404,39 @@ const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [
             {/* Upcoming Tournaments Table */}
             <div>
                 <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-2xl font-bold text-white uppercase tracking-wide">Próximos Torneos</h2>
+                    <div className="flex items-center gap-4">
+                        <h2 className="text-2xl font-bold text-white uppercase tracking-wide">Próximos Torneos</h2>
+
+                        {/* Navigation for upcoming events */}
+                        {allUpcomingEvents.length > EVENTS_PER_PAGE && (
+                            <div className="flex items-center gap-2">
+                                <button
+                                    onClick={goToPreviousEvents}
+                                    disabled={upcomingPage === 0}
+                                    className="p-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                    title="Eventos anteriores"
+                                >
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                                    </svg>
+                                </button>
+                                <span className="text-sm text-slate-400 font-medium">
+                                    {upcomingPage + 1} / {totalUpcomingPages}
+                                </span>
+                                <button
+                                    onClick={goToNextEvents}
+                                    disabled={upcomingPage >= totalUpcomingPages - 1}
+                                    className="p-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                    title="Eventos siguientes"
+                                >
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                    </svg>
+                                </button>
+                            </div>
+                        )}
+                    </div>
+
                     {/* Botón para agendar evento - solo visible para tiendas y admins */}
                     {(userRole === 'store' || userRole === 'admin') && (
                         <button
