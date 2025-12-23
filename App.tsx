@@ -220,7 +220,8 @@ const AppContent: React.FC = () => {
         playerCount: e.registration_count || 0, // Contador real de inscritos
         createdBy: e.created_by, // ID del creador del evento
         maxPlayers: e.max_players, // Máximo de jugadores
-        time: e.event_time // Hora del evento
+        time: e.event_time, // Hora del evento
+        isUserRegistered: e.is_user_registered || false // Si el usuario está inscrito
       })) || [];
 
       // Combinar torneos futuros con eventos agendados

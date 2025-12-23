@@ -353,6 +353,39 @@ const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [
         }
     };
 
+    // Handler para cancelar inscripción
+    const handleCancelRegistration = async (event: CommunityEvent) => {
+        if (!confirm(`¿Estás seguro de que quieres cancelar tu inscripción a "${event.title}"?`)) {
+            return;
+        }
+
+        try {
+            const { data, error } = await supabase
+                .rpc('cancel_event_registration', { p_event_id: event.id });
+
+            if (error) {
+                console.error('Error al cancelar inscripción:', error);
+                toast.error('Error al cancelar', {
+                    description: error.message
+                });
+                return;
+            }
+
+            toast.success('Inscripción cancelada', {
+                description: `Tu inscripción a "${event.title}" fue cancelada`
+            });
+
+            // Recargar para actualizar
+            window.location.reload();
+
+        } catch (error: any) {
+            console.error('Error al cancelar inscripción:', error);
+            toast.error('Error inesperado', {
+                description: error.message || 'No se pudo cancelar la inscripción'
+            });
+        }
+    };
+
     const pastEvents = events.filter(e => {
         const eventDate = new Date(e.date);
         const today = new Date();
@@ -620,13 +653,22 @@ const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [
                                                         </button>
                                                     )}
 
-                                                    {/* Botón de inscribirse - para todos */}
-                                                    <button
-                                                        onClick={() => handleRegisterClick(event)}
-                                                        className="text-sky-400 hover:text-sky-300 font-bold border border-sky-600/50 hover:border-sky-500 px-4 py-2 rounded-md hover:bg-sky-900/20 transition-all"
-                                                    >
-                                                        Inscribirse
-                                                    </button>
+                                                    {/* Botón de inscribirse/cancelar - para todos */}
+                                                    {event.isUserRegistered ? (
+                                                        <button
+                                                            onClick={() => handleCancelRegistration(event)}
+                                                            className="text-orange-400 hover:text-orange-300 font-bold border border-orange-600/50 hover:border-orange-500 px-4 py-2 rounded-md hover:bg-orange-900/20 transition-all"
+                                                        >
+                                                            Cancelar Inscripción
+                                                        </button>
+                                                    ) : (
+                                                        <button
+                                                            onClick={() => handleRegisterClick(event)}
+                                                            className="text-sky-400 hover:text-sky-300 font-bold border border-sky-600/50 hover:border-sky-500 px-4 py-2 rounded-md hover:bg-sky-900/20 transition-all"
+                                                        >
+                                                            Inscribirse
+                                                        </button>
+                                                    )}
                                                 </div>
                                             </td>
                                         </tr>

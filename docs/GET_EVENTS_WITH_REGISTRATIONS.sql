@@ -1,5 +1,6 @@
 -- =============================================================================
 -- FUNCIÓN RPC: Obtener eventos agendados con contador de inscritos
+-- Y verificar si el usuario actual está inscrito
 -- =============================================================================
 
 CREATE OR REPLACE FUNCTION public.get_scheduled_events_with_registrations()
@@ -14,7 +15,8 @@ RETURNS TABLE (
     description text,
     created_by uuid,
     created_at timestamp with time zone,
-    registration_count bigint
+    registration_count bigint,
+    is_user_registered boolean
 )
 LANGUAGE sql
 STABLE
@@ -30,7 +32,13 @@ AS $$
         se.description,
         se.created_by,
         se.created_at,
-        COALESCE(COUNT(er.id), 0) as registration_count
+        COALESCE(COUNT(er.id), 0) as registration_count,
+        EXISTS (
+            SELECT 1 FROM public.event_registrations er2
+            WHERE er2.event_id = se.id 
+            AND er2.player_id = auth.uid()
+            AND er2.status = 'confirmed'
+        ) as is_user_registered
     FROM public.scheduled_events se
     LEFT JOIN public.event_registrations er 
         ON se.id = er.event_id AND er.status = 'confirmed'
@@ -40,4 +48,4 @@ AS $$
     ORDER BY se.date ASC, se.time ASC;
 $$;
 
-COMMENT ON FUNCTION public.get_scheduled_events_with_registrations IS 'Devuelve eventos agendados con el contador de inscripciones confirmadas';
+COMMENT ON FUNCTION public.get_scheduled_events_with_registrations IS 'Devuelve eventos agendados con el contador de inscripciones y si el usuario actual está inscrito';

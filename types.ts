@@ -39,6 +39,7 @@ export interface CommunityEvent {
   createdBy?: string; // ID del usuario que creó el evento (solo para eventos agendados)
   maxPlayers?: number; // Máximo de jugadores permitidos
   time?: string; // Hora del evento
+  isUserRegistered?: boolean; // Si el usuario actual está inscrito
 }
 
 export interface MediaArticle {
