@@ -13,7 +13,12 @@ const RankingsPage: React.FC<RankingsPageProps> = ({ players }) => {
     const pwpRanking = useMemo(() => {
         return [...players]
             .sort((a, b) => b.pwp - a.pwp)
-            .map((player, index) => ({ ...player, rank: index + 1 }));
+            .map((player, index) => ({
+                ...player,
+                rank: index + 1,
+                // Aplicar lógica de anonimización
+                name: player.isPublic ? player.name : `Jugador ${player.id.slice(-4)}`
+            }));
     }, [players]);
 
     const winRateRanking = useMemo(() => {
@@ -24,7 +29,12 @@ const RankingsPage: React.FC<RankingsPageProps> = ({ players }) => {
                 return { ...player, winRate };
             })
             .sort((a, b) => b.winRate - a.winRate)
-            .map((player, index) => ({ ...player, rank: index + 1 }));
+            .map((player, index) => ({
+                ...player,
+                rank: index + 1,
+                // Aplicar lógica de anonimización
+                name: player.isPublic ? player.name : `Jugador ${player.id.slice(-4)}`
+            }));
     }, [players]);
 
 

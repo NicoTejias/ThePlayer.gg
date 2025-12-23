@@ -215,8 +215,6 @@ const AppContent: React.FC = () => {
         console.error('Error fetching scheduled events:', scheduledError);
       }
 
-      console.log('Scheduled events from DB:', scheduledData);
-
       const scheduledEvents: CommunityEvent[] = scheduledData?.map(e => ({
         id: e.id,
         title: e.title,
@@ -230,11 +228,8 @@ const AppContent: React.FC = () => {
         isUserRegistered: e.is_user_registered || false // Si el usuario está inscrito
       })) || [];
 
-      console.log('Scheduled events mapped:', scheduledEvents);
-
       // Combinar torneos futuros con eventos agendados
       const allEvents = [...futureTournaments, ...scheduledEvents];
-      console.log('All events combined:', allEvents);
       setCommunityEvents(allEvents);
     }
   };
