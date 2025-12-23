@@ -1,12 +1,12 @@
 -- =============================================================================
 -- FUNCIÓN RPC: Obtener eventos agendados con contador de inscritos
--- Y verificar si el usuario actual está inscrito
+-- SIN filtro de fecha (el frontend se encarga del filtrado)
 -- =============================================================================
 
 -- Eliminar la función anterior si existe
 DROP FUNCTION IF EXISTS public.get_scheduled_events_with_registrations();
 
--- Crear la nueva versión con el campo adicional
+-- Crear la nueva versión SIN filtro de fecha
 CREATE FUNCTION public.get_scheduled_events_with_registrations()
 RETURNS TABLE (
     id uuid,
@@ -46,10 +46,9 @@ AS $$
     FROM public.scheduled_events se
     LEFT JOIN public.event_registrations er 
         ON se.id = er.event_id AND er.status = 'confirmed'
-    WHERE se.date >= (CURRENT_DATE AT TIME ZONE 'America/Santiago')::date
     GROUP BY se.id, se.title, se.date, se.time, se.format, se.store_name, 
              se.max_players, se.description, se.created_by, se.created_at
     ORDER BY se.date ASC, se.time ASC;
 $$;
 
-COMMENT ON FUNCTION public.get_scheduled_events_with_registrations IS 'Devuelve eventos agendados con el contador de inscripciones y si el usuario actual está inscrito';
+COMMENT ON FUNCTION public.get_scheduled_events_with_registrations IS 'Devuelve TODOS los eventos agendados con el contador de inscripciones. El filtrado por fecha se hace en el frontend.';
