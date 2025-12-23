@@ -4,6 +4,26 @@ import type { RankingEntry, CommunityEvent, MediaArticle, MarketplacePost, WinRa
 import Card from '../components/Card';
 import TrophyIcon from '../components/icons/TrophyIcon';
 import SparklesIcon from '../components/icons/SparklesIcon';
+import UsersIcon from '../components/icons/UserIcon'; // Ensure this matches existing import if present or add it
+import { supabase } from '../supabaseClient';
+
+const CountUp: React.FC<{ end: number, duration?: number }> = ({ end, duration = 2000 }) => {
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    let startTime: number | null = null;
+    const animate = (currentTime: number) => {
+      if (!startTime) startTime = currentTime;
+      const progress = Math.min((currentTime - startTime) / duration, 1);
+      const ease = 1 - Math.pow(1 - progress, 4); // EaseOutQuart
+      setCount(Math.floor(ease * end));
+      if (progress < 1) requestAnimationFrame(animate);
+    };
+    requestAnimationFrame(animate);
+  }, [end, duration]);
+
+  return <span>{count.toLocaleString()}</span>;
+};
 
 // Mock Data for Media and Marketplace (as we don't have real data source for these yet)
 const mockArticles: MediaArticle[] = [
@@ -62,6 +82,31 @@ interface HomePageProps {
 
 const HomePage: React.FC<HomePageProps> = ({ players, events }) => {
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [stats, setStats] = useState({ stores: 0, players: 0, tournaments: 0, matches: 0 });
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        // Mock some data if tables are empty, but try real fetch first
+        const [stores, players, tournaments, results] = await Promise.all([
+          supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'store'),
+          supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'player'),
+          supabase.from('tournaments').select('*', { count: 'exact', head: true }),
+          supabase.from('tournament_results').select('*', { count: 'exact', head: true })
+        ]);
+
+        setStats({
+          stores: stores.count || 0,
+          players: players.count || 0,
+          tournaments: tournaments.count || 0,
+          matches: results.count || 0
+        });
+      } catch (e) {
+        console.error("Error fetching stats", e);
+      }
+    };
+    fetchStats();
+  }, []);
 
   // Auto-slide effect
   useEffect(() => {
@@ -335,6 +380,66 @@ const HomePage: React.FC<HomePageProps> = ({ players, events }) => {
         </section>
 
       </div>
+
+      {/* Community Stats Section */}
+      <section className="mt-24 mb-12 relative px-4">
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-900/10 via-purple-900/10 to-blue-900/10 blur-3xl rounded-full opacity-50 -z-10 pointer-events-none"></div>
+
+        <div className="text-center mb-10">
+          <h2 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-slate-100 to-slate-400 uppercase tracking-tighter">
+            La Comunidad en Cifras
+          </h2>
+          <p className="text-slate-400 mt-2 font-medium">El ecosistema competitivo más grande de Chile</p>
+        </div>
+
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-6xl mx-auto">
+          {/* Players Stat */}
+          <div className="bg-slate-800/40 backdrop-blur-sm p-6 rounded-xl border border-slate-700/50 flex flex-col items-center hover:border-blue-500/50 hover:bg-slate-800/60 transition-all group hover:-translate-y-1 duration-300">
+            <div className="p-3 bg-blue-500/10 rounded-full mb-4 group-hover:bg-blue-500/20 transition-colors text-blue-400 shadow-[0_0_15px_rgba(59,130,246,0.2)]">
+              <UsersIcon className="w-8 h-8" />
+            </div>
+            <div className="text-4xl font-bold text-white mb-1 tabular-nums tracking-tight">
+              <CountUp end={stats.players} />
+            </div>
+            <div className="text-xs text-slate-400 uppercase tracking-widest font-bold">Jugadores</div>
+          </div>
+
+          {/* Stores Stat */}
+          <div className="bg-slate-800/40 backdrop-blur-sm p-6 rounded-xl border border-slate-700/50 flex flex-col items-center hover:border-yellow-500/50 hover:bg-slate-800/60 transition-all group hover:-translate-y-1 duration-300">
+            <div className="p-3 bg-yellow-500/10 rounded-full mb-4 group-hover:bg-yellow-500/20 transition-colors text-yellow-400 shadow-[0_0_15px_rgba(234,179,8,0.2)]">
+              <svg xmlns="http://www.w3.org/2000/svg" className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+              </svg>
+            </div>
+            <div className="text-4xl font-bold text-white mb-1 tabular-nums tracking-tight">
+              <CountUp end={stats.stores} />
+            </div>
+            <div className="text-xs text-slate-400 uppercase tracking-widest font-bold">Tiendas</div>
+          </div>
+
+          {/* Tournaments Stat */}
+          <div className="bg-slate-800/40 backdrop-blur-sm p-6 rounded-xl border border-slate-700/50 flex flex-col items-center hover:border-purple-500/50 hover:bg-slate-800/60 transition-all group hover:-translate-y-1 duration-300">
+            <div className="p-3 bg-purple-500/10 rounded-full mb-4 group-hover:bg-purple-500/20 transition-colors text-purple-400 shadow-[0_0_15px_rgba(168,85,247,0.2)]">
+              <TrophyIcon className="w-8 h-8" />
+            </div>
+            <div className="text-4xl font-bold text-white mb-1 tabular-nums tracking-tight">
+              <CountUp end={stats.tournaments} />
+            </div>
+            <div className="text-xs text-slate-400 uppercase tracking-widest font-bold">Torneos</div>
+          </div>
+
+          {/* Matches Stat */}
+          <div className="bg-slate-800/40 backdrop-blur-sm p-6 rounded-xl border border-slate-700/50 flex flex-col items-center hover:border-green-500/50 hover:bg-slate-800/60 transition-all group hover:-translate-y-1 duration-300">
+            <div className="p-3 bg-green-500/10 rounded-full mb-4 group-hover:bg-green-500/20 transition-colors text-green-400 shadow-[0_0_15px_rgba(34,197,94,0.2)]">
+              <SparklesIcon className="w-8 h-8" />
+            </div>
+            <div className="text-4xl font-bold text-white mb-1 tabular-nums tracking-tight">
+              <CountUp end={stats.matches} />
+            </div>
+            <div className="text-xs text-slate-400 uppercase tracking-widest font-bold">Partidas</div>
+          </div>
+        </div>
+      </section>
 
     </div>
   );
