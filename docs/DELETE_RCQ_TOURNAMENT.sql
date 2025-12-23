@@ -5,8 +5,8 @@
 -- PASO 1: Ver todos los torneos recientes para identificar el RCQ
 SELECT 
     id,
-    tournament_name,
-    tournament_date,
+    name,
+    date,
     store_name,
     player_count,
     format,
@@ -36,8 +36,8 @@ WHERE id = 'ID_DEL_TORNEO_AQUI';
 -- 2.4 - Verificar que se eliminó correctamente
 SELECT 
     id,
-    tournament_name,
-    tournament_date
+    name,
+    date
 FROM public.tournaments
 WHERE id = 'ID_DEL_TORNEO_AQUI';
 -- Esta query NO debería devolver ningún resultado
