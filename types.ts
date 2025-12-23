@@ -37,6 +37,8 @@ export interface CommunityEvent {
   playerCount: number;
   imageUrl?: string;
   createdBy?: string; // ID del usuario que creó el evento (solo para eventos agendados)
+  maxPlayers?: number; // Máximo de jugadores permitidos
+  time?: string; // Hora del evento
 }
 
 export interface MediaArticle {

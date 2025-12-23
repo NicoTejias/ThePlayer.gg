@@ -207,12 +207,9 @@ const AppContent: React.FC = () => {
           playerCount: t.playerCount
         }));
 
-      // 3. Fetch Scheduled Events (eventos agendados)
+      // 3. Fetch Scheduled Events (eventos agendados) con contador de inscritos
       const { data: scheduledData, error: scheduledError } = await supabase
-        .from('scheduled_events')
-        .select('*')
-        .gte('date', today.toISOString().split('T')[0])
-        .order('date', { ascending: true });
+        .rpc('get_scheduled_events_with_registrations');
 
       const scheduledEvents: CommunityEvent[] = scheduledData?.map(e => ({
         id: e.id,
@@ -220,8 +217,10 @@ const AppContent: React.FC = () => {
         date: e.date,
         storeName: e.store_name,
         format: e.format,
-        playerCount: 0, // Los eventos agendados no tienen inscritos aún
-        createdBy: e.created_by // ID del creador del evento
+        playerCount: e.registration_count || 0, // Contador real de inscritos
+        createdBy: e.created_by, // ID del creador del evento
+        maxPlayers: e.max_players, // Máximo de jugadores
+        time: e.time // Hora del evento
       })) || [];
 
       // Combinar torneos futuros con eventos agendados

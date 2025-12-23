@@ -556,10 +556,10 @@ const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [
                             ) : (
                                 upcomingEvents.map((event) => {
                                     const details = getTournamentTypeDetails(event);
-                                    const mockTime = "19:00"; // Mock time
-                                    const mockLimit = 64; // Mock limit
+                                    const eventTime = event.time || "19:00"; // Usar hora real o default
+                                    const maxLimit = event.maxPlayers || 64; // Usar límite real o default
                                     const registered = event.playerCount || 0;
-                                    const isFull = registered >= mockLimit;
+                                    const isFull = registered >= maxLimit;
 
                                     return (
                                         <tr key={event.id} className="group hover:bg-slate-700/30 transition-colors">
@@ -567,7 +567,7 @@ const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [
                                                 {event.date}
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-400">
-                                                {mockTime}
+                                                {eventTime}
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap">
                                                 <div className="flex flex-col">
@@ -595,12 +595,12 @@ const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [
                                             <td className="px-6 py-4 whitespace-nowrap text-center">
                                                 <div className="flex flex-col items-center">
                                                     <span className={`text-sm font-bold ${isFull ? 'text-red-400' : 'text-green-400'}`}>
-                                                        {registered}/{mockLimit}
+                                                        {registered}/{maxLimit}
                                                     </span>
                                                     <div className="w-16 h-1.5 bg-slate-700 rounded-full mt-1 overflow-hidden">
                                                         <div
                                                             className={`h-full ${isFull ? 'bg-red-500' : 'bg-green-500'}`}
-                                                            style={{ width: `${Math.min((registered / mockLimit) * 100, 100)}%` }}
+                                                            style={{ width: `${Math.min((registered / maxLimit) * 100, 100)}%` }}
                                                         ></div>
                                                     </div>
                                                 </div>
