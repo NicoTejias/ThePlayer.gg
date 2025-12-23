@@ -31,13 +31,22 @@ ON public.scheduled_events (created_by);
 -- =============================================================================
 ALTER TABLE public.scheduled_events ENABLE ROW LEVEL SECURITY;
 
+-- Eliminar políticas existentes si existen
+DO $$ 
+BEGIN
+    DROP POLICY IF EXISTS "Anyone can view scheduled events" ON public.scheduled_events;
+    DROP POLICY IF EXISTS "Stores and admins can create events" ON public.scheduled_events;
+    DROP POLICY IF EXISTS "Users can update own events" ON public.scheduled_events;
+    DROP POLICY IF EXISTS "Users can delete own events" ON public.scheduled_events;
+EXCEPTION
+    WHEN undefined_object THEN NULL;
+END $$;
+
 -- Todos pueden ver eventos agendados
-DROP POLICY IF EXISTS "Anyone can view scheduled events" ON public.scheduled_events;
 CREATE POLICY "Anyone can view scheduled events" ON public.scheduled_events
     FOR SELECT USING (true);
 
 -- Solo tiendas y admins pueden crear eventos
-DROP POLICY IF EXISTS "Stores and admins can create events" ON public.scheduled_events;
 CREATE POLICY "Stores and admins can create events" ON public.scheduled_events
     FOR INSERT WITH CHECK (
         EXISTS (
@@ -48,24 +57,9 @@ CREATE POLICY "Stores and admins can create events" ON public.scheduled_events
     );
 
 -- Solo el creador puede actualizar sus eventos
-DROP POLICY IF EXISTS "Users can update own events" ON public.scheduled_events;
 CREATE POLICY "Users can update own events" ON public.scheduled_events
     FOR UPDATE USING (auth.uid() = created_by);
 
 -- Solo el creador puede eliminar sus eventos
-DROP POLICY IF EXISTS "Users can delete own events" ON public.scheduled_events;
 CREATE POLICY "Users can delete own events" ON public.scheduled_events
     FOR DELETE USING (auth.uid() = created_by);
-
--- =============================================================================
--- COMENTARIOS
--- =============================================================================
-COMMENT ON TABLE public.scheduled_events IS 'Eventos agendados por tiendas para aparecer en el calendario';
-COMMENT ON COLUMN public.scheduled_events.title IS 'Nombre del torneo (ej: FNM Standard - Viernes)';
-COMMENT ON COLUMN public.scheduled_events.date IS 'Fecha del evento';
-COMMENT ON COLUMN public.scheduled_events.time IS 'Hora del evento';
-COMMENT ON COLUMN public.scheduled_events.format IS 'Formato del torneo (Standard, Modern, etc.)';
-COMMENT ON COLUMN public.scheduled_events.store_name IS 'Nombre de la tienda que organiza';
-COMMENT ON COLUMN public.scheduled_events.max_players IS 'Máximo de jugadores permitidos';
-COMMENT ON COLUMN public.scheduled_events.description IS 'Descripción adicional del evento';
-COMMENT ON COLUMN public.scheduled_events.created_by IS 'Usuario que creó el evento';

@@ -40,6 +40,7 @@ const getWeekNumber = (d: Date) => {
     return weekNo;
 };
 
+
 const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [], userRole }) => {
     const navigate = useNavigate();
     // State for expanded past tournament view
@@ -47,28 +48,56 @@ const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [
     // State for schedule tournament modal
     const [showScheduleModal, setShowScheduleModal] = React.useState(false);
 
-    // Calendar Logic (Dynamic Current Month)
-    const currentDate = new Date();
-    const currentYear = currentDate.getFullYear();
-    const currentMonth = currentDate.getMonth(); // 0-indexed
+    // State for calendar navigation
+    const today = new Date();
+    const [calendarYear, setCalendarYear] = React.useState(today.getFullYear());
+    const [calendarMonth, setCalendarMonth] = React.useState(today.getMonth());
 
-    const monthName = new Intl.DateTimeFormat('es-ES', { month: 'long', year: 'numeric' }).format(currentDate);
+    // Calendar Logic (Dynamic Month based on navigation)
+    const calendarDate = new Date(calendarYear, calendarMonth, 1);
+    const monthName = new Intl.DateTimeFormat('es-ES', { month: 'long', year: 'numeric' }).format(calendarDate);
+
+    // Navigation functions
+    const goToPreviousMonth = () => {
+        if (calendarMonth === 0) {
+            setCalendarMonth(11);
+            setCalendarYear(calendarYear - 1);
+        } else {
+            setCalendarMonth(calendarMonth - 1);
+        }
+    };
+
+    const goToNextMonth = () => {
+        if (calendarMonth === 11) {
+            setCalendarMonth(0);
+            setCalendarYear(calendarYear + 1);
+        } else {
+            setCalendarMonth(calendarMonth + 1);
+        }
+    };
+
+    const goToToday = () => {
+        setCalendarYear(today.getFullYear());
+        setCalendarMonth(today.getMonth());
+    };
 
     // Calculate start of calendar grid (Monday-based)
-    const firstDayOfMonth = new Date(currentYear, currentMonth, 1);
+    const firstDayOfMonth = new Date(calendarYear, calendarMonth, 1);
     const startDayIndex = (firstDayOfMonth.getDay() + 6) % 7; // 0=Mon, ... 6=Sun
 
+
+
     // Start date for the grid (previous month's padding if needed)
-    const gridStartDate = new Date(currentYear, currentMonth, 1 - startDayIndex);
+    const gridStartDate = new Date(calendarYear, calendarMonth, 1 - startDayIndex);
 
     const renderCalendarDay = (date: Date) => {
-        const isCurrentMonth = date.getMonth() === currentMonth;
+        const isCurrentMonth = date.getMonth() === calendarMonth;
         const dayNum = date.getDate();
 
         // Find events for this day
         const dayEvents = events.filter(e => {
             const [y, m, d] = e.date.split('-').map(Number);
-            return d === dayNum && (m - 1) === currentMonth && y === currentYear;
+            return d === dayNum && (m - 1) === calendarMonth && y === calendarYear;
         });
 
         if (!isCurrentMonth) {
@@ -130,13 +159,13 @@ const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [
     const topStore = topStoreEntry ? topStoreEntry[0] : 'N/A';
 
     // Filter upcoming events (future dates only) - limit to 5
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const todayForFilter = new Date();
+    todayForFilter.setHours(0, 0, 0, 0);
 
     const upcomingEvents = events
         .filter(e => {
             const eventDate = new Date(e.date);
-            return eventDate >= today;
+            return eventDate >= todayForFilter;
         })
         .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
         .slice(0, 5); // Limit to 5 events
@@ -452,7 +481,39 @@ const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [
             {/* Calendar Section */}
             <div>
                 <div className="flex justify-between items-center mb-4">
-                    <h2 className="text-2xl font-bold text-white uppercase tracking-wide capitalize">{monthName}</h2>
+                    <div className="flex items-center gap-4">
+                        <h2 className="text-2xl font-bold text-white uppercase tracking-wide capitalize">{monthName}</h2>
+
+                        {/* Navigation Buttons */}
+                        <div className="flex items-center gap-2">
+                            <button
+                                onClick={goToPreviousMonth}
+                                className="p-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors"
+                                title="Mes anterior"
+                            >
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                                </svg>
+                            </button>
+                            <button
+                                onClick={goToToday}
+                                className="px-3 py-2 bg-sky-700 hover:bg-sky-600 text-white text-sm font-medium rounded-lg transition-colors"
+                                title="Ir a hoy"
+                            >
+                                Hoy
+                            </button>
+                            <button
+                                onClick={goToNextMonth}
+                                className="p-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors"
+                                title="Mes siguiente"
+                            >
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
                     <div className="flex gap-2 text-sm">
                         <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-full bg-orange-500"></span> x1</span>
                         <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-full bg-slate-400"></span> x2</span>
