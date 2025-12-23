@@ -3,7 +3,11 @@
 -- Y verificar si el usuario actual está inscrito
 -- =============================================================================
 
-CREATE OR REPLACE FUNCTION public.get_scheduled_events_with_registrations()
+-- Eliminar la función anterior si existe
+DROP FUNCTION IF EXISTS public.get_scheduled_events_with_registrations();
+
+-- Crear la nueva versión con el campo adicional
+CREATE FUNCTION public.get_scheduled_events_with_registrations()
 RETURNS TABLE (
     id uuid,
     title text,
