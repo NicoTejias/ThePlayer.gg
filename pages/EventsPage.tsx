@@ -182,16 +182,41 @@ const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [
     const [upcomingPage, setUpcomingPage] = React.useState(0);
     const EVENTS_PER_PAGE = 5;
 
-    // Filter upcoming events (future dates only)
-    const todayForFilter = new Date();
-    todayForFilter.setHours(0, 0, 0, 0);
+    // Filter upcoming events (incluye eventos de hoy que no han pasado)
+    const now = new Date();
 
     const allUpcomingEvents = events
         .filter(e => {
             const eventDate = new Date(e.date);
-            return eventDate >= todayForFilter;
+
+            // Si el evento tiene hora, crear fecha+hora completa
+            if (e.time) {
+                const [hours, minutes] = e.time.split(':').map(Number);
+                const eventDateTime = new Date(eventDate);
+                eventDateTime.setHours(hours, minutes, 0, 0);
+
+                // Incluir si la fecha+hora es futura
+                return eventDateTime >= now;
+            }
+
+            // Si no tiene hora, incluir si es hoy o futuro
+            const todayStart = new Date(now);
+            todayStart.setHours(0, 0, 0, 0);
+            eventDate.setHours(0, 0, 0, 0);
+
+            return eventDate >= todayStart;
         })
-        .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+        .sort((a, b) => {
+            // Ordenar por fecha y luego por hora
+            const dateCompare = new Date(a.date).getTime() - new Date(b.date).getTime();
+            if (dateCompare !== 0) return dateCompare;
+
+            // Si tienen la misma fecha, ordenar por hora
+            if (a.time && b.time) {
+                return a.time.localeCompare(b.time);
+            }
+            return 0;
+        });
 
     // Paginate upcoming events
     const totalUpcomingPages = Math.ceil(allUpcomingEvents.length / EVENTS_PER_PAGE);
