@@ -52,6 +52,11 @@ const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [
     // State for registration confirmation modal
     const [showRegisterModal, setShowRegisterModal] = React.useState(false);
     const [selectedEvent, setSelectedEvent] = React.useState<CommunityEvent | null>(null);
+    // State for event details modal (from calendar)
+    const [showEventDetailsModal, setShowEventDetailsModal] = React.useState(false);
+    const [selectedCalendarEvent, setSelectedCalendarEvent] = React.useState<CommunityEvent | null>(null);
+    // State for loading actions
+    const [processingEventId, setProcessingEventId] = React.useState<string | null>(null);
 
     // State for calendar navigation
     const today = new Date();
@@ -109,6 +114,11 @@ const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [
             return <div className="h-32 bg-slate-800/30 border border-slate-700/30 p-2 opacity-50 flex flex-col justify-between"><span className="text-slate-600 text-sm font-medium">{dayNum}</span></div>;
         }
 
+        const handleEventClick = (event: CommunityEvent) => {
+            setSelectedCalendarEvent(event);
+            setShowEventDetailsModal(true);
+        };
+
         return (
             <div className="h-32 bg-slate-800 border border-slate-700 p-2 overflow-hidden transition-colors hover:bg-slate-700/50 relative group">
                 <span className={`text-sm font-bold ${dayEvents.length > 0 ? 'text-white' : 'text-slate-500'}`}>{dayNum}</span>
@@ -116,7 +126,11 @@ const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [
                     {dayEvents.map(e => {
                         const { color } = getTournamentTypeDetails(e);
                         return (
-                            <div key={e.id} className={`text-[10px] px-1.5 py-0.5 rounded truncate font-medium ${color} ${color.includes('text-slate-900') ? '' : 'text-white'} shadow-sm`}>
+                            <div
+                                key={e.id}
+                                onClick={() => handleEventClick(e)}
+                                className={`text-[10px] px-1.5 py-0.5 rounded truncate font-medium ${color} ${color.includes('text-slate-900') ? '' : 'text-white'} shadow-sm cursor-pointer hover:opacity-80 transition-opacity`}
+                            >
                                 {e.title}
                             </div>
                         );
@@ -323,6 +337,8 @@ const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [
     const handleConfirmRegistration = async () => {
         if (!selectedEvent) return;
 
+        setProcessingEventId(selectedEvent.id);
+
         try {
             const { data, error } = await supabase
                 .rpc('register_to_event', { p_event_id: selectedEvent.id });
@@ -332,6 +348,7 @@ const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [
                 toast.error('Error al inscribirse', {
                     description: error.message
                 });
+                setProcessingEventId(null);
                 return;
             }
 
@@ -343,13 +360,16 @@ const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [
             setSelectedEvent(null);
 
             // Recargar para actualizar el contador
-            window.location.reload();
+            setTimeout(() => {
+                window.location.reload();
+            }, 500); // Pequeño delay para que se vea el toast
 
         } catch (error: any) {
             console.error('Error al inscribirse:', error);
             toast.error('Error inesperado', {
                 description: error.message || 'No se pudo completar la inscripción'
             });
+            setProcessingEventId(null);
         }
     };
 
@@ -358,6 +378,8 @@ const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [
         if (!confirm(`¿Estás seguro de que quieres cancelar tu inscripción a "${event.title}"?`)) {
             return;
         }
+
+        setProcessingEventId(event.id);
 
         try {
             const { data, error } = await supabase
@@ -368,6 +390,7 @@ const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [
                 toast.error('Error al cancelar', {
                     description: error.message
                 });
+                setProcessingEventId(null);
                 return;
             }
 
@@ -375,14 +398,17 @@ const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [
                 description: `Tu inscripción a "${event.title}" fue cancelada`
             });
 
-            // Recargar para actualizar
-            window.location.reload();
+            // Recargar para actualizar con un pequeño delay
+            setTimeout(() => {
+                window.location.reload();
+            }, 500); // Pequeño delay para que se vea el toast
 
         } catch (error: any) {
             console.error('Error al cancelar inscripción:', error);
             toast.error('Error inesperado', {
                 description: error.message || 'No se pudo cancelar la inscripción'
             });
+            setProcessingEventId(null);
         }
     };
 
@@ -657,16 +683,24 @@ const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [
                                                     {event.isUserRegistered ? (
                                                         <button
                                                             onClick={() => handleCancelRegistration(event)}
-                                                            className="text-orange-400 hover:text-orange-300 font-bold border border-orange-600/50 hover:border-orange-500 px-4 py-2 rounded-md hover:bg-orange-900/20 transition-all"
+                                                            disabled={processingEventId === event.id}
+                                                            className={`font-bold border px-4 py-2 rounded-md transition-all ${processingEventId === event.id
+                                                                ? 'text-slate-500 border-slate-600 cursor-not-allowed'
+                                                                : 'text-orange-400 hover:text-orange-300 border-orange-600/50 hover:border-orange-500 hover:bg-orange-900/20'
+                                                                }`}
                                                         >
-                                                            Cancelar Inscripción
+                                                            {processingEventId === event.id ? 'Procesando...' : 'Cancelar Inscripción'}
                                                         </button>
                                                     ) : (
                                                         <button
                                                             onClick={() => handleRegisterClick(event)}
-                                                            className="text-sky-400 hover:text-sky-300 font-bold border border-sky-600/50 hover:border-sky-500 px-4 py-2 rounded-md hover:bg-sky-900/20 transition-all"
+                                                            disabled={processingEventId === event.id}
+                                                            className={`font-bold border px-4 py-2 rounded-md transition-all ${processingEventId === event.id
+                                                                ? 'text-slate-500 border-slate-600 cursor-not-allowed'
+                                                                : 'text-sky-400 hover:text-sky-300 border-sky-600/50 hover:border-sky-500 hover:bg-sky-900/20'
+                                                                }`}
                                                         >
-                                                            Inscribirse
+                                                            {processingEventId === event.id ? 'Procesando...' : 'Inscribirse'}
                                                         </button>
                                                     )}
                                                 </div>
@@ -854,6 +888,132 @@ const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [
                             >
                                 Confirmar Asistencia
                             </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Modal de Detalles del Evento (desde calendario) */}
+            {showEventDetailsModal && selectedCalendarEvent && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+                    <div className="bg-slate-800 rounded-xl shadow-2xl border border-slate-700 max-w-lg w-full">
+                        {/* Header */}
+                        <div className="bg-gradient-to-r from-purple-600 to-blue-600 px-6 py-4 rounded-t-xl">
+                            <h2 className="text-2xl font-bold text-white">{selectedCalendarEvent.title}</h2>
+                        </div>
+
+                        {/* Content */}
+                        <div className="p-6 space-y-4">
+                            {/* Fecha y Hora */}
+                            <div className="flex items-center gap-3 text-slate-300">
+                                <svg className="w-5 h-5 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                                <div>
+                                    <p className="text-sm text-slate-500">Fecha y Hora</p>
+                                    <p className="font-semibold">{selectedCalendarEvent.date} {selectedCalendarEvent.time ? `a las ${selectedCalendarEvent.time}` : ''}</p>
+                                </div>
+                            </div>
+
+                            {/* Formato */}
+                            <div className="flex items-center gap-3 text-slate-300">
+                                <svg className="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                                </svg>
+                                <div>
+                                    <p className="text-sm text-slate-500">Formato</p>
+                                    <p className="font-semibold">{selectedCalendarEvent.format}</p>
+                                </div>
+                            </div>
+
+                            {/* Lugar */}
+                            <div className="flex items-center gap-3 text-slate-300">
+                                <svg className="w-5 h-5 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                                <div>
+                                    <p className="text-sm text-slate-500">Lugar</p>
+                                    <p className="font-semibold">{selectedCalendarEvent.storeName}</p>
+                                </div>
+                            </div>
+
+                            {/* Inscritos */}
+                            {selectedCalendarEvent.maxPlayers && (
+                                <div className="flex items-center gap-3 text-slate-300">
+                                    <svg className="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                                    </svg>
+                                    <div>
+                                        <p className="text-sm text-slate-500">Inscritos</p>
+                                        <p className="font-semibold">{selectedCalendarEvent.playerCount || 0} / {selectedCalendarEvent.maxPlayers}</p>
+                                        <div className="w-full h-2 bg-slate-700 rounded-full mt-1 overflow-hidden">
+                                            <div
+                                                className={`h-full ${(selectedCalendarEvent.playerCount || 0) >= selectedCalendarEvent.maxPlayers ? 'bg-red-500' : 'bg-green-500'}`}
+                                                style={{ width: `${Math.min(((selectedCalendarEvent.playerCount || 0) / selectedCalendarEvent.maxPlayers) * 100, 100)}%` }}
+                                            ></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Tipo de evento */}
+                            <div className="bg-slate-900 rounded-lg p-3 border border-slate-700">
+                                <p className="text-xs text-slate-500 mb-1">Tipo de Evento</p>
+                                <div className="flex items-center gap-2">
+                                    {(() => {
+                                        const details = getTournamentTypeDetails(selectedCalendarEvent);
+                                        return (
+                                            <>
+                                                <span className={`text-xs px-2 py-1 rounded font-bold ${details.color} ${details.color.includes('text-slate-900') ? '' : 'text-white'}`}>
+                                                    {details.type}
+                                                </span>
+                                                <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full font-bold text-xs ${details.multiplier === 'x4' ? 'bg-red-600 text-white' :
+                                                    details.multiplier === 'x3' ? 'bg-yellow-500 text-slate-900' :
+                                                        details.multiplier === 'x2' ? 'bg-slate-400 text-slate-900' :
+                                                            'bg-orange-500 text-white'
+                                                    }`}>
+                                                    {details.multiplier}
+                                                </span>
+                                            </>
+                                        );
+                                    })()}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Buttons */}
+                        <div className="flex gap-3 px-6 pb-6">
+                            <button
+                                onClick={() => {
+                                    setShowEventDetailsModal(false);
+                                    setSelectedCalendarEvent(null);
+                                }}
+                                className="flex-1 px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white font-medium rounded-lg transition-colors"
+                            >
+                                Cerrar
+                            </button>
+                            {selectedCalendarEvent.isUserRegistered ? (
+                                <button
+                                    onClick={() => {
+                                        setShowEventDetailsModal(false);
+                                        handleCancelRegistration(selectedCalendarEvent);
+                                    }}
+                                    className="flex-1 px-4 py-2 bg-orange-600 hover:bg-orange-500 text-white font-bold rounded-lg transition-colors shadow-lg"
+                                >
+                                    Cancelar Inscripción
+                                </button>
+                            ) : (
+                                <button
+                                    onClick={() => {
+                                        setShowEventDetailsModal(false);
+                                        handleRegisterClick(selectedCalendarEvent);
+                                    }}
+                                    className="flex-1 px-4 py-2 bg-sky-600 hover:bg-sky-500 text-white font-bold rounded-lg transition-colors shadow-lg"
+                                >
+                                    Inscribirse
+                                </button>
+                            )}
                         </div>
                     </div>
                 </div>
