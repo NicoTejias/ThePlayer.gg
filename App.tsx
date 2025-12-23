@@ -191,14 +191,21 @@ const AppContent: React.FC = () => {
       }));
       setTournamentResults(mappedTourneys);
 
-      const mappedEvents: CommunityEvent[] = mappedTourneys.map(t => ({
-        id: t.id,
-        title: t.name,
-        date: t.date,
-        storeName: t.storeName,
-        format: t.format,
-        playerCount: t.playerCount
-      }));
+      // Solo convertir torneos FUTUROS a CommunityEvents
+      // Los torneos pasados solo están en tournamentResults
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      const mappedEvents: CommunityEvent[] = mappedTourneys
+        .filter(t => new Date(t.date) >= today) // Solo eventos futuros
+        .map(t => ({
+          id: t.id,
+          title: t.name,
+          date: t.date,
+          storeName: t.storeName,
+          format: t.format,
+          playerCount: t.playerCount
+        }));
       setCommunityEvents(mappedEvents);
     }
   };
@@ -459,7 +466,7 @@ const AppContent: React.FC = () => {
           <Route path="/envivo" element={<LiveStreamPage />} />
           <Route path="/pls" element={<PLSPage />} />
           <Route path="/ranking/pwp" element={<RankingsPage players={players} />} />
-          <Route path="/eventos" element={<EventsPage events={communityEvents} />} />
+          <Route path="/eventos" element={<EventsPage events={communityEvents} finishedTournaments={tournamentResults} userRole={userRole} />} />
           <Route path="/torneos" element={<TournamentsListPage tournaments={tournamentResults} />} />
           <Route path="/torneos/:tournamentId" element={<TournamentStandingsPage />} />
           <Route path="/mercado" element={<MarketplacePage />} />

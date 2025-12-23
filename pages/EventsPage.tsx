@@ -1,12 +1,16 @@
 import React from 'react';
-import type { CommunityEvent } from '../types';
+import type { CommunityEvent, TournamentResult } from '../types';
 import Card from '../components/Card';
 import CalendarIcon from '../components/icons/CalendarIcon';
 import MapPinIcon from '../components/icons/MapPinIcon';
 import TagIcon from '../components/icons/TagIcon';
+import { useNavigate } from 'react-router-dom';
+import ScheduleTournamentModal from '../components/ScheduleTournamentModal';
 
 interface EventsPageProps {
     events: CommunityEvent[];
+    finishedTournaments?: TournamentResult[]; // Torneos subidos desde el panel de tienda
+    userRole?: 'player' | 'store' | 'admin' | null;
 }
 
 const getTournamentTypeDetails = (event: CommunityEvent) => {
@@ -34,9 +38,12 @@ const getWeekNumber = (d: Date) => {
     return weekNo;
 };
 
-const EventsPage: React.FC<EventsPageProps> = ({ events }) => {
+const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [], userRole }) => {
+    const navigate = useNavigate();
     // State for expanded past tournament view
     const [expandedEventId, setExpandedEventId] = React.useState<string | null>(null);
+    // State for schedule tournament modal
+    const [showScheduleModal, setShowScheduleModal] = React.useState(false);
 
     // Calendar Logic (Dynamic Current Month)
     const currentDate = new Date();
@@ -119,6 +126,72 @@ const EventsPage: React.FC<EventsPageProps> = ({ events }) => {
     }, {} as Record<string, number>);
     const topStoreEntry = Object.entries(storeCounts).sort((a, b) => (b[1] as number) - (a[1] as number))[0];
     const topStore = topStoreEntry ? topStoreEntry[0] : 'N/A';
+
+    // Filter upcoming events (future dates only) - limit to 5
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const upcomingEvents = events
+        .filter(e => {
+            const eventDate = new Date(e.date);
+            return eventDate >= today;
+        })
+        .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+        .slice(0, 5); // Limit to 5 events
+
+    // Handler para agendar torneo
+    const handleScheduleTournament = async (eventData: any) => {
+        try {
+            const eventsToCreate: any[] = [];
+
+            if (eventData.recurring) {
+                // Generar eventos recurrentes
+                const startDate = new Date(eventData.date);
+                const endDate = eventData.recurrenceEnd ? new Date(eventData.recurrenceEnd) : new Date(startDate.getFullYear() + 1, startDate.getMonth(), startDate.getDate());
+
+                let currentDate = new Date(startDate);
+
+                while (currentDate <= endDate) {
+                    eventsToCreate.push({
+                        title: eventData.title,
+                        date: currentDate.toISOString().split('T')[0],
+                        format: eventData.format,
+                        storeName: eventData.storeName,
+                        playerCount: 0 // Inicialmente sin jugadores inscritos
+                    });
+
+                    // Calcular siguiente fecha según tipo de recurrencia
+                    if (eventData.recurrenceType === 'weekly') {
+                        currentDate.setDate(currentDate.getDate() + 7);
+                    } else if (eventData.recurrenceType === 'biweekly') {
+                        currentDate.setDate(currentDate.getDate() + 14);
+                    } else if (eventData.recurrenceType === 'monthly') {
+                        currentDate.setMonth(currentDate.getMonth() + 1);
+                    }
+                }
+            } else {
+                // Evento único
+                eventsToCreate.push({
+                    title: eventData.title,
+                    date: eventData.date,
+                    format: eventData.format,
+                    storeName: eventData.storeName,
+                    playerCount: 0
+                });
+            }
+
+            // TODO: Guardar en Supabase cuando esté lista la tabla scheduled_events
+            console.log('Eventos a crear:', eventsToCreate);
+            console.log(`Se crearán ${eventsToCreate.length} eventos`);
+
+            // Por ahora solo mostramos en consola
+            // Cuando implementes Supabase:
+            // const { error } = await supabase.from('scheduled_events').insert(eventsToCreate);
+
+        } catch (error) {
+            console.error('Error al agendar torneo:', error);
+        }
+    };
 
     const pastEvents = events.filter(e => {
         const eventDate = new Date(e.date);
@@ -256,7 +329,21 @@ const EventsPage: React.FC<EventsPageProps> = ({ events }) => {
 
             {/* Upcoming Tournaments Table */}
             <div>
-                <h2 className="text-2xl font-bold text-white uppercase tracking-wide mb-6">Próximos Torneos</h2>
+                <div className="flex justify-between items-center mb-6">
+                    <h2 className="text-2xl font-bold text-white uppercase tracking-wide">Próximos Torneos</h2>
+                    {/* Botón para agendar evento - solo visible para tiendas y admins */}
+                    {(userRole === 'store' || userRole === 'admin') && (
+                        <button
+                            onClick={() => setShowScheduleModal(true)}
+                            className="flex items-center gap-2 bg-green-600 hover:bg-green-500 text-white font-bold px-4 py-2 rounded-lg transition-colors shadow-lg"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
+                            </svg>
+                            Agendar Torneo
+                        </button>
+                    )}
+                </div>
                 <div className="overflow-x-auto bg-slate-800 rounded-lg shadow-xl border border-slate-700">
                     <table className="min-w-full divide-y divide-slate-700">
                         <thead className="bg-slate-700/50">
@@ -272,65 +359,69 @@ const EventsPage: React.FC<EventsPageProps> = ({ events }) => {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-700">
-                            {events.map((event) => {
-                                const details = getTournamentTypeDetails(event);
-                                const mockTime = "19:00"; // Mock time
-                                const mockLimit = 64; // Mock limit
-                                const registered = event.playerCount || 0;
-                                const isFull = registered >= mockLimit;
+                            {upcomingEvents.length === 0 ? (
+                                <tr><td colSpan={8} className="px-6 py-8 text-center text-slate-500">No hay torneos próximos agendados.</td></tr>
+                            ) : (
+                                upcomingEvents.map((event) => {
+                                    const details = getTournamentTypeDetails(event);
+                                    const mockTime = "19:00"; // Mock time
+                                    const mockLimit = 64; // Mock limit
+                                    const registered = event.playerCount || 0;
+                                    const isFull = registered >= mockLimit;
 
-                                return (
-                                    <tr key={event.id} className="group hover:bg-slate-700/30 transition-colors">
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-300 font-medium sticky left-0 bg-slate-800 group-hover:bg-slate-700 transition-colors z-10 border-r border-slate-700/50">
-                                            {event.date}
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-400">
-                                            {mockTime}
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <div className="flex flex-col">
-                                                <span className="text-white font-bold text-base">{event.title}</span>
-                                                <span className={`text-[10px] inline-block px-1.5 py-0.5 rounded w-fit mt-1 font-bold ${details.color} ${details.color.includes('text-slate-900') ? '' : 'text-white'}`}>
-                                                    {details.type}
-                                                </span>
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <span className="text-sm text-sky-400 font-medium">{event.format}</span>
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-300">
-                                            {event.storeName}
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-center">
-                                            <span className={`inline-flex items-center justify-center w-8 h-8 rounded-full font-bold text-sm ${details.multiplier === 'x4' ? 'bg-red-600 text-white shadow-lg shadow-red-900/50' :
-                                                details.multiplier === 'x3' ? 'bg-yellow-500 text-slate-900 shadow-lg shadow-yellow-900/50' :
-                                                    details.multiplier === 'x2' ? 'bg-slate-400 text-slate-900' :
-                                                        'bg-orange-500 text-white'
-                                                }`}>
-                                                {details.multiplier}
-                                            </span>
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-center">
-                                            <div className="flex flex-col items-center">
-                                                <span className={`text-sm font-bold ${isFull ? 'text-red-400' : 'text-green-400'}`}>
-                                                    {registered}/{mockLimit}
-                                                </span>
-                                                <div className="w-16 h-1.5 bg-slate-700 rounded-full mt-1 overflow-hidden">
-                                                    <div
-                                                        className={`h-full ${isFull ? 'bg-red-500' : 'bg-green-500'}`}
-                                                        style={{ width: `${Math.min((registered / mockLimit) * 100, 100)}%` }}
-                                                    ></div>
+                                    return (
+                                        <tr key={event.id} className="group hover:bg-slate-700/30 transition-colors">
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-300 font-medium sticky left-0 bg-slate-800 group-hover:bg-slate-700 transition-colors z-10 border-r border-slate-700/50">
+                                                {event.date}
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-400">
+                                                {mockTime}
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <div className="flex flex-col">
+                                                    <span className="text-white font-bold text-base">{event.title}</span>
+                                                    <span className={`text-[10px] inline-block px-1.5 py-0.5 rounded w-fit mt-1 font-bold ${details.color} ${details.color.includes('text-slate-900') ? '' : 'text-white'}`}>
+                                                        {details.type}
+                                                    </span>
                                                 </div>
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                            <button className="text-sky-400 hover:text-sky-300 font-bold border border-sky-600/50 hover:border-sky-500 px-4 py-2 rounded-md hover:bg-sky-900/20 transition-all">
-                                                Inscribirse
-                                            </button>
-                                        </td>
-                                    </tr>
-                                );
-                            })}
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <span className="text-sm text-sky-400 font-medium">{event.format}</span>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-300">
+                                                {event.storeName}
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-center">
+                                                <span className={`inline-flex items-center justify-center w-8 h-8 rounded-full font-bold text-sm ${details.multiplier === 'x4' ? 'bg-red-600 text-white shadow-lg shadow-red-900/50' :
+                                                    details.multiplier === 'x3' ? 'bg-yellow-500 text-slate-900 shadow-lg shadow-yellow-900/50' :
+                                                        details.multiplier === 'x2' ? 'bg-slate-400 text-slate-900' :
+                                                            'bg-orange-500 text-white'
+                                                    }`}>
+                                                    {details.multiplier}
+                                                </span>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-center">
+                                                <div className="flex flex-col items-center">
+                                                    <span className={`text-sm font-bold ${isFull ? 'text-red-400' : 'text-green-400'}`}>
+                                                        {registered}/{mockLimit}
+                                                    </span>
+                                                    <div className="w-16 h-1.5 bg-slate-700 rounded-full mt-1 overflow-hidden">
+                                                        <div
+                                                            className={`h-full ${isFull ? 'bg-red-500' : 'bg-green-500'}`}
+                                                            style={{ width: `${Math.min((registered / mockLimit) * 100, 100)}%` }}
+                                                        ></div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                                <button className="text-sky-400 hover:text-sky-300 font-bold border border-sky-600/50 hover:border-sky-500 px-4 py-2 rounded-md hover:bg-sky-900/20 transition-all">
+                                                    Inscribirse
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    );
+                                })
+                            )}
                         </tbody>
                     </table>
                 </div>
@@ -382,7 +473,7 @@ const EventsPage: React.FC<EventsPageProps> = ({ events }) => {
                 </div>
             </div>
 
-            {/* Past Tournaments Table Section */}
+            {/* Finished Tournaments Section - Torneos subidos */}
             <div>
                 <h2 className="text-2xl font-bold text-slate-500 uppercase tracking-wide mb-6">Torneos Finalizados</h2>
                 <div className="overflow-x-auto bg-slate-900/50 rounded-lg border border-slate-800">
@@ -392,108 +483,50 @@ const EventsPage: React.FC<EventsPageProps> = ({ events }) => {
                                 <th className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider sticky left-0 bg-slate-900 z-20 border-r border-slate-800">Fecha</th>
                                 <th className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Evento</th>
                                 <th className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Formato</th>
-                                <th className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Lugar</th>
+                                <th className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Tienda</th>
+                                <th className="px-6 py-4 text-center text-xs font-bold text-slate-500 uppercase tracking-wider">Jugadores</th>
                                 <th className="px-6 py-4 text-center text-xs font-bold text-slate-500 uppercase tracking-wider">Estado</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-800">
-                            {pastEvents.length === 0 ? (
-                                <tr><td colSpan={6} className="px-6 py-8 text-center text-slate-600">No hay torneos pasados.</td></tr>
+                            {finishedTournaments.length === 0 ? (
+                                <tr><td colSpan={6} className="px-6 py-8 text-center text-slate-600">No hay torneos finalizados.</td></tr>
                             ) : (
-                                pastEvents.map((event) => {
-                                    const details = getTournamentTypeDetails(event);
-                                    const isExpanded = expandedEventId === event.id;
-                                    const showDecklists = details.type.includes('Premier') || details.type.includes('RCQ');
-
-                                    return (
-                                        <React.Fragment key={event.id}>
-                                            <tr
-                                                className={`transition-colors cursor-pointer group ${isExpanded ? 'bg-slate-800/50' : 'hover:bg-slate-800/30'}`}
-                                                onClick={() => setExpandedEventId(isExpanded ? null : event.id)}
-                                            >
-                                                <td className="px-6 py-4 text-sm text-slate-500 sticky left-0 bg-slate-900 group-hover:bg-slate-800 z-10 border-r border-slate-800 transition-colors">{event.date}</td>
-                                                <td className="px-6 py-4">
-                                                    <div className="flex flex-col">
-                                                        <span className="text-slate-400 font-bold">{event.title}</span>
-                                                        <span className="text-[10px] text-slate-600 mt-0.5">{details.type}</span>
-                                                    </div>
-                                                </td>
-                                                <td className="px-6 py-4 text-sm text-slate-600">{event.format}</td>
-                                                <td className="px-6 py-4 text-sm text-slate-600">{event.storeName}</td>
-                                                <td className="px-6 py-4 text-center">
-                                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-800 text-slate-500 border border-slate-700">
-                                                        Finalizado
-                                                    </span>
-                                                </td>
-                                                <td className="px-6 py-4 text-right">
-                                                    <button className="text-sky-500 hover:text-sky-400 font-bold text-lg">
-                                                        {isExpanded ? '−' : '+'}
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                            {isExpanded && (
-                                                <tr className="bg-slate-900/40 border-b border-slate-800 animate-in fade-in slide-in-from-top-2">
-                                                    <td colSpan={6} className="p-4 sm:p-6">
-                                                        <div className="bg-slate-800 border border-slate-700 rounded-lg overflow-hidden shadow-inner">
-                                                            <div className="bg-slate-900/50 px-4 py-3 border-b border-slate-700 flex justify-between items-center">
-                                                                <h4 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
-                                                                    <span className="w-1.5 h-1.5 rounded-full bg-sky-500"></span>
-                                                                    Resultados y Posiciones
-                                                                </h4>
-                                                                <div className="flex items-center gap-4">
-                                                                    {showDecklists && (
-                                                                        <button className="text-xs bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1 rounded transition-colors font-medium shadow-sm">
-                                                                            Ver Decklists
-                                                                        </button>
-                                                                    )}
-                                                                    <span className="text-xs text-slate-500">Top 8 Mostrado</span>
-                                                                </div>
-                                                            </div>
-                                                            <div className="overflow-x-auto">
-                                                                <table className="min-w-full text-sm text-left">
-                                                                    <thead className="text-xs text-slate-400 uppercase bg-slate-700/30">
-                                                                        <tr>
-                                                                            <th className="px-4 py-3 font-medium">Posición</th>
-                                                                            <th className="px-4 py-3 font-medium">Jugador</th>
-                                                                            <th className="px-4 py-3 font-medium text-center">Puntos PWP</th>
-                                                                            <th className="px-4 py-3 font-medium text-right">Record</th>
-                                                                        </tr>
-                                                                    </thead>
-                                                                    <tbody className="divide-y divide-slate-700/30">
-                                                                        {[1, 2, 3, 4, 5, 6, 7, 8].map((pos) => (
-                                                                            <tr key={pos} className="hover:bg-slate-700/20 transition-colors">
-                                                                                <td className="px-4 py-2.5">
-                                                                                    <span className={`font-bold ${pos === 1 ? 'text-yellow-400' : pos <= 3 ? 'text-slate-200' : 'text-slate-500'}`}>
-                                                                                        #{pos}
-                                                                                    </span>
-                                                                                </td>
-                                                                                <td className="px-4 py-2.5 text-slate-300 font-medium">Jugador Ejemplo {pos}</td>
-                                                                                <td className="px-4 py-2.5 text-center text-sky-400 font-bold">+{Math.max(10 - pos, 1) * 3}</td>
-                                                                                <td className="px-4 py-2.5 text-right text-slate-400 text-xs font-mono">{4 - Math.floor(pos / 3)}-{Math.floor(pos / 3)}-0</td>
-                                                                            </tr>
-                                                                        ))}
-                                                                    </tbody>
-                                                                </table>
-                                                            </div>
-                                                            <div className="px-4 py-2 bg-slate-900/30 border-t border-slate-700 text-center">
-                                                                <button className="text-xs text-sky-500 hover:text-sky-400 font-medium hover:underline">
-                                                                    Ver tabla completa detallada →
-                                                                </button>
-                                                            </div>
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                            )}
-                                        </React.Fragment>
-                                    );
-                                })
+                                finishedTournaments.map((tournament) => (
+                                    <tr key={tournament.id} className="hover:bg-slate-800/30 transition-colors">
+                                        <td className="px-6 py-4 text-sm text-slate-500 sticky left-0 bg-slate-900 z-10 border-r border-slate-800">
+                                            {new Date(tournament.date).toLocaleDateString('es-CL')}
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <span className="text-slate-400 font-bold">{tournament.name}</span>
+                                        </td>
+                                        <td className="px-6 py-4 text-sm text-slate-600">{tournament.format}</td>
+                                        <td className="px-6 py-4 text-sm text-slate-600">{tournament.storeName}</td>
+                                        <td className="px-6 py-4 text-center">
+                                            <span className="text-sky-400 font-bold">{tournament.playerCount}</span>
+                                        </td>
+                                        <td className="px-6 py-4 text-center">
+                                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-900/30 text-green-400 border border-green-700/50">
+                                                Finalizado
+                                            </span>
+                                        </td>
+                                    </tr>
+                                ))
                             )}
                         </tbody>
                     </table>
                 </div>
             </div>
+
+            {/* Modal de Agendamiento */}
+            <ScheduleTournamentModal
+                isOpen={showScheduleModal}
+                onClose={() => setShowScheduleModal(false)}
+                onSchedule={handleScheduleTournament}
+            />
         </div>
     );
 };
 
 export default EventsPage;
+

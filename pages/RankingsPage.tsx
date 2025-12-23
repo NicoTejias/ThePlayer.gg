@@ -97,7 +97,7 @@ const RankingsPage: React.FC<RankingsPageProps> = ({ players }) => {
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-700">
-                                {pwpRanking.slice(0, 20).map((player, index) => (
+                                {pwpRanking.map((player, index) => (
                                     <tr key={`${player.id}-pwp`} className="hover:bg-slate-700/40 transition-colors duration-150 h-16 relative">
                                         <td className="px-6 py-4 whitespace-nowrap sticky left-0 bg-slate-800 z-10 border-r border-slate-700/50">
                                             <span className={`text-lg font-bold w-8 text-center block ${index === 0 ? 'text-yellow-400' :
@@ -175,7 +175,7 @@ const RankingsPage: React.FC<RankingsPageProps> = ({ players }) => {
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-700">
-                                {winRateRanking.slice(0, 20).map((player, index) => (
+                                {winRateRanking.map((player, index) => (
                                     <tr key={`${player.id}-wr`} className="hover:bg-slate-700/40 transition-colors duration-150 h-16 relative">
                                         <td className="px-6 py-4 whitespace-nowrap sticky left-0 bg-slate-800 z-10 border-r border-slate-700/50">
                                             <span className={`text-lg font-bold w-8 text-center block ${index === 0 ? 'text-yellow-400' :
