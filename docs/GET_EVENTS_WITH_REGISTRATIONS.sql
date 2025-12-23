@@ -46,7 +46,7 @@ AS $$
     FROM public.scheduled_events se
     LEFT JOIN public.event_registrations er 
         ON se.id = er.event_id AND er.status = 'confirmed'
-    WHERE se.date >= CURRENT_DATE
+    WHERE se.date >= (CURRENT_DATE AT TIME ZONE 'America/Santiago')::date
     GROUP BY se.id, se.title, se.date, se.time, se.format, se.store_name, 
              se.max_players, se.description, se.created_by, se.created_at
     ORDER BY se.date ASC, se.time ASC;
