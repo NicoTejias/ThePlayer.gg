@@ -118,11 +118,8 @@ const AdminDashboardPage: React.FC = () => {
         setConfirmAction({ show: false, type: null, storeId: '', storeName: '' });
 
         if (type === 'approve') {
-            const { data, error } = await supabase
-                .from('profiles')
-                .update({ status: 'active' })
-                .eq('id', storeId)
-                .select();
+            const { error } = await supabase
+                .rpc('approve_store', { store_id: storeId });
 
             if (error) {
                 alert("Error al aprobar: " + error.message);
@@ -132,9 +129,7 @@ const AdminDashboardPage: React.FC = () => {
             }
         } else if (type === 'reject') {
             const { error } = await supabase
-                .from('profiles')
-                .update({ status: 'rejected' })
-                .eq('id', storeId);
+                .rpc('reject_store', { store_id: storeId });
 
             if (error) {
                 alert("Error al rechazar: " + error.message);
