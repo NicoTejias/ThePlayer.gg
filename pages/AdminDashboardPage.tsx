@@ -7,6 +7,7 @@ import UsersIcon from '../components/icons/UserIcon';
 import ScaleIcon from '../components/icons/ScaleIcon';
 import { supabase } from '../supabaseClient';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 import { isAdminEmail } from '../config/adminConfig';
 
 const StatCard: React.FC<{ icon: React.ReactNode, title: string, value: string | number, color: string }> = ({ icon, title, value, color }) => (
@@ -42,6 +43,27 @@ const AdminDashboardPage: React.FC = () => {
     useEffect(() => {
         fetchAdminData();
     }, []);
+
+    const handleDeleteTournament = async (tournamentId: string, tournamentName: string) => {
+        const confirmMessage = `ADVERTENCIA ADMIN: ¿Deseas eliminar permanentemente el torneo "${tournamentName}" y TODOS sus resultados? \n\nEscribe ELIMINAR para confirmar:`;
+        const userInput = window.prompt(confirmMessage);
+        if (userInput !== 'ELIMINAR') return;
+
+        try {
+            const { data, error } = await supabase.rpc('delete_tournament_by_id', {
+                tournament_id_param: tournamentId
+            });
+
+            if (error) throw error;
+            if (!data.success) throw new Error(data.message);
+
+            toast.success('Torneo eliminado correctamente por Admin');
+            fetchAdminData();
+        } catch (error: any) {
+            console.error("Delete error:", error);
+            toast.error('Error al eliminar torneo: ' + error.message);
+        }
+    };
 
     const fetchAdminData = async () => {
         setLoading(true);
@@ -232,8 +254,14 @@ const AdminDashboardPage: React.FC = () => {
                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">{tournament.title}</td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-300">{tournament.storeName}</td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-center text-slate-300">{tournament.playerCount}</td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
+                                        <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium space-x-2">
                                             <button className="px-3 py-1 text-xs font-semibold rounded-md bg-sky-600 text-white hover:bg-sky-700 transition-colors">Ver</button>
+                                            <button
+                                                onClick={() => handleDeleteTournament(tournament.id, tournament.title)}
+                                                className="px-3 py-1 text-xs font-semibold rounded-md bg-red-900/60 text-red-300 hover:bg-red-800 hover:text-white transition-colors border border-red-800"
+                                            >
+                                                Eliminar
+                                            </button>
                                         </td>
                                     </tr>
                                 ))}

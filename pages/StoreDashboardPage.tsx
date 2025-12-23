@@ -9,13 +9,14 @@ import { parseEventLinkHtml } from '../utils/HtmlParser';
 
 interface StoreDashboardPageProps {
     onTournamentUpload: (tournamentData: Omit<TournamentResult, 'id'>, players: TournamentParseResult[]) => void;
+    onDeleteTournament: (tournamentId: string) => Promise<void>;
     userRole: 'player' | 'store' | 'admin' | null;
     tournaments: TournamentResult[]; // Real data from database
     storeStatus?: string;
     storeName?: string; // Nombre de la tienda (viene del perfil del usuario)
 }
 
-const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpload, userRole, tournaments, storeStatus, storeName }) => {
+const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpload, onDeleteTournament, userRole, tournaments, storeStatus, storeName }) => {
     const [step, setStep] = useState<'upload' | 'confirm'>('upload');
     // ... existing state ...
     const [uploadMethod, setUploadMethod] = useState<'text'>('text');
@@ -28,6 +29,7 @@ const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpl
     const [parsedData, setParsedData] = useState<TournamentParseResult[]>([]);
     const [error, setError] = useState<string | null>(null);
     const [isUploading, setIsUploading] = useState(false);
+    const [isDeleting, setIsDeleting] = useState<string | null>(null);
 
     // BLOCKED VIEW FOR PENDING STORES
     if (storeStatus === 'pending_approval') {
@@ -64,6 +66,24 @@ const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpl
     // ... rest of logic
 
     // Arrays and handlers...
+    // ... rest of logic...
+
+    const handleDeleteClick = async (tournamentId: string, tournamentName: string) => {
+        const confirmMessage = `¿Estás seguro que deseas eliminar el torneo "${tournamentName}"? Esta acción borrará todos los resultados asociados y NO se puede deshacer.\n\nEscribe ELIMINAR para confirmar:`;
+        const userInput = window.prompt(confirmMessage);
+
+        if (userInput === 'ELIMINAR') {
+            setIsDeleting(tournamentId);
+            try {
+                await onDeleteTournament(tournamentId);
+            } finally {
+                setIsDeleting(null);
+            }
+        } else if (userInput !== null) {
+            alert('Cancelado: Debes escribir "ELIMINAR" exactamente para confirmar.');
+        }
+    };
+
     const tournamentTypes = [
         { value: 'semanal', label: 'Semanal', multiplier: 1 },
         { value: 'fnm', label: 'FNM', multiplier: 1 },
@@ -481,6 +501,7 @@ const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpl
                                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Fecha</th>
                                     <th scope="col" className="px-6 py-3 text-center text-xs font-medium text-slate-300 uppercase tracking-wider">Jugadores</th>
                                     <th scope="col" className="px-6 py-3 text-center text-xs font-medium text-slate-300 uppercase tracking-wider">Estado</th>
+                                    <th scope="col" className="px-6 py-3 text-center text-xs font-medium text-slate-300 uppercase tracking-wider">Acciones</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-700">
@@ -496,11 +517,31 @@ const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpl
                                                     Procesado
                                                 </span>
                                             </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-center text-sm">
+                                                <button
+                                                    onClick={() => handleDeleteClick(t.id, t.name)}
+                                                    disabled={isDeleting === t.id}
+                                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md bg-red-900/40 text-red-400 hover:bg-red-900/60 hover:text-red-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                                    title="Eliminar torneo"
+                                                >
+                                                    {isDeleting === t.id ? (
+                                                        <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                                        </svg>
+                                                    ) : (
+                                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                        </svg>
+                                                    )}
+                                                    Eliminar
+                                                </button>
+                                            </td>
                                         </tr>
                                     ))
                                 ) : (
                                     <tr>
-                                        <td colSpan={4} className="px-6 py-8 text-center text-slate-400">
+                                        <td colSpan={5} className="px-6 py-8 text-center text-slate-400">
                                             No hay torneos reportados aún.
                                         </td>
                                     </tr>

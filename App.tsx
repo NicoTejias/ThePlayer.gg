@@ -469,6 +469,23 @@ const AppContent: React.FC = () => {
     }
   };
 
+  const handleDeleteTournament = async (tournamentId: string) => {
+    try {
+      const { data, error } = await supabase.rpc('delete_tournament_by_id', {
+        tournament_id_param: tournamentId
+      });
+
+      if (error) throw error;
+      if (!data.success) throw new Error(data.message);
+
+      toast.success('Torneo eliminado correctamente');
+      await fetchData(); // Refrescar datos para que desaparezca de la lista
+    } catch (error: any) {
+      console.error("Error deleting tournament:", error);
+      toast.error('Error al eliminar el torneo', { description: error.message });
+    }
+  };
+
   return (
     <div className="bg-slate-900 text-slate-200 min-h-screen flex flex-col relative isolate">
       <Toaster position="top-center" richColors theme="dark" />
@@ -504,7 +521,7 @@ const AppContent: React.FC = () => {
           <Route path="/login" element={<AuthPage handleLogin={handleLogin} />} />
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="/admin" element={<AdminDashboardPage />} />
-          <Route path="/dashboard/tienda" element={<StoreDashboardPage onTournamentUpload={handleTournamentUpload} userRole={userRole} tournaments={tournamentResults} storeStatus={userProfile?.status} storeName={userProfile?.username} />} />
+          <Route path="/dashboard/tienda" element={<StoreDashboardPage onTournamentUpload={handleTournamentUpload} onDeleteTournament={handleDeleteTournament} userRole={userRole} tournaments={tournamentResults} storeStatus={userProfile?.status} storeName={userProfile?.username} />} />
           <Route path="/dashboard/jugador" element={<PlayerDashboardPage profile={userProfile} />} />
         </Routes>
       </main>
