@@ -1,36 +1,15 @@
 -- =============================================================================
--- ELIMINAR EVENTOS DUPLICADOS Y DE PRUEBA
+-- ELIMINAR EVENTOS USANDO FUNCIONES RPC
 -- =============================================================================
+-- IMPORTANTE: Primero ejecuta ADMIN_DELETE_EVENTS_RPC.sql para crear las funciones
 
 -- OPCIÓN 1: Eliminar TODOS los eventos agendados
--- (Usa esta si quieres empezar desde cero)
-DELETE FROM public.scheduled_events;
+-- Devuelve el número de eventos eliminados
+SELECT public.delete_all_scheduled_events();
 
--- OPCIÓN 2: Eliminar solo eventos duplicados del 2025-12-23
--- (Mantiene solo 1 de cada evento duplicado)
-/*
-DELETE FROM public.scheduled_events
-WHERE id NOT IN (
-    SELECT MIN(id)
-    FROM public.scheduled_events
-    WHERE date = '2025-12-23'
-    GROUP BY title, time, store_name
-);
-*/
-
--- OPCIÓN 3: Eliminar solo eventos de "Tienda Test"
--- (Si todos los eventos de prueba son de esta tienda)
-/*
-DELETE FROM public.scheduled_events
-WHERE store_name = 'Tienda Test';
-*/
-
--- OPCIÓN 4: Eliminar eventos específicos del 2025-12-23
--- (Elimina todos los eventos de esa fecha)
-/*
-DELETE FROM public.scheduled_events
-WHERE date = '2025-12-23';
-*/
+-- OPCIÓN 2: Eliminar solo eventos duplicados
+-- Mantiene solo 1 de cada evento duplicado
+-- SELECT public.delete_duplicate_events();
 
 -- Verificar cuántos eventos quedan
 SELECT 
