@@ -13,12 +13,20 @@ const RankingsPage: React.FC<RankingsPageProps> = ({ players }) => {
     const pwpRanking = useMemo(() => {
         return [...players]
             .sort((a, b) => b.pwp - a.pwp)
-            .map((player, index) => ({
-                ...player,
-                rank: index + 1,
-                // Aplicar lógica de anonimización
-                name: player.isPublic ? player.name : `Jugador ${player.id.slice(-4)}`
-            }));
+            .map((player, index) => {
+                // Generar número anónimo consistente basado en hash del ID
+                const hashCode = player.id.split('').reduce((acc, char) => {
+                    return char.charCodeAt(0) + ((acc << 5) - acc);
+                }, 0);
+                const anonymousNumber = Math.abs(hashCode % 9000) + 1000; // Número de 4 dígitos (1000-9999)
+
+                return {
+                    ...player,
+                    rank: index + 1,
+                    // Aplicar lógica de anonimización
+                    name: player.isPublic ? player.name : `Jugador #${anonymousNumber}`
+                };
+            });
     }, [players]);
 
     const winRateRanking = useMemo(() => {
@@ -29,12 +37,20 @@ const RankingsPage: React.FC<RankingsPageProps> = ({ players }) => {
                 return { ...player, winRate };
             })
             .sort((a, b) => b.winRate - a.winRate)
-            .map((player, index) => ({
-                ...player,
-                rank: index + 1,
-                // Aplicar lógica de anonimización
-                name: player.isPublic ? player.name : `Jugador ${player.id.slice(-4)}`
-            }));
+            .map((player, index) => {
+                // Generar número anónimo consistente basado en hash del ID
+                const hashCode = player.id.split('').reduce((acc, char) => {
+                    return char.charCodeAt(0) + ((acc << 5) - acc);
+                }, 0);
+                const anonymousNumber = Math.abs(hashCode % 9000) + 1000; // Número de 4 dígitos (1000-9999)
+
+                return {
+                    ...player,
+                    rank: index + 1,
+                    // Aplicar lógica de anonimización
+                    name: player.isPublic ? player.name : `Jugador #${anonymousNumber}`
+                };
+            });
     }, [players]);
 
 

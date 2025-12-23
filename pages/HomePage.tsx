@@ -74,14 +74,22 @@ const HomePage: React.FC<HomePageProps> = ({ players, events }) => {
   const topPwpPlayers = [...players]
     .sort((a, b) => (b.pwp || 0) - (a.pwp || 0))
     .slice(0, 10)
-    .map((p, i) => ({
-      rank: i + 1,
-      // Anonymous Name Logic
-      playerName: p.isPublic ? p.name : `Jugador ${p.id.slice(-4)}`,
-      pwp: p.pwp || 0,
-      region: p.region || 'Unknown',
-      team: p.team || 'Unknown' // Adding team to the mapped object
-    }));
+    .map((p, i) => {
+      // Generar número anónimo consistente basado en hash del ID
+      const hashCode = p.id.split('').reduce((acc, char) => {
+        return char.charCodeAt(0) + ((acc << 5) - acc);
+      }, 0);
+      const anonymousNumber = Math.abs(hashCode % 9000) + 1000; // Número de 4 dígitos (1000-9999)
+
+      return {
+        rank: i + 1,
+        // Anonymous Name Logic
+        playerName: p.isPublic ? p.name : `Jugador #${anonymousNumber}`,
+        pwp: p.pwp || 0,
+        region: p.region || 'Unknown',
+        team: p.team || 'Unknown' // Adding team to the mapped object
+      };
+    });
 
   // Derive Top 10 Win Rate Ranking (PLS Winrate)
   const topWinRatePlayers = [...players]
@@ -92,14 +100,22 @@ const HomePage: React.FC<HomePageProps> = ({ players, events }) => {
     })
     .sort((a, b) => b.winRate - a.winRate)
     .slice(0, 10)
-    .map((p, i) => ({
-      rank: i + 1,
-      // Anonymous Name Logic: "Jugador " + last 4 chars of ID (simulated or real)
-      playerName: p.isPublic ? p.name : `Jugador ${p.id.slice(-4)}`,
-      winRate: `${p.winRate.toFixed(1)}%`,
-      region: p.region || 'Unknown',
-      team: p.team || 'Unknown' // Adding team to the mapped object
-    }));
+    .map((p, i) => {
+      // Generar número anónimo consistente basado en hash del ID
+      const hashCode = p.id.split('').reduce((acc, char) => {
+        return char.charCodeAt(0) + ((acc << 5) - acc);
+      }, 0);
+      const anonymousNumber = Math.abs(hashCode % 9000) + 1000; // Número de 4 dígitos (1000-9999)
+
+      return {
+        rank: i + 1,
+        // Anonymous Name Logic: "Jugador " + last 4 chars of ID (simulated or real)
+        playerName: p.isPublic ? p.name : `Jugador #${anonymousNumber}`,
+        winRate: `${p.winRate.toFixed(1)}%`,
+        region: p.region || 'Unknown',
+        team: p.team || 'Unknown' // Adding team to the mapped object
+      };
+    });
 
   // Combine real events with mock events to ensure we show 6 items for layout verification
   // Filter out duplicates if IDs might clash, though unlikely with "e1", "e2" etc vs UUIDs
