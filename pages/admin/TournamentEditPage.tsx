@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { supabase } from '../../supabaseClient';
 import { toast } from 'sonner';
 
@@ -16,37 +16,42 @@ interface Tournament {
 const TournamentEditPage: React.FC = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [tournaments, setTournaments] = useState<Tournament[]>([]);
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
     const [selectedTournament, setSelectedTournament] = useState<Tournament | null>(null);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [deleteReason, setDeleteReason] = useState('');
     const [processing, setProcessing] = useState(false);
 
-    const searchTournaments = async () => {
-        if (!searchQuery.trim()) {
-            toast.error('Ingresa un término de búsqueda');
-            return;
-        }
+    // Load all tournaments on mount
+    useEffect(() => {
+        loadTournaments();
+    }, []);
 
+    const loadTournaments = async () => {
         setLoading(true);
         try {
             const { data, error } = await supabase.rpc('admin_search_tournaments', {
-                p_query: searchQuery,
-                p_limit: 50
+                p_query: searchQuery.trim() || null,
+                p_limit: 100
             });
 
             if (error) throw error;
             setTournaments(data || []);
-
-            if (data && data.length === 0) {
-                toast.info('No se encontraron torneos');
-            }
         } catch (error: any) {
-            console.error('Error searching tournaments:', error);
+            console.error('Error loading tournaments:', error);
             toast.error('Error: ' + error.message);
         } finally {
             setLoading(false);
         }
+    };
+
+    const handleSearch = () => {
+        loadTournaments();
+    };
+
+    const handleClearSearch = () => {
+        setSearchQuery('');
+        setTimeout(() => loadTournaments(), 100);
     };
 
     const openDeleteModal = (tournament: Tournament) => {
@@ -76,9 +81,7 @@ const TournamentEditPage: React.FC = () => {
             setShowDeleteModal(false);
             setSelectedTournament(null);
             setDeleteReason('');
-
-            // Refresh search results
-            searchTournaments();
+            loadTournaments();
         } catch (error: any) {
             console.error('Error deleting tournament:', error);
             toast.error('Error: ' + error.message);
@@ -153,8 +156,16 @@ const TournamentEditPage: React.FC = () => {
                 </p>
             </div>
 
+            {/* Loading */}
+            {loading && (
+                <div className="text-center py-12">
+                    <div className="w-12 h-12 border-4 border-sky-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+                    <p className="text-slate-400 mt-4">Cargando torneos...</p>
+                </div>
+            )}
+
             {/* Results */}
-            {tournaments.length > 0 && (
+            {!loading && tournaments.length > 0 && (
                 <>
                     <div className="flex items-center justify-between">
                         <p className="text-slate-400 text-sm">
@@ -192,12 +203,6 @@ const TournamentEditPage: React.FC = () => {
                                             <td className="px-6 py-4">
                                                 <div className="flex items-center justify-end gap-2">
                                                     <button
-                                                        onClick={() => toast.info('Edición de resultados individuales próximamente')}
-                                                        className="px-3 py-1.5 bg-blue-900/50 hover:bg-blue-800 text-blue-300 rounded text-xs font-medium transition-colors"
-                                                    >
-                                                        Editar Resultados
-                                                    </button>
-                                                    <button
                                                         onClick={() => openDeleteModal(tournament)}
                                                         className="px-3 py-1.5 bg-red-900/50 hover:bg-red-800 text-red-300 rounded text-xs font-medium transition-colors"
                                                     >
@@ -214,25 +219,8 @@ const TournamentEditPage: React.FC = () => {
                 </>
             )}
 
-            {/* Empty State - After Search */}
-            {!loading && tournaments.length === 0 && searchQuery && (
-                <div className="text-center py-12 bg-slate-800/50 rounded-lg border border-slate-700">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="w-16 h-16 text-slate-600 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
-                    <p className="text-slate-400 text-lg">No se encontraron torneos</p>
-                    <p className="text-slate-500 text-sm mt-2">Intenta con otro término de búsqueda</p>
-                    <button
-                        onClick={handleClearSearch}
-                        className="mt-4 px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors"
-                    >
-                        Ver todos los torneos
-                    </button>
-                </div>
-            )}
-
-            {/* Empty State - No tournaments at all */}
-            {!loading && tournaments.length === 0 && !searchQuery && (
+            {/* Empty State */}
+            {!loading && tournaments.length === 0 && (
                 <div className="text-center py-12 bg-slate-800/50 rounded-lg border border-slate-700">
                     <svg xmlns="http://www.w3.org/2000/svg" className="w-16 h-16 text-slate-600 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
