@@ -62,6 +62,7 @@ const SettingsPage: React.FC = () => {
     const [aliases, setAliases] = useState<any[]>([]);
     const [newAlias, setNewAlias] = useState('');
     const [aliasLoading, setAliasLoading] = useState(false);
+    const [aliasError, setAliasError] = useState<string | null>(null);
 
     const fetchAliases = async (userId: string) => {
         const { data, error } = await supabase
@@ -75,6 +76,7 @@ const SettingsPage: React.FC = () => {
     const handleAddAlias = async () => {
         if (!newAlias.trim()) return;
         setAliasLoading(true);
+        setAliasError(null); // Clear previous errors
         try {
             const { data: { user } } = await supabase.auth.getUser();
             if (!user) return;
@@ -86,17 +88,18 @@ const SettingsPage: React.FC = () => {
 
             if (error) {
                 if (error.code === '23505') { // Unique violation
-                    setMessage({ type: 'error', text: 'Este alias ya está registrado por otro usuario o por ti mismo.' });
+                    setAliasError('❌ Este alias ya está registrado por otro usuario o por ti mismo.');
                 } else {
-                    throw error;
+                    setAliasError(`Error: ${error.message}`);
                 }
             } else {
                 setNewAlias('');
+                setAliasError(null);
                 fetchAliases(user.id);
                 setMessage({ type: 'success', text: 'Alias agregado correctamente.' });
             }
         } catch (error: any) {
-            setMessage({ type: 'error', text: error.message });
+            setAliasError(`Error inesperado: ${error.message}`);
         } finally {
             setAliasLoading(false);
         }
@@ -400,10 +403,15 @@ const SettingsPage: React.FC = () => {
                                     <input
                                         type="text"
                                         value={newAlias}
-                                        onChange={(e) => setNewAlias(e.target.value)}
-                                        className={commonInputClass}
+                                        onChange={(e) => { setNewAlias(e.target.value); setAliasError(null); }}
+                                        className={`${commonInputClass} ${aliasError ? 'border-red-500 ring-2 ring-red-500/50' : ''}`}
                                         placeholder='Ej: "Juan Perez", "Juan P.", "DarkMage99"'
                                     />
+                                    {aliasError && (
+                                        <p className="text-sm text-red-400 mt-2 bg-red-900/30 p-2 rounded border border-red-500/50 animate-pulse">
+                                            {aliasError}
+                                        </p>
+                                    )}
                                 </div>
                                 <button
                                     type="button"
