@@ -1,5 +1,15 @@
 
 
+export interface Team {
+  id: string;
+  name: string;
+  logoUrl?: string;
+  description?: string;
+  captainId?: string;
+  totalPwp?: number; // Calculated field
+  memberCount?: number; // Calculated field
+}
+
 export interface PlayerProfile {
   id: string;
   name: string;
@@ -8,9 +18,11 @@ export interface PlayerProfile {
   matchesWon: number;
   matchesLost: number;
   matchesDrew: number;
-  winRate?: number; // Optional, can be calculated
-  team?: string;
-  isPublic?: boolean; // If true, show full name. If false, show as anonymous
+  winRate?: number;
+  teamId?: string;
+  team?: string; // Legacy text field (still used for display if teamId is null)
+  teamData?: Team; // Formal team entity
+  isPublic?: boolean;
 }
 
 // FIX: Add RankingEntry and WinRateRankingEntry types used in HomePage.tsx

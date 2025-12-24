@@ -22,11 +22,12 @@ import AuthPage from './pages/AuthPage';
 import AdminDashboardPage from './pages/AdminDashboardPage';
 import StoreDashboardPage from './pages/StoreDashboardPage';
 import PlayerDashboardPage from './pages/PlayerDashboardPage';
+import TeamProfilePage from './pages/TeamProfilePage';
 import TournamentsListPage from './pages/TournamentsListPage';
 import TournamentStandingsPage from './pages/TournamentStandingsPage';
 import SettingsPage from './pages/SettingsPage';
 import LiveStreamPage from './pages/LiveStreamPage';
-import type { TournamentResult, CommunityEvent, PlayerProfile, TournamentParseResult } from './types';
+import type { TournamentResult, CommunityEvent, PlayerProfile, TournamentParseResult, Team } from './types';
 import OnboardingModal from './components/OnboardingModal';
 
 const mockInitialPlayers: PlayerProfile[] = [];
@@ -42,6 +43,7 @@ const AppContent: React.FC = () => {
   const [tournamentResults, setTournamentResults] = useState<TournamentResult[]>([]);
   const [communityEvents, setCommunityEvents] = useState<CommunityEvent[]>([]);
   const [players, setPlayers] = useState<PlayerProfile[]>([]);
+  const [teams, setTeams] = useState<Team[]>([]);
   const [showOnboarding, setShowOnboarding] = useState(false);
 
   // Hardcoded for now. In future, fetch this from Supabase 'system_status' table or similar.
@@ -111,13 +113,14 @@ const AppContent: React.FC = () => {
         username: string;
         region: string;
         team: string | null;
+        teamId: string | null;
         isPublic: boolean
       }> = {};
 
       if (playerIds.length > 0) {
         const { data: profilesData } = await supabase
           .from('profiles')
-          .select('id, username, first_name, last_name, region, team, is_public')
+          .select('id, username, first_name, last_name, region, team, team_id, is_public')
           .in('id', playerIds);
 
         if (profilesData) {
@@ -128,9 +131,30 @@ const AppContent: React.FC = () => {
               username: profile.username || 'Unknown',
               region: profile.region || 'Unknown',
               team: profile.team,
+              teamId: profile.team_id,
               isPublic: profile.is_public ?? false
             };
           }
+        }
+      }
+
+      // 1.5 Fetch Teams
+      const { data: teamsData } = await supabase
+        .from('teams')
+        .select('*');
+
+      const teamsMap: Record<string, Team> = {};
+      if (teamsData) {
+        for (const t of teamsData) {
+          teamsMap[t.id] = {
+            id: t.id,
+            name: t.name,
+            logoUrl: t.logo_url,
+            description: t.description,
+            captainId: t.captain_id,
+            totalPwp: 0,
+            memberCount: 0
+          };
         }
       }
 
@@ -156,6 +180,15 @@ const AppContent: React.FC = () => {
           displayName = `Jugador ${anonymousNumber}`;
         }
 
+        // Link to teamData if available
+        const teamData = profile?.teamId ? teamsMap[profile.teamId] : undefined;
+
+        // Accumulate team stats
+        if (teamData) {
+          teamData.totalPwp = (teamData.totalPwp || 0) + data.pwp;
+          teamData.memberCount = (teamData.memberCount || 0) + 1;
+        }
+
         return {
           id: data.playerId || key, // Usar player_name como ID si no tiene cuenta
           name: displayName,
@@ -164,11 +197,17 @@ const AppContent: React.FC = () => {
           matchesWon: data.wins,
           matchesLost: data.losses,
           matchesDrew: data.draws,
+          teamId: profile?.teamId || undefined,
           team: profile?.team || null,
+          teamData: teamData,
           // isPublic = true si tiene cuenta vinculada
           isPublic: hasAccount
         };
       });
+
+      // Sort teams by total PWP
+      const sortedTeams = Object.values(teamsMap).sort((a, b) => (b.totalPwp || 0) - (a.totalPwp || 0));
+      setTeams(sortedTeams);
 
       // Ya está ordenado por PWP descendente
       setPlayers(mappedPlayers);
@@ -506,7 +545,8 @@ const AppContent: React.FC = () => {
           <Route path="/" element={<HomePage players={players} events={communityEvents} />} />
           <Route path="/envivo" element={<LiveStreamPage />} />
           <Route path="/pls" element={<PLSPage />} />
-          <Route path="/ranking/pwp" element={<RankingsPage players={players} />} />
+          <Route path="/ranking/pwp" element={<RankingsPage players={players} teams={teams} />} />
+          <Route path="/equipo/:teamId" element={<TeamProfilePage />} />
           <Route path="/eventos" element={<EventsPage events={communityEvents} finishedTournaments={tournamentResults} userRole={userRole} userId={userProfile?.id} />} />
           <Route path="/torneos" element={<TournamentsListPage tournaments={tournamentResults} />} />
           <Route path="/torneos/:tournamentId" element={<TournamentStandingsPage />} />
