@@ -29,6 +29,7 @@ import SettingsPage from './pages/SettingsPage';
 import LiveStreamPage from './pages/LiveStreamPage';
 import type { TournamentResult, CommunityEvent, PlayerProfile, TournamentParseResult, Team } from './types';
 import OnboardingModal from './components/OnboardingModal';
+import ClaimResultsModal from './components/ClaimResultsModal';
 
 const mockInitialPlayers: PlayerProfile[] = [];
 const mockTournamentResults: TournamentResult[] = [];
@@ -45,6 +46,8 @@ const AppContent: React.FC = () => {
   const [players, setPlayers] = useState<PlayerProfile[]>([]);
   const [teams, setTeams] = useState<Team[]>([]);
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [unclaimedResults, setUnclaimedResults] = useState<any[]>([]);
+  const [showClaimModal, setShowClaimModal] = useState(false);
 
   // Hardcoded for now. In future, fetch this from Supabase 'system_status' table or similar.
   const [isLiveSignal, setIsLiveSignal] = useState(true);
@@ -335,6 +338,9 @@ const AppContent: React.FC = () => {
             if (count === 0) {
               setShowOnboarding(true);
             }
+
+            // Detectar resultados sin reclamar
+            fetchUnclaimedResults(session.user.id);
           }
         } else {
           // Profile missing (could be new OAuth user or Email user with failed profile creation)
@@ -429,6 +435,34 @@ const AppContent: React.FC = () => {
     navigate('/');
   };
 
+  const fetchUnclaimedResults = async (userId: string) => {
+    try {
+      const { data, error } = await supabase.rpc('detect_unclaimed_results', {
+        p_player_id: userId
+      });
+
+      if (error) {
+        console.error('Error fetching unclaimed results:', error);
+        return;
+      }
+
+      if (data && data.length > 0) {
+        setUnclaimedResults(data);
+        // Mostrar el modal solo si no está mostrando onboarding
+        if (!showOnboarding) {
+          setShowClaimModal(true);
+        }
+      }
+    } catch (error) {
+      console.error('Error in fetchUnclaimedResults:', error);
+    }
+  };
+
+  const handleClaimProcessed = async () => {
+    // Refrescar datos después de procesar reclamaciones
+    await fetchData();
+  };
+
   const handleTournamentUpload = async (tournamentData: Omit<TournamentResult, 'id'>, playerResults: TournamentParseResult[]) => {
     console.log("=== INICIO DE SUBIDA ===");
     console.log("Tournament Data:", tournamentData);
@@ -508,7 +542,13 @@ const AppContent: React.FC = () => {
   };
 
   const commonHandler = {
-    closeOnboarding: () => setShowOnboarding(false),
+    closeOnboarding: () => {
+      setShowOnboarding(false);
+      // Si hay resultados sin reclamar, mostrar el modal después de cerrar onboarding
+      if (unclaimedResults.length > 0) {
+        setTimeout(() => setShowClaimModal(true), 500);
+      }
+    },
     goToSettings: () => {
       setShowOnboarding(false);
       navigate('/settings');
@@ -545,6 +585,13 @@ const AppContent: React.FC = () => {
         isOpen={showOnboarding}
         onClose={commonHandler.closeOnboarding}
         onGoToSettings={commonHandler.goToSettings}
+      />
+
+      <ClaimResultsModal
+        isOpen={showClaimModal}
+        unclaimedResults={unclaimedResults}
+        onClose={() => setShowClaimModal(false)}
+        onClaimProcessed={handleClaimProcessed}
       />
 
       <main className="flex-grow container mx-auto px-4 py-8">
