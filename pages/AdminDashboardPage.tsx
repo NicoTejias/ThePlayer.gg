@@ -195,31 +195,29 @@ const AdminDashboardPage: React.FC = () => {
                         <p className="text-slate-400 text-sm">Administra usuarios, suspensiones y permisos</p>
                     </a>
 
-                    <div className="group bg-slate-800/50 p-6 rounded-lg border border-slate-700 opacity-60 cursor-not-allowed">
+                    <a href="#/admin/integrity" className="group bg-slate-800 hover:bg-slate-700 p-6 rounded-lg border border-slate-700 hover:border-yellow-500 transition-all shadow-lg">
                         <div className="flex items-center gap-4 mb-3">
-                            <div className="p-3 bg-yellow-900/40 rounded-lg">
+                            <div className="p-3 bg-yellow-900/40 rounded-lg group-hover:bg-yellow-800/60 transition-colors">
                                 <ShieldCheckIcon className="w-6 h-6 text-yellow-300" />
                             </div>
                             <h3 className="text-lg font-bold text-white">Revisión de Integridad</h3>
                         </div>
                         <p className="text-slate-400 text-sm">Aprobar torneos con advertencias</p>
-                        <span className="text-xs text-slate-500 mt-2 block">Próximamente</span>
-                    </div>
+                    </a>
 
-                    <div className="group bg-slate-800/50 p-6 rounded-lg border border-slate-700 opacity-60 cursor-not-allowed">
+                    <a href="#/admin/claims" className="group bg-slate-800 hover:bg-slate-700 p-6 rounded-lg border border-slate-700 hover:border-sky-500 transition-all shadow-lg">
                         <div className="flex items-center gap-4 mb-3">
-                            <div className="p-3 bg-sky-900/40 rounded-lg">
+                            <div className="p-3 bg-sky-900/40 rounded-lg group-hover:bg-sky-800/60 transition-colors">
                                 <ClipboardListIcon className="w-6 h-6 text-sky-300" />
                             </div>
                             <h3 className="text-lg font-bold text-white">Reclamos Pendientes</h3>
                         </div>
                         <p className="text-slate-400 text-sm">Revisar y aprobar reclamos de resultados</p>
-                        <span className="text-xs text-slate-500 mt-2 block">Próximamente</span>
-                    </div>
+                    </a>
 
-                    <div className="group bg-slate-800/50 p-6 rounded-lg border border-slate-700 opacity-60 cursor-not-allowed">
+                    <a href="#/admin/tournaments/edit" className="group bg-slate-800 hover:bg-slate-700 p-6 rounded-lg border border-slate-700 hover:border-green-500 transition-all shadow-lg">
                         <div className="flex items-center gap-4 mb-3">
-                            <div className="p-3 bg-green-900/40 rounded-lg">
+                            <div className="p-3 bg-green-900/40 rounded-lg group-hover:bg-green-800/60 transition-colors">
                                 <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 text-green-300" viewBox="0 0 20 20" fill="currentColor">
                                     <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
                                 </svg>
@@ -227,8 +225,7 @@ const AdminDashboardPage: React.FC = () => {
                             <h3 className="text-lg font-bold text-white">Editar Torneos</h3>
                         </div>
                         <p className="text-slate-400 text-sm">Modificar y eliminar torneos</p>
-                        <span className="text-xs text-slate-500 mt-2 block">Próximamente</span>
-                    </div>
+                    </a>
                 </div>
             </section>
 
