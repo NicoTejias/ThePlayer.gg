@@ -131,34 +131,47 @@ const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpl
     };
 
     const processIntegrity = async (results: TournamentParseResult[], detectedDate?: string) => {
-        // Fetch context for integrity check
-        // 1. Get recent tournament results fingerprints for this store
-        const { data: recentResults } = await supabase
-            .from('tournament_results')
-            .select('tournament_id, player_name, pwp_earned')
-            .order('created_at', { ascending: false })
-            .limit(1000);
+        // Safety timeout for database calls
+        const abortController = new AbortController();
+        const timeoutId = setTimeout(() => abortController.abort(), 10000);
 
-        const tournamentGroups: Record<string, any[]> = {};
-        recentResults?.forEach(r => {
-            if (!tournamentGroups[r.tournament_id]) tournamentGroups[r.tournament_id] = [];
-            tournamentGroups[r.tournament_id].push({ playerName: r.player_name, pwpEarned: r.pwp_earned });
-        });
+        try {
+            // Fetch context for integrity check
+            const { data: recentResults, error: recentError } = await supabase
+                .from('tournament_results')
+                .select('tournament_id, player_name, pwp_earned')
+                .order('created_at', { ascending: false })
+                .limit(1000)
+                .abortSignal(abortController.signal);
 
-        const recentFingerprints = Object.values(tournamentGroups).map(g => getTournamentFingerprint(g as any));
+            if (recentError) console.error("Integrity context fetch error:", recentError);
 
-        // 2. Count today's uploads
-        const todayStr = new Date().toISOString().split('T')[0];
-        const dailyUploadCount = tournaments.filter(t => t.date === todayStr && t.storeName === storeName).length;
+            const tournamentGroups: Record<string, any[]> = {};
+            recentResults?.forEach(r => {
+                if (!tournamentGroups[r.tournament_id]) tournamentGroups[r.tournament_id] = [];
+                tournamentGroups[r.tournament_id].push({ playerName: r.player_name, pwpEarned: r.pwp_earned });
+            });
 
-        const integrityWarnings = checkTournamentIntegrity(results, results.length, tournamentType, {
-            fileDate: detectedDate,
-            userDate: tournamentDate,
-            currentDate: new Date().toISOString(),
-            recentFingerprints,
-            dailyUploadCount
-        });
-        setWarnings(integrityWarnings);
+            const recentFingerprints = Object.values(tournamentGroups).map(g => getTournamentFingerprint(g as any));
+
+            // 2. Count today's uploads
+            const todayStr = new Date().toISOString().split('T')[0];
+            const dailyUploadCount = tournaments.filter(t => t.date === todayStr && t.storeName === storeName).length;
+
+            const integrityWarnings = checkTournamentIntegrity(results, results.length, tournamentType, {
+                fileDate: detectedDate,
+                userDate: tournamentDate,
+                currentDate: new Date().toISOString(),
+                recentFingerprints,
+                dailyUploadCount
+            });
+            setWarnings(integrityWarnings);
+        } catch (err: any) {
+            console.error("Integrity check failed or timed out:", err);
+            // Non-critical: we still want to allow the upload if integrity check fails
+        } finally {
+            clearTimeout(timeoutId);
+        }
     };
 
     const handleProcessFile = async () => {
@@ -215,8 +228,8 @@ const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpl
                 setStep('confirm');
 
             } catch (e: any) {
-                console.error(e);
-                setError(e.message || "Error al procesar el archivo.");
+                console.error("Error processing file:", e);
+                setError(e.message || "Error al procesar el archivo. Revisa que el formato sea correcto.");
             } finally {
                 setIsProcessing(false);
             }
@@ -400,11 +413,32 @@ const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpl
                                     )}
                                 </div>
 
-                                {error && <p className="text-sm text-red-400 bg-red-900/50 p-3 rounded-md">{error}</p>}
+                                {error && <p className="text-sm text-red-400 bg-red-900/50 p-3 rounded-md animate-pulse">{error}</p>}
 
-                                <button onClick={handleProcessFile} disabled={isProcessing} className="w-full py-3 px-4 font-bold rounded-lg transition duration-300 bg-sky-600 text-white hover:bg-sky-700 disabled:bg-slate-600 disabled:cursor-not-allowed">
-                                    {isProcessing ? 'Procesando...' : 'Verificar Datos'}
-                                </button>
+                                <div className="space-y-3">
+                                    <button
+                                        onClick={handleProcessFile}
+                                        disabled={isProcessing}
+                                        className="w-full py-3 px-4 font-bold rounded-lg transition duration-300 bg-sky-600 text-white hover:bg-sky-700 disabled:bg-slate-700 disabled:text-slate-500 disabled:cursor-not-allowed group relative"
+                                    >
+                                        <span className={isProcessing ? 'opacity-0' : 'opacity-100'}>Verificar Datos</span>
+                                        {isProcessing && (
+                                            <div className="absolute inset-0 flex items-center justify-center">
+                                                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                                                <span className="ml-2 font-mono text-xs uppercase tracking-tighter">Procesando...</span>
+                                            </div>
+                                        )}
+                                    </button>
+
+                                    {isProcessing && (
+                                        <button
+                                            onClick={() => setIsProcessing(false)}
+                                            className="w-full py-2 text-xs text-slate-500 hover:text-slate-300 underline font-medium"
+                                        >
+                                            ¿Tardando demasiado? Cancelar y reintentar
+                                        </button>
+                                    )}
+                                </div>
                             </div>
                         </div>
                     )}

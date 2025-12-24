@@ -278,29 +278,28 @@ const AppContent: React.FC = () => {
     // 1. Initialize Auth Check
     const initAuth = async () => {
       setIsAuthLoading(true);
+
+      // Safety timeout for auth initialization
+      const authTimeout = setTimeout(() => {
+        if (isAuthLoading) {
+          console.warn("Auth initialization timed out. Forcing loading state off.");
+          setIsAuthLoading(false);
+        }
+      }, 8000);
+
       try {
-        // Check active session immediately
         const { data: { session }, error } = await supabase.auth.getSession();
         if (error) throw error;
         await handleSessionState(session);
 
-        // Setup listener for future changes
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-          // We don't await this inside the event loop in a way that blocks init, 
-          // but we want to ensure state updates correctly.
-          await handleSessionState(session);
+          handleSessionState(session);
         });
-
-        // Warning: returning the cleanup function here inside the async function 
-        // doesn't actually work for useEffect cleanup because useEffect expects 
-        // the immediate return to be the cleanup.
-        // We need to move the subscription out or handle it differently if we want strict cleanup.
-        // For now, let's just keep the logic flowing but fix the loading state.
-
       } catch (err) {
         console.error("Critical Auth Error:", err);
         setIsLoggedIn(false);
       } finally {
+        clearTimeout(authTimeout);
         setIsAuthLoading(false);
       }
     };
@@ -379,7 +378,6 @@ const AppContent: React.FC = () => {
       }
     } catch (error) {
       console.error("Error in handleSessionState:", error);
-      // Ensure we don't break the app - set to logged out state
       setIsLoggedIn(false);
       setUserRole(null);
       setUserProfile(null);
@@ -388,10 +386,19 @@ const AppContent: React.FC = () => {
 
   if (isAuthLoading) {
     return (
-      <div className="bg-slate-900 min-h-screen flex items-center justify-center text-white">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-12 h-12 border-4 border-sky-500 border-t-transparent rounded-full animate-spin"></div>
-          <p className="animate-pulse">Cargando sesión...</p>
+      <div className="bg-slate-900 min-h-screen flex flex-col items-center justify-center text-white p-4">
+        <div className="flex flex-col items-center gap-6 max-w-sm text-center">
+          <div className="w-16 h-16 border-4 border-sky-500 border-t-transparent rounded-full animate-spin"></div>
+          <div className="space-y-2">
+            <p className="text-xl font-bold uppercase tracking-widest animate-pulse">Cargando sesión...</p>
+            <p className="text-slate-500 text-sm italic">Si esto tarda demasiado, por favor recarga la página o revisa tu conexión.</p>
+          </div>
+          <button
+            onClick={() => window.location.reload()}
+            className="mt-4 px-6 py-2 bg-slate-800 hover:bg-slate-700 rounded-full text-xs font-bold uppercase tracking-tighter border border-slate-700 transition-colors"
+          >
+            Forzar Recarga
+          </button>
         </div>
       </div>
     );
