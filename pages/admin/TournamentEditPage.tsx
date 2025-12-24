@@ -112,24 +112,45 @@ const TournamentEditPage: React.FC = () => {
 
             {/* Search */}
             <div className="bg-slate-800 p-6 rounded-lg border border-slate-700">
-                <label className="block text-sm font-medium text-slate-300 mb-3">Buscar Torneo</label>
+                <label className="block text-sm font-medium text-slate-300 mb-3">
+                    Buscar Torneo {searchQuery && <span className="text-slate-500">(mostrando {tournaments.length} resultados)</span>}
+                </label>
                 <div className="flex gap-4">
-                    <input
-                        type="search"
-                        placeholder="Nombre del torneo o tienda..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        onKeyPress={(e) => e.key === 'Enter' && searchTournaments()}
-                        className="flex-1 bg-slate-900 text-white placeholder-slate-500 rounded px-4 py-3 focus:outline-none focus:ring-2 focus:ring-sky-500 border border-slate-700"
-                    />
+                    <div className="flex-1 relative">
+                        <input
+                            type="search"
+                            placeholder="Busca por nombre del torneo o tienda (ej: 'FNM', 'Modern', 'Tienda X')..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+                            className="w-full bg-slate-900 text-white placeholder-slate-500 rounded px-4 py-3 focus:outline-none focus:ring-2 focus:ring-sky-500 border border-slate-700"
+                        />
+                        {searchQuery && (
+                            <button
+                                onClick={handleClearSearch}
+                                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
+                                title="Limpiar búsqueda"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                                </svg>
+                            </button>
+                        )}
+                    </div>
                     <button
-                        onClick={searchTournaments}
+                        onClick={handleSearch}
                         disabled={loading}
-                        className="px-6 py-3 bg-sky-600 hover:bg-sky-500 text-white font-bold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="px-6 py-3 bg-sky-600 hover:bg-sky-500 text-white font-bold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                     >
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd" />
+                        </svg>
                         {loading ? 'Buscando...' : 'Buscar'}
                     </button>
                 </div>
+                <p className="text-slate-500 text-xs mt-2">
+                    💡 Deja el campo vacío y presiona "Buscar" para ver todos los torneos
+                </p>
             </div>
 
             {/* Results */}
@@ -193,7 +214,7 @@ const TournamentEditPage: React.FC = () => {
                 </>
             )}
 
-            {/* Empty State */}
+            {/* Empty State - After Search */}
             {!loading && tournaments.length === 0 && searchQuery && (
                 <div className="text-center py-12 bg-slate-800/50 rounded-lg border border-slate-700">
                     <svg xmlns="http://www.w3.org/2000/svg" className="w-16 h-16 text-slate-600 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -201,17 +222,23 @@ const TournamentEditPage: React.FC = () => {
                     </svg>
                     <p className="text-slate-400 text-lg">No se encontraron torneos</p>
                     <p className="text-slate-500 text-sm mt-2">Intenta con otro término de búsqueda</p>
+                    <button
+                        onClick={handleClearSearch}
+                        className="mt-4 px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors"
+                    >
+                        Ver todos los torneos
+                    </button>
                 </div>
             )}
 
-            {/* Initial State */}
+            {/* Empty State - No tournaments at all */}
             {!loading && tournaments.length === 0 && !searchQuery && (
                 <div className="text-center py-12 bg-slate-800/50 rounded-lg border border-slate-700">
                     <svg xmlns="http://www.w3.org/2000/svg" className="w-16 h-16 text-slate-600 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
-                    <p className="text-slate-400 text-lg">Busca un torneo para comenzar</p>
-                    <p className="text-slate-500 text-sm mt-2">Usa el campo de búsqueda arriba</p>
+                    <p className="text-slate-400 text-lg">No hay torneos en la base de datos</p>
+                    <p className="text-slate-500 text-sm mt-2">Los torneos aparecerán aquí cuando se suban desde el panel de tiendas</p>
                 </div>
             )}
 
