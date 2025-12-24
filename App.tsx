@@ -21,6 +21,7 @@ import JudgesPage from './pages/JudgesPage';
 import StoresPage from './pages/StoresPage';
 import AuthPage from './pages/AuthPage';
 import AdminDashboardPage from './pages/AdminDashboardPage';
+import UserManagementPage from './pages/admin/UserManagementPage';
 import StoreDashboardPage from './pages/StoreDashboardPage';
 import PlayerDashboardPage from './pages/PlayerDashboardPage';
 import TeamProfilePage from './pages/TeamProfilePage';
@@ -618,6 +619,7 @@ const AppContent: React.FC = () => {
           <Route path="/login" element={<AuthPage handleLogin={handleLogin} />} />
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="/admin" element={<AdminDashboardPage />} />
+          <Route path="/admin/users" element={<UserManagementPage />} />
           <Route path="/dashboard/tienda" element={<StoreDashboardPage onTournamentUpload={handleTournamentUpload} onDeleteTournament={handleDeleteTournament} userRole={userRole} tournaments={tournamentResults} storeStatus={userProfile?.status} storeName={userProfile?.username} />} />
           <Route path="/dashboard/jugador" element={<PlayerDashboardPage profile={userProfile} />} />
         </Routes>

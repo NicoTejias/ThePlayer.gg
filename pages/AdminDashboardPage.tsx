@@ -181,6 +181,57 @@ const AdminDashboardPage: React.FC = () => {
                 <StatCard icon={<UsersIcon className="w-8 h-8" />} title="Total Jugadores" value={stats.totalPlayers} color="violet" />
             </section>
 
+            {/* Admin Tools Navigation */}
+            <section>
+                <h2 className="text-3xl font-bold text-white uppercase tracking-wider mb-6">Herramientas Administrativas</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <a href="#/admin/users" className="group bg-slate-800 hover:bg-slate-700 p-6 rounded-lg border border-slate-700 hover:border-sky-500 transition-all shadow-lg">
+                        <div className="flex items-center gap-4 mb-3">
+                            <div className="p-3 bg-purple-900/40 rounded-lg group-hover:bg-purple-800/60 transition-colors">
+                                <UsersIcon className="w-6 h-6 text-purple-300" />
+                            </div>
+                            <h3 className="text-lg font-bold text-white">Gestión de Usuarios</h3>
+                        </div>
+                        <p className="text-slate-400 text-sm">Administra usuarios, suspensiones y permisos</p>
+                    </a>
+
+                    <div className="group bg-slate-800/50 p-6 rounded-lg border border-slate-700 opacity-60 cursor-not-allowed">
+                        <div className="flex items-center gap-4 mb-3">
+                            <div className="p-3 bg-yellow-900/40 rounded-lg">
+                                <ShieldCheckIcon className="w-6 h-6 text-yellow-300" />
+                            </div>
+                            <h3 className="text-lg font-bold text-white">Revisión de Integridad</h3>
+                        </div>
+                        <p className="text-slate-400 text-sm">Aprobar torneos con advertencias</p>
+                        <span className="text-xs text-slate-500 mt-2 block">Próximamente</span>
+                    </div>
+
+                    <div className="group bg-slate-800/50 p-6 rounded-lg border border-slate-700 opacity-60 cursor-not-allowed">
+                        <div className="flex items-center gap-4 mb-3">
+                            <div className="p-3 bg-sky-900/40 rounded-lg">
+                                <ClipboardListIcon className="w-6 h-6 text-sky-300" />
+                            </div>
+                            <h3 className="text-lg font-bold text-white">Reclamos Pendientes</h3>
+                        </div>
+                        <p className="text-slate-400 text-sm">Revisar y aprobar reclamos de resultados</p>
+                        <span className="text-xs text-slate-500 mt-2 block">Próximamente</span>
+                    </div>
+
+                    <div className="group bg-slate-800/50 p-6 rounded-lg border border-slate-700 opacity-60 cursor-not-allowed">
+                        <div className="flex items-center gap-4 mb-3">
+                            <div className="p-3 bg-green-900/40 rounded-lg">
+                                <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 text-green-300" viewBox="0 0 20 20" fill="currentColor">
+                                    <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                                </svg>
+                            </div>
+                            <h3 className="text-lg font-bold text-white">Editar Torneos</h3>
+                        </div>
+                        <p className="text-slate-400 text-sm">Modificar y eliminar torneos</p>
+                        <span className="text-xs text-slate-500 mt-2 block">Próximamente</span>
+                    </div>
+                </div>
+            </section>
+
             {/* Main Admin Sections */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
 
