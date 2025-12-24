@@ -8,7 +8,12 @@ interface ParsedRow {
     draws: number;
 }
 
-export const parseEventLinkHtml = async (file: File): Promise<ParsedRow[]> => {
+interface ParserResult {
+    results: ParsedRow[];
+    detectedDate?: string;
+}
+
+export const parseEventLinkHtml = async (file: File): Promise<ParserResult> => {
     const text = await file.text();
     const parser = new DOMParser();
     const doc = parser.parseFromString(text, 'text/html');
@@ -85,6 +90,10 @@ export const parseEventLinkHtml = async (file: File): Promise<ParsedRow[]> => {
                 wins = parseInt(recordMatch[1]);
                 losses = parseInt(recordMatch[2]);
                 draws = parseInt(recordMatch[3]);
+            } else if (!isNaN(points) && points > 0) {
+                // Fallback: estimate from points if record is missing
+                wins = Math.floor(points / 3);
+                draws = points % 3;
             }
 
             if (!isNaN(rank) && name && !isNaN(points)) {
@@ -151,5 +160,5 @@ export const parseEventLinkHtml = async (file: File): Promise<ParsedRow[]> => {
         }
     }
 
-    return currentRows;
+    return { results: currentRows };
 };

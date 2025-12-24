@@ -15,13 +15,19 @@ interface ParsedRow {
  * - MatchRecord (formato W-L-D)
  * - Points (puntos del torneo)
  */
-export const parseMeleeCSV = (csvText: string): ParsedRow[] => {
+export interface ParserResult {
+    results: ParsedRow[];
+    detectedDate?: string;
+}
+
+export const parseMeleeCSV = (csvText: string): ParserResult => {
     const rows: ParsedRow[] = [];
+    let detectedDate: string | undefined;
 
     // Split by lines
     const lines = csvText.split('\n').map(line => line.trim()).filter(line => line.length > 0);
 
-    if (lines.length === 0) return rows;
+    if (lines.length === 0) return { results: rows };
 
     // Parse header to find column indices
     const header = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
@@ -48,6 +54,9 @@ export const parseMeleeCSV = (csvText: string): ParsedRow[] => {
 
     // Fallback: buscar DisplayName
     const displayNameIdx = header.findIndex(h => h === 'TeamPlayers1DisplayName');
+
+    // Date Detection (New)
+    const dateIdx = header.findIndex(h => h.toLowerCase().includes('date') || h.toLowerCase().includes('fecha'));
 
     // Determinar qué columna usar para el nombre
     const useFirstLastName = playerNameIdx === -1 && firstNameIdx !== -1 && lastNameIdx !== -1;
@@ -135,6 +144,11 @@ export const parseMeleeCSV = (csvText: string): ParsedRow[] => {
             points = (wins * 3) + draws;
         }
 
+        // Detect date if not already found
+        if (!detectedDate && dateIdx !== -1 && parts[dateIdx]) {
+            detectedDate = parts[dateIdx].replace(/"/g, '').trim();
+        }
+
         rows.push({ rank, name, points, wins, losses, draws });
     }
 
@@ -144,7 +158,7 @@ export const parseMeleeCSV = (csvText: string): ParsedRow[] => {
         console.log('📊 Muestra de datos:', rows.slice(0, 3));
     }
 
-    return rows;
+    return { results: rows, detectedDate };
 };
 
 // Helper function to parse CSV line handling quoted fields

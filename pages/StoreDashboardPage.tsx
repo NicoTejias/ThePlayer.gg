@@ -6,6 +6,8 @@ import { parseEventLinkPdf } from '../utils/PdfParser';
 import { parseEventLinkText } from '../utils/TextParser';
 import { parseMeleeCSV } from '../utils/CSVParser';
 import { parseEventLinkHtml } from '../utils/HtmlParser';
+import { checkTournamentIntegrity, IntegrityWarning, getTournamentFingerprint } from '../utils/IntegrityChecker';
+import { supabase } from '../supabaseClient';
 
 interface StoreDashboardPageProps {
     onTournamentUpload: (tournamentData: Omit<TournamentResult, 'id'>, players: TournamentParseResult[]) => void;
@@ -13,12 +15,11 @@ interface StoreDashboardPageProps {
     userRole: 'player' | 'store' | 'admin' | null;
     tournaments: TournamentResult[]; // Real data from database
     storeStatus?: string;
-    storeName?: string; // Nombre de la tienda (viene del perfil del usuario)
+    storeName?: string; // Nombre de la tienda
 }
 
 const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpload, onDeleteTournament, userRole, tournaments, storeStatus, storeName }) => {
     const [step, setStep] = useState<'upload' | 'confirm'>('upload');
-    // ... existing state ...
     const [uploadMethod, setUploadMethod] = useState<'text'>('text');
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [pastedText, setPastedText] = useState('');
@@ -28,6 +29,7 @@ const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpl
     const [isProcessing, setIsProcessing] = useState(false);
     const [parsedData, setParsedData] = useState<TournamentParseResult[]>([]);
     const [error, setError] = useState<string | null>(null);
+    const [warnings, setWarnings] = useState<IntegrityWarning[]>([]);
     const [isUploading, setIsUploading] = useState(false);
     const [isDeleting, setIsDeleting] = useState<string | null>(null);
 
@@ -62,11 +64,6 @@ const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpl
             </div>
         );
     }
-
-    // ... rest of logic
-
-    // Arrays and handlers...
-    // ... rest of logic...
 
     const handleDeleteClick = async (tournamentId: string, tournamentName: string) => {
         const confirmMessage = `¿Estás seguro que deseas eliminar el torneo "${tournamentName}"? Esta acción borrará todos los resultados asociados y NO se puede deshacer.\n\nEscribe ELIMINAR para confirmar:`;
@@ -108,7 +105,7 @@ const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpl
         setParsedData(updatedData);
     };
 
-    const getParticipationPoints = (playerCount: number): number => {
+    const getParticipationPoints = (playerCount: number) => {
         if (playerCount >= 128) return 5;
         if (playerCount >= 64) return 4;
         if (playerCount >= 32) return 3;
@@ -117,18 +114,9 @@ const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpl
         return 0;
     };
 
-    const getTournamentMultiplier = (type: string): number => {
-        switch (type) {
-            case 'premier':
-            case 'rcq': return 4;
-            case 'prerelease':
-            case 'sellado':
-            case 'draft': return 3;
-            case 'showdown': return 2;
-            case 'semanal':
-            case 'fnm':
-            default: return 1;
-        }
+    const getTournamentMultiplier = (type: string) => {
+        const found = tournamentTypes.find(t => t.value === type);
+        return found ? found.multiplier : 1;
     };
 
     const handlePaste = async () => {
@@ -142,26 +130,62 @@ const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpl
         }
     };
 
+    const processIntegrity = async (results: TournamentParseResult[], detectedDate?: string) => {
+        // Fetch context for integrity check
+        // 1. Get recent tournament results fingerprints for this store
+        const { data: recentResults } = await supabase
+            .from('tournament_results')
+            .select('tournament_id, player_name, pwp_earned')
+            .order('created_at', { ascending: false })
+            .limit(1000);
+
+        const tournamentGroups: Record<string, any[]> = {};
+        recentResults?.forEach(r => {
+            if (!tournamentGroups[r.tournament_id]) tournamentGroups[r.tournament_id] = [];
+            tournamentGroups[r.tournament_id].push({ playerName: r.player_name, pwpEarned: r.pwp_earned });
+        });
+
+        const recentFingerprints = Object.values(tournamentGroups).map(g => getTournamentFingerprint(g as any));
+
+        // 2. Count today's uploads
+        const todayStr = new Date().toISOString().split('T')[0];
+        const dailyUploadCount = tournaments.filter(t => t.date === todayStr && t.storeName === storeName).length;
+
+        const integrityWarnings = checkTournamentIntegrity(results, results.length, tournamentType, {
+            fileDate: detectedDate,
+            userDate: tournamentDate,
+            currentDate: new Date().toISOString(),
+            recentFingerprints,
+            dailyUploadCount
+        });
+        setWarnings(integrityWarnings);
+    };
+
     const handleProcessFile = async () => {
-        // Prioritize file upload
+        if (!tournamentType) {
+            setError('Por favor selecciona un tipo de torneo.');
+            return;
+        }
+
         if (selectedFile) {
             setIsProcessing(true);
             setError(null);
             try {
-                let parsedRows: any[] = [];
+                let parserResult: any;
                 const fileName = selectedFile.name.toLowerCase();
 
                 if (fileName.endsWith('.html') || fileName.endsWith('.htm')) {
-                    parsedRows = await parseEventLinkHtml(selectedFile);
+                    parserResult = await parseEventLinkHtml(selectedFile);
                 } else if (fileName.endsWith('.pdf')) {
-                    parsedRows = await parseEventLinkPdf(selectedFile);
+                    parserResult = await parseEventLinkPdf(selectedFile);
                 } else if (fileName.endsWith('.csv')) {
-                    // Read CSV file
                     const text = await selectedFile.text();
-                    parsedRows = parseMeleeCSV(text);
+                    parserResult = parseMeleeCSV(text);
                 } else {
                     throw new Error("Formato de archivo no soportado. Por favor sube un archivo HTML, PDF o CSV.");
                 }
+
+                const { results: parsedRows, detectedDate } = parserResult;
 
                 if (parsedRows.length === 0) {
                     throw new Error("No se encontraron jugadores en el archivo. Verifica que sea un export válido.");
@@ -170,11 +194,10 @@ const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpl
                 const multiplier = getTournamentMultiplier(tournamentType);
                 const participationPoints = getParticipationPoints(parsedRows.length);
 
-                const results: TournamentParseResult[] = parsedRows.map(row => {
+                const finalResults: TournamentParseResult[] = parsedRows.map((row: any) => {
                     const estimatedWins = row.wins ?? Math.floor(row.points / 3);
                     const estimatedDraws = row.draws ?? (row.points % 3);
                     const estimatedLosses = row.losses ?? 0;
-
                     const pwpEarned = ((estimatedWins * 3) + (estimatedDraws * 1) + participationPoints) * multiplier;
 
                     return {
@@ -187,7 +210,8 @@ const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpl
                     };
                 });
 
-                setParsedData(results);
+                setParsedData(finalResults);
+                await processIntegrity(finalResults, detectedDate);
                 setStep('confirm');
 
             } catch (e: any) {
@@ -199,18 +223,17 @@ const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpl
             return;
         }
 
-        // Fallback to text if valid
         if (pastedText.trim()) {
             setIsProcessing(true);
             setError(null);
             try {
-                const parsedRows = parseEventLinkText(pastedText);
+                const { results: parsedRows, detectedDate } = parseEventLinkText(pastedText);
                 if (parsedRows.length === 0) {
                     throw new Error("No se pudieron leer datos válidos del texto.");
                 }
                 const multiplier = getTournamentMultiplier(tournamentType);
                 const participationPoints = getParticipationPoints(parsedRows.length);
-                const results: TournamentParseResult[] = parsedRows.map(row => {
+                const finalResults: TournamentParseResult[] = parsedRows.map((row: any) => {
                     const pwpEarned = ((row.wins * 3) + (row.draws * 1) + participationPoints) * multiplier;
                     return {
                         playerName: row.name,
@@ -221,7 +244,8 @@ const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpl
                         pwpEarned: Math.round(pwpEarned)
                     };
                 });
-                setParsedData(results);
+                setParsedData(finalResults);
+                await processIntegrity(finalResults, detectedDate);
                 setStep('confirm');
             } catch (e: any) {
                 setError(e.message);
@@ -243,27 +267,18 @@ const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpl
         setTournamentType('');
         setTournamentDate(new Date().toISOString().split('T')[0]);
         setError(null);
+        setWarnings([]);
         const fileInput = document.getElementById('tournament-file') as HTMLInputElement;
         if (fileInput) fileInput.value = '';
     };
 
     const handleConfirm = async () => {
-        if (isUploading) {
-            console.log("⚠️ Upload already in progress, ignoring duplicate call");
-            return;
-        }
+        if (isUploading) return;
 
-        // Validation: Check for duplicates or invalid names
-        const nameCounts: { [key: string]: number } = {};
-        for (const player of parsedData) {
-            const name = player.playerName.trim();
-            if (!name) continue;
-            nameCounts[name] = (nameCounts[name] || 0) + 1;
-        }
-
-        const duplicates = Object.keys(nameCounts).filter(name => nameCounts[name] > 1);
-        if (duplicates.length > 0) {
-            setError(`Error de validación: Se han detectado nombres duplicados (${duplicates[0]}). Esto suele indicar que el archivo no se leyó correctamente. Revisa la columna de nombres.`);
+        // Extra final check for duplicate players
+        const names = parsedData.map(p => p.playerName.toLowerCase().trim());
+        if (new Set(names).size !== names.length) {
+            setError("Error: Hay jugadores duplicados en la lista.");
             return;
         }
 
@@ -279,10 +294,8 @@ const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpl
             playerCount: parsedData.length
         };
 
-        console.log("StoreDashboard: Llamando a onTournamentUpload...");
         try {
             await onTournamentUpload(tournamentData, parsedData);
-            console.log("StoreDashboard: Upload completado, limpiando formulario...");
             handleCancel();
         } catch (error) {
             console.error("StoreDashboard: Error en upload:", error);
@@ -306,15 +319,13 @@ const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpl
                         <div>
                             <h2 className="text-3xl font-bold text-white uppercase tracking-wider mb-6">Reportar Nuevo Torneo</h2>
                             <div className="bg-slate-800 p-8 rounded-lg shadow-xl border border-slate-700 space-y-6">
-                                {/* Tournament Type */}
                                 <div>
                                     <label htmlFor="tournament-type" className="block text-sm font-medium text-slate-300 mb-2">Tipo de Torneo</label>
                                     <select
                                         id="tournament-type"
-                                        name="tournament-type"
                                         value={tournamentType}
                                         onChange={e => setTournamentType(e.target.value)}
-                                        className="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 appearance-none"
+                                        className="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 appearance-none text-white"
                                     >
                                         <option value="">Seleccionar tipo...</option>
                                         {tournamentTypes.map(type => (
@@ -325,13 +336,11 @@ const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpl
                                     </select>
                                 </div>
 
-                                {/* Tournament Date */}
                                 <div>
                                     <label htmlFor="tournament-date" className="block text-sm font-medium text-slate-300 mb-2">Fecha del Torneo</label>
-                                    <input type="date" name="tournament-date" id="tournament-date" value={tournamentDate} onChange={e => setTournamentDate(e.target.value)} className="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500" />
+                                    <input type="date" value={tournamentDate} onChange={e => setTournamentDate(e.target.value)} className="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 text-white" />
                                 </div>
 
-                                {/* File Upload Section */}
                                 <div>
                                     <label className="block text-sm font-medium text-slate-300 mb-2">Archivo de Resultados</label>
                                     <div className={`relative border-2 border-dashed rounded-lg p-6 text-center transition-colors ${selectedFile ? 'border-sky-500 bg-sky-900/20' : 'border-slate-600 hover:border-slate-500 bg-slate-900'}`}>
@@ -359,7 +368,6 @@ const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpl
                                     </div>
                                 </div>
 
-                                {/* Legacy Paste (Collapsed/Secondary) */}
                                 <div className="border-t border-slate-700 pt-4">
                                     <button
                                         type="button"
@@ -405,7 +413,6 @@ const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpl
                         <div>
                             <h2 className="text-3xl font-bold text-white uppercase tracking-wider mb-6">Confirmar Resultados</h2>
                             <div className="bg-slate-800 p-8 rounded-lg shadow-xl border border-slate-700 space-y-6">
-                                {/* Summary Section */}
                                 <div className="space-y-4 border-b border-slate-700 pb-6">
                                     <div className="grid grid-cols-2 gap-4">
                                         <div className="bg-slate-900 p-3 rounded-lg">
@@ -417,34 +424,29 @@ const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpl
                                             <p className="font-bold text-white">{tournamentDate}</p>
                                         </div>
                                     </div>
-                                    <div className="bg-slate-900 p-3 rounded-lg">
-                                        <p className="text-xs text-slate-400 mb-1">Datos Raw (Solo Lectura)</p>
-                                        <pre className="text-xs text-slate-500 max-h-20 overflow-auto font-mono">{pastedText}</pre>
-                                    </div>
                                 </div>
 
-                                <p className="text-slate-300 text-sm">Se encontraron <span className="font-bold text-white">{parsedData.length}</span> jugadores. <span className="opacity-70">Verifica que los datos sean correctos.</span></p>
+                                <p className="text-slate-300 text-sm">Se encontraron <span className="font-bold text-white">{parsedData.length}</span> jugadores.</p>
 
                                 <div className="max-h-96 overflow-y-auto border border-slate-700 rounded-md">
                                     <table className="min-w-full divide-y divide-slate-700">
                                         <thead className="bg-slate-700/50 sticky top-0">
                                             <tr>
-                                                <th className="px-4 py-2 text-left text-xs font-medium text-slate-300 uppercase">Jugador (Editable)</th>
+                                                <th className="px-4 py-2 text-left text-xs font-medium text-slate-300 uppercase">Jugador</th>
                                                 <th className="px-4 py-2 text-center text-xs font-medium text-slate-300 uppercase">Record</th>
-                                                <th className="px-4 py-2 text-right text-xs font-medium text-slate-300 uppercase">PWP Calculados</th>
+                                                <th className="px-4 py-2 text-right text-xs font-medium text-slate-300 uppercase">PWP</th>
                                             </tr>
                                         </thead>
                                         <tbody className="divide-y divide-slate-700">
                                             {parsedData.map((player, index) => (
                                                 <tr key={index}>
-                                                    <td className="px-2 py-1 whitespace-nowrap">
+                                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-white">
                                                         <input
                                                             type="text"
                                                             value={player.playerName}
                                                             onChange={(e) => handlePlayerNameChange(index, e.target.value)}
                                                             readOnly={userRole !== 'admin'}
-                                                            className={`w-full bg-slate-700 text-white rounded-md p-2 border border-slate-600 focus:ring-sky-500 focus:border-sky-500 text-sm ${userRole !== 'admin' ? 'opacity-75 cursor-not-allowed select-none' : ''}`}
-                                                            title={userRole !== 'admin' ? "Solo administradores pueden editar nombres" : "Editar nombre"}
+                                                            className={`w-full bg-slate-900 text-white rounded p-1 border border-slate-700 ${userRole !== 'admin' ? 'cursor-default' : ''}`}
                                                         />
                                                     </td>
                                                     <td className="px-4 py-2 whitespace-nowrap text-sm text-center text-slate-300 font-mono">{player.matchRecord}</td>
@@ -455,34 +457,30 @@ const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpl
                                     </table>
                                 </div>
 
-                                {error && (
-                                    <div className="p-4 bg-red-900/50 border border-red-700/50 rounded-lg flex items-start gap-3 animate-in fade-in slide-in-from-top-2">
-                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-red-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                                        </svg>
-                                        <div className="space-y-1">
-                                            <p className="text-red-200 font-medium">Validación Fallida</p>
-                                            <p className="text-sm text-red-300/80">{error}</p>
+                                {warnings.length > 0 && (
+                                    <div className="p-4 bg-yellow-900/50 border border-yellow-700/50 rounded-lg space-y-3">
+                                        <div className="flex items-start gap-3">
+                                            <div className="text-yellow-400 flex-shrink-0">⚠️</div>
+                                            <div className="space-y-1">
+                                                <p className="text-yellow-200 font-medium text-sm">Alertas de Seguridad</p>
+                                                <ul className="list-disc list-inside text-xs text-yellow-300/80 space-y-1">
+                                                    {warnings.map((w, i) => (
+                                                        <li key={i}>{w.message}</li>
+                                                    ))}
+                                                </ul>
+                                            </div>
                                         </div>
                                     </div>
                                 )}
 
+                                {error && <p className="text-sm text-red-400 bg-red-900/50 p-3 rounded-md">{error}</p>}
+
                                 <div className="flex gap-4 pt-4">
-                                    <button onClick={handleCancel} disabled={isUploading} className="w-full py-3 px-4 font-bold rounded-lg transition duration-300 bg-slate-600 text-white hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed">
+                                    <button onClick={handleCancel} disabled={isUploading} className="w-full py-3 px-4 font-bold rounded-lg bg-slate-600 text-white hover:bg-slate-700">
                                         Cancelar
                                     </button>
-                                    <button onClick={handleConfirm} disabled={isUploading} className="w-full py-3 px-4 font-bold rounded-lg transition duration-300 bg-green-600 text-white hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
-                                        {isUploading ? (
-                                            <>
-                                                <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                                </svg>
-                                                Subiendo...
-                                            </>
-                                        ) : (
-                                            'Confirmar y Subir Resultados'
-                                        )}
+                                    <button onClick={handleConfirm} disabled={isUploading} className="w-full py-3 px-4 font-bold rounded-lg bg-green-600 text-white hover:bg-green-700 flex items-center justify-center gap-2">
+                                        {isUploading ? 'Subiendo...' : 'Confirmar y Subir'}
                                     </button>
                                 </div>
                             </div>
@@ -490,60 +488,38 @@ const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpl
                     )}
                 </section>
 
-                {/* History Section */}
                 <section className="lg:col-span-3">
-                    <h2 className="text-3xl font-bold text-white uppercase tracking-wider mb-6">Historial de Torneos Reportados</h2>
+                    <h2 className="text-3xl font-bold text-white uppercase tracking-wider mb-6">Historial de Torneos</h2>
                     <div className="overflow-x-auto bg-slate-800 rounded-lg shadow-xl border border-slate-700">
                         <table className="min-w-full divide-y divide-slate-700">
                             <thead className="bg-slate-700/50">
                                 <tr>
-                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Nombre del Torneo</th>
-                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Fecha</th>
-                                    <th scope="col" className="px-6 py-3 text-center text-xs font-medium text-slate-300 uppercase tracking-wider">Jugadores</th>
-                                    <th scope="col" className="px-6 py-3 text-center text-xs font-medium text-slate-300 uppercase tracking-wider">Estado</th>
-                                    <th scope="col" className="px-6 py-3 text-center text-xs font-medium text-slate-300 uppercase tracking-wider">Acciones</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase">Torneo</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase">Fecha</th>
+                                    <th className="px-6 py-3 text-center text-xs font-medium text-slate-300 uppercase">Players</th>
+                                    <th className="px-6 py-3 text-center text-xs font-medium text-slate-300 uppercase">Acciones</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-700">
-                                {tournaments.length > 0 ? (
-                                    tournaments.map(t => (
-                                        <tr key={t.id} className="hover:bg-slate-700/40 transition-colors">
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">{t.name}</td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-400">{t.date}</td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-center text-slate-300">{t.playerCount}</td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-center text-sm">
-                                                <span className="inline-flex items-center gap-1.5 px-2 py-1 text-xs font-semibold rounded-md bg-green-600/30 text-green-300">
-                                                    <CheckCircleIcon className="w-4 h-4" />
-                                                    Procesado
-                                                </span>
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-center text-sm">
-                                                <button
-                                                    onClick={() => handleDeleteClick(t.id, t.name)}
-                                                    disabled={isDeleting === t.id}
-                                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md bg-red-900/40 text-red-400 hover:bg-red-900/60 hover:text-red-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                                                    title="Eliminar torneo"
-                                                >
-                                                    {isDeleting === t.id ? (
-                                                        <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                                        </svg>
-                                                    ) : (
-                                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                                        </svg>
-                                                    )}
-                                                    Eliminar
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    ))
-                                ) : (
-                                    <tr>
-                                        <td colSpan={5} className="px-6 py-8 text-center text-slate-400">
-                                            No hay torneos reportados aún.
+                                {tournaments.map(t => (
+                                    <tr key={t.id} className="hover:bg-slate-700/40 transition-colors">
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-white">{t.name}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-400">{t.date}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-center text-slate-300">{t.playerCount}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-center text-sm">
+                                            <button
+                                                onClick={() => handleDeleteClick(t.id, t.name)}
+                                                disabled={isDeleting === t.id}
+                                                className="text-red-400 hover:text-red-300"
+                                            >
+                                                Eliminar
+                                            </button>
                                         </td>
+                                    </tr>
+                                ))}
+                                {tournaments.length === 0 && (
+                                    <tr>
+                                        <td colSpan={4} className="px-6 py-8 text-center text-slate-400">Sin torneos aún.</td>
                                     </tr>
                                 )}
                             </tbody>

@@ -7,7 +7,12 @@ interface ParsedRow {
     draws: number;
 }
 
-export const parseEventLinkText = (text: string): ParsedRow[] => {
+export interface ParserResult {
+    results: ParsedRow[];
+    detectedDate?: string;
+}
+
+export const parseEventLinkText = (text: string): ParserResult => {
     const rows: ParsedRow[] = [];
 
     // Split by lines
@@ -82,5 +87,5 @@ export const parseEventLinkText = (text: string): ParsedRow[] => {
         }
     }
 
-    return rows;
+    return { results: rows };
 };

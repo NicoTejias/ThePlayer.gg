@@ -15,7 +15,12 @@ export interface ParsedRow {
     draws: number;
 }
 
-export const parseEventLinkPdf = async (file: File): Promise<ParsedRow[]> => {
+export interface ParserResult {
+    results: ParsedRow[];
+    detectedDate?: string;
+}
+
+export const parseEventLinkPdf = async (file: File): Promise<ParserResult> => {
     const arrayBuffer = await file.arrayBuffer();
     const loadingTask = pdfjsLib.getDocument({
         data: new Uint8Array(arrayBuffer),
@@ -83,5 +88,5 @@ export const parseEventLinkPdf = async (file: File): Promise<ParsedRow[]> => {
         }
     }
 
-    return rows;
+    return { results: rows };
 };
