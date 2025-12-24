@@ -1,0 +1,359 @@
+import React, { useState } from 'react';
+import { supabase } from '../supabaseClient';
+import { toast } from 'sonner';
+
+interface CreateListingModalProps {
+    isOpen: boolean;
+    onClose: () => void;
+    onSuccess: () => void;
+    editListing?: any; // Para edición futura
+}
+
+const GAMES = [
+    'Magic: The Gathering',
+    'Pokémon TCG',
+    'Yu-Gi-Oh!',
+    'One Piece TCG',
+    'Lorcana',
+    'Star Wars: Unlimited',
+    'Flesh and Blood',
+    'Digimon Card Game'
+];
+
+const FORMATS = [
+    'Standard',
+    'Modern',
+    'Pioneer',
+    'Legacy',
+    'Vintage',
+    'Commander (EDH)',
+    'Pauper',
+    'Limited',
+    'Otro'
+];
+
+const CONDITIONS = [
+    { value: 'NM', label: 'Near Mint (NM)' },
+    { value: 'LP', label: 'Lightly Played (LP)' },
+    { value: 'MP', label: 'Moderately Played (MP)' },
+    { value: 'HP', label: 'Heavily Played (HP)' },
+    { value: 'DMG', label: 'Damaged (DMG)' }
+];
+
+const CreateListingModal: React.FC<CreateListingModalProps> = ({ isOpen, onClose, onSuccess, editListing }) => {
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
+    // Form state
+    const [title, setTitle] = useState(editListing?.title || '');
+    const [description, setDescription] = useState(editListing?.description || '');
+    const [listingType, setListingType] = useState<'sale' | 'buy' | 'trade'>(editListing?.listing_type || 'sale');
+    const [price, setPrice] = useState(editListing?.price || '');
+    const [game, setGame] = useState(editListing?.game || '');
+    const [format, setFormat] = useState(editListing?.format || '');
+    const [condition, setCondition] = useState(editListing?.condition || '');
+    const [quantity, setQuantity] = useState(editListing?.quantity || 1);
+    const [imageUrls, setImageUrls] = useState<string[]>(editListing?.images || ['']);
+
+    if (!isOpen) return null;
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+
+        // Validaciones
+        if (!title.trim()) {
+            toast.error('El título es requerido');
+            return;
+        }
+        if (!game) {
+            toast.error('Selecciona un juego');
+            return;
+        }
+        if (listingType !== 'trade' && !price) {
+            toast.error('El precio es requerido para ventas y compras');
+            return;
+        }
+
+        setIsSubmitting(true);
+
+        try {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) throw new Error('No autenticado');
+
+            // Insertar listing
+            const { data: listing, error: listingError } = await supabase
+                .from('marketplace_listings')
+                .insert({
+                    seller_id: user.id,
+                    title: title.trim(),
+                    description: description.trim() || null,
+                    listing_type: listingType,
+                    price: listingType !== 'trade' ? parseFloat(price) : null,
+                    game,
+                    format: format || null,
+                    condition: condition || null,
+                    quantity: parseInt(quantity.toString())
+                })
+                .select()
+                .single();
+
+            if (listingError) throw listingError;
+
+            // Insertar imágenes (filtrar URLs vacías)
+            const validImages = imageUrls.filter(url => url.trim());
+            if (validImages.length > 0) {
+                const imageInserts = validImages.map((url, index) => ({
+                    listing_id: listing.id,
+                    image_url: url.trim(),
+                    display_order: index
+                }));
+
+                const { error: imagesError } = await supabase
+                    .from('listing_images')
+                    .insert(imageInserts);
+
+                if (imagesError) console.error('Error inserting images:', imagesError);
+            }
+
+            toast.success('Anuncio creado exitosamente');
+            onSuccess();
+            onClose();
+            resetForm();
+        } catch (error: any) {
+            console.error('Error creating listing:', error);
+            toast.error('Error al crear el anuncio: ' + error.message);
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    const resetForm = () => {
+        setTitle('');
+        setDescription('');
+        setListingType('sale');
+        setPrice('');
+        setGame('');
+        setFormat('');
+        setCondition('');
+        setQuantity(1);
+        setImageUrls(['']);
+    };
+
+    const addImageField = () => {
+        if (imageUrls.length < 4) {
+            setImageUrls([...imageUrls, '']);
+        }
+    };
+
+    const removeImageField = (index: number) => {
+        setImageUrls(imageUrls.filter((_, i) => i !== index));
+    };
+
+    const updateImageUrl = (index: number, value: string) => {
+        const newUrls = [...imageUrls];
+        newUrls[index] = value;
+        setImageUrls(newUrls);
+    };
+
+    const inputClass = "w-full px-4 py-2.5 bg-slate-900 border border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 transition text-white placeholder-slate-500";
+    const labelClass = "block text-sm font-medium text-slate-300 mb-1.5";
+
+    return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in">
+            <div className="bg-slate-800 rounded-2xl border border-slate-700 shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+                {/* Header */}
+                <div className="sticky top-0 bg-slate-800 border-b border-slate-700 p-6 flex items-center justify-between z-10">
+                    <h2 className="text-2xl font-bold text-white uppercase tracking-tight">
+                        {editListing ? 'Editar Anuncio' : 'Nuevo Anuncio'}
+                    </h2>
+                    <button
+                        onClick={onClose}
+                        className="text-slate-400 hover:text-white transition-colors"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                        </svg>
+                    </button>
+                </div>
+
+                {/* Form */}
+                <form onSubmit={handleSubmit} className="p-6 space-y-6">
+                    {/* Tipo de Anuncio */}
+                    <div>
+                        <label className={labelClass}>Tipo de Anuncio *</label>
+                        <div className="grid grid-cols-3 gap-3">
+                            {[
+                                { value: 'sale', label: 'Venta', color: 'red' },
+                                { value: 'buy', label: 'Compra', color: 'green' },
+                                { value: 'trade', label: 'Cambio', color: 'blue' }
+                            ].map(type => (
+                                <button
+                                    key={type.value}
+                                    type="button"
+                                    onClick={() => setListingType(type.value as any)}
+                                    className={`py-3 px-4 rounded-lg font-bold uppercase tracking-wider transition-all ${listingType === type.value
+                                            ? `bg-${type.color}-600 text-white ring-2 ring-${type.color}-400`
+                                            : 'bg-slate-900 text-slate-400 hover:bg-slate-700'
+                                        }`}
+                                >
+                                    {type.label}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Título */}
+                    <div>
+                        <label className={labelClass}>Título del Anuncio *</label>
+                        <input
+                            type="text"
+                            value={title}
+                            onChange={(e) => setTitle(e.target.value)}
+                            className={inputClass}
+                            placeholder='Ej: "Vendo Force of Will [2XM]"'
+                            maxLength={100}
+                            required
+                        />
+                    </div>
+
+                    {/* Descripción */}
+                    <div>
+                        <label className={labelClass}>Descripción</label>
+                        <textarea
+                            value={description}
+                            onChange={(e) => setDescription(e.target.value)}
+                            className={inputClass}
+                            rows={4}
+                            placeholder="Detalles adicionales, estado, idioma, etc."
+                            maxLength={500}
+                        />
+                    </div>
+
+                    {/* Juego y Formato */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label className={labelClass}>Juego *</label>
+                            <select
+                                value={game}
+                                onChange={(e) => setGame(e.target.value)}
+                                className={inputClass}
+                                required
+                            >
+                                <option value="">Selecciona un juego</option>
+                                {GAMES.map(g => <option key={g} value={g}>{g}</option>)}
+                            </select>
+                        </div>
+                        <div>
+                            <label className={labelClass}>Formato</label>
+                            <select
+                                value={format}
+                                onChange={(e) => setFormat(e.target.value)}
+                                className={inputClass}
+                            >
+                                <option value="">Selecciona formato (opcional)</option>
+                                {FORMATS.map(f => <option key={f} value={f}>{f}</option>)}
+                            </select>
+                        </div>
+                    </div>
+
+                    {/* Precio, Condición, Cantidad */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        {listingType !== 'trade' && (
+                            <div>
+                                <label className={labelClass}>Precio (CLP) *</label>
+                                <input
+                                    type="number"
+                                    value={price}
+                                    onChange={(e) => setPrice(e.target.value)}
+                                    className={inputClass}
+                                    placeholder="15000"
+                                    min="0"
+                                    step="100"
+                                    required={listingType !== 'trade'}
+                                />
+                            </div>
+                        )}
+                        <div>
+                            <label className={labelClass}>Condición</label>
+                            <select
+                                value={condition}
+                                onChange={(e) => setCondition(e.target.value)}
+                                className={inputClass}
+                            >
+                                <option value="">Selecciona condición</option>
+                                {CONDITIONS.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
+                            </select>
+                        </div>
+                        <div>
+                            <label className={labelClass}>Cantidad</label>
+                            <input
+                                type="number"
+                                value={quantity}
+                                onChange={(e) => setQuantity(parseInt(e.target.value) || 1)}
+                                className={inputClass}
+                                min="1"
+                                max="999"
+                            />
+                        </div>
+                    </div>
+
+                    {/* Imágenes */}
+                    <div>
+                        <label className={labelClass}>Imágenes (URLs)</label>
+                        <div className="space-y-2">
+                            {imageUrls.map((url, index) => (
+                                <div key={index} className="flex gap-2">
+                                    <input
+                                        type="url"
+                                        value={url}
+                                        onChange={(e) => updateImageUrl(index, e.target.value)}
+                                        className={inputClass}
+                                        placeholder="https://..."
+                                    />
+                                    {imageUrls.length > 1 && (
+                                        <button
+                                            type="button"
+                                            onClick={() => removeImageField(index)}
+                                            className="px-3 py-2 bg-red-900/50 hover:bg-red-800 text-red-300 rounded-lg transition-colors"
+                                        >
+                                            ✕
+                                        </button>
+                                    )}
+                                </div>
+                            ))}
+                            {imageUrls.length < 4 && (
+                                <button
+                                    type="button"
+                                    onClick={addImageField}
+                                    className="w-full py-2 border-2 border-dashed border-slate-600 hover:border-sky-500 text-slate-400 hover:text-sky-400 rounded-lg transition-colors text-sm font-medium"
+                                >
+                                    + Agregar otra imagen
+                                </button>
+                            )}
+                        </div>
+                        <p className="text-xs text-slate-500 mt-2">Puedes agregar hasta 4 imágenes. Usa URLs de Scryfall, TCGPlayer, etc.</p>
+                    </div>
+
+                    {/* Buttons */}
+                    <div className="flex gap-4 pt-4">
+                        <button
+                            type="button"
+                            onClick={onClose}
+                            className="flex-1 py-3 px-6 bg-slate-700 hover:bg-slate-600 text-white font-bold rounded-xl transition-colors"
+                        >
+                            Cancelar
+                        </button>
+                        <button
+                            type="submit"
+                            disabled={isSubmitting}
+                            className="flex-1 py-3 px-6 bg-gradient-to-r from-sky-600 to-blue-600 hover:from-sky-500 hover:to-blue-500 text-white font-bold rounded-xl shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-wider"
+                        >
+                            {isSubmitting ? 'Creando...' : editListing ? 'Guardar Cambios' : 'Publicar Anuncio'}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    );
+};
+
+export default CreateListingModal;

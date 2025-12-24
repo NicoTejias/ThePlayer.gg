@@ -10,6 +10,7 @@ import HomePage from './pages/HomePage';
 import RankingsPage from './pages/RankingsPage';
 import EventsPage from './pages/EventsPage';
 import MarketplacePage from './pages/MarketplacePage';
+import MyListingsPage from './pages/MyListingsPage';
 import MarketplaceDetailPage from './pages/MarketplaceDetailPage';
 import CommanderPage from './pages/CommanderPage';
 import MediaPage from './pages/MediaPage';
@@ -605,7 +606,9 @@ const AppContent: React.FC = () => {
           <Route path="/torneos" element={<TournamentsListPage tournaments={tournamentResults} />} />
           <Route path="/torneos/:tournamentId" element={<TournamentStandingsPage />} />
           <Route path="/mercado" element={<MarketplacePage />} />
+          <Route path="/mercado" element={<MarketplacePage />} />
           <Route path="/mercado/:id" element={<MarketplaceDetailPage />} />
+          <Route path="/mis-anuncios" element={<MyListingsPage />} />
           <Route path="/commander" element={<CommanderPage />} />
           <Route path="/media" element={<MediaPage />} />
           <Route path="/media/articulos" element={<MediaArticlesPage />} />
