@@ -324,6 +324,99 @@ const AppContent: React.FC = () => {
     }
   };
 
+  // Handle session state changes (must be defined before useEffect)
+  const handleSessionState = async (session: any) => {
+    try {
+      if (session?.user) {
+        setIsLoggedIn(true);
+
+        // Fetch or create profile
+        const { data: profile, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', session.user.id)
+          .single();
+
+        if (profile) {
+          setUserRole(profile.role as 'player' | 'store' | 'admin');
+          setUserProfile(profile);
+          console.log("Logged in as:", profile.role);
+
+          // Check for Alias (Onboarding)
+          if (profile.role === 'player') {
+            const { count } = await supabase
+              .from('player_aliases')
+              .select('*', { count: 'exact', head: true })
+              .eq('player_id', session.user.id);
+
+            if (count === 0) {
+              setShowOnboarding(true);
+            }
+
+            // Detectar resultados sin reclamar
+            fetchUnclaimedResults(session.user.id);
+          }
+        } else {
+          // Profile missing (could be new OAuth user)
+          console.log("Profile not found, creating new profile for user:", session.user.email);
+
+          // Extract user info from Google OAuth metadata
+          const fullName = session.user.user_metadata.full_name ||
+            session.user.user_metadata.name ||
+            session.user.email?.split('@')[0] ||
+            'User';
+
+          // Get role from localStorage (set during signup) or default to 'player'
+          const savedRole = localStorage.getItem('signup_role') as 'player' | 'store' | null;
+          const userRole = savedRole || 'player';
+
+          console.log("Creating profile with role:", userRole, "for:", fullName);
+
+          const newProfile = {
+            id: session.user.id,
+            username: fullName,
+            role: userRole,
+            email: session.user.email,
+            avatar_url: session.user.user_metadata.avatar_url || session.user.user_metadata.picture,
+            first_name: session.user.user_metadata.given_name || fullName.split(' ')[0] || '',
+            last_name: session.user.user_metadata.family_name || fullName.split(' ').slice(1).join(' ') || '',
+            pwp: 0,
+            matches_won: 0,
+            matches_lost: 0,
+            matches_drew: 0
+          };
+
+          const { error: insertError } = await supabase
+            .from('profiles')
+            .insert(newProfile);
+
+          if (insertError) {
+            console.error("Error creating profile:", insertError);
+            setUserRole(userRole);
+            setUserProfile(newProfile);
+            toast.error('Error al crear perfil. Contacta al administrador.');
+          } else {
+            console.log("Profile created successfully for:", fullName);
+            setUserRole(userRole);
+            setUserProfile(newProfile);
+            localStorage.removeItem('signup_role');
+            toast.success(`¡Bienvenido, ${fullName}!`);
+          }
+        }
+      } else {
+        setIsLoggedIn(false);
+        setUserRole(null);
+        setUserProfile(null);
+        setShowOnboarding(false);
+      }
+    } catch (error) {
+      console.error("Error in handleSessionState:", error);
+      setIsLoggedIn(false);
+      setUserRole(null);
+      setUserProfile(null);
+    }
+  };
+
   // Fetch data on load
   React.useEffect(() => {
     // 1. Initialize Auth Check
@@ -368,100 +461,6 @@ const AppContent: React.FC = () => {
     initAuth();
     fetchData();
   }, []);
-
-  const handleSessionState = async (session: any) => {
-    try {
-      if (session?.user) {
-        setIsLoggedIn(true);
-
-        // Fetch or create profile
-        const { data: profile, error } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', session.user.id)
-          .single();
-
-        if (profile) {
-          setUserRole(profile.role as 'player' | 'store' | 'admin');
-          setUserProfile(profile);
-          console.log("Logged in as:", profile.role);
-
-          // Check for Alias (Onboarding)
-          if (profile.role === 'player') {
-            const { count } = await supabase
-              .from('player_aliases')
-              .select('*', { count: 'exact', head: true })
-              .eq('player_id', session.user.id);
-
-            if (count === 0) {
-              setShowOnboarding(true);
-            }
-
-            // Detectar resultados sin reclamar
-            fetchUnclaimedResults(session.user.id);
-          }
-        } else {
-          // Profile missing (could be new OAuth user or Email user with failed profile creation)
-          console.log("Profile not found, creating new profile for user:", session.user.email);
-
-          // Extract user info from Google OAuth metadata
-          const fullName = session.user.user_metadata.full_name ||
-            session.user.user_metadata.name ||
-            session.user.email?.split('@')[0] ||
-            'User';
-
-          // Get role from localStorage (set during signup) or default to 'player'
-          const savedRole = localStorage.getItem('signup_role') as 'player' | 'store' | null;
-          const userRole = savedRole || 'player';
-
-          console.log("Creating profile with role:", userRole, "for:", fullName);
-
-          const newProfile = {
-            id: session.user.id,
-            username: fullName,
-            role: userRole,
-            email: session.user.email,
-            avatar_url: session.user.user_metadata.avatar_url || session.user.user_metadata.picture,
-            first_name: session.user.user_metadata.given_name || fullName.split(' ')[0] || '',
-            last_name: session.user.user_metadata.family_name || fullName.split(' ').slice(1).join(' ') || '',
-            pwp: 0,
-            matches_won: 0,
-            matches_lost: 0,
-            matches_drew: 0
-          };
-
-          const { error: insertError } = await supabase
-            .from('profiles')
-            .insert(newProfile);
-
-          if (insertError) {
-            console.error("Error creating profile:", insertError);
-            // Fallback: Set profile in memory anyway so the user can use the site temporarily
-            setUserRole(userRole);
-            setUserProfile(newProfile);
-            toast.error('Error al crear perfil. Contacta al administrador.');
-          } else {
-            console.log("Profile created successfully for:", fullName);
-            setUserRole(userRole);
-            setUserProfile(newProfile);
-            // Clear the saved role from localStorage
-            localStorage.removeItem('signup_role');
-            toast.success(`¡Bienvenido, ${fullName}!`);
-          }
-        }
-      } else {
-        setIsLoggedIn(false);
-        setUserRole(null);
-        setUserProfile(null);
-        setShowOnboarding(false);
-      }
-    } catch (error) {
-      console.error("Error in handleSessionState:", error);
-      setIsLoggedIn(false);
-      setUserRole(null);
-      setUserProfile(null);
-    }
-  };
 
   if (isAuthLoading) {
     return (
