@@ -58,8 +58,47 @@ const AppContent: React.FC = () => {
   const [unclaimedResults, setUnclaimedResults] = useState<any[]>([]);
   const [showClaimModal, setShowClaimModal] = useState(false);
 
-  // Hardcoded for now. In future, fetch this from Supabase 'system_status' table or similar.
-  const [isLiveSignal, setIsLiveSignal] = useState(true);
+  // YouTube Live Signal Detection
+  const [isLiveSignal, setIsLiveSignal] = useState(false);
+  const YOUTUBE_CHANNEL_ID = 'UC-ymLrXBUoNFhku0d8tWCVA'; // StreamCaster Mage channel
+  const YOUTUBE_API_KEY = 'AIzaSyD-EGf2uQdBNFhT2FZ_m_DXR4P3kIR_LN8';
+
+  useEffect(() => {
+    checkYouTubeLiveStatus();
+    // Check every 5 minutes
+    const interval = setInterval(checkYouTubeLiveStatus, 5 * 60 * 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const checkYouTubeLiveStatus = async () => {
+    try {
+      // Skip if API key not configured
+      if (!YOUTUBE_API_KEY || YOUTUBE_API_KEY.includes('YourAPIKeyHere')) {
+        setIsLiveSignal(false);
+        return;
+      }
+
+      let searchUrl = '';
+
+      // Try with Channel ID first if configured
+      if (YOUTUBE_CHANNEL_ID && !YOUTUBE_CHANNEL_ID.includes('YourChannelIDHere')) {
+        searchUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=${YOUTUBE_CHANNEL_ID}&eventType=live&type=video&key=${YOUTUBE_API_KEY}`;
+      } else {
+        // Fallback: Search by channel handle (temporary until Channel ID is configured)
+        searchUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=@streamcastermage&eventType=live&type=video&key=${YOUTUBE_API_KEY}`;
+      }
+
+      const response = await fetch(searchUrl);
+      const data = await response.json();
+
+      // Check if there are any live streams
+      setIsLiveSignal(data.items && data.items.length > 0);
+    } catch (error) {
+      console.error('Error checking YouTube live status:', error);
+      setIsLiveSignal(false);
+    }
+  };
+
   const navigate = useNavigate();
 
   // Fetch data definition

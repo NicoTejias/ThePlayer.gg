@@ -304,7 +304,11 @@ const HomePage: React.FC<HomePageProps> = ({ players, events }) => {
           <div className="bg-slate-800 rounded-lg p-4 shadow-xl border border-slate-700 flex-1 flex flex-col gap-4">
             {displayEvents.length > 0 ? (
               displayEvents.map((event) => (
-                <div key={event.id} className="bg-slate-700/40 rounded-lg p-3 border border-slate-600/50 hover:border-sky-500/50 transition-colors group">
+                <Link
+                  key={event.id}
+                  to="/eventos"
+                  className="bg-slate-700/40 rounded-lg p-3 border border-slate-600/50 hover:border-sky-500/50 transition-colors group block"
+                >
                   <div className="flex justify-between items-start mb-1">
                     <h3 className="text-white font-bold group-hover:text-sky-400 transition-colors text-sm line-clamp-1">{event.title}</h3>
                     <span className="text-[10px] bg-sky-900/80 text-sky-200 px-1.5 py-0.5 rounded border border-sky-700/50 whitespace-nowrap">{event.format}</span>
@@ -313,7 +317,7 @@ const HomePage: React.FC<HomePageProps> = ({ players, events }) => {
                   <div className="text-slate-500 text-[10px] flex items-center gap-1">
                     <span>📅 {event.date}</span>
                   </div>
-                </div>
+                </Link>
               ))
             ) : (
               <p className="text-slate-400 text-sm text-center py-10">No hay eventos próximos.</p>
