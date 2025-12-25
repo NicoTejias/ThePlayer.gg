@@ -405,13 +405,13 @@ const AppContent: React.FC = () => {
             console.error("Error creating profile:", insertError);
             setUserRole(userRole);
             setUserProfile(newProfile);
-            toast.error('Error al crear perfil. Contacta al administrador.');
+            // toast.error('Error al crear perfil. Contacta al administrador.');
           } else {
             console.log("Profile created successfully for:", fullName);
             setUserRole(userRole);
             setUserProfile(newProfile);
             localStorage.removeItem('signup_role');
-            toast.success(`¡Bienvenido, ${fullName}!`);
+            // toast.success(`¡Bienvenido, ${fullName}!`);
           }
         }
       } else {
