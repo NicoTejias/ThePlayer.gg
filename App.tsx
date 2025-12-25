@@ -432,16 +432,16 @@ const AppContent: React.FC = () => {
 
   // Fetch data on load
   React.useEffect(() => {
+    let authSubscription: any = null;
+
     // 1. Initialize Auth Check
     const initAuth = async () => {
       setIsAuthLoading(true);
 
       // Safety timeout for auth initialization
       const authTimeout = setTimeout(() => {
-        if (isAuthLoading) {
-          console.warn("Auth initialization timed out. Forcing loading state off.");
-          setIsAuthLoading(false);
-        }
+        console.warn("Auth initialization timed out. Forcing loading state off.");
+        setIsAuthLoading(false);
       }, 8000);
 
       try {
@@ -458,10 +458,7 @@ const AppContent: React.FC = () => {
           await handleSessionState(session);
         });
 
-        // Cleanup subscription on unmount
-        return () => {
-          subscription.unsubscribe();
-        };
+        authSubscription = subscription;
       } catch (err) {
         console.error("Critical Auth Error:", err);
         setIsLoggedIn(false);
@@ -473,6 +470,13 @@ const AppContent: React.FC = () => {
 
     initAuth();
     fetchData();
+
+    // Cleanup subscription on unmount
+    return () => {
+      if (authSubscription) {
+        authSubscription.unsubscribe();
+      }
+    };
   }, []);
 
   if (isAuthLoading) {
