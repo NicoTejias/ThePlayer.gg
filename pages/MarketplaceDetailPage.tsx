@@ -49,10 +49,13 @@ const MarketplaceDetailPage: React.FC = () => {
     const [listing, setListing] = useState<ListingDetail | null>(null);
     const [loading, setLoading] = useState(true);
     const [currentUser, setCurrentUser] = useState<any>(null);
+    const [isFavorite, setIsFavorite] = useState(false);
+    const [favoriteLoading, setFavoriteLoading] = useState(false);
 
     useEffect(() => {
         fetchListing();
         fetchCurrentUser();
+        checkIfFavorite();
     }, [id]);
 
     const fetchCurrentUser = async () => {
@@ -81,6 +84,37 @@ const MarketplaceDetailPage: React.FC = () => {
             toast.error('Error al cargar el anuncio');
         } finally {
             setLoading(false);
+        }
+    };
+
+    const checkIfFavorite = async () => {
+        if (!id) return;
+        try {
+            const { data, error } = await supabase.rpc('is_favorite', {
+                p_listing_id: id
+            });
+            if (error) throw error;
+            setIsFavorite(data || false);
+        } catch (error) {
+            console.error('Error checking favorite:', error);
+        }
+    };
+
+    const toggleFavorite = async () => {
+        if (!id) return;
+        setFavoriteLoading(true);
+        try {
+            const { data, error } = await supabase.rpc('toggle_favorite', {
+                p_listing_id: id
+            });
+            if (error) throw error;
+            setIsFavorite(data.is_favorite);
+            toast.success(data.action === 'added' ? 'Agregado a favoritos ❤️' : 'Eliminado de favoritos');
+        } catch (error: any) {
+            console.error('Error toggling favorite:', error);
+            toast.error('Error: ' + error.message);
+        } finally {
+            setFavoriteLoading(false);
         }
     };
 
@@ -122,9 +156,26 @@ const MarketplaceDetailPage: React.FC = () => {
                     <div className="bg-slate-800 rounded-lg p-6 border border-slate-700 shadow-2xl">
                         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4">
                             <h1 className="text-3xl font-bold text-white uppercase tracking-tight">{listing.title}</h1>
-                            <span className={`px-3 py-1 rounded-full text-sm font-bold tracking-wider uppercase ${getTypeStyles(listing.listing_type)}`}>
-                                {getTypeLabel(listing.listing_type)}
-                            </span>
+                            <div className="flex items-center gap-3">
+                                {!isOwner && (
+                                    <button
+                                        onClick={toggleFavorite}
+                                        disabled={favoriteLoading}
+                                        className={`p-2 rounded-full transition-all ${isFavorite
+                                                ? 'bg-red-500 text-white hover:bg-red-600'
+                                                : 'bg-slate-700 text-slate-400 hover:bg-slate-600 hover:text-white'
+                                            } disabled:opacity-50`}
+                                        title={isFavorite ? 'Quitar de favoritos' : 'Agregar a favoritos'}
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill={isFavorite ? 'currentColor' : 'none'} viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                                        </svg>
+                                    </button>
+                                )}
+                                <span className={`px-3 py-1 rounded-full text-sm font-bold tracking-wider uppercase ${getTypeStyles(listing.listing_type)}`}>
+                                    {getTypeLabel(listing.listing_type)}
+                                </span>
+                            </div>
                         </div>
 
                         <div className="flex flex-wrap items-center gap-4 text-slate-300 mb-6 text-sm">
