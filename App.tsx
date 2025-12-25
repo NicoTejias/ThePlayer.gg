@@ -28,6 +28,7 @@ import TournamentEditPage from './pages/admin/TournamentEditPage';
 import NotificationsPage from './pages/NotificationsPage';
 import NotificationBell from './components/NotificationBell';
 import FavoritesPage from './pages/FavoritesPage';
+import SellerProfilePage from './pages/SellerProfilePage';
 import StoreDashboardPage from './pages/StoreDashboardPage';
 import PlayerDashboardPage from './pages/PlayerDashboardPage';
 import TeamProfilePage from './pages/TeamProfilePage';
@@ -631,6 +632,7 @@ const AppContent: React.FC = () => {
           <Route path="/admin/tournaments/edit" element={<TournamentEditPage />} />
           <Route path="/notifications" element={<NotificationsPage />} />
           <Route path="/favorites" element={<FavoritesPage />} />
+          <Route path="/seller/:sellerId" element={<SellerProfilePage />} />
           <Route path="/dashboard/tienda" element={<StoreDashboardPage onTournamentUpload={handleTournamentUpload} onDeleteTournament={handleDeleteTournament} userRole={userRole} tournaments={tournamentResults} storeStatus={userProfile?.status} storeName={userProfile?.username} />} />
           <Route path="/dashboard/jugador" element={<PlayerDashboardPage profile={userProfile} />} />
         </Routes>

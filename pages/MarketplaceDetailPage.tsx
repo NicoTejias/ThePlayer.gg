@@ -51,6 +51,7 @@ const MarketplaceDetailPage: React.FC = () => {
     const [currentUser, setCurrentUser] = useState<any>(null);
     const [isFavorite, setIsFavorite] = useState(false);
     const [favoriteLoading, setFavoriteLoading] = useState(false);
+    const [sellerRating, setSellerRating] = useState<{ avg_rating: number | null, total_ratings: number } | null>(null);
 
     useEffect(() => {
         fetchListing();
@@ -76,6 +77,8 @@ const MarketplaceDetailPage: React.FC = () => {
 
             if (data && data.length > 0) {
                 setListing(data[0]);
+                // Fetch seller rating
+                fetchSellerRating(data[0].seller_id);
             } else {
                 setListing(null);
             }
@@ -116,6 +119,46 @@ const MarketplaceDetailPage: React.FC = () => {
         } finally {
             setFavoriteLoading(false);
         }
+    };
+
+    const fetchSellerRating = async (sellerId: string) => {
+        try {
+            const { data, error } = await supabase
+                .from('profiles')
+                .select('avg_rating, total_ratings')
+                .eq('id', sellerId)
+                .single();
+
+            if (error) throw error;
+            setSellerRating(data);
+        } catch (error) {
+            console.error('Error fetching seller rating:', error);
+        }
+    };
+
+    const renderStars = (rating: number) => {
+        return (
+            <div className="flex items-center gap-1">
+                {[1, 2, 3, 4, 5].map((star) => (
+                    <svg
+                        key={star}
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-4 w-4"
+                        fill={star <= rating ? 'currentColor' : 'none'}
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        style={{ color: star <= rating ? '#fbbf24' : '#64748b' }}
+                    >
+                        <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"
+                        />
+                    </svg>
+                ))}
+            </div>
+        );
     };
 
     if (loading) {
@@ -162,8 +205,8 @@ const MarketplaceDetailPage: React.FC = () => {
                                         onClick={toggleFavorite}
                                         disabled={favoriteLoading}
                                         className={`p-2 rounded-full transition-all ${isFavorite
-                                                ? 'bg-red-500 text-white hover:bg-red-600'
-                                                : 'bg-slate-700 text-slate-400 hover:bg-slate-600 hover:text-white'
+                                            ? 'bg-red-500 text-white hover:bg-red-600'
+                                            : 'bg-slate-700 text-slate-400 hover:bg-slate-600 hover:text-white'
                                             } disabled:opacity-50`}
                                         title={isFavorite ? 'Quitar de favoritos' : 'Agregar a favoritos'}
                                     >
@@ -181,7 +224,23 @@ const MarketplaceDetailPage: React.FC = () => {
                         <div className="flex flex-wrap items-center gap-4 text-slate-300 mb-6 text-sm">
                             <div className="flex items-center gap-2 bg-slate-700/50 px-3 py-1.5 rounded-md">
                                 <UserIcon className="w-4 h-4 text-sky-400" />
-                                <span className="font-semibold text-white">{listing.seller_name}</span>
+                                <a
+                                    href={`#/seller/${listing.seller_id}`}
+                                    className="font-semibold text-white hover:text-sky-400 transition-colors"
+                                >
+                                    {listing.seller_name}
+                                </a>
+                                {sellerRating && sellerRating.avg_rating && (
+                                    <div className="flex items-center gap-1 ml-2">
+                                        {renderStars(Math.round(sellerRating.avg_rating))}
+                                        <span className="text-yellow-400 text-xs font-bold ml-1">
+                                            {sellerRating.avg_rating.toFixed(1)}
+                                        </span>
+                                        <span className="text-slate-500 text-xs">
+                                            ({sellerRating.total_ratings})
+                                        </span>
+                                    </div>
+                                )}
                             </div>
                             {listing.seller_region && (
                                 <div className="flex items-center gap-2 bg-slate-700/50 px-3 py-1.5 rounded-md">
