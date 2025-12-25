@@ -339,13 +339,23 @@ const AppContent: React.FC = () => {
       }, 8000);
 
       try {
+        // Get initial session
         const { data: { session }, error } = await supabase.auth.getSession();
         if (error) throw error;
+
+        console.log("Initial session:", session ? "Found" : "Not found");
         await handleSessionState(session);
 
-        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-          handleSessionState(session);
+        // Subscribe to auth changes
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+          console.log("Auth state changed:", event, session ? "Session exists" : "No session");
+          await handleSessionState(session);
         });
+
+        // Cleanup subscription on unmount
+        return () => {
+          subscription.unsubscribe();
+        };
       } catch (err) {
         console.error("Critical Auth Error:", err);
         setIsLoggedIn(false);
@@ -392,17 +402,28 @@ const AppContent: React.FC = () => {
           }
         } else {
           // Profile missing (could be new OAuth user or Email user with failed profile creation)
-          console.log("Profile not found, creating new profile...");
+          console.log("Profile not found, creating new profile for user:", session.user.email);
 
-          const fullName = session.user.user_metadata.full_name || session.user.user_metadata.username || session.user.email?.split('@')[0] || 'User';
-          const userRole = (session.user.user_metadata.role as 'player' | 'store') || (localStorage.getItem('signup_role') as 'player' | 'store') || 'player';
+          // Extract user info from Google OAuth metadata
+          const fullName = session.user.user_metadata.full_name ||
+            session.user.user_metadata.name ||
+            session.user.email?.split('@')[0] ||
+            'User';
+
+          // Get role from localStorage (set during signup) or default to 'player'
+          const savedRole = localStorage.getItem('signup_role') as 'player' | 'store' | null;
+          const userRole = savedRole || 'player';
+
+          console.log("Creating profile with role:", userRole, "for:", fullName);
 
           const newProfile = {
             id: session.user.id,
             username: fullName,
             role: userRole,
             email: session.user.email,
-            avatar_url: session.user.user_metadata.avatar_url,
+            avatar_url: session.user.user_metadata.avatar_url || session.user.user_metadata.picture,
+            first_name: session.user.user_metadata.given_name || fullName.split(' ')[0] || '',
+            last_name: session.user.user_metadata.family_name || fullName.split(' ').slice(1).join(' ') || '',
             pwp: 0,
             matches_won: 0,
             matches_lost: 0,
@@ -414,14 +435,18 @@ const AppContent: React.FC = () => {
             .insert(newProfile);
 
           if (insertError) {
-            console.error("Error creating profile automatically (likely RLS). Using temp profile:", insertError);
+            console.error("Error creating profile:", insertError);
             // Fallback: Set profile in memory anyway so the user can use the site temporarily
             setUserRole(userRole);
             setUserProfile(newProfile);
+            toast.error('Error al crear perfil. Contacta al administrador.');
           } else {
-            console.log("Profile created successfully.");
+            console.log("Profile created successfully for:", fullName);
             setUserRole(userRole);
             setUserProfile(newProfile);
+            // Clear the saved role from localStorage
+            localStorage.removeItem('signup_role');
+            toast.success(`¡Bienvenido, ${fullName}!`);
           }
         }
       } else {
