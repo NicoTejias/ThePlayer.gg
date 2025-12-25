@@ -5,6 +5,7 @@ import { toast } from 'sonner';
 import UserIcon from '../components/icons/UserIcon';
 import MapPinIcon from '../components/icons/MapPinIcon';
 import CurrencyDollarIcon from '../components/icons/CurrencyDollarIcon';
+import RatingModal from '../components/RatingModal';
 
 interface ListingDetail {
     id: string;
@@ -51,6 +52,9 @@ const MarketplaceDetailPage: React.FC = () => {
     const [currentUser, setCurrentUser] = useState<any>(null);
     const [isFavorite, setIsFavorite] = useState(false);
     const [favoriteLoading, setFavoriteLoading] = useState(false);
+    const [showRatingModal, setShowRatingModal] = useState(false);
+    const [canRate, setCanRate] = useState(false);
+    const [hasRated, setHasRated] = useState(false);
     const [sellerRating, setSellerRating] = useState<{ avg_rating: number | null, total_ratings: number } | null>(null);
 
     useEffect(() => {
@@ -58,6 +62,13 @@ const MarketplaceDetailPage: React.FC = () => {
         fetchCurrentUser();
         checkIfFavorite();
     }, [id]);
+
+    // Check if can rate after listing is loaded
+    useEffect(() => {
+        if (listing) {
+            checkIfCanRate();
+        }
+    }, [listing]);
 
     const fetchCurrentUser = async () => {
         const { data: { user } } = await supabase.auth.getUser();
@@ -159,6 +170,30 @@ const MarketplaceDetailPage: React.FC = () => {
                 ))}
             </div>
         );
+    };
+
+    const checkIfCanRate = async () => {
+        if (!id || !listing) return;
+        try {
+            const { data: canRateData } = await supabase.rpc('can_rate_listing', {
+                p_listing_id: id
+            });
+            setCanRate(canRateData || false);
+
+            const { data: ratingData } = await supabase.rpc('get_user_rating_for_listing', {
+                p_listing_id: id
+            });
+            setHasRated(ratingData && ratingData.length > 0);
+        } catch (error) {
+            console.error('Error checking rating status:', error);
+        }
+    };
+
+    const handleRatingSubmitted = () => {
+        if (listing) {
+            fetchSellerRating(listing.seller_id);
+            checkIfCanRate();
+        }
     };
 
     if (loading) {
