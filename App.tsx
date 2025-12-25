@@ -326,18 +326,29 @@ const AppContent: React.FC = () => {
 
   // Handle session state changes (must be defined before useEffect)
   const handleSessionState = async (session: any) => {
+    console.log("=== handleSessionState called ===");
+    console.log("Session:", session ? "EXISTS" : "NULL");
+    if (session?.user) {
+      console.log("User ID:", session.user.id);
+      console.log("User email:", session.user.email);
+    }
+
     try {
       if (session?.user) {
         setIsLoggedIn(true);
 
         // Fetch or create profile
+        console.log("Fetching profile for user:", session.user.id);
         const { data: profile, error } = await supabase
           .from('profiles')
           .select('*')
           .eq('id', session.user.id)
           .single();
 
+        console.log("Profile fetch result:", { profile, error });
+
         if (profile) {
+          console.log("Profile found! Role:", profile.role);
           setUserRole(profile.role as 'player' | 'store' | 'admin');
           setUserProfile(profile);
           console.log("Logged in as:", profile.role);
