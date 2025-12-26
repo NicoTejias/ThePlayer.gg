@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Toaster, toast } from 'sonner';
 import { HashRouter, Routes, Route, useNavigate } from 'react-router-dom';
 import { supabase } from './supabaseClient';
@@ -359,8 +359,8 @@ const AppContent: React.FC = () => {
     }
   };
 
-  // Handle session state changes (must be defined before useEffect)
-  const handleSessionState = async (session: any) => {
+  // Handle session state changes (wrapped in useCallback for proper initialization)
+  const handleSessionState = useCallback(async (session: any) => {
     console.log("=== handleSessionState called ===");
     console.log("Session:", session ? "EXISTS" : "NULL");
     if (session?.user) {
@@ -463,7 +463,7 @@ const AppContent: React.FC = () => {
     } finally {
       setIsAuthLoading(false);
     }
-  };
+  }, []); // Empty dependency array since it only uses setState functions
 
   // Fetch data on load
   React.useEffect(() => {
