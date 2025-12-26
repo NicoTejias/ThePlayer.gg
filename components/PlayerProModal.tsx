@@ -1,14 +1,17 @@
 import React, { useState } from 'react';
 import { toast } from 'sonner';
+import { supabase } from '../supabaseClient';
 import ProBadge from './ProBadge';
 
 interface PlayerProModalProps {
     isOpen: boolean;
     onClose: () => void;
+    profile: any; // User profile with id and email
 }
 
-const PlayerProModal: React.FC<PlayerProModalProps> = ({ isOpen, onClose }) => {
+const PlayerProModal: React.FC<PlayerProModalProps> = ({ isOpen, onClose, profile }) => {
     const [selectedPlan, setSelectedPlan] = useState<'monthly' | 'quarterly' | 'annual'>('monthly');
+    const [loading, setLoading] = useState(false);
 
     if (!isOpen) return null;
 
@@ -44,10 +47,37 @@ const PlayerProModal: React.FC<PlayerProModalProps> = ({ isOpen, onClose }) => {
         { icon: '⚡', title: 'Soporte Prioritario', description: 'Respuestas rápidas a tus consultas' }
     ];
 
-    const handleSubscribe = () => {
-        // TODO: Integrate with payment gateway
-        toast.info('Integración de pagos próximamente disponible');
-        onClose();
+    const handleSubscribe = async () => {
+        if (!profile?.id || !profile?.email) {
+            toast.error('Debes estar logueado para suscribirte');
+            return;
+        }
+
+        setLoading(true);
+
+        try {
+            // Call Supabase Edge Function to create subscription
+            const { data, error } = await supabase.functions.invoke('create-subscription', {
+                body: {
+                    player_id: profile.id,
+                    plan_type: selectedPlan,
+                    payer_email: profile.email
+                }
+            });
+
+            if (error) throw error;
+
+            // Redirect to MercadoPago checkout
+            if (data?.init_point) {
+                window.location.href = data.init_point;
+            } else {
+                throw new Error('No se recibió el link de pago');
+            }
+        } catch (err: any) {
+            console.error('Error creating subscription:', err);
+            toast.error(err.message || 'Error al procesar el pago');
+            setLoading(false);
+        }
     };
 
     return (
@@ -82,8 +112,8 @@ const PlayerProModal: React.FC<PlayerProModalProps> = ({ isOpen, onClose }) => {
                                 key={key}
                                 onClick={() => setSelectedPlan(key as any)}
                                 className={`p-6 rounded-xl border-2 transition-all ${selectedPlan === key
-                                        ? 'border-purple-500 bg-purple-900/30 shadow-lg shadow-purple-900/50'
-                                        : 'border-slate-700 bg-slate-800 hover:border-purple-500/50'
+                                    ? 'border-purple-500 bg-purple-900/30 shadow-lg shadow-purple-900/50'
+                                    : 'border-slate-700 bg-slate-800 hover:border-purple-500/50'
                                     }`}
                             >
                                 {plan.discount && (
@@ -139,9 +169,13 @@ const PlayerProModal: React.FC<PlayerProModalProps> = ({ isOpen, onClose }) => {
                             </button>
                             <button
                                 onClick={handleSubscribe}
-                                className="px-8 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold rounded-lg hover:from-purple-500 hover:to-pink-500 transition-all shadow-lg shadow-purple-900/50"
+                                disabled={loading}
+                                className={`px-8 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold rounded-lg transition-all shadow-lg shadow-purple-900/50 ${loading
+                                        ? 'opacity-50 cursor-not-allowed'
+                                        : 'hover:from-purple-500 hover:to-pink-500'
+                                    }`}
                             >
-                                Suscribirse Ahora
+                                {loading ? 'Procesando...' : 'Suscribirse Ahora'}
                             </button>
                         </div>
                     </div>
