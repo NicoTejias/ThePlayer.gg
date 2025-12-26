@@ -1,8 +1,10 @@
-
-import React from 'react';
+import React, { useState } from 'react';
 import type { Store } from '../types';
 import MapPinIcon from '../components/icons/MapPinIcon';
 import GlobeAltIcon from '../components/icons/GlobeAltIcon';
+import PricingCard from '../components/PricingCard';
+import StoreSubscriptionModal from '../components/StoreSubscriptionModal';
+import { toast } from 'sonner';
 
 const mockStores: Store[] = [
     // FIX: Added missing `requestDate` property to conform to the Store type.
@@ -31,6 +33,8 @@ const HeartIcon: React.FC<{ className?: string, fill?: boolean }> = ({ className
 
 const StoresPage: React.FC = () => {
     const [followedStores, setFollowedStores] = React.useState<string[]>([]);
+    const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
+    const [selectedPlan, setSelectedPlan] = useState<'basic' | 'medium' | 'premium'>('medium');
 
     const toggleFollow = (storeId: string) => {
         setFollowedStores(prev =>
@@ -40,8 +44,85 @@ const StoresPage: React.FC = () => {
         );
     };
 
+    const handleSubscribe = (plan: 'basic' | 'medium' | 'premium') => {
+        setSelectedPlan(plan);
+        setShowSubscriptionModal(true);
+    };
+
     return (
-        <div className="space-y-12">
+        <div className="space-y-16">
+            {/* Hero Section - Join ThePlayer */}
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate-900 via-sky-900/20 to-slate-900 border border-sky-500/30 p-12">
+                <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiMzYjgyZjYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDM0djItaDJWMzRoLTJ6bTAgNHYyaDJ2LTJoLTJ6bTAtOHYyaDJ2LTJoLTJ6bTAtNHYyaDJ2LTJoLTJ6bTAtNHYyaDJ2LTJoLTJ6bTAtNHYyaDJ2LTJoLTJ6bTAtNHYyaDJ2LTJoLTJ6bTAtNHYyaDJ2LTJoLTJ6bTAtNHYyaDJ2LTJoLTJ6Ii8+PC9nPjwvZz48L3N2Zz4=')] opacity-30"></div>
+
+                <div className="relative z-10 text-center mb-12">
+                    <h2 className="text-5xl font-bold text-white mb-4">¿Tienes una Tienda de TCG?</h2>
+                    <p className="text-xl text-slate-300 max-w-3xl mx-auto">
+                        Únete a ThePlayer.gg y lleva tu tienda al siguiente nivel. Atrae más jugadores, organiza torneos oficiales y crece con la comunidad.
+                    </p>
+                </div>
+
+                {/* Pricing Cards */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto relative z-10">
+                    <PricingCard
+                        title="Plan Básico"
+                        price="25.000"
+                        features={[
+                            'Puntos PWP oficiales en torneos',
+                            'Torneos en calendario ThePlayer',
+                            'Perfil de tienda completo',
+                            'Gestión de eventos desde dashboard',
+                            'Estadísticas básicas de asistencia'
+                        ]}
+                        ctaText="Comenzar"
+                        onCTAClick={() => handleSubscribe('basic')}
+                    />
+
+                    <PricingCard
+                        title="Plan Medio"
+                        price="50.000"
+                        badge="Más Popular"
+                        highlighted={true}
+                        features={[
+                            'Todo lo del Plan Básico',
+                            'Mención destacada en Home',
+                            'Clasificatorio directo al Nacional',
+                            'Transmisión incluida',
+                            'Badge "Tienda Verificada"',
+                            'Prioridad en búsquedas',
+                            'Estadísticas avanzadas'
+                        ]}
+                        ctaText="Elegir Plan"
+                        onCTAClick={() => handleSubscribe('medium')}
+                    />
+
+                    <PricingCard
+                        title="Plan Premium"
+                        price="100.000"
+                        badge="Mejor Valor"
+                        features={[
+                            'Todo lo del Plan Medio',
+                            'Publicidad en redes sociales',
+                            'Badge "Tienda Premium"',
+                            'Destacado visual exclusivo',
+                            'Sección exclusiva en Home',
+                            'Reportes mensuales personalizados',
+                            'Soporte prioritario',
+                            'Co-branding en eventos'
+                        ]}
+                        ctaText="Contactar"
+                        onCTAClick={() => handleSubscribe('premium')}
+                    />
+                </div>
+
+                <div className="text-center mt-12 relative z-10">
+                    <p className="text-slate-400 text-sm">
+                        💡 Todos los precios son en CLP (Pesos Chilenos) por mes. Sin permanencia mínima.
+                    </p>
+                </div>
+            </div>
+
+            {/* Stores Directory Section */}
             <div className="text-center">
                 <h1 className="text-4xl sm:text-5xl font-bold text-white tracking-tighter uppercase">Directorio de Tiendas Asociadas</h1>
                 <p className="text-lg text-slate-300 mt-2 max-w-4xl mx-auto">
@@ -120,6 +201,13 @@ const StoresPage: React.FC = () => {
                     );
                 })}
             </div>
+
+            {/* Subscription Modal */}
+            <StoreSubscriptionModal
+                isOpen={showSubscriptionModal}
+                onClose={() => setShowSubscriptionModal(false)}
+                selectedPlan={selectedPlan}
+            />
         </div>
     );
 };
