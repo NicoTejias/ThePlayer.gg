@@ -198,13 +198,14 @@ const AppContent: React.FC = () => {
         region: string;
         team: string | null;
         teamId: string | null;
-        isPublic: boolean
+        isPublic: boolean;
+        isPro: boolean;
       }> = {};
 
       if (playerIds.length > 0) {
         const { data: profilesData } = await supabase
           .from('profiles')
-          .select('id, username, first_name, last_name, region, team, team_id, is_public')
+          .select('id, username, first_name, last_name, region, team, team_id, is_public, is_pro')
           .in('id', playerIds);
 
         if (profilesData) {
@@ -216,7 +217,8 @@ const AppContent: React.FC = () => {
               region: profile.region || 'Unknown',
               team: profile.team,
               teamId: profile.team_id,
-              isPublic: profile.is_public ?? false
+              isPublic: profile.is_public ?? false,
+              isPro: profile.is_pro ?? false
             };
           }
         }
@@ -285,7 +287,8 @@ const AppContent: React.FC = () => {
           team: profile?.team || null,
           teamData: teamData,
           // isPublic = true si tiene cuenta vinculada
-          isPublic: hasAccount
+          isPublic: hasAccount,
+          is_pro: profile?.isPro || false
         };
       });
 
