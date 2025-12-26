@@ -701,9 +701,9 @@ const AppContent: React.FC = () => {
     one_piece: 'theme-one_piece',
     lorcana: 'theme-lorcana',
     star_wars: 'theme-star_wars',
-    flesh_blood: 'theme-mtg', // Fallback
-    digimon: 'theme-mtg', // Fallback
-    yugioh: 'theme-mtg' // Fallback
+    yugioh: 'theme-yugioh',
+    flesh_blood: 'theme-flesh_blood',
+    digimon: 'theme-digimon'
   }[currentGame] || 'theme-mtg';
 
   return (

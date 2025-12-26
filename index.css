@@ -58,6 +58,42 @@
   --color-accent-hover: #0891b2;
 }
 
+/* Yu-Gi-Oh - Purple/Violet */
+.theme-yugioh {
+  --bg-base: #1e1b4b;
+  /* indigo-950 */
+  --bg-secondary: #312e81;
+  /* indigo-900 */
+  --color-accent: #a855f7;
+  /* purple-500 */
+  --color-accent-hover: #9333ea;
+  /* purple-600 */
+}
+
+/* Flesh and Blood - Crimson/Red */
+.theme-flesh_blood {
+  --bg-base: #450a0a;
+  /* red-950 */
+  --bg-secondary: #7f1d1d;
+  /* red-900 */
+  --color-accent: #f87171;
+  /* red-400 */
+  --color-accent-hover: #ef4444;
+  /* red-500 */
+}
+
+/* Digimon - Orange/Teal */
+.theme-digimon {
+  --bg-base: #0c4a6e;
+  /* sky-900 */
+  --bg-secondary: #075985;
+  /* sky-800 */
+  --color-accent: #fb923c;
+  /* orange-400 */
+  --color-accent-hover: #f97316;
+  /* orange-500 */
+}
+
 /* Override Tailwind utilities to use our dynamic variables */
 @layer utilities {
   .bg-slate-900 {
