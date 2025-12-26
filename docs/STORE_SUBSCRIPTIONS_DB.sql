@@ -69,13 +69,21 @@ ALTER TABLE subscription_requests ENABLE ROW LEVEL SECURITY;
 ALTER TABLE store_subscriptions ENABLE ROW LEVEL SECURITY;
 
 -- 6. RLS Policies for subscription_requests
+-- Drop existing policies if they exist
+DROP POLICY IF EXISTS "Anyone can submit subscription request" ON subscription_requests;
+DROP POLICY IF EXISTS "Admins can view all subscription requests" ON subscription_requests;
+DROP POLICY IF EXISTS "Admins can update subscription requests" ON subscription_requests;
+DROP POLICY IF EXISTS "Stores can view own subscription" ON store_subscriptions;
+DROP POLICY IF EXISTS "Admins can view all subscriptions" ON store_subscriptions;
+DROP POLICY IF EXISTS "Admins can manage subscriptions" ON store_subscriptions;
+
 -- Allow anyone to insert (submit request)
-CREATE POLICY \"Anyone can submit subscription request\"
+CREATE POLICY "Anyone can submit subscription request"
     ON subscription_requests FOR INSERT
     WITH CHECK (true);
 
 -- Only admins can view all requests
-CREATE POLICY \"Admins can view all subscription requests\"
+CREATE POLICY "Admins can view all subscription requests"
     ON subscription_requests FOR SELECT
     USING (
         EXISTS (
@@ -86,7 +94,7 @@ CREATE POLICY \"Admins can view all subscription requests\"
     );
 
 -- Only admins can update requests
-CREATE POLICY \"Admins can update subscription requests\"
+CREATE POLICY "Admins can update subscription requests"
     ON subscription_requests FOR UPDATE
     USING (
         EXISTS (
@@ -98,12 +106,12 @@ CREATE POLICY \"Admins can update subscription requests\"
 
 -- 7. RLS Policies for store_subscriptions
 -- Stores can view their own subscription
-CREATE POLICY \"Stores can view own subscription\"
+CREATE POLICY "Stores can view own subscription"
     ON store_subscriptions FOR SELECT
     USING (store_id = auth.uid());
 
 -- Admins can view all subscriptions
-CREATE POLICY \"Admins can view all subscriptions\"
+CREATE POLICY "Admins can view all subscriptions"
     ON store_subscriptions FOR SELECT
     USING (
         EXISTS (
@@ -114,7 +122,7 @@ CREATE POLICY \"Admins can view all subscriptions\"
     );
 
 -- Only admins can manage subscriptions
-CREATE POLICY \"Admins can manage subscriptions\"
+CREATE POLICY "Admins can manage subscriptions"
     ON store_subscriptions FOR ALL
     USING (
         EXISTS (
@@ -161,6 +169,10 @@ END;
 $$;
 
 -- 10. Create trigger to update updated_at timestamp
+-- Drop existing triggers first
+DROP TRIGGER IF EXISTS update_subscription_requests_updated_at ON subscription_requests;
+DROP TRIGGER IF EXISTS update_store_subscriptions_updated_at ON store_subscriptions;
+
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
 BEGIN

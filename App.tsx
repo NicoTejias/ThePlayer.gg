@@ -25,6 +25,7 @@ import UserManagementPage from './pages/admin/UserManagementPage';
 import ClaimReviewPage from './pages/admin/ClaimReviewPage';
 import IntegrityReviewPanel from './pages/admin/IntegrityReviewPanel';
 import TournamentEditPage from './pages/admin/TournamentEditPage';
+import SubscriptionManagementPage from './pages/admin/SubscriptionManagementPage';
 import NotificationsPage from './pages/NotificationsPage';
 import NotificationBell from './components/NotificationBell';
 import FavoritesPage from './pages/FavoritesPage';
@@ -755,6 +756,7 @@ const AppContent: React.FC = () => {
           <Route path="/admin/claims" element={<ClaimReviewPage />} />
           <Route path="/admin/integrity" element={<IntegrityReviewPanel />} />
           <Route path="/admin/tournaments/edit" element={<TournamentEditPage />} />
+          <Route path="/admin/subscriptions" element={<SubscriptionManagementPage />} />
           <Route path="/notifications" element={<NotificationsPage />} />
           <Route path="/favorites" element={<FavoritesPage />} />
           <Route path="/seller/:sellerId" element={<SellerProfilePage />} />

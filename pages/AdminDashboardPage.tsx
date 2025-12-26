@@ -226,6 +226,19 @@ const AdminDashboardPage: React.FC = () => {
                         </div>
                         <p className="text-slate-400 text-sm">Modificar y eliminar torneos</p>
                     </a>
+
+                    <a href="#/admin/subscriptions" className="group bg-slate-800 hover:bg-slate-700 p-6 rounded-lg border border-slate-700 hover:border-orange-500 transition-all shadow-lg">
+                        <div className="flex items-center gap-4 mb-3">
+                            <div className="p-3 bg-orange-900/40 rounded-lg group-hover:bg-orange-800/60 transition-colors">
+                                <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 text-orange-300" viewBox="0 0 20 20" fill="currentColor">
+                                    <path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z" />
+                                    <path fillRule="evenodd" d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z" clipRule="evenodd" />
+                                </svg>
+                            </div>
+                            <h3 className="text-lg font-bold text-white">Suscripciones</h3>
+                        </div>
+                        <p className="text-slate-400 text-sm">Gestionar solicitudes de tiendas</p>
+                    </a>
                 </div>
             </section>
 
