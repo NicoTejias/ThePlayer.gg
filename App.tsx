@@ -41,6 +41,7 @@ import LiveStreamPage from './pages/LiveStreamPage';
 import type { TournamentResult, CommunityEvent, PlayerProfile, TournamentParseResult, Team } from './types';
 import OnboardingModal from './components/OnboardingModal';
 import ClaimResultsModal from './components/ClaimResultsModal';
+import { GameProvider, useGame } from './context/GameContext';
 
 const mockInitialPlayers: PlayerProfile[] = [];
 const mockTournamentResults: TournamentResult[] = [];
@@ -48,6 +49,7 @@ const mockInitialEvents: CommunityEvent[] = [];
 
 
 const AppContent: React.FC = () => {
+  const { currentGame } = useGame(); // Use Game Context
   const [isAuthLoading, setIsAuthLoading] = useState(true); // New loading state
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userRole, setUserRole] = useState<'player' | 'store' | 'admin' | null>(null);
@@ -112,6 +114,8 @@ const AppContent: React.FC = () => {
     // =====================================================================
 
     // 1. Fetch tournament results agrupados por player_name
+    // FILTERED BY CURRENT GAME via Inner Join on Tournaments
+    // Note: We select tournament columns to filter but don't strictly need to return them if we filter
     const { data: resultsData, error: resultsError } = await supabase
       .from('tournament_results')
       .select(`
@@ -120,8 +124,25 @@ const AppContent: React.FC = () => {
         pwp_earned,
         wins,
         losses,
-        draws
-      `);
+        draws,
+        tournaments!inner(game_type)
+      `)
+      .eq('tournaments.game_type', currentGame);
+
+    // Also fetch Tournaments List filtered by game
+    const { data: tournamentsData } = await supabase
+      .from('tournaments')
+      .select('*')
+      .eq('game_type', currentGame)
+      .order('date', { ascending: false });
+
+    // Filter local mock events if DB is empty, otherwise use DB events logic if applicable
+    // (Assuming communityEvents comes from DB or mock)
+    // For now, let's assume we want to query DB for upcoming events too if logic existed
+    // Or filter the tournamentsData to show recent ones
+
+    // Update tournamentResults state
+    setTournamentResults(tournamentsData || []);
 
     if (resultsData) {
       // Agrupar resultados por player_name (o player_id si existe)
@@ -578,7 +599,8 @@ const AppContent: React.FC = () => {
           p_date: isoDate,
           p_store_name: tournamentData.storeName,
           p_format: tournamentData.format,
-          p_player_count: tournamentData.playerCount
+          p_player_count: tournamentData.playerCount,
+          p_game_type: currentGame
         });
 
       const { error: tourneyError } = await Promise.race([insertPromise, timeoutPromise]) as any;
@@ -727,7 +749,9 @@ const AppContent: React.FC = () => {
 const App: React.FC = () => {
   return (
     <HashRouter>
-      <AppContent />
+      <GameProvider>
+        <AppContent />
+      </GameProvider>
     </HashRouter>
   );
 };

@@ -52,6 +52,7 @@ export interface CommunityEvent {
   maxPlayers?: number; // Máximo de jugadores permitidos
   time?: string; // Hora del evento
   isUserRegistered?: boolean; // Si el usuario actual está inscrito
+  gameType?: GameType;
 }
 
 export interface MediaArticle {
@@ -139,6 +140,22 @@ export interface TournamentParseResult {
   pwpEarned: number;
 }
 
+export type GameType = 'mtg' | 'pokemon' | 'one_piece' | 'lorcana' | 'flesh_and_blood' | 'yugioh' | 'star_wars' | 'board_game' | 'rpg' | 'warhammer' | 'other';
+
+export const GAME_LABELS: Record<GameType, string> = {
+  mtg: 'Magic: The Gathering',
+  pokemon: 'Pokémon TCG',
+  one_piece: 'One Piece TCG',
+  lorcana: 'Disney Lorcana',
+  flesh_and_blood: 'Flesh and Blood',
+  yugioh: 'Yu-Gi-Oh!',
+  star_wars: 'Star Wars Unlimited',
+  board_game: 'Juegos de Mesa',
+  rpg: 'Rol (RPG)',
+  warhammer: 'Warhammer / Wargames',
+  other: 'Otro'
+};
+
 export interface TournamentResult {
   id: string;
   name: string;
@@ -146,6 +163,7 @@ export interface TournamentResult {
   storeName: string;
   format: TournamentFormat | string;
   playerCount: number;
+  gameType?: GameType;
 }
 
 export type TournamentFormat =
