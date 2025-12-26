@@ -328,7 +328,7 @@ const PlayerDashboardPage: React.FC<{ profile?: any }> = ({ profile }) => {
             </div>
 
             {/* PRO Modal */}
-            <PlayerProModal isOpen={showProModal} onClose={() => setShowProModal(false)} />
+            <PlayerProModal isOpen={showProModal} onClose={() => setShowProModal(false)} profile={profile} />
         </div>
     );
 };
