@@ -9,12 +9,11 @@ export default {
         "./**/*.{js,ts,jsx,tsx}",
     ],
     theme: {
-        extend: {
-            colors: {
-                'player-dark': '#0f172a',
-                'player-accent': '#3b82f6',
-                'player-secondary': '#1e293b',
-            },
+        colors: {
+            'player-dark': 'var(--bg-base)',
+            'player-accent': 'var(--color-accent)',
+            'player-accent-hover': 'var(--color-accent-hover)', // New hover state
+            'player-secondary': 'var(--bg-secondary)',
         },
     },
     plugins: [],

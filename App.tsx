@@ -694,8 +694,20 @@ const AppContent: React.FC = () => {
     }
   };
 
+  // Determine theme class
+  const themeClass = {
+    mtg: 'theme-mtg',
+    pokemon: 'theme-pokemon',
+    one_piece: 'theme-one_piece',
+    lorcana: 'theme-lorcana',
+    star_wars: 'theme-star_wars',
+    flesh_blood: 'theme-mtg', // Fallback
+    digimon: 'theme-mtg', // Fallback
+    yugioh: 'theme-mtg' // Fallback
+  }[currentGame] || 'theme-mtg';
+
   return (
-    <div className="bg-slate-900 text-slate-200 min-h-screen flex flex-col relative isolate">
+    <div className={`bg-slate-900 text-slate-200 min-h-screen flex flex-col relative isolate ${themeClass}`}>
       <Toaster position="top-center" richColors theme="dark" />
       <ParticlesBackground />
       <Header isLoggedIn={isLoggedIn} userRole={userRole} handleLogout={handleLogout}
