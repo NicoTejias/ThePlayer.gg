@@ -4,25 +4,18 @@ import MapPinIcon from '../components/icons/MapPinIcon';
 import GlobeAltIcon from '../components/icons/GlobeAltIcon';
 import PricingCard from '../components/PricingCard';
 import StoreSubscriptionModal from '../components/StoreSubscriptionModal';
+import SubscriptionBadge from '../components/SubscriptionBadge';
 import { toast } from 'sonner';
 
 const mockStores: Store[] = [
-    // FIX: Added missing `requestDate` property to conform to the Store type.
-    { id: 's1', name: 'Magicsur', region: 'Metropolitana', address: 'Av. Providencia 2216, Local 5A', website: '#', logoUrl: 'https://picsum.photos/seed/store1/200/200', status: 'Aprobada', requestDate: '2024-01-10' },
-    // FIX: Added missing `requestDate` property to conform to the Store type.
-    { id: 's2', name: 'Guildreams', region: 'Valparaíso', address: 'Calle Valparaíso 568, Local 32, Viña del Mar', website: '#', logoUrl: 'https://picsum.photos/seed/store2/200/200', status: 'Aprobada', requestDate: '2024-01-12' },
-    // FIX: Added missing `requestDate` property to conform to the Store type.
-    { id: 's3', name: 'Ouroboros Store', region: 'Metropolitana', address: 'Av. Nueva Providencia 2160, Local 12', website: '#', logoUrl: 'https://picsum.photos/seed/store3/200/200', status: 'Aprobada', requestDate: '2024-02-01' },
-    // FIX: Added missing `requestDate` property to conform to the Store type.
+    { id: 's1', name: 'Magicsur', region: 'Metropolitana', address: 'Av. Providencia 2216, Local 5A', website: '#', logoUrl: 'https://picsum.photos/seed/store1/200/200', status: 'Aprobada', requestDate: '2024-01-10', subscription_tier: 'premium' },
+    { id: 's2', name: 'Guildreams', region: 'Valparaíso', address: 'Calle Valparaíso 568, Local 32, Viña del Mar', website: '#', logoUrl: 'https://picsum.photos/seed/store2/200/200', status: 'Aprobada', requestDate: '2024-01-12', subscription_tier: 'medium' },
+    { id: 's3', name: 'Ouroboros Store', region: 'Metropolitana', address: 'Av. Nueva Providencia 2160, Local 12', website: '#', logoUrl: 'https://picsum.photos/seed/store3/200/200', status: 'Aprobada', requestDate: '2024-02-01', subscription_tier: 'basic' },
     { id: 's4', name: 'El Reino de los Duelos', region: 'Biobío', address: 'Aníbal Pinto 509, Local 15, Concepción', website: '#', logoUrl: 'https://picsum.photos/seed/store4/200/200', status: 'Aprobada', requestDate: '2024-02-15' },
-    // FIX: Added missing `requestDate` property to conform to the Store type.
-    { id: 's5', name: 'La Forja del Sur', region: 'Sur', address: 'Av. Alemania 0987, Temuco', website: '#', logoUrl: 'https://picsum.photos/seed/store5/200/200', status: 'Aprobada', requestDate: '2024-03-05' },
-    // FIX: Added missing `requestDate` property to conform to the Store type.
+    { id: 's5', name: 'La Forja del Sur', region: 'Sur', address: 'Av. Alemania 0987, Temuco', website: '#', logoUrl: 'https://picsum.photos/seed/store5/200/200', status: 'Aprobada', requestDate: '2024-03-05', subscription_tier: 'medium' },
     { id: 's6', name: 'Goblin Store', region: 'Metropolitana', address: 'Av. Irarrázaval 2891, Local 102, Ñuñoa', website: '#', logoUrl: 'https://picsum.photos/seed/store6/200/200', status: 'Aprobada', requestDate: '2024-03-20' },
-    // FIX: Added missing `requestDate` property to conform to the Store type.
-    { id: 's7', name: 'El Templo del Juego', region: 'Norte', address: 'Arturo Prat 452, Antofagasta', website: '#', logoUrl: 'https://picsum.photos/seed/store7/200/200', status: 'Aprobada', requestDate: '2024-04-01' },
-    // FIX: Added missing `requestDate` property to conform to the Store type.
-    { id: 's8', name: 'Card Universe', region: 'Valparaíso', address: 'Esmeralda 1087, Valparaíso', website: '#', logoUrl: 'https://picsum.photos/seed/store8/200/200', status: 'Aprobada', requestDate: '2024-04-18' },
+    { id: 's7', name: 'El Templo del Juego', region: 'Norte', address: 'Arturo Prat 452, Antofagasta', website: '#', logoUrl: 'https://picsum.photos/seed/store7/200/200', status: 'Aprobada', requestDate: '2024-04-01', subscription_tier: 'premium' },
+    { id: 's8', name: 'Card Universe', region: 'Valparaíso', address: 'Esmeralda 1087, Valparaíso', website: '#', logoUrl: 'https://picsum.photos/seed/store8/200/200', status: 'Aprobada', requestDate: '2024-04-18', subscription_tier: 'basic' },
 ];
 
 const HeartIcon: React.FC<{ className?: string, fill?: boolean }> = ({ className, fill }) => (
@@ -166,8 +159,25 @@ const StoresPage: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-8">
                 {mockStores.map((store) => {
                     const isFollowing = followedStores.includes(store.id);
+                    const tier = store.subscription_tier || 'free';
+
+                    // Conditional styling based on tier
+                    const borderClass = {
+                        premium: 'border-2 border-yellow-500 shadow-2xl shadow-yellow-900/30',
+                        medium: 'border-2 border-sky-500 shadow-xl shadow-sky-900/20',
+                        basic: 'border border-emerald-500/50 shadow-lg',
+                        free: 'border border-slate-700'
+                    }[tier];
+
+                    const bgClass = {
+                        premium: 'bg-gradient-to-br from-slate-800 via-slate-800 to-yellow-900/20',
+                        medium: 'bg-slate-800',
+                        basic: 'bg-slate-800',
+                        free: 'bg-slate-800'
+                    }[tier];
+
                     return (
-                        <div key={store.id} className="bg-slate-800 rounded-lg overflow-hidden shadow-lg hover:shadow-sky-500/20 transition-all duration-300 ease-in-out transform hover:-translate-y-1 border border-slate-700 flex flex-col text-center relative group">
+                        <div key={store.id} className={`${bgClass} rounded-lg overflow-hidden hover:shadow-sky-500/20 transition-all duration-300 ease-in-out transform hover:-translate-y-1 ${borderClass} flex flex-col text-center relative group`}>
 
                             {/* Follow Button */}
                             <button
@@ -178,8 +188,19 @@ const StoresPage: React.FC = () => {
                                 <HeartIcon className={`w-6 h-6 transition-colors duration-300 ${isFollowing ? 'text-red-500' : 'text-slate-400 group-hover:text-white'}`} fill={isFollowing} />
                             </button>
 
+                            {/* Subscription Badge */}
+                            {tier !== 'free' && (
+                                <div className="absolute top-3 left-3 z-10">
+                                    <SubscriptionBadge tier={tier} size="small" />
+                                </div>
+                            )}
+
                             <div className="p-6 bg-slate-700/50 relative">
-                                <img className="w-24 h-24 object-contain rounded-full mx-auto border-4 border-slate-600" src={store.logoUrl} alt={`${store.name} logo`} />
+                                <img className={`w-24 h-24 object-contain rounded-full mx-auto border-4 ${tier === 'premium' ? 'border-yellow-500 shadow-lg shadow-yellow-900/50' :
+                                        tier === 'medium' ? 'border-sky-500' :
+                                            tier === 'basic' ? 'border-emerald-500' :
+                                                'border-slate-600'
+                                    }`} src={store.logoUrl} alt={`${store.name} logo`} />
                             </div>
                             <div className="p-6 flex-grow flex flex-col items-center">
                                 <h3 className="font-bold text-xl mb-2 text-white uppercase">{store.name}</h3>
