@@ -68,6 +68,15 @@ const AppContent: React.FC = () => {
   const YOUTUBE_API_KEY = 'AIzaSyD-EGf2uQdBNFhT2FZ_m_DXR4P3kIR_LN8';
 
   useEffect(() => {
+    console.log("Game Context Changed:", currentGame);
+    // Clear data to force UI update and avoid stale data mixing
+    setPlayers([]);
+    setTournamentResults([]);
+    // Fetch new data
+    fetchData();
+  }, [currentGame]); // Re-fetch when game changes
+
+  useEffect(() => {
     checkYouTubeLiveStatus();
     // Check every 5 minutes
     const interval = setInterval(checkYouTubeLiveStatus, 5 * 60 * 1000);
