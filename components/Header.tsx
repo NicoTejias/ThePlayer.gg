@@ -85,12 +85,39 @@ const Header: React.FC<HeaderProps> = ({ isLoggedIn, userRole, userName = 'Jugad
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <div className="flex-shrink-0 mr-4">
+          <div className="flex-shrink-0 mr-4 relative">
             <Link to="/" className="flex items-center gap-2">
               <span className="text-2xl sm:text-3xl font-bold text-white tracking-tighter font-['Rajdhani'] uppercase bg-gradient-to-r from-sky-400 to-violet-400 bg-clip-text text-transparent">
                 ThePlayer.gg
               </span>
             </Link>
+
+            {/* Game Selector - Positioned below logo */}
+            <div className="absolute top-full left-0 mt-1 z-50">
+              <div className="relative group">
+                <button className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-300 hover:text-white transition-colors bg-slate-800/95 px-3 py-1.5 rounded-full border border-slate-700 hover:border-sky-500/50 hover:bg-slate-700/80 hover:shadow-lg hover:shadow-sky-900/20 backdrop-blur-sm">
+                  <span className="text-[10px] text-slate-500">Mundo:</span>
+                  <span className="text-sky-400">{GAME_LABELS[currentGame]}</span>
+                  <svg className="w-3 h-3 ml-1 opacity-50 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                </button>
+
+                <div className="absolute top-full left-0 mt-2 w-56 bg-slate-800 rounded-xl shadow-2xl border border-slate-700/50 overflow-hidden opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 transform origin-top-left">
+                  <div className="p-1 max-h-[80vh] overflow-y-auto custom-scrollbar">
+                    <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider px-3 py-2">Selecciona Universo</div>
+                    {(Object.keys(GAME_LABELS) as GameType[]).map((game) => (
+                      <button
+                        key={game}
+                        onClick={() => setGame(game)}
+                        className={`flex items-center w-full text-left px-3 py-2 text-sm rounded-lg transition-colors mb-0.5 ${currentGame === game ? 'bg-sky-600/20 text-sky-300 border border-sky-600/30' : 'text-slate-300 hover:bg-slate-700/50 hover:text-white'}`}
+                      >
+                        {currentGame === game && <div className="w-1.5 h-1.5 rounded-full bg-sky-400 mr-2 shadow-[0_0_8px_rgba(56,189,248,0.5)]"></div>}
+                        <span className={currentGame === game ? 'font-semibold' : ''}>{GAME_LABELS[game]}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* Navigation */}
@@ -235,33 +262,6 @@ const Header: React.FC<HeaderProps> = ({ isLoggedIn, userRole, userName = 'Jugad
                 Acceder
               </Link>
             )}
-          </div>
-        </div>
-
-        {/* Game Selector Row - Centered below logo */}
-        <div className="flex justify-center py-2 border-t border-slate-700/30">
-          <div className="relative group">
-            <button className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-300 hover:text-white transition-colors bg-slate-800/80 px-4 py-2 rounded-full border border-slate-700 hover:border-sky-500/50 hover:bg-slate-700/50 hover:shadow-lg hover:shadow-sky-900/10">
-              <span className="text-[10px] text-slate-500">Mundo:</span>
-              <span className="text-sky-400">{GAME_LABELS[currentGame]}</span>
-              <svg className="w-3 h-3 ml-1 opacity-50 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
-            </button>
-
-            <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 w-56 bg-slate-800 rounded-xl shadow-2xl border border-slate-700/50 overflow-hidden opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
-              <div className="p-1 max-h-[80vh] overflow-y-auto custom-scrollbar">
-                <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider px-3 py-2">Selecciona Universo</div>
-                {(Object.keys(GAME_LABELS) as GameType[]).map((game) => (
-                  <button
-                    key={game}
-                    onClick={() => setGame(game)}
-                    className={`flex items-center w-full text-left px-3 py-2 text-sm rounded-lg transition-colors mb-0.5 ${currentGame === game ? 'bg-sky-600/20 text-sky-300 border border-sky-600/30' : 'text-slate-300 hover:bg-slate-700/50 hover:text-white'}`}
-                  >
-                    {currentGame === game && <div className="w-1.5 h-1.5 rounded-full bg-sky-400 mr-2 shadow-[0_0_8px_rgba(56,189,248,0.5)]"></div>}
-                    <span className={currentGame === game ? 'font-semibold' : ''}>{GAME_LABELS[game]}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
           </div>
         </div>
       </div>
