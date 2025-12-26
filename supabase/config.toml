@@ -1,0 +1,8 @@
+# Supabase Edge Functions Configuration
+# This file is used by Supabase CLI to deploy functions
+
+[functions.create-subscription]
+verify_jwt = false
+
+[functions.webhook-handler]
+verify_jwt = false
