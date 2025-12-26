@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '../supabaseClient';
 import { toast } from 'sonner';
 import EventPreferencesModal from '../components/EventPreferencesModal';
+import { useGame } from '../context/GameContext';
+import { GAME_LABELS } from '../types';
 
 interface CalendarEvent {
     id: string;
@@ -17,6 +19,7 @@ interface CalendarEvent {
 }
 
 const CalendarPage: React.FC = () => {
+    const { currentGame } = useGame();
     const [currentDate, setCurrentDate] = useState(new Date());
     const [events, setEvents] = useState<CalendarEvent[]>([]);
     const [recommendedEvents, setRecommendedEvents] = useState<CalendarEvent[]>([]);
@@ -27,21 +30,36 @@ const CalendarPage: React.FC = () => {
     useEffect(() => {
         fetchEventsForMonth();
         fetchRecommendedEvents();
-    }, [currentDate]);
+    }, [currentDate, currentGame]);
 
     const fetchEventsForMonth = async () => {
         setLoading(true);
         try {
-            const year = currentDate.getFullYear();
-            const month = currentDate.getMonth() + 1;
-
-            const { data, error } = await supabase.rpc('get_events_by_month', {
-                p_year: year,
-                p_month: month
+            const { data, error } = await supabase.rpc('get_scheduled_events_with_registrations', {
+                p_game_type: currentGame
             });
 
             if (error) throw error;
-            setEvents(data || []);
+
+            // Filter events for current month
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+            const filteredEvents = (data || []).filter((event: any) => {
+                const eventDate = new Date(event.date);
+                return eventDate.getFullYear() === year && eventDate.getMonth() === month;
+            });
+
+            setEvents(filteredEvents.map((e: any) => ({
+                id: e.id,
+                title: e.title,
+                date: e.date,
+                event_time: e.event_time,
+                store_name: e.store_name,
+                format: e.format,
+                registration_count: e.registration_count,
+                max_players: e.max_players,
+                is_user_registered: e.is_user_registered
+            })));
         } catch (error) {
             console.error('Error fetching events:', error);
             toast.error('Error al cargar eventos');
@@ -53,15 +71,38 @@ const CalendarPage: React.FC = () => {
     const fetchRecommendedEvents = async () => {
         try {
             const { data: { user } } = await supabase.auth.getUser();
-            if (!user) return;
+            if (!user) {
+                setRecommendedEvents([]);
+                return;
+            }
 
-            const { data, error } = await supabase.rpc('get_personalized_events', {
-                p_user_id: user.id,
-                p_limit: 10
+            // Get all upcoming events for current game
+            const { data, error } = await supabase.rpc('get_scheduled_events_with_registrations', {
+                p_game_type: currentGame
             });
 
             if (error) throw error;
-            setRecommendedEvents(data || []);
+
+            // Filter to upcoming events only and limit to 10
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            const upcoming = (data || []).filter((event: any) => {
+                const eventDate = new Date(event.date);
+                return eventDate >= today;
+            }).slice(0, 10);
+
+            setRecommendedEvents(upcoming.map((e: any) => ({
+                id: e.id,
+                title: e.title,
+                date: e.date,
+                event_time: e.event_time,
+                store_name: e.store_name,
+                format: e.format,
+                registration_count: e.registration_count,
+                max_players: e.max_players,
+                is_user_registered: e.is_user_registered
+            })));
         } catch (error) {
             console.error('Error fetching recommended events:', error);
         }
@@ -130,7 +171,7 @@ const CalendarPage: React.FC = () => {
                 <div className="flex justify-between items-center mb-8">
                     <div>
                         <h1 className="text-4xl font-bold mb-2">Calendario de Eventos</h1>
-                        <p className="text-slate-400">Encuentra torneos y eventos de Magic: The Gathering</p>
+                        <p className="text-slate-400">Encuentra torneos y eventos de {GAME_LABELS[currentGame]}</p>
                     </div>
                     <button
                         onClick={() => setShowPreferences(true)}
@@ -221,10 +262,10 @@ const CalendarPage: React.FC = () => {
                                     <div
                                         key={index}
                                         className={`min-h-24 p-2 rounded-lg border transition-colors ${date
-                                                ? today
-                                                    ? 'bg-sky-900/30 border-sky-500'
-                                                    : 'bg-slate-700/30 border-slate-600 hover:border-slate-500'
-                                                : 'bg-transparent border-transparent'
+                                            ? today
+                                                ? 'bg-sky-900/30 border-sky-500'
+                                                : 'bg-slate-700/30 border-slate-600 hover:border-slate-500'
+                                            : 'bg-transparent border-transparent'
                                             }`}
                                     >
                                         {date && (
