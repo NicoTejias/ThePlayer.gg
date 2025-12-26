@@ -418,9 +418,42 @@ const AppContent: React.FC = () => {
 
           console.log("Creating profile with role:", userRole, "for:", fullName);
 
+          // Generate unique username by checking for duplicates
+          let username = fullName;
+          let attempt = 0;
+          let isUnique = false;
+
+          while (!isUnique && attempt < 10) {
+            const { data: existingUser, error: checkError } = await supabase
+              .from('profiles')
+              .select('id')
+              .eq('username', username)
+              .maybeSingle();
+
+            if (checkError) {
+              console.error("Error checking username uniqueness:", checkError);
+              break;
+            }
+
+            if (!existingUser) {
+              isUnique = true;
+              console.log("Unique username found:", username);
+            } else {
+              attempt++;
+              username = `${fullName}${attempt}`;
+              console.log("Username taken, trying:", username);
+            }
+          }
+
+          // If still not unique after 10 attempts, append timestamp
+          if (!isUnique) {
+            username = `${fullName}_${Date.now().toString().slice(-6)}`;
+            console.log("Using timestamp-based username:", username);
+          }
+
           const newProfile = {
             id: session.user.id,
-            username: fullName,
+            username: username,
             role: userRole,
             email: session.user.email,
             avatar_url: session.user.user_metadata.avatar_url || session.user.user_metadata.picture,
@@ -442,11 +475,11 @@ const AppContent: React.FC = () => {
             setUserProfile(newProfile);
             // toast.error('Error al crear perfil. Contacta al administrador.');
           } else {
-            console.log("Profile created successfully for:", fullName);
+            console.log("Profile created successfully for:", username);
             setUserRole(userRole);
             setUserProfile(newProfile);
             localStorage.removeItem('signup_role');
-            // toast.success(`¡Bienvenido, ${fullName}!`);
+            // toast.success(`¡Bienvenido, ${username}!`);
           }
         }
       } else {

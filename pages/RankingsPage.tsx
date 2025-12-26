@@ -5,6 +5,7 @@ import TrophyIcon from '../components/icons/TrophyIcon';
 import SparklesIcon from '../components/icons/SparklesIcon';
 import UsersIcon from '../components/icons/UserIcon';
 import { useGame } from '../context/GameContext';
+import ProBadge from '../components/ProBadge';
 
 interface RankingsPageProps {
     players: PlayerProfile[];
@@ -127,7 +128,12 @@ const RankingsPage: React.FC<RankingsPageProps> = ({ players, teams }) => {
                                     {pwpRanking.map((player, index) => (
                                         <tr key={player.id} className="hover:bg-slate-700/40 transition-colors">
                                             <td className="px-6 py-4 whitespace-nowrap font-bold text-slate-400">{index + 1}</td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-white font-medium">{player.name}</td>
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <div className="flex items-center gap-2">
+                                                    <span className="text-white font-medium">{player.name}</span>
+                                                    {player.is_pro && <ProBadge size="small" />}
+                                                </div>
+                                            </td>
                                             <td className="px-6 py-4 whitespace-nowrap">
                                                 {player.teamId ? (
                                                     <Link to={`/equipo/${player.teamId}`} className="px-2 inline-flex text-xs font-semibold rounded-full bg-sky-500/10 text-sky-400 hover:bg-sky-500/20 transition-colors">
@@ -167,7 +173,12 @@ const RankingsPage: React.FC<RankingsPageProps> = ({ players, teams }) => {
                                     {winRateRanking.map((player, index) => (
                                         <tr key={`${player.id}-wr`} className="hover:bg-slate-700/40 transition-colors">
                                             <td className="px-6 py-4 whitespace-nowrap font-bold text-slate-400">{index + 1}</td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-white font-medium">{player.name}</td>
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <div className="flex items-center gap-2">
+                                                    <span className="text-white font-medium">{player.name}</span>
+                                                    {player.is_pro && <ProBadge size="small" />}
+                                                </div>
+                                            </td>
                                             <td className="px-6 py-4 whitespace-nowrap">
                                                 {player.teamId ? (
                                                     <Link to={`/equipo/${player.teamId}`} className="px-2 inline-flex text-xs font-semibold rounded-full bg-sky-500/10 text-sky-400 hover:bg-sky-500/20 transition-colors">
