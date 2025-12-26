@@ -58,19 +58,42 @@
   --color-accent-hover: #0891b2;
 }
 
-/* Tailwind v4 Configuration - Override utilities to use dynamic vars */
-@theme {
-  --color-slate-900: var(--bg-base);
-  --color-slate-800: var(--bg-secondary);
-  --color-sky-500: var(--color-accent);
-  --color-sky-600: var(--color-accent-hover);
-  --color-blue-500: var(--color-accent);
-  --color-blue-600: var(--color-accent-hover);
+/* Override Tailwind utilities to use our dynamic variables */
+@layer utilities {
+  .bg-slate-900 {
+    background-color: var(--bg-base) !important;
+  }
 
-  /* Retain legacy custom colors mapped to theme */
-  --color-player-dark: var(--bg-base);
-  --color-player-secondary: var(--bg-secondary);
-  --color-player-accent: var(--color-accent);
+  .bg-slate-800 {
+    background-color: var(--bg-secondary) !important;
+  }
+
+  .text-sky-500,
+  .text-blue-500 {
+    color: var(--color-accent) !important;
+  }
+
+  .bg-sky-500,
+  .bg-blue-500 {
+    background-color: var(--color-accent) !important;
+  }
+
+  .bg-sky-600,
+  .bg-blue-600,
+  .hover\:bg-sky-500:hover,
+  .hover\:bg-blue-500:hover {
+    background-color: var(--color-accent-hover) !important;
+  }
+
+  .border-sky-500,
+  .border-blue-500 {
+    border-color: var(--color-accent) !important;
+  }
+
+  .ring-sky-500,
+  .ring-blue-500 {
+    --tw-ring-color: var(--color-accent) !important;
+  }
 }
 
 body {
