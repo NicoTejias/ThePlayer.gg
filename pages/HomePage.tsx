@@ -4,8 +4,9 @@ import type { RankingEntry, CommunityEvent, MediaArticle, MarketplacePost, WinRa
 import Card from '../components/Card';
 import TrophyIcon from '../components/icons/TrophyIcon';
 import SparklesIcon from '../components/icons/SparklesIcon';
-import UsersIcon from '../components/icons/UserIcon'; // Ensure this matches existing import if present or add it
+import UsersIcon from '../components/icons/UserIcon';
 import { supabase } from '../supabaseClient';
+import { useGame } from '../context/GameContext';
 
 const CountUp: React.FC<{ end: number, duration?: number }> = ({ end, duration = 2000 }) => {
   const [count, setCount] = useState(0);
@@ -81,6 +82,7 @@ interface HomePageProps {
 }
 
 const HomePage: React.FC<HomePageProps> = ({ players, events }) => {
+  const { currentGame } = useGame();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [stats, setStats] = useState({ stores: 0, players: 0, tournaments: 0, matches: 0 });
 
@@ -91,8 +93,12 @@ const HomePage: React.FC<HomePageProps> = ({ players, events }) => {
         const [stores, players, tournaments, results] = await Promise.all([
           supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'store'),
           supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'player'),
-          supabase.from('tournaments').select('*', { count: 'exact', head: true }),
-          supabase.from('tournament_results').select('*', { count: 'exact', head: true })
+          supabase.from('tournaments')
+            .select('*', { count: 'exact', head: true })
+            .eq('game_type', currentGame),
+          supabase.from('tournament_results')
+            .select('id, tournaments!inner(game_type)', { count: 'exact', head: true })
+            .eq('tournaments.game_type', currentGame)
         ]);
 
         setStats({
@@ -105,8 +111,9 @@ const HomePage: React.FC<HomePageProps> = ({ players, events }) => {
         console.error("Error fetching stats", e);
       }
     };
+
     fetchStats();
-  }, []);
+  }, [currentGame]);
 
   // Auto-slide effect
   useEffect(() => {

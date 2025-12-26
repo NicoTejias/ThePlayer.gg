@@ -4,6 +4,7 @@ import type { PlayerProfile, Team } from '../types';
 import TrophyIcon from '../components/icons/TrophyIcon';
 import SparklesIcon from '../components/icons/SparklesIcon';
 import UsersIcon from '../components/icons/UserIcon';
+import { useGame } from '../context/GameContext';
 
 interface RankingsPageProps {
     players: PlayerProfile[];
@@ -11,7 +12,24 @@ interface RankingsPageProps {
 }
 
 const RankingsPage: React.FC<RankingsPageProps> = ({ players, teams }) => {
+    const { currentGame } = useGame();
     const [activeTab, setActiveTab] = useState<'individual' | 'team'>('individual');
+
+    const getPointsLabel = () => {
+        switch (currentGame) {
+            case 'mtg': return 'PWP';
+            case 'pokemon': return 'CP';
+            default: return 'Puntos';
+        }
+    };
+
+    const getRankingTitle = () => {
+        switch (currentGame) {
+            case 'mtg': return 'Player Latam Series';
+            default: return `Ranking ${currentGame === 'pokemon' ? 'Pokémon' : 'General'}`;
+        }
+    };
+
 
     const pwpRanking = useMemo(() => {
         return [...players]
@@ -91,8 +109,8 @@ const RankingsPage: React.FC<RankingsPageProps> = ({ players, teams }) => {
                     {/* Ranking PWP */}
                     <div className="space-y-4 animate-fade-in-up">
                         <div className="text-center md:text-left h-28 flex flex-col justify-center">
-                            <h2 className="text-3xl font-bold text-white uppercase tracking-wider">Player Latam Series</h2>
-                            <p className="text-md text-slate-400 mt-1">Suma de PWP obtenidos en torneos oficiales.</p>
+                            <h2 className="text-3xl font-bold text-white uppercase tracking-wider">{getRankingTitle()}</h2>
+                            <p className="text-md text-slate-400 mt-1">Suma de {getPointsLabel()} obtenidos en torneos oficiales.</p>
                         </div>
                         {/* Tab Content here (Individual Table) */}
                         <div className="overflow-x-auto bg-slate-800 rounded-lg shadow-xl border border-slate-700">
@@ -121,7 +139,7 @@ const RankingsPage: React.FC<RankingsPageProps> = ({ players, teams }) => {
                                                     </span>
                                                 )}
                                             </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-right text-sky-400 font-bold">{player.pwp} pts</td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-right text-sky-400 font-bold">{player.pwp} {getPointsLabel()}</td>
                                         </tr>
                                     ))}
                                 </tbody>

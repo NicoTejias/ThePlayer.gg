@@ -8,6 +8,7 @@ import { parseMeleeCSV } from '../utils/CSVParser';
 import { parseEventLinkHtml } from '../utils/HtmlParser';
 import { checkTournamentIntegrity, IntegrityWarning, getTournamentFingerprint } from '../utils/IntegrityChecker';
 import { supabase } from '../supabaseClient';
+import { useGame } from '../context/GameContext';
 
 interface StoreDashboardPageProps {
     onTournamentUpload: (tournamentData: Omit<TournamentResult, 'id'>, players: TournamentParseResult[]) => void;
@@ -19,6 +20,7 @@ interface StoreDashboardPageProps {
 }
 
 const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpload, onDeleteTournament, userRole, tournaments, storeStatus, storeName }) => {
+    const { currentGame } = useGame();
     const [step, setStep] = useState<'upload' | 'confirm'>('upload');
     const [uploadMethod, setUploadMethod] = useState<'text'>('text');
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -468,7 +470,7 @@ const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpl
                                             <tr>
                                                 <th className="px-4 py-2 text-left text-xs font-medium text-slate-300 uppercase">Jugador</th>
                                                 <th className="px-4 py-2 text-center text-xs font-medium text-slate-300 uppercase">Record</th>
-                                                <th className="px-4 py-2 text-right text-xs font-medium text-slate-300 uppercase">PWP</th>
+                                                <th className="px-4 py-2 text-right text-xs font-medium text-slate-300 uppercase">{currentGame === 'mtg' ? 'PWP' : 'Puntos'}</th>
                                             </tr>
                                         </thead>
                                         <tbody className="divide-y divide-slate-700">
