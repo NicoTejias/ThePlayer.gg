@@ -58,6 +58,21 @@
   --color-accent-hover: #0891b2;
 }
 
+/* Tailwind v4 Configuration - Override utilities to use dynamic vars */
+@theme {
+  --color-slate-900: var(--bg-base);
+  --color-slate-800: var(--bg-secondary);
+  --color-sky-500: var(--color-accent);
+  --color-sky-600: var(--color-accent-hover);
+  --color-blue-500: var(--color-accent);
+  --color-blue-600: var(--color-accent-hover);
+
+  /* Retain legacy custom colors mapped to theme */
+  --color-player-dark: var(--bg-base);
+  --color-player-secondary: var(--bg-secondary);
+  --color-player-accent: var(--color-accent);
+}
+
 body {
   margin: 0;
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
