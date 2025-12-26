@@ -77,34 +77,6 @@ const AppContent: React.FC = () => {
     fetchData();
   }, [currentGame]); // Re-fetch when game changes
 
-  // Auth State Listener - Handle Google OAuth and initial session
-  useEffect(() => {
-    // Check current session on mount
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      console.log("Initial session check:", session ? "Session found" : "No session");
-      if (session) {
-        handleSessionState(session);
-      } else {
-        setIsAuthLoading(false);
-      }
-    });
-
-    // Listen for auth changes (handles OAuth callbacks)
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      console.log("Auth state changed:", _event, session ? "Session exists" : "No session");
-      if (session) {
-        handleSessionState(session);
-      } else {
-        setIsLoggedIn(false);
-        setUserRole(null);
-        setUserProfile(null);
-        setIsAuthLoading(false);
-      }
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
-
   useEffect(() => {
     checkYouTubeLiveStatus();
     // Check every 5 minutes
