@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../supabaseClient';
+import { useGame } from '../context/GameContext';
 import UserIcon from '../components/icons/UserIcon';
 import MapPinIcon from '../components/icons/MapPinIcon';
 import CreateListingModal from '../components/CreateListingModal';
@@ -42,6 +43,7 @@ const getTypeLabel = (type: string) => {
 };
 
 const MarketplacePage: React.FC = () => {
+    const { currentGame } = useGame();
     const [listings, setListings] = useState<Listing[]>([]);
     const [loading, setLoading] = useState(true);
     const [showCreateModal, setShowCreateModal] = useState(false);
@@ -49,12 +51,11 @@ const MarketplacePage: React.FC = () => {
     // Filters
     const [searchQuery, setSearchQuery] = useState('');
     const [filterType, setFilterType] = useState('');
-    const [filterGame, setFilterGame] = useState('');
     const [sortBy, setSortBy] = useState('recent');
 
     useEffect(() => {
         fetchListings();
-    }, [searchQuery, filterType, filterGame, sortBy]);
+    }, [searchQuery, filterType, currentGame, sortBy]);
 
     const fetchListings = async () => {
         setLoading(true);
@@ -62,7 +63,7 @@ const MarketplacePage: React.FC = () => {
             const { data, error } = await supabase.rpc('search_marketplace_listings', {
                 p_query: searchQuery || null,
                 p_type: filterType || null,
-                p_game: filterGame || null,
+                p_game_type: currentGame, // USAR CONTEXT
                 p_sort: sortBy
             });
 
@@ -115,18 +116,7 @@ const MarketplacePage: React.FC = () => {
                     <option value="buy">Compra</option>
                     <option value="trade">Cambio</option>
                 </select>
-                <select
-                    value={filterGame}
-                    onChange={(e) => setFilterGame(e.target.value)}
-                    className="bg-slate-900/60 text-white rounded px-3 py-2 focus:outline-none border border-slate-700 text-sm"
-                >
-                    <option value="">Todos los Juegos</option>
-                    <option value="Magic: The Gathering">Magic: The Gathering</option>
-                    <option value="Pokémon TCG">Pokémon TCG</option>
-                    <option value="Yu-Gi-Oh!">Yu-Gi-Oh!</option>
-                    <option value="One Piece TCG">One Piece TCG</option>
-                    <option value="Lorcana">Lorcana</option>
-                </select>
+                {/* Game Filter removed - controlled globally */}
                 <select
                     value={sortBy}
                     onChange={(e) => setSortBy(e.target.value)}

@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useGame } from '../context/GameContext';
+import { GAME_LABELS } from '../types';
 
 interface ScheduleTournamentModalProps {
     isOpen: boolean;
@@ -7,6 +9,7 @@ interface ScheduleTournamentModalProps {
 }
 
 const ScheduleTournamentModal: React.FC<ScheduleTournamentModalProps> = ({ isOpen, onClose, onSchedule }) => {
+    const { currentGame } = useGame();
     const [formData, setFormData] = useState({
         title: '',
         date: '',
@@ -17,8 +20,14 @@ const ScheduleTournamentModal: React.FC<ScheduleTournamentModalProps> = ({ isOpe
         recurring: false,
         recurrenceType: 'weekly',
         recurrenceEnd: '',
-        description: ''
+        description: '',
+        game_type: currentGame
     });
+
+    // Update game_type when modal opens or context changes
+    useEffect(() => {
+        setFormData(prev => ({ ...prev, game_type: currentGame }));
+    }, [currentGame, isOpen]);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -35,7 +44,8 @@ const ScheduleTournamentModal: React.FC<ScheduleTournamentModalProps> = ({ isOpe
             recurring: false,
             recurrenceType: 'weekly',
             recurrenceEnd: '',
-            description: ''
+            description: '',
+            game_type: currentGame
         });
     };
 
@@ -112,14 +122,36 @@ const ScheduleTournamentModal: React.FC<ScheduleTournamentModalProps> = ({ isOpe
                             onChange={(e) => setFormData({ ...formData, format: e.target.value })}
                             className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-green-500"
                         >
-                            <option value="Standard">Standard</option>
-                            <option value="Modern">Modern</option>
-                            <option value="Pioneer">Pioneer</option>
-                            <option value="Legacy">Legacy</option>
-                            <option value="Pauper">Pauper</option>
-                            <option value="Commander">Commander</option>
-                            <option value="Draft">Draft</option>
-                            <option value="Sealed">Sealed</option>
+                            {currentGame === 'mtg' && (
+                                <>
+                                    <option value="Standard">Standard</option>
+                                    <option value="Modern">Modern</option>
+                                    <option value="Pioneer">Pioneer</option>
+                                    <option value="Legacy">Legacy</option>
+                                    <option value="Pauper">Pauper</option>
+                                    <option value="Commander">Commander</option>
+                                    <option value="Draft">Draft</option>
+                                    <option value="Sealed">Sealed</option>
+                                </>
+                            )}
+                            {currentGame === 'pokemon' && (
+                                <>
+                                    <option value="Standard">Standard</option>
+                                    <option value="Expanded">Expanded</option>
+                                    <option value="Unlimited">Unlimited</option>
+                                </>
+                            )}
+                            {currentGame === 'one_piece' && (
+                                <>
+                                    <option value="Standard">Standard</option>
+                                    <option value="Sealed">Sealed</option>
+                                    <option value="Team Battle">Team Battle</option>
+                                </>
+                            )}
+                            {/* Fallback for others */}
+                            {!['mtg', 'pokemon', 'one_piece'].includes(currentGame) && (
+                                <option value="Standard">Standard</option>
+                            )}
                         </select>
                     </div>
 

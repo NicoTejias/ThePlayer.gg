@@ -331,7 +331,9 @@ const AppContent: React.FC = () => {
 
       // 3. Fetch Scheduled Events (eventos agendados) con contador de inscritos
       const { data: scheduledData, error: scheduledError } = await supabase
-        .rpc('get_scheduled_events_with_registrations');
+        .rpc('get_scheduled_events_with_registrations', {
+          p_game_type: currentGame
+        });
 
       if (scheduledError) {
         console.error('Error fetching scheduled events:', scheduledError);

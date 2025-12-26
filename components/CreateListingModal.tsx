@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { supabase } from '../supabaseClient';
+import { useGame } from '../context/GameContext';
 import { toast } from 'sonner';
 import CardSearchInput from './CardSearchInput';
 import type { CardSearchResult } from '../utils/ScryfallApi';
@@ -49,6 +50,7 @@ const CONDITIONS = [
 ];
 
 const CreateListingModal: React.FC<CreateListingModalProps> = ({ isOpen, onClose, onSuccess, editListing }) => {
+    const { currentGame } = useGame();
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     // Form state
@@ -56,10 +58,20 @@ const CreateListingModal: React.FC<CreateListingModalProps> = ({ isOpen, onClose
     const [description, setDescription] = useState(editListing?.description || '');
     const [listingType, setListingType] = useState<'sale' | 'buy' | 'trade'>(editListing?.listing_type || 'sale');
     const [price, setPrice] = useState(editListing?.price || '');
-    const [game, setGame] = useState(editListing?.game || 'Magic: The Gathering');
+    // Game locks to current game context
     const [format, setFormat] = useState(editListing?.format || '');
     const [condition, setCondition] = useState(editListing?.condition || '');
     const [selectedCards, setSelectedCards] = useState<SelectedCard[]>([]);
+
+    const resetForm = () => {
+        setTitle('');
+        setDescription('');
+        setListingType('sale');
+        setPrice('');
+        setFormat('');
+        setCondition('');
+        setSelectedCards([]);
+    };
 
     if (!isOpen) return null;
 
@@ -108,10 +120,8 @@ const CreateListingModal: React.FC<CreateListingModalProps> = ({ isOpen, onClose
             toast.error('El título es requerido');
             return;
         }
-        if (!game) {
-            toast.error('Selecciona un juego');
-            return;
-        }
+
+        // Game check implicit via context
         if (listingType !== 'trade' && !price) {
             toast.error('El precio es requerido para ventas y compras');
             return;
@@ -139,7 +149,7 @@ const CreateListingModal: React.FC<CreateListingModalProps> = ({ isOpen, onClose
                     description: description.trim() || null,
                     listing_type: listingType,
                     price: listingType !== 'trade' ? parseFloat(price) : null,
-                    game,
+                    game_type: currentGame, // Use ENUM
                     format: format || null,
                     condition: condition || null,
                     quantity: totalQuantity
@@ -172,17 +182,6 @@ const CreateListingModal: React.FC<CreateListingModalProps> = ({ isOpen, onClose
         } finally {
             setIsSubmitting(false);
         }
-    };
-
-    const resetForm = () => {
-        setTitle('');
-        setDescription('');
-        setListingType('sale');
-        setPrice('');
-        setGame('Magic: The Gathering');
-        setFormat('');
-        setCondition('');
-        setSelectedCards([]);
     };
 
     const inputClass = "w-full px-4 py-2.5 bg-slate-900 border border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 transition text-white placeholder-slate-500";
@@ -232,8 +231,8 @@ const CreateListingModal: React.FC<CreateListingModalProps> = ({ isOpen, onClose
                         </div>
                     </div>
 
-                    {/* Buscar Cartas (Solo para Magic) */}
-                    {game === 'Magic: The Gathering' && (
+                    {/* Buscar Cartas (Solo para Magic) - Pending support for other APIs */}
+                    {currentGame === 'mtg' && (
                         <div>
                             <label className={labelClass}>Buscar Cartas *</label>
                             <CardSearchInput
@@ -324,15 +323,13 @@ const CreateListingModal: React.FC<CreateListingModalProps> = ({ isOpen, onClose
                     {/* Juego y Formato */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label className={labelClass}>Juego *</label>
-                            <select
-                                value={game}
-                                onChange={(e) => setGame(e.target.value)}
-                                className={inputClass}
-                                required
-                            >
-                                {GAMES.map(g => <option key={g} value={g}>{g}</option>)}
-                            </select>
+                            <label className={labelClass}>Juego</label>
+                            <input
+                                type="text"
+                                value={currentGame.toUpperCase()}
+                                disabled
+                                className={`${inputClass} opacity-60 cursor-not-allowed font-bold`}
+                            />
                         </div>
                         <div>
                             <label className={labelClass}>Formato</label>
