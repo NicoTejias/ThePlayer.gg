@@ -81,7 +81,7 @@ const Header: React.FC<HeaderProps> = ({ isLoggedIn, userRole, userName = 'Jugad
   const inactiveClass = "text-slate-300 hover:bg-slate-700 hover:text-white";
 
   return (
-    <header className="bg-slate-800/90 backdrop-blur-md shadow-lg sticky top-0 z-50 border-b border-slate-700/50">
+    <header className="bg-slate-800 backdrop-blur-md shadow-lg sticky top-0 z-50 border-b border-slate-700/50">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
