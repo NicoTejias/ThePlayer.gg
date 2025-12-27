@@ -46,9 +46,10 @@ interface HeaderProps {
   userName?: string; // New prop
   handleLogout: () => void;
   isLiveSignal?: boolean;
+  judgeRole?: string | null;
 }
 
-const Header: React.FC<HeaderProps> = ({ isLoggedIn, userRole, userName = 'Jugador', handleLogout, isLiveSignal = false }) => {
+const Header: React.FC<HeaderProps> = ({ isLoggedIn, userRole, userName = 'Jugador', handleLogout, isLiveSignal = false, judgeRole = null }) => {
   const { currentGame, setGame } = useGame();
   const [isProfileMenuOpen, setProfileMenuOpen] = useState(false);
   const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -221,6 +222,14 @@ const Header: React.FC<HeaderProps> = ({ isLoggedIn, userRole, userName = 'Jugad
                             <path fillRule="evenodd" d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z" clipRule="evenodd" />
                           </svg>
                           Panel Tienda (Test)
+                        </Link>
+                      )}
+                      {judgeRole === 'head_judge' && (
+                        <Link to="/dashboard/head-judge" className="flex items-center gap-3 px-4 py-2.5 text-sm text-purple-200 hover:bg-slate-700/50 transition-colors" role="menuitem">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+                          </svg>
+                          Dashboard de Jueces 👑
                         </Link>
                       )}
                       <Link to="/favorites" className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-200 hover:bg-slate-700/50 transition-colors" role="menuitem">
