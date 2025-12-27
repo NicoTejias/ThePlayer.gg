@@ -404,8 +404,8 @@ const AppContent: React.FC = () => {
               setShowOnboarding(true);
             }
 
-            // Detectar resultados sin reclamar
-            fetchUnclaimedResults(session.user.id);
+            // TODO: Implement fetchUnclaimedResults
+            // fetchUnclaimedResults(session.user.id);
           }
         } else {
           // Profile missing (could be new OAuth user)
