@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../supabaseClient';
 import JudgeProfileCard from '../components/JudgeProfileCard';
+import JudgeApplicationModal from '../components/JudgeApplicationModal';
 import { toast } from 'sonner';
 
 interface Judge {
@@ -20,10 +21,25 @@ const JudgesPage: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [selectedGame, setSelectedGame] = useState<string>('all');
     const [selectedRegion, setSelectedRegion] = useState<string>('all');
+    const [showApplicationModal, setShowApplicationModal] = useState(false);
+    const [currentUser, setCurrentUser] = useState<any>(null);
 
     useEffect(() => {
         fetchJudges();
+        fetchCurrentUser();
     }, []);
+
+    const fetchCurrentUser = async () => {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+            const { data: profile } = await supabase
+                .from('profiles')
+                .select('*')
+                .eq('id', user.id)
+                .single();
+            setCurrentUser(profile);
+        }
+    };
 
     const fetchJudges = async () => {
         try {
@@ -87,7 +103,10 @@ const JudgesPage: React.FC = () => {
                             torneos justos y de calidad.
                         </p>
                         <div className="flex flex-wrap gap-4 justify-center">
-                            <button className="px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold rounded-lg hover:from-purple-500 hover:to-pink-500 transition-all shadow-lg">
+                            <button
+                                onClick={() => currentUser ? setShowApplicationModal(true) : toast.error('Debes iniciar sesión para aplicar')}
+                                className="px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold rounded-lg hover:from-purple-500 hover:to-pink-500 transition-all shadow-lg"
+                            >
                                 Aplicar para ser Juez
                             </button>
                             <button className="px-6 py-3 bg-slate-800 border border-slate-700 text-white font-bold rounded-lg hover:bg-slate-700 transition-all">
@@ -191,6 +210,13 @@ const JudgesPage: React.FC = () => {
                     </div>
                 )}
             </div>
+
+            {/* Application Modal */}
+            <JudgeApplicationModal
+                isOpen={showApplicationModal}
+                onClose={() => setShowApplicationModal(false)}
+                userProfile={currentUser}
+            />
         </div>
     );
 };
