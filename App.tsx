@@ -754,6 +754,7 @@ const AppContent: React.FC = () => {
       <Header isLoggedIn={isLoggedIn} userRole={userRole} handleLogout={handleLogout}
         isLiveSignal={isLiveSignal}
         userName={userProfile?.username || 'Jugador'}
+        judgeRole={userProfile?.judge_role}
       />
 
       <OnboardingModal
