@@ -33,7 +33,7 @@ CREATE TABLE IF NOT EXISTS judge_applications (
   experience_years INTEGER,
   previous_certifications TEXT,
   motivation TEXT NOT NULL,
-  references TEXT,
+  referee_contacts TEXT,
   status TEXT DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'rejected')),
   reviewed_by UUID REFERENCES profiles(id),
   review_notes TEXT,
