@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '../supabaseClient';
 import JudgeProfileCard from '../components/JudgeProfileCard';
 import JudgeApplicationModal from '../components/JudgeApplicationModal';
+import JudgeRequirementsSection from '../components/JudgeRequirementsSection';
+import JudgeDocumentationSection from '../components/JudgeDocumentationSection';
+import WhyBecomeJudgeSection from '../components/WhyBecomeJudgeSection';
 import { toast } from 'sonner';
 
 interface Judge {
@@ -109,7 +112,10 @@ const JudgesPage: React.FC = () => {
                             >
                                 Aplicar para ser Juez
                             </button>
-                            <button className="px-6 py-3 bg-slate-800 border border-slate-700 text-white font-bold rounded-lg hover:bg-slate-700 transition-all">
+                            <button
+                                onClick={() => document.getElementById('requirements')?.scrollIntoView({ behavior: 'smooth' })}
+                                className="px-6 py-3 bg-slate-800 border border-slate-700 text-white font-bold rounded-lg hover:bg-slate-700 transition-all"
+                            >
                                 Ver Requisitos
                             </button>
                         </div>
@@ -139,9 +145,19 @@ const JudgesPage: React.FC = () => {
                 </div>
             </div>
 
+            {/* Why Become a Judge Section */}
+            <WhyBecomeJudgeSection />
+
+            {/* Requirements Section */}
+            <JudgeRequirementsSection />
+
+            {/* Documentation Section */}
+            <JudgeDocumentationSection />
+
             {/* Filters */}
             <div className="max-w-7xl mx-auto px-6 mb-8">
                 <div className="bg-slate-800 border border-slate-700 rounded-xl p-6">
+                    <h3 className="text-2xl font-bold text-white mb-6 text-center">Directorio de Jueces</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {/* Game Filter */}
                         <div>

@@ -410,24 +410,70 @@ const AppContent: React.FC = () => {
           }
         } else {
           // Profile missing (could be new OAuth user)
-          console.log("Profile not found, creating new profile for user:", session.user.email);
+          console.log("=== CREATING NEW PROFILE ===");
+          console.log("User email:", session.user.email);
+          console.log("User ID:", session.user.id);
+          console.log("Full user metadata:", session.user.user_metadata);
 
-          // Extract user info from Google OAuth metadata
-          const fullName = session.user.user_metadata.full_name ||
-            session.user.user_metadata.name ||
-            session.user.email?.split('@')[0] ||
-            'User';
+          // Extract user info from metadata with improved fallback logic
+          // Priority: full_name > name > given_name + family_name > email username
+          const metadata = session.user.user_metadata;
+
+          let fullName = metadata.full_name || metadata.name;
+
+          // If no full_name or name, try to construct from given_name and family_name
+          if (!fullName && (metadata.given_name || metadata.family_name)) {
+            fullName = [metadata.given_name, metadata.family_name]
+              .filter(Boolean)
+              .join(' ')
+              .trim();
+          }
+
+          // Last resort: use email username
+          if (!fullName) {
+            fullName = session.user.email?.split('@')[0] || 'Usuario';
+          }
+
+          console.log("Extracted full name:", fullName);
 
           // Get role from localStorage (set during signup) or default to 'player'
           const savedRole = localStorage.getItem('signup_role') as 'player' | 'store' | null;
           const userRole = savedRole || 'player';
 
-          console.log("Creating profile with role:", userRole, "for:", fullName);
+          console.log("Creating profile with role:", userRole);
+
+          // Extract first and last names with better logic
+          // Priority: given_name/family_name from Google > split full_name > use full_name for both
+          let firstName = metadata.given_name || '';
+          let lastName = metadata.family_name || '';
+
+          // If Google didn't provide given_name or family_name, try to split full_name
+          if (!firstName && !lastName && fullName) {
+            const nameParts = fullName.trim().split(' ');
+            if (nameParts.length >= 2) {
+              firstName = nameParts[0];
+              lastName = nameParts.slice(1).join(' ');
+            } else {
+              // If only one word, use it as first name
+              firstName = nameParts[0] || fullName;
+              lastName = '';
+            }
+          }
+
+          // Ensure we never have completely empty names
+          if (!firstName && !lastName) {
+            firstName = fullName || 'Usuario';
+            lastName = '';
+          }
+
+          console.log("First name:", firstName, "| Last name:", lastName);
 
           // Generate unique username by checking for duplicates
           let username = fullName;
           let attempt = 0;
           let isUnique = false;
+
+          console.log("Starting username uniqueness check with:", username);
 
           while (!isUnique && attempt < 10) {
             const { data: existingUser, error: checkError } = await supabase
@@ -443,7 +489,7 @@ const AppContent: React.FC = () => {
 
             if (!existingUser) {
               isUnique = true;
-              console.log("Unique username found:", username);
+              console.log("✓ Unique username found:", username);
             } else {
               attempt++;
               username = `${fullName}${attempt}`;
@@ -462,26 +508,33 @@ const AppContent: React.FC = () => {
             username: username,
             role: userRole,
             email: session.user.email,
-            avatar_url: session.user.user_metadata.avatar_url || session.user.user_metadata.picture,
-            first_name: session.user.user_metadata.given_name || fullName.split(' ')[0] || '',
-            last_name: session.user.user_metadata.family_name || fullName.split(' ').slice(1).join(' ') || '',
+            avatar_url: metadata.avatar_url || metadata.picture,
+            first_name: firstName,
+            last_name: lastName,
             pwp: 0,
             matches_won: 0,
             matches_lost: 0,
             matches_drew: 0
           };
 
+          console.log("Profile object to insert:", {
+            ...newProfile,
+            id: newProfile.id.substring(0, 8) + "..." // Truncate ID for readability
+          });
+
           const { error: insertError } = await supabase
             .from('profiles')
             .insert(newProfile);
 
           if (insertError) {
-            console.error("Error creating profile:", insertError);
+            console.error("❌ Error creating profile:", insertError);
             setUserRole(userRole);
             setUserProfile(newProfile);
             // toast.error('Error al crear perfil. Contacta al administrador.');
           } else {
-            console.log("Profile created successfully for:", username);
+            console.log("✓ Profile created successfully!");
+            console.log("Username:", username);
+            console.log("Role:", userRole);
             setUserRole(userRole);
             setUserProfile(newProfile);
             localStorage.removeItem('signup_role');
