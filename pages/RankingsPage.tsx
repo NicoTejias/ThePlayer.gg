@@ -126,7 +126,13 @@ const RankingsPage: React.FC<RankingsPageProps> = ({ players, teams }) => {
                                 </thead>
                                 <tbody className="divide-y divide-slate-700">
                                     {pwpRanking.map((player, index) => (
-                                        <tr key={player.id} className="hover:bg-slate-700/40 transition-colors">
+                                        <tr
+                                            key={player.id}
+                                            className={`transition-colors ${player.is_pro
+                                                ? 'bg-gradient-to-r from-purple-900/20 to-transparent border-l-4 border-purple-500 hover:from-purple-900/30'
+                                                : 'hover:bg-slate-700/40'
+                                                }`}
+                                        >
                                             <td className="px-6 py-4 whitespace-nowrap font-bold text-slate-400">{index + 1}</td>
                                             <td className="px-6 py-4 whitespace-nowrap">
                                                 <div className="flex items-center gap-2">
@@ -171,7 +177,13 @@ const RankingsPage: React.FC<RankingsPageProps> = ({ players, teams }) => {
                                 </thead>
                                 <tbody className="divide-y divide-slate-700">
                                     {winRateRanking.map((player, index) => (
-                                        <tr key={`${player.id}-wr`} className="hover:bg-slate-700/40 transition-colors">
+                                        <tr
+                                            key={`${player.id}-wr`}
+                                            className={`transition-colors ${player.is_pro
+                                                    ? 'bg-gradient-to-r from-purple-900/20 to-transparent border-l-4 border-purple-500 hover:from-purple-900/30'
+                                                    : 'hover:bg-slate-700/40'
+                                                }`}
+                                        >
                                             <td className="px-6 py-4 whitespace-nowrap font-bold text-slate-400">{index + 1}</td>
                                             <td className="px-6 py-4 whitespace-nowrap">
                                                 <div className="flex items-center gap-2">

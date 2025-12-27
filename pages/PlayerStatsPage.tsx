@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '../supabaseClient';
 import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { toast } from 'sonner';
+import ProBadge from '../components/ProBadge';
 
 interface StatsByFormat {
     format: string;
@@ -39,6 +40,7 @@ const PlayerStatsPage: React.FC = () => {
     const [metrics, setMetrics] = useState<PerformanceMetrics | null>(null);
     const [loading, setLoading] = useState(true);
     const [currentUser, setCurrentUser] = useState<any>(null);
+    const [profile, setProfile] = useState<any>(null);
 
     useEffect(() => {
         fetchCurrentUser();
@@ -53,6 +55,16 @@ const PlayerStatsPage: React.FC = () => {
     const fetchCurrentUser = async () => {
         const { data: { user } } = await supabase.auth.getUser();
         setCurrentUser(user);
+
+        if (user) {
+            // Fetch profile to check PRO status
+            const { data: profileData } = await supabase
+                .from('profiles')
+                .select('*')
+                .eq('id', user.id)
+                .single();
+            setProfile(profileData);
+        }
     };
 
     const fetchAllStats = async () => {
@@ -144,7 +156,10 @@ const PlayerStatsPage: React.FC = () => {
             <div className="max-w-7xl mx-auto">
                 {/* Header */}
                 <div className="mb-8">
-                    <h1 className="text-4xl font-bold mb-2">Estadísticas Avanzadas</h1>
+                    <div className="flex items-center gap-3 mb-2">
+                        <h1 className="text-4xl font-bold">Estadísticas Avanzadas</h1>
+                        {profile?.is_pro && <ProBadge />}
+                    </div>
                     <p className="text-slate-400">Análisis detallado de tu rendimiento en torneos</p>
                 </div>
 
@@ -214,6 +229,126 @@ const PlayerStatsPage: React.FC = () => {
                                 <p className="text-2xl font-bold">{metrics.worst_format}</p>
                             </div>
                         )}
+                    </div>
+                )}
+
+                {/* PRO Analytics Section */}
+                {profile?.is_pro ? (
+                    <div className="bg-gradient-to-br from-purple-900/30 to-pink-900/30 border-2 border-purple-500/50 rounded-xl p-8 mb-8">
+                        <div className="flex items-center gap-3 mb-6">
+                            <div className="w-12 h-12 bg-purple-500/20 rounded-lg flex items-center justify-center">
+                                <svg className="w-6 h-6 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <h2 className="text-2xl font-bold text-purple-300">PRO Analytics</h2>
+                                <p className="text-purple-400/80 text-sm">Estadísticas exclusivas para miembros PRO</p>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            {/* Consistency Score */}
+                            <div className="bg-slate-800/50 rounded-lg p-6 border border-purple-500/30">
+                                <div className="flex items-center gap-2 mb-3">
+                                    <svg className="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                                    </svg>
+                                    <span className="text-sm text-purple-300 font-semibold">Consistencia</span>
+                                </div>
+                                <p className="text-3xl font-bold text-white mb-1">
+                                    {metrics.total_tournaments > 0
+                                        ? ((metrics.average_pwp_per_tournament / 10) * 100).toFixed(0)
+                                        : 0}%
+                                </p>
+                                <p className="text-xs text-purple-400/70">Basado en PWP promedio</p>
+                            </div>
+
+                            {/* Tournament Participation Rate */}
+                            <div className="bg-slate-800/50 rounded-lg p-6 border border-purple-500/30">
+                                <div className="flex items-center gap-2 mb-3">
+                                    <svg className="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                    </svg>
+                                    <span className="text-sm text-purple-300 font-semibold">Torneos</span>
+                                </div>
+                                <p className="text-3xl font-bold text-white mb-1">{metrics.total_tournaments}</p>
+                                <p className="text-xs text-purple-400/70">Total participados</p>
+                            </div>
+
+                            {/* Performance Trend */}
+                            <div className="bg-slate-800/50 rounded-lg p-6 border border-purple-500/30">
+                                <div className="flex items-center gap-2 mb-3">
+                                    <svg className="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    <span className="text-sm text-purple-300 font-semibold">Tendencia</span>
+                                </div>
+                                <p className="text-3xl font-bold text-white mb-1">
+                                    {metrics.overall_win_rate >= 50 ? '📈' : '📊'}
+                                </p>
+                                <p className="text-xs text-purple-400/70">
+                                    {metrics.overall_win_rate >= 50 ? 'Positiva' : 'En desarrollo'}
+                                </p>
+                            </div>
+                        </div>
+
+                        {/* PRO Insights */}
+                        <div className="mt-6 bg-slate-800/30 rounded-lg p-6 border border-purple-500/20">
+                            <h3 className="text-lg font-semibold text-purple-300 mb-4 flex items-center gap-2">
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                Insights PRO
+                            </h3>
+                            <div className="space-y-3">
+                                <div className="flex items-start gap-3">
+                                    <div className="w-2 h-2 bg-purple-400 rounded-full mt-2"></div>
+                                    <p className="text-sm text-slate-300">
+                                        Tu win rate de <span className="font-bold text-purple-300">{metrics.overall_win_rate.toFixed(1)}%</span> está
+                                        {metrics.overall_win_rate >= 50 ? ' por encima' : ' por debajo'} del promedio competitivo (50%).
+                                    </p>
+                                </div>
+                                {metrics.best_format && (
+                                    <div className="flex items-start gap-3">
+                                        <div className="w-2 h-2 bg-purple-400 rounded-full mt-2"></div>
+                                        <p className="text-sm text-slate-300">
+                                            Destacas en <span className="font-bold text-purple-300">{metrics.best_format}</span>.
+                                            Considera especializarte en este formato.
+                                        </p>
+                                    </div>
+                                )}
+                                <div className="flex items-start gap-3">
+                                    <div className="w-2 h-2 bg-purple-400 rounded-full mt-2"></div>
+                                    <p className="text-sm text-slate-300">
+                                        Promedio de <span className="font-bold text-purple-300">{metrics.average_pwp_per_tournament.toFixed(1)} PWP</span> por torneo.
+                                        {metrics.average_pwp_per_tournament >= 5
+                                            ? ' ¡Excelente rendimiento!'
+                                            : ' Sigue mejorando para aumentar tu ranking.'}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                ) : (
+                    <div className="bg-gradient-to-br from-purple-900/20 to-pink-900/20 border-2 border-purple-500/30 rounded-xl p-8 mb-8">
+                        <div className="text-center">
+                            <div className="w-16 h-16 bg-purple-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <svg className="w-8 h-8 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                </svg>
+                            </div>
+                            <h3 className="text-2xl font-bold text-white mb-2">Desbloquea PRO Analytics</h3>
+                            <p className="text-slate-400 mb-6">
+                                Obtén insights avanzados, recomendaciones personalizadas y análisis de tendencias
+                            </p>
+                            <button
+                                onClick={() => window.location.href = '/#/dashboard/jugador'}
+                                className="px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold rounded-lg hover:from-purple-500 hover:to-pink-500 transition-all shadow-lg"
+                            >
+                                Hazte PRO
+                            </button>
+                        </div>
                     </div>
                 )}
 
