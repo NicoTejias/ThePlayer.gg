@@ -1,10 +1,11 @@
 -- =====================================================
--- SETUP COMPLETO: SISTEMA DE DISCIPLINA + FORO
+-- SETUP COMPLETO: SISTEMA DE DISCIPLINA + FORO (VERSIÓN FINAL)
 -- =====================================================
--- Ejecuta este script para reparar el error "relation judge_forum_threads does not exist"
--- y asegurar que todo el sistema funcione correctamente.
+-- Ejecuta este script para reparar TODOS los errores de tablas y funciones faltantes.
 
--- 1. CREACIÓN DE TABLAS DEL FORO (Si no existen)
+-- =====================================================
+-- 1. TABLAS DEL FORO
+-- =====================================================
 CREATE TABLE IF NOT EXISTS judge_forum_threads (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   author_id UUID REFERENCES profiles(id) NOT NULL,
@@ -25,39 +26,31 @@ CREATE TABLE IF NOT EXISTS judge_forum_posts (
   updated_at TIMESTAMP DEFAULT NOW()
 );
 
--- 2. POLÍTICAS DE SEGURIDAD (RLS)
+-- RLS FORO
 ALTER TABLE judge_forum_threads ENABLE ROW LEVEL SECURITY;
 ALTER TABLE judge_forum_posts ENABLE ROW LEVEL SECURITY;
 
--- Limpiar políticas antiguas para evitar duplicados
 DROP POLICY IF EXISTS "Judges can view threads" ON judge_forum_threads;
 DROP POLICY IF EXISTS "Judges can create threads" ON judge_forum_threads;
 DROP POLICY IF EXISTS "Judges can view posts" ON judge_forum_posts;
 DROP POLICY IF EXISTS "Judges can create posts" ON judge_forum_posts;
 
--- Crear nuevas políticas
 CREATE POLICY "Judges can view threads" ON judge_forum_threads
-  FOR SELECT USING (
-    EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND (judge_role IS NOT NULL OR role IN ('admin', 'organizer')))
-  );
+  FOR SELECT USING (EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND (judge_role IS NOT NULL OR role IN ('admin', 'organizer'))));
 
 CREATE POLICY "Judges can create threads" ON judge_forum_threads
-  FOR INSERT WITH CHECK (
-    EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND (judge_role IS NOT NULL OR role IN ('admin', 'organizer')))
-  );
+  FOR INSERT WITH CHECK (EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND (judge_role IS NOT NULL OR role IN ('admin', 'organizer'))));
 
 CREATE POLICY "Judges can view posts" ON judge_forum_posts
-  FOR SELECT USING (
-    EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND (judge_role IS NOT NULL OR role IN ('admin', 'organizer')))
-  );
+  FOR SELECT USING (EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND (judge_role IS NOT NULL OR role IN ('admin', 'organizer'))));
 
 CREATE POLICY "Judges can create posts" ON judge_forum_posts
-  FOR INSERT WITH CHECK (
-    EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND (judge_role IS NOT NULL OR role IN ('admin', 'organizer')))
-  );
+  FOR INSERT WITH CHECK (EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND (judge_role IS NOT NULL OR role IN ('admin', 'organizer'))));
 
--- 3. ACTUALIZACIÓN DE LA FUNCIÓN DE INFRACCIONES
--- Esta función crea la infracción Y automáticamente abre un hilo en el foro
+
+-- =====================================================
+-- 2. FUNCIÓN DE INFRACCIONES
+-- =====================================================
 CREATE OR REPLACE FUNCTION create_infraction(
   p_player_name TEXT,
   p_player_id UUID DEFAULT NULL,
@@ -76,7 +69,6 @@ DECLARE
   v_post_content TEXT;
   v_reporter_username TEXT;
 BEGIN
-  -- A. Crear Infracción
   INSERT INTO infractions (
     player_name, player_id, tournament_id, reported_by,
     infraction_type, severity, description, penalty_applied, game_type
@@ -86,13 +78,10 @@ BEGIN
   )
   RETURNING id INTO v_infraction_id;
 
-  -- B. Preparar datos para el Hilo Automático
-  -- Obtener nombre del juez
   SELECT username INTO v_reporter_username FROM profiles WHERE id = auth.uid();
   IF v_reporter_username IS NULL THEN v_reporter_username := 'Juez'; END IF;
 
   v_thread_title := 'Infracción: ' || p_player_name || ' - ' || INITCAP(REPLACE(p_infraction_type, '_', ' '));
-  
   v_post_content := '**Reporte Automático de Infracción**' || E'\n\n' ||
                     '**Jugador:** ' || p_player_name || E'\n' ||
                     '**Infracción:** ' || p_infraction_type || E'\n' ||
@@ -101,21 +90,57 @@ BEGIN
                     '**Descripción:**' || E'\n' || p_description || E'\n\n' ||
                     'Este hilo ha sido creado automáticamente para discusión entre jueces.';
 
-  -- C. Crear Hilo en el Foro
-  INSERT INTO judge_forum_threads (
-    author_id, title, category
-  ) VALUES (
-    auth.uid(), v_thread_title, 'rulings'
-  )
-  RETURNING id INTO v_thread_id;
-
-  -- D. Crear Primer Post
-  INSERT INTO judge_forum_posts (
-    thread_id, author_id, content
-  ) VALUES (
-    v_thread_id, auth.uid(), v_post_content
-  );
+  INSERT INTO judge_forum_threads (author_id, title, category) VALUES (auth.uid(), v_thread_title, 'rulings') RETURNING id INTO v_thread_id;
+  INSERT INTO judge_forum_posts (thread_id, author_id, content) VALUES (v_thread_id, auth.uid(), v_post_content);
   
   RETURN v_infraction_id;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+
+-- =====================================================
+-- 3. ACTUALIZACIÓN DE DISCIPLINE CASES (LO QUE FALTABA)
+-- =====================================================
+
+-- Agregar columnas necesarias si no existen
+DO $$ 
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'discipline_cases' AND column_name = 'witness_statement') THEN
+    ALTER TABLE discipline_cases ADD COLUMN witness_statement TEXT;
+  END IF;
+
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'discipline_cases' AND column_name = 'evidence_urls') THEN
+    ALTER TABLE discipline_cases ADD COLUMN evidence_urls TEXT[];
+  END IF;
+END $$;
+
+-- Función create_discipline_case actualizada
+CREATE OR REPLACE FUNCTION create_discipline_case(
+  p_infraction_id UUID DEFAULT NULL,
+  p_case_type TEXT DEFAULT 'dq_review',
+  p_accused_player_name TEXT DEFAULT '',
+  p_accused_player_id UUID DEFAULT NULL,
+  p_involved_judge_id UUID DEFAULT NULL,
+  p_judge_statement TEXT DEFAULT '',
+  p_additional_evidence TEXT DEFAULT NULL,
+  p_witness_statement TEXT DEFAULT NULL,
+  p_evidence_urls TEXT[] DEFAULT NULL
+)
+RETURNS UUID AS $$
+DECLARE
+  v_case_id UUID;
+BEGIN
+  INSERT INTO discipline_cases (
+    infraction_id, case_type, accused_player_name, accused_player_id,
+    involved_judge_id, judge_statement, additional_evidence, created_by,
+    witness_statement, evidence_urls
+  ) VALUES (
+    p_infraction_id, p_case_type, p_accused_player_name, p_accused_player_id,
+    p_involved_judge_id, p_judge_statement, p_additional_evidence, auth.uid(),
+    p_witness_statement, p_evidence_urls
+  )
+  RETURNING id INTO v_case_id;
+  
+  RETURN v_case_id;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
