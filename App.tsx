@@ -840,7 +840,7 @@ const AppContent: React.FC = () => {
 
       <main className="flex-grow container mx-auto px-4 py-8">
         <Routes>
-          <Route path="/" element={<HomePage players={players} events={communityEvents} />} />
+          <Route path="/" element={<HomePage players={players} events={communityEvents} session={userProfile ? { user: userProfile } : null} userRole={userRole} userId={userProfile?.id} />} />
           <Route path="/envivo" element={<LiveStreamPage />} />
           <Route path="/pls" element={<PLSPage />} />
           <Route path="/ranking/pwp" element={<RankingsPage players={players} teams={teams} />} />

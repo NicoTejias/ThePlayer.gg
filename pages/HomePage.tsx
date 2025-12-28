@@ -1,12 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import type { RankingEntry, CommunityEvent, MediaArticle, MarketplacePost, WinRateRankingEntry, PlayerProfile } from '../types';
-import Card from '../components/Card';
+import SimpleCard from '../components/SimpleCard';
 import TrophyIcon from '../components/icons/TrophyIcon';
 import SparklesIcon from '../components/icons/SparklesIcon';
 import UsersIcon from '../components/icons/UserIcon';
 import { supabase } from '../supabaseClient';
 import { useGame } from '../context/GameContext';
+import VisitorWidget from '../components/widgets/VisitorWidget';
+import PlayerWidget from '../components/widgets/PlayerWidget';
+import StoreWidget from '../components/widgets/StoreWidget';
+import JudgeWidget from '../components/widgets/JudgeWidget';
+import AdminWidget from '../components/widgets/AdminWidget';
 
 const CountUp: React.FC<{ end: number, duration?: number }> = ({ end, duration = 2000 }) => {
   const [count, setCount] = useState(0);
@@ -39,11 +44,7 @@ const mockEventsData: CommunityEvent[] = [
   { id: 'e3', title: 'RCQ Pioneer Qualifier', date: '2025-01-22', storeName: 'Entre Juegos', format: 'Pioneer', playerCount: 48, imageUrl: '' },
 ];
 
-const mockMarketplace: MarketplacePost[] = [
-  { id: '1', title: 'Busco Force of Will', type: 'Compra', seller: 'User123', region: 'Metropolitana', imageUrl: 'https://picsum.photos/seed/market1/400/300' },
-  { id: '2', title: 'Vendo fetchlands de Modern Horizons 2', type: 'Venta', seller: 'CardTraderCL', region: 'Valparaíso', imageUrl: 'https://picsum.photos/seed/market2/400/300' },
-  { id: '3', title: 'Cambio Ragavan por Solitude', type: 'Cambio', seller: 'ProPlayer', region: 'Biobío', imageUrl: 'https://picsum.photos/seed/market3/400/300' },
-];
+
 
 const sliderItems = [
   { id: 1, title: 'Últimas Noticias', link: '/media', imageUrl: 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?auto=format&fit=crop&q=80&w=800', color: 'from-blue-600/80' },
@@ -64,9 +65,12 @@ const SectionHeader: React.FC<{ title: string, linkTo: string }> = ({ title, lin
 interface HomePageProps {
   players: PlayerProfile[];
   events: CommunityEvent[];
+  session?: any;
+  userRole?: 'player' | 'store' | 'admin' | 'judge' | 'head_judge' | null;
+  userId?: string;
 }
 
-const HomePage: React.FC<HomePageProps> = ({ players, events }) => {
+const HomePage: React.FC<HomePageProps> = ({ players, events, session, userRole, userId }) => {
   const { currentGame } = useGame();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [latestNews, setLatestNews] = useState<MediaArticle[]>([]);
@@ -170,8 +174,8 @@ const HomePage: React.FC<HomePageProps> = ({ players, events }) => {
       };
     });
 
-  const combinedEvents = [...(events || []), ...mockEventsData];
-  const displayEvents = combinedEvents.slice(0, 6);
+  // Use real events if available, otherwise fallback to mock data
+  const displayEvents = (events && events.length > 0) ? events.slice(0, 4) : mockEventsData.slice(0, 4);
 
   if (loading) {
     return (
@@ -208,6 +212,13 @@ const HomePage: React.FC<HomePageProps> = ({ players, events }) => {
           ))}
         </div>
       </section>
+
+      {/* Role-Based Personalized Widget */}
+      {!session && <VisitorWidget />}
+      {session && userRole === 'player' && userId && <PlayerWidget userId={userId} />}
+      {session && userRole === 'store' && userId && <StoreWidget storeId={userId} />}
+      {session && (userRole === 'judge' || userRole === 'head_judge') && userId && <JudgeWidget judgeId={userId} />}
+      {session && userRole === 'admin' && <AdminWidget />}
 
       {/* Community Stats Section */}
       <section className="mt-24 mb-12 relative px-4">
@@ -274,7 +285,7 @@ const HomePage: React.FC<HomePageProps> = ({ players, events }) => {
           <SectionHeader title="Próximos Eventos" linkTo="/eventos" />
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {displayEvents.slice(0, 4).map((event) => (
-              <Card key={event.id} className="bg-slate-800/50 hover:bg-slate-800/70 transition-all border border-slate-700">
+              <SimpleCard key={event.id} className="bg-slate-800/50 hover:bg-slate-800/70 transition-all border border-slate-700">
                 <div className="p-4">
                   <h3 className="text-lg font-bold text-white mb-2 line-clamp-1">{event.title}</h3>
                   <p className="text-sm text-slate-400 mb-1">📍 {event.storeName}</p>
@@ -284,7 +295,7 @@ const HomePage: React.FC<HomePageProps> = ({ players, events }) => {
                     <span className="text-xs text-slate-500">{event.playerCount} jugadores</span>
                   </div>
                 </div>
-              </Card>
+              </SimpleCard>
             ))}
           </div>
         </section>
@@ -345,7 +356,7 @@ const HomePage: React.FC<HomePageProps> = ({ players, events }) => {
               <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3">Artículos</h3>
               <div className="space-y-3">
                 {(latestNews.length > 0 ? latestNews : mockArticles).slice(0, 3).map((article) => (
-                  <Card key={article.id} className="bg-slate-800/50 hover:bg-slate-800/70 transition-all border border-slate-700">
+                  <SimpleCard key={article.id} className="bg-slate-800/50 hover:bg-slate-800/70 transition-all border border-slate-700">
                     <div className="flex gap-3 p-3">
                       <div className="w-24 h-24 flex-shrink-0 rounded overflow-hidden">
                         <img src={article.image_url || article.imageUrl || ''} alt={article.title} className="w-full h-full object-cover" />
@@ -356,7 +367,7 @@ const HomePage: React.FC<HomePageProps> = ({ players, events }) => {
                         <p className="text-xs text-slate-400 line-clamp-2">{article.excerpt}</p>
                       </div>
                     </div>
-                  </Card>
+                  </SimpleCard>
                 ))}
               </div>
             </div>
@@ -367,7 +378,7 @@ const HomePage: React.FC<HomePageProps> = ({ players, events }) => {
               <div className="space-y-3">
                 {featuredContent.slice(0, 3).map((video) => (
                   <a key={video.id} href={video.link} className="block group">
-                    <Card className="bg-slate-800/50 hover:bg-slate-800/70 transition-all border border-slate-700">
+                    <SimpleCard className="bg-slate-800/50 hover:bg-slate-800/70 transition-all border border-slate-700">
                       <div className="flex gap-3 p-3">
                         <div className="w-32 h-20 flex-shrink-0 rounded overflow-hidden relative">
                           <img src={video.imageUrl} alt={video.title} className="w-full h-full object-cover" />
@@ -382,7 +393,7 @@ const HomePage: React.FC<HomePageProps> = ({ players, events }) => {
                           <p className="text-xs text-slate-500 mt-1">{video.date}</p>
                         </div>
                       </div>
-                    </Card>
+                    </SimpleCard>
                   </a>
                 ))}
               </div>
