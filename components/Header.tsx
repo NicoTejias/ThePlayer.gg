@@ -24,21 +24,6 @@ const NavLinks: NavLinkType[] = [
   { name: 'Ranking', path: '/ranking/pwp' },
   { name: 'Eventos', path: '/eventos' },
   { name: 'Calendario', path: '/calendario' },
-  {
-    name: 'Mundos',
-    path: '#', // Placeholder for top level
-    subItems: [
-      {
-        name: 'Magic',
-        path: '#',
-        subItems: [
-          { name: 'Commander', path: '/commander' },
-          { name: 'Pauper', path: '/pauper' },
-          { name: 'Premodern', path: '/premodern' },
-        ]
-      }
-    ]
-  },
   { name: 'Mercado TCG', path: '/mercado' },
   {
     name: 'Media',
@@ -178,18 +163,45 @@ const Header: React.FC<HeaderProps> = ({ isLoggedIn, userRole, userName = 'Jugad
                   <svg className="w-3 h-3 ml-1 opacity-50 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
                 </button>
 
-                <div className="absolute top-full left-0 mt-2 w-56 bg-slate-800 rounded-xl shadow-2xl border border-slate-700/50 overflow-hidden opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 transform origin-top-left">
+                <div className="absolute top-full left-0 mt-2 w-56 bg-slate-800 rounded-xl shadow-2xl border border-slate-700/50 overflow-visible opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 transform origin-top-left">
                   <div className="p-1 max-h-[80vh] overflow-y-auto custom-scrollbar">
                     <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider px-3 py-2">Selecciona Universo</div>
                     {(Object.keys(GAME_LABELS) as GameType[]).map((game) => (
-                      <button
-                        key={game}
-                        onClick={() => setGame(game)}
-                        className={`flex items-center w-full text-left px-3 py-2 text-sm rounded-lg transition-colors mb-0.5 ${currentGame === game ? 'bg-sky-600/20 text-sky-300 border border-sky-600/30' : 'text-slate-300 hover:bg-slate-700/50 hover:text-white'}`}
-                      >
-                        {currentGame === game && <div className="w-1.5 h-1.5 rounded-full bg-sky-400 mr-2 shadow-[0_0_8px_rgba(56,189,248,0.5)]"></div>}
-                        <span className={currentGame === game ? 'font-semibold' : ''}>{GAME_LABELS[game]}</span>
-                      </button>
+                      <div key={game} className="relative group/game">
+                        <button
+                          onClick={() => setGame(game)}
+                          className={`flex items-center justify-between w-full text-left px-3 py-2 text-sm rounded-lg transition-colors mb-0.5 ${currentGame === game ? 'bg-sky-600/20 text-sky-300 border border-sky-600/30' : 'text-slate-300 hover:bg-slate-700/50 hover:text-white'}`}
+                        >
+                          <span className="flex items-center">
+                            {currentGame === game && <div className="w-1.5 h-1.5 rounded-full bg-sky-400 mr-2 shadow-[0_0_8px_rgba(56,189,248,0.5)]"></div>}
+                            <span className={currentGame === game ? 'font-semibold' : ''}>{GAME_LABELS[game]}</span>
+                          </span>
+                          {/* Show arrow for Magic to indicate submenu */}
+                          {game === 'mtg' && (
+                            <svg className="w-3 h-3 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                            </svg>
+                          )}
+                        </button>
+
+                        {/* Submenu for Magic formats */}
+                        {game === 'mtg' && (
+                          <div className="absolute top-0 left-full ml-1 w-44 bg-slate-800 rounded-xl shadow-2xl border border-slate-700/50 opacity-0 invisible group-hover/game:opacity-100 group-hover/game:visible transition-all z-50">
+                            <div className="p-1">
+                              <div className="text-[10px] font-bold text-purple-400 uppercase tracking-wider px-3 py-2">Formatos Casuales</div>
+                              <Link to="/commander" className="block px-3 py-2 text-sm text-slate-300 hover:bg-slate-700/50 hover:text-sky-300 rounded-lg transition-colors">
+                                Commander
+                              </Link>
+                              <Link to="/pauper" className="block px-3 py-2 text-sm text-slate-300 hover:bg-slate-700/50 hover:text-sky-300 rounded-lg transition-colors">
+                                Pauper
+                              </Link>
+                              <Link to="/premodern" className="block px-3 py-2 text-sm text-slate-300 hover:bg-slate-700/50 hover:text-sky-300 rounded-lg transition-colors">
+                                Premodern
+                              </Link>
+                            </div>
+                          </div>
+                        )}
+                      </div>
                     ))}
                   </div>
                 </div>
