@@ -12,6 +12,7 @@ import PlayerWidget from '../components/widgets/PlayerWidget';
 import StoreWidget from '../components/widgets/StoreWidget';
 import JudgeWidget from '../components/widgets/JudgeWidget';
 import AdminWidget from '../components/widgets/AdminWidget';
+import QuickRegistrationModal from '../components/QuickRegistrationModal';
 
 const CountUp: React.FC<{ end: number, duration?: number }> = ({ end, duration = 2000 }) => {
   const [count, setCount] = useState(0);
@@ -77,6 +78,9 @@ const HomePage: React.FC<HomePageProps> = ({ players, events, session, userRole,
   const [featuredContent, setFeaturedContent] = useState<any[]>([]);
   const [stats, setStats] = useState({ totalPlayers: 0, registeredStores: 0, activeTournaments: 0, totalMatches: 0 });
   const [loading, setLoading] = useState(true);
+  const [registrations, setRegistrations] = useState<Set<string>>(new Set());
+  const [showRegModal, setShowRegModal] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState<any>(null);
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -120,6 +124,24 @@ const HomePage: React.FC<HomePageProps> = ({ players, events, session, userRole,
     const subscription = supabase.channel('public:profiles').on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, fetchStats).subscribe();
     return () => { supabase.removeChannel(subscription); };
   }, [currentGame]);
+
+  // Fetch user registrations if logged in
+  useEffect(() => {
+    const fetchRegistrations = async () => {
+      if (!userId) return;
+
+      const { data } = await supabase
+        .from('tournament_registrations')
+        .select('tournament_id')
+        .eq('player_id', userId);
+
+      if (data) {
+        setRegistrations(new Set(data.map(r => r.tournament_id)));
+      }
+    };
+
+    fetchRegistrations();
+  }, [userId]);
 
   // Auto-slide effect
   useEffect(() => {
@@ -292,7 +314,30 @@ const HomePage: React.FC<HomePageProps> = ({ players, events, session, userRole,
                   <p className="text-sm text-slate-400 mb-1">📅 {new Date(event.date).toLocaleDateString()}</p>
                   <div className="flex items-center justify-between mt-3 pt-3 border-t border-slate-700">
                     <span className="text-xs bg-blue-500/20 text-blue-300 px-2 py-1 rounded">{event.format}</span>
-                    <span className="text-xs text-slate-500">{event.playerCount} jugadores</span>
+                    <div className="flex items-center gap-2">
+                      {userRole === 'player' && userId && !registrations.has(event.id) && (
+                        <button
+                          onClick={() => {
+                            setSelectedEvent(event);
+                            setShowRegModal(true);
+                          }}
+                          className="text-xs bg-green-600 hover:bg-green-500 text-white px-3 py-1.5 rounded font-bold transition-colors"
+                        >
+                          Inscribirse
+                        </button>
+                      )}
+                      {userRole === 'player' && registrations.has(event.id) && (
+                        <span className="text-xs text-green-400 font-bold flex items-center gap-1">
+                          <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                          </svg>
+                          Inscrito
+                        </span>
+                      )}
+                      {!userRole && (
+                        <span className="text-xs text-slate-500">{event.playerCount} jugadores</span>
+                      )}
+                    </div>
                   </div>
                 </div>
               </SimpleCard>
@@ -401,6 +446,28 @@ const HomePage: React.FC<HomePageProps> = ({ players, events, session, userRole,
           </div>
         </section>
       </div>
+
+      {/* Quick Registration Modal */}
+      {selectedEvent && (
+        <QuickRegistrationModal
+          isOpen={showRegModal}
+          onClose={() => {
+            setShowRegModal(false);
+            setSelectedEvent(null);
+          }}
+          event={{
+            id: selectedEvent.id,
+            title: selectedEvent.title,
+            date: selectedEvent.date,
+            storeName: selectedEvent.storeName,
+            format: selectedEvent.format
+          }}
+          userId={userId || ''}
+          onSuccess={() => {
+            setRegistrations(prev => new Set([...prev, selectedEvent.id]));
+          }}
+        />
+      )}
     </div>
   );
 };

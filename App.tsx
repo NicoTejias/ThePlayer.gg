@@ -5,6 +5,7 @@ import { supabase } from './supabaseClient';
 import type { Database } from './database.types';
 import Header from './components/Header';
 import Footer from './components/Footer';
+import FloatingActionButton from './components/FloatingActionButton';
 import ParticlesBackground from './components/ParticlesBackground';
 import HomePage from './pages/HomePage';
 import RankingsPage from './pages/RankingsPage';
@@ -824,6 +825,9 @@ const AppContent: React.FC = () => {
         userName={userProfile?.username || 'Jugador'}
         judgeRole={userProfile?.judge_role}
       />
+
+      {/* Floating Action Button for Stores */}
+      <FloatingActionButton userRole={userRole} />
 
       <OnboardingModal
         isOpen={showOnboarding}
