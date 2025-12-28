@@ -4,7 +4,7 @@ const PartnersSection: React.FC = () => {
     const partners = [
         {
             name: 'StreamCaster Mage',
-            logo: '/images/streamcaster-mage-logo.png',
+            logo: '/streamcaster-mage-logo.png',
             url: 'https://www.streamcastermage.cl/',
             description: 'Productora Audiovisual'
         },
@@ -59,7 +59,7 @@ const PartnersSection: React.FC = () => {
                             <div className="bg-slate-900/50 p-6 rounded-xl border border-slate-700 hover:border-sky-500 transition-colors">
                                 <img
                                     src={partner.logo}
-                                    alt={`${partner.name} - ${partner.description}`}
+                                    alt={`${partner.name} - ${partner.description} `}
                                     className="h-20 w-auto object-contain filter brightness-90 group-hover:brightness-110 transition-all"
                                 />
                                 <p className="text-slate-400 text-sm text-center mt-3 group-hover:text-sky-400 transition-colors">
