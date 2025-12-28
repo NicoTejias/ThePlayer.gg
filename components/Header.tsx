@@ -114,6 +114,7 @@ const Header: React.FC<HeaderProps> = ({ isLoggedIn, userRole, userName = 'Jugad
   const { currentGame, setGame } = useGame();
   const [isProfileMenuOpen, setProfileMenuOpen] = useState(false);
   const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isMagicHovered, setIsMagicHovered] = useState(false);
   const profileMenuRef = useRef<HTMLDivElement>(null);
   const location = useLocation();
 
@@ -167,9 +168,11 @@ const Header: React.FC<HeaderProps> = ({ isLoggedIn, userRole, userName = 'Jugad
                   <div className="p-1">
                     <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider px-3 py-2">Selecciona Universo</div>
                     {(Object.keys(GAME_LABELS) as GameType[]).map((game) => (
-                      <div key={game} className="relative group/game">
+                      <div key={game} className="relative">
                         <button
                           onClick={() => setGame(game)}
+                          onMouseEnter={() => game === 'mtg' && setIsMagicHovered(true)}
+                          onMouseLeave={() => game === 'mtg' && setIsMagicHovered(false)}
                           className={`flex items-center justify-between w-full text-left px-3 py-2 text-sm rounded-lg transition-colors mb-0.5 ${currentGame === game ? 'bg-sky-600/20 text-sky-300 border border-sky-600/30' : 'text-slate-300 hover:bg-slate-700/50 hover:text-white'}`}
                         >
                           <span className="flex items-center">
@@ -188,24 +191,30 @@ const Header: React.FC<HeaderProps> = ({ isLoggedIn, userRole, userName = 'Jugad
                   </div>
                 </div>
 
-                {/* Magic Submenu - Completely independent floating panel */}
-                <div className="absolute top-full left-[14.5rem] mt-2 w-44 bg-slate-800 rounded-xl shadow-2xl border border-purple-500/30 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-[100] transform origin-top-left">
-                  <div className="p-1">
-                    <div className="text-[10px] font-bold text-purple-400 uppercase tracking-wider px-3 py-2 flex items-center gap-2">
-                      <span className="w-1.5 h-1.5 rounded-full bg-purple-400"></span>
-                      Formatos MTG
+                {/* Magic Submenu - Only visible when hovering Magic option */}
+                {isMagicHovered && (
+                  <div
+                    className="absolute top-full left-[14.5rem] mt-2 w-44 bg-slate-800 rounded-xl shadow-2xl border border-purple-500/30 z-[100] transform origin-top-left animate-in fade-in slide-in-from-left-2 duration-200"
+                    onMouseEnter={() => setIsMagicHovered(true)}
+                    onMouseLeave={() => setIsMagicHovered(false)}
+                  >
+                    <div className="p-1">
+                      <div className="text-[10px] font-bold text-purple-400 uppercase tracking-wider px-3 py-2 flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 rounded-full bg-purple-400"></span>
+                        Formatos MTG
+                      </div>
+                      <Link to="/commander" className="block px-3 py-2 text-sm text-slate-300 hover:bg-purple-600/20 hover:text-purple-300 rounded-lg transition-colors">
+                        🏰 Commander
+                      </Link>
+                      <Link to="/pauper" className="block px-3 py-2 text-sm text-slate-300 hover:bg-purple-600/20 hover:text-purple-300 rounded-lg transition-colors">
+                        💎 Pauper
+                      </Link>
+                      <Link to="/premodern" className="block px-3 py-2 text-sm text-slate-300 hover:bg-purple-600/20 hover:text-purple-300 rounded-lg transition-colors">
+                        📜 Premodern
+                      </Link>
                     </div>
-                    <Link to="/commander" className="block px-3 py-2 text-sm text-slate-300 hover:bg-purple-600/20 hover:text-purple-300 rounded-lg transition-colors">
-                      🏰 Commander
-                    </Link>
-                    <Link to="/pauper" className="block px-3 py-2 text-sm text-slate-300 hover:bg-purple-600/20 hover:text-purple-300 rounded-lg transition-colors">
-                      💎 Pauper
-                    </Link>
-                    <Link to="/premodern" className="block px-3 py-2 text-sm text-slate-300 hover:bg-purple-600/20 hover:text-purple-300 rounded-lg transition-colors">
-                      📜 Premodern
-                    </Link>
                   </div>
-                </div>
+                )}
               </div>
             </div>
           </div>
