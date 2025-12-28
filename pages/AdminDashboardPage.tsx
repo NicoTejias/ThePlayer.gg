@@ -124,6 +124,62 @@ const AdminDashboardPage: React.FC = () => {
         }
     };
 
+    const handleApproveStore = async (id: string, name: string) => {
+        setConfirmAction({ show: true, type: 'approve', storeId: id, storeName: name });
+    };
+
+    const handleRejectStore = async (id: string, name: string) => {
+        setConfirmAction({ show: true, type: 'reject', storeId: id, storeName: name });
+    };
+
+    const handleDeleteTournament = async (tournamentId: string, tournamentName: string) => {
+        const confirmMessage = `ADVERTENCIA ADMIN: ¿Deseas eliminar permanentemente el torneo "${tournamentName}" y TODOS sus resultados? \n\nEscribe ELIMINAR para confirmar:`;
+        const userInput = window.prompt(confirmMessage);
+        if (userInput !== 'ELIMINAR') return;
+
+        try {
+            const { data, error } = await supabase.rpc('delete_tournament_by_id', {
+                tournament_id_param: tournamentId
+            });
+
+            if (error) throw error;
+            if (!data.success) throw new Error(data.message);
+
+            toast.success('Torneo eliminado correctamente por Admin');
+            fetchAdminData();
+        } catch (error: any) {
+            console.error("Delete error:", error);
+            toast.error('Error al eliminar torneo: ' + error.message);
+        }
+    };
+
+    const executeAction = async () => {
+        const { type, storeId, storeName } = confirmAction;
+        setConfirmAction({ show: false, type: null, storeId: '', storeName: '' });
+
+        if (type === 'approve') {
+            const { error } = await supabase
+                .rpc('approve_store', { store_id: storeId });
+
+            if (error) {
+                alert("Error al aprobar: " + error.message);
+            } else {
+                alert(`Tienda ${storeName} aprobada correctamente.`);
+                await fetchAdminData();
+            }
+        } else if (type === 'reject') {
+            const { error } = await supabase
+                .rpc('reject_store', { store_id: storeId });
+
+            if (error) {
+                alert("Error al rechazar: " + error.message);
+            } else {
+                alert(`Tienda ${storeName} rechazada.`);
+                await fetchAdminData();
+            }
+        }
+    };
+
     if (loading) {
         return (
             <div className="min-h-screen flex items-center justify-center">

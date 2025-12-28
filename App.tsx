@@ -24,6 +24,7 @@ import StoresPage from './pages/StoresPage';
 import AuthPage from './pages/AuthPage';
 import AdminDashboardPage from './pages/AdminDashboardPage';
 import AdminCMSPage from './pages/AdminCMSPage';
+import ArticleDetailPage from './pages/ArticleDetailPage';
 import UserManagementPage from './pages/admin/UserManagementPage';
 import ClaimReviewPage from './pages/admin/ClaimReviewPage';
 import IntegrityReviewPanel from './pages/admin/IntegrityReviewPanel';
@@ -854,6 +855,7 @@ const AppContent: React.FC = () => {
           <Route path="/commander" element={<CommanderPage />} />
           <Route path="/media" element={<MediaPage />} />
           <Route path="/media/articulos" element={<MediaArticlesPage />} />
+          <Route path="/media/articulos/:slug" element={<ArticleDetailPage />} />
           <Route path="/media/videos" element={<MediaVideosPage />} />
           <Route path="/jueces" element={<JudgesPage />} />
           <Route path="/tiendas" element={<StoresPage />} />
