@@ -131,15 +131,6 @@ const HomePage: React.FC<HomePageProps> = ({ players, events }) => {
 
   const theme = getGameTheme(currentGame);
 
-  const partners = [
-    { name: 'StreamCaster Mage', logo: '/images/streamcaster-mage-logo.png', url: '#' },
-    { name: 'Blood Moon', logo: '/images/partners/bloodmoon.png', url: '#' },
-    { name: 'Blue Robot', logo: '/images/partners/blue_robot.png', url: '#' },
-    { name: 'Command Center', logo: '/images/partners/command_center.jpg', url: '#' },
-    { name: 'Moss Eisley', logo: '/images/partners/moss_eisley.jpg', url: '#' },
-    { name: 'The Player', logo: '/images/partners/theplayer_logo.png', url: '#' },
-  ];
-
   if (loading) {
     return (
       <div className={`min-h-screen ${theme.bg} flex items-center justify-center`}>
@@ -237,20 +228,6 @@ const HomePage: React.FC<HomePageProps> = ({ players, events }) => {
             </div>
           </div>
         </section>
-      </div>
-
-      {/* Marquee Brands/Partners */}
-      <div className="border-t border-slate-800 py-12 mt-24 bg-black/40">
-        <div className="container mx-auto px-4 text-center">
-          <p className="text-slate-500 text-sm uppercase tracking-widest mb-8 font-bold">NUESTROS ALIADOS ESTRATÉGICOS</p>
-          <div className="flex flex-wrap justify-center items-center gap-12 opacity-80 grayscale hover:grayscale-0 transition-all hover:opacity-100 duration-500">
-            {partners.map((partner, idx) => (
-              <a key={idx} href={partner.url} className='hover:scale-110 transition-transform'>
-                <img src={partner.logo} alt={partner.name} className="h-10 md:h-16 object-contain" />
-              </a>
-            ))}
-          </div>
-        </div>
       </div>
     </div>
   );
