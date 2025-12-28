@@ -567,14 +567,20 @@ const AppContent: React.FC = () => {
 
       // Safety timeout for auth initialization
       const authTimeout = setTimeout(() => {
-        console.warn("Auth initialization timed out. Forcing loading state off.");
+        console.warn("Auth initialization timed out after 15 seconds. Forcing loading state off.");
         setIsAuthLoading(false);
-      }, 8000);
+        setIsLoggedIn(false);
+        setUserRole(null);
+        setUserProfile(null);
+      }, 15000); // Increased from 8000 to 15000ms for slower connections
 
       try {
         // Get initial session
         const { data: { session }, error } = await supabase.auth.getSession();
-        if (error) throw error;
+        if (error) {
+          console.error("Error getting session:", error);
+          throw error;
+        }
 
         console.log("Initial session:", session ? "Found" : "Not found");
         await handleSessionState(session);
@@ -589,6 +595,9 @@ const AppContent: React.FC = () => {
       } catch (err) {
         console.error("Critical Auth Error:", err);
         setIsLoggedIn(false);
+        setUserRole(null);
+        setUserProfile(null);
+        toast.error("Error al cargar la sesión. Por favor, recarga la página.");
       } finally {
         clearTimeout(authTimeout);
         setIsAuthLoading(false);
