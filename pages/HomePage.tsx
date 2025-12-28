@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import type { MediaArticle, CommunityEvent, MarketplacePost, PlayerProfile } from '../types';
+import type { RankingEntry, CommunityEvent, MediaArticle, MarketplacePost, WinRateRankingEntry, PlayerProfile } from '../types';
+import Card from '../components/Card';
 import TrophyIcon from '../components/icons/TrophyIcon';
 import SparklesIcon from '../components/icons/SparklesIcon';
+import UsersIcon from '../components/icons/UserIcon';
 import { supabase } from '../supabaseClient';
 import { useGame } from '../context/GameContext';
 
@@ -24,13 +26,40 @@ const CountUp: React.FC<{ end: number, duration?: number }> = ({ end, duration =
   return <span>{count.toLocaleString()}</span>;
 };
 
-// Mock Data
+// Mock Data for Media and Marketplace
+const mockArticles: MediaArticle[] = [
+  { id: '1', title: 'Análisis del Metajuego Moderno Post-Baneos', author: 'Admin', excerpt: 'Exploramos cómo los últimos cambios han afectado el panorama competitivo de Modern.', imageUrl: 'https://images.unsplash.com/photo-1613771404784-3a5686aa2be3?auto=format&fit=crop&q=80&w=800', category: 'Modern' },
+  { id: '2', title: 'Top 5 Cartas de Commander', author: 'Invitado', excerpt: 'Un ranking de las cartas más impactantes y versátiles para tu próximo mazo de Commander.', imageUrl: 'https://images.unsplash.com/photo-1635326444826-06c8f84991a9?auto=format&fit=crop&q=80&w=800', category: 'Commander' },
+  { id: '3', title: 'Reporte: Ganador del RCQ Santiago', author: 'JuezLocal', excerpt: 'Entrevista exclusiva con el ganador del último Regional Championship Qualifier.', imageUrl: 'https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&q=80&w=800', category: 'Reporte' },
+];
+
+const mockEventsData: CommunityEvent[] = [
+  { id: 'e1', title: 'Gran Open Modern', date: '2025-01-15', storeName: 'MagicSur Santiago', format: 'Modern', playerCount: 64, imageUrl: '' },
+  { id: 'e2', title: 'Commander Party Night', date: '2025-01-18', storeName: 'La Comarca', format: 'Commander', playerCount: 32, imageUrl: '' },
+  { id: 'e3', title: 'RCQ Pioneer Qualifier', date: '2025-01-22', storeName: 'Entre Juegos', format: 'Pioneer', playerCount: 48, imageUrl: '' },
+];
+
+const mockMarketplace: MarketplacePost[] = [
+  { id: '1', title: 'Busco Force of Will', type: 'Compra', seller: 'User123', region: 'Metropolitana', imageUrl: 'https://picsum.photos/seed/market1/400/300' },
+  { id: '2', title: 'Vendo fetchlands de Modern Horizons 2', type: 'Venta', seller: 'CardTraderCL', region: 'Valparaíso', imageUrl: 'https://picsum.photos/seed/market2/400/300' },
+  { id: '3', title: 'Cambio Ragavan por Solitude', type: 'Cambio', seller: 'ProPlayer', region: 'Biobío', imageUrl: 'https://picsum.photos/seed/market3/400/300' },
+];
+
 const sliderItems = [
   { id: 1, title: 'Últimas Noticias', link: '/media', imageUrl: 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?auto=format&fit=crop&q=80&w=800', color: 'from-blue-600/80' },
   { id: 2, title: 'Videos', link: '/media/videos', imageUrl: 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&q=80&w=800', color: 'from-red-600/80' },
   { id: 3, title: 'Artículos', link: '/media/articulos', imageUrl: 'https://images.unsplash.com/photo-1585241936939-be05368a5bcb?auto=format&fit=crop&q=80&w=800', color: 'from-green-600/80' },
   { id: 4, title: 'MERCADO TCG', link: '/mercado', imageUrl: 'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?auto=format&fit=crop&q=80&w=800', color: 'from-purple-600/80' },
 ];
+
+const SectionHeader: React.FC<{ title: string, linkTo: string }> = ({ title, linkTo }) => (
+  <div className="flex justify-between items-center mb-6">
+    <h2 className="text-3xl font-bold text-white uppercase tracking-wider">{title}</h2>
+    <Link to={linkTo} className="text-sky-400 hover:text-sky-300 transition-colors">
+      Ver más &rarr;
+    </Link>
+  </div>
+);
 
 interface HomePageProps {
   players: PlayerProfile[];
@@ -96,138 +125,266 @@ const HomePage: React.FC<HomePageProps> = ({ players, events }) => {
     return () => clearInterval(timer);
   }, []);
 
-  const getGameTheme = (game: string) => {
-    switch (game) {
-      case 'mtg':
-        return {
-          bg: 'bg-slate-900',
-          accent: 'blue',
-          gradient: 'from-violet-600 to-blue-600',
-          heroImage: 'https://images.unsplash.com/photo-1642375630656-e0e985b9b653?q=80&w=2070&auto=format&fit=crop'
-        };
-      case 'pokemon':
-        return {
-          bg: 'bg-yellow-950',
-          accent: 'yellow',
-          gradient: 'from-yellow-500 to-amber-600',
-          heroImage: 'https://images.unsplash.com/photo-1613771404721-1f92d799e49f?q=80&w=2069&auto=format&fit=crop'
-        };
-      case 'one_piece':
-        return {
-          bg: 'bg-red-950',
-          accent: 'red',
-          gradient: 'from-red-600 to-orange-600',
-          heroImage: 'https://images.unsplash.com/photo-1578353022142-09264fd64295?q=80&w=1920&auto=format&fit=crop'
-        };
-      default:
-        return {
-          bg: 'bg-slate-900',
-          accent: 'blue',
-          gradient: 'from-blue-600 to-cyan-500',
-          heroImage: 'https://images.unsplash.com/photo-1511512578047-dfb367046420?q=80&w=2070&auto=format&fit=crop'
-        };
-    }
-  };
+  // Derive Top 10 Pts Ranking (Player Latam Series)
+  const topPwpPlayers = [...players]
+    .sort((a, b) => (b.pwp || 0) - (a.pwp || 0))
+    .slice(0, 10)
+    .map((p, i) => {
+      const hashCode = p.id.split('').reduce((acc, char) => {
+        return char.charCodeAt(0) + ((acc << 5) - acc);
+      }, 0);
+      const anonymousNumber = Math.abs(hashCode % 9000) + 1000;
 
-  const theme = getGameTheme(currentGame);
+      return {
+        id: p.id,
+        rank: i + 1,
+        playerName: p.isPublic ? p.name : `Jugador #${anonymousNumber}`,
+        pwp: p.pwp || 0,
+        region: p.region || 'Unknown',
+        team: p.team || 'Sin Equipo'
+      };
+    });
+
+  // Derive Top 10 Win Rate Ranking (PLS Winrate)
+  const topWinRatePlayers = [...players]
+    .map(p => {
+      const totalMatches = (p.matchesWon || 0) + (p.matchesLost || 0) + (p.matchesDrew || 0);
+      const winRate = totalMatches > 0 ? ((p.matchesWon || 0) / totalMatches) * 100 : 0;
+      return { ...p, winRate };
+    })
+    .sort((a, b) => b.winRate - a.winRate)
+    .slice(0, 10)
+    .map((p, i) => {
+      const hashCode = p.id.split('').reduce((acc, char) => {
+        return char.charCodeAt(0) + ((acc << 5) - acc);
+      }, 0);
+      const anonymousNumber = Math.abs(hashCode % 9000) + 1000;
+
+      return {
+        id: p.id,
+        rank: i + 1,
+        playerName: p.isPublic ? p.name : `Jugador #${anonymousNumber}`,
+        winRate: `${p.winRate.toFixed(1)}%`,
+        region: p.region || 'Unknown',
+        team: p.team || 'Sin Equipo'
+      };
+    });
+
+  const combinedEvents = [...(events || []), ...mockEventsData];
+  const displayEvents = combinedEvents.slice(0, 6);
 
   if (loading) {
     return (
-      <div className={`min-h-screen ${theme.bg} flex items-center justify-center`}>
-        <div className={`w-16 h-16 border-4 border-${theme.accent}-500 border-t-transparent rounded-full animate-spin`}></div>
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+        <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
       </div>
     );
   }
 
   return (
-    <div className={`min-h-screen ${theme.bg} pb-20 transition-colors duration-700`}>
-      {/* Hero Section */}
-      <section className="relative h-[85vh] flex items-center justify-center overflow-hidden">
-        <div className={`absolute inset-0 bg-gradient-to-b from-black/80 via-${theme.accent}-950/20 to-${theme.bg.split('-')[1]}-900 z-10`}></div>
-        <div className="absolute inset-0 bg-cover bg-center opacity-50 animate-pulse-slow" style={{ backgroundImage: `url('${theme.heroImage}')` }}></div>
-        <div className="relative z-20 text-center px-4 max-w-5xl mx-auto space-y-10 animate-fade-in-up">
-          <h1 className="text-6xl md:text-9xl font-black text-white tracking-tighter drop-shadow-[0_0_25px_rgba(0,0,0,0.8)]">
-            THE <span className={`text-transparent bg-clip-text bg-gradient-to-r ${theme.gradient}`}>PLAYER</span>
-          </h1>
-          <p className="text-2xl md:text-3xl text-slate-200 font-light max-w-3xl mx-auto drop-shadow-md leading-relaxed">
-            Domina el metajuego en el ecosistema número uno de Latinoamérica.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-6 justify-center pt-8">
-            <Link to="/eventos" className={`px-10 py-5 bg-gradient-to-r ${theme.gradient} hover:brightness-110 text-white font-bold text-xl rounded-2xl shadow-2xl shadow-${theme.accent}-500/30 transition-all transform hover:scale-105 hover:-translate-y-1 border border-white/10`}>
-              🏆 Competir
-            </Link>
-            <Link to="/ranking" className="px-10 py-5 bg-white/5 backdrop-blur-xl border border-white/10 hover:bg-white/10 text-white font-bold text-xl rounded-2xl transition-all transform hover:scale-105 hover:-translate-y-1">
-              📊 Ver Rankings
-            </Link>
-          </div>
+    <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950">
+      {/* Hero Carousel */}
+      <section className="relative h-[500px] overflow-hidden">
+        {sliderItems.map((item, idx) => (
+          <Link
+            key={item.id}
+            to={item.link}
+            className={`absolute inset-0 transition-opacity duration-1000 ${idx === currentSlide ? 'opacity-100' : 'opacity-0'}`}
+            style={{ backgroundImage: `url('${item.imageUrl}')`, backgroundSize: 'cover', backgroundPosition: 'center' }}
+          >
+            <div className={`absolute inset-0 bg-gradient-to-r ${item.color} to-transparent opacity-95`}></div>
+            <div className="relative z-10 flex items-center justify-center h-full">
+              <h2 className="text-6xl font-black text-white uppercase tracking-wider drop-shadow-2xl">{item.title}</h2>
+            </div>
+          </Link>
+        ))}
+        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-20 flex gap-2">
+          {sliderItems.map((_, idx) => (
+            <button
+              key={idx}
+              onClick={() => setCurrentSlide(idx)}
+              className={`w-3 h-3 rounded-full transition-all ${idx === currentSlide ? 'bg-white w-8' : 'bg-white/50'}`}
+            />
+          ))}
         </div>
       </section>
 
-      {/* Stats Bar */}
-      <section className="container mx-auto px-4 relative z-30 -mt-24 mb-24">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 bg-black/40 backdrop-blur-xl p-8 rounded-3xl border border-white/10 shadow-2xl">
-          <div className="text-center group">
-            <p className="text-4xl md:text-5xl font-black text-white group-hover:text-blue-400 transition-colors">{stats.totalPlayers}</p>
-            <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-400 mt-2">Jugadores</p>
-          </div>
-          <div className="text-center group">
-            <p className="text-4xl md:text-5xl font-black text-white group-hover:text-emerald-400 transition-colors">{stats.activeTournaments}</p>
-            <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-400 mt-2">Torneos</p>
-          </div>
-          <div className="text-center group">
-            <p className="text-4xl md:text-5xl font-black text-white group-hover:text-yellow-400 transition-colors">{stats.registeredStores}</p>
-            <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-400 mt-2">Tiendas</p>
-          </div>
-          <div className="text-center group">
-            <p className="text-4xl md:text-5xl font-black text-white group-hover:text-purple-400 transition-colors">{stats.totalMatches}</p>
-            <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-400 mt-2">Partidas</p>
-          </div>
-        </div>
-      </section>
+      {/* Community Stats Section */}
+      <section className="mt-24 mb-12 relative px-4">
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-900/10 via-purple-900/10 to-pink-900/10 blur-3xl"></div>
+        <div className="container mx-auto relative z-10">
+          <h2 className="text-3xl font-bold text-center text-white mb-8 uppercase tracking-wide">
+            Comunidad en Números
+          </h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            {/* Players Stat */}
+            <div className="bg-slate-800/40 backdrop-blur-sm p-6 rounded-xl border border-slate-700/50 flex flex-col items-center hover:border-blue-500/50 hover:bg-slate-800/60 transition-all group hover:-translate-y-1 duration-300">
+              <div className="p-3 bg-blue-500/10 rounded-full mb-4 group-hover:bg-blue-500/20 transition-colors text-blue-400 shadow-[0_0_15px_rgba(59,130,246,0.2)]">
+                <UsersIcon className="w-8 h-8" />
+              </div>
+              <div className="text-4xl font-bold text-white mb-1 tabular-nums tracking-tight">
+                <CountUp end={stats.totalPlayers} />
+              </div>
+              <div className="text-xs text-slate-400 uppercase tracking-widest font-bold">Jugadores</div>
+            </div>
 
-      {/* Content Grid */}
-      <div className="container mx-auto px-4 max-w-7xl space-y-24">
-        {/* Latest News */}
-        <section>
-          <div className="flex items-end justify-between mb-12">
-            <h2 className="text-4xl font-black text-white uppercase tracking-tighter">
-              <span className={`text-${theme.accent}-500/80 mr-2`}>///</span> Novedades
-            </h2>
-            <Link to="/media/articulos" className="hidden md:flex items-center gap-2 text-slate-400 hover:text-white transition-colors font-bold uppercase text-sm tracking-wider">
-              Ver Archivo <span className="text-xl">→</span>
-            </Link>
-          </div>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {latestNews.length > 0 ? (
-              <Link to={`/media/articulos/${latestNews[0].slug}`} className="relative h-[500px] rounded-3xl overflow-hidden group border border-white/10 shadow-2xl">
-                <div className="absolute inset-0 bg-black/20 group-hover:bg-black/0 transition-colors z-10"></div>
-                <img src={latestNews[0].image_url || latestNews[0].imageUrl || ''} alt={latestNews[0].title} className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent z-20"></div>
-                <div className="absolute bottom-0 left-0 p-8 z-30 w-full">
-                  <span className={`inline-block px-3 py-1 bg-${theme.accent}-600 text-white text-xs font-black rounded uppercase tracking-wider mb-4`}>Destacado</span>
-                  <h3 className="text-3xl md:text-4xl font-bold text-white mb-4 leading-tight group-hover:text-blue-300 transition-colors">{latestNews[0].title}</h3>
-                  <p className="text-slate-300 line-clamp-2 md:text-lg mb-4">{latestNews[0].excerpt}</p>
-                </div>
-              </Link>
-            ) : (
-              <div className="h-[500px] bg-slate-800/50 rounded-3xl flex items-center justify-center border border-white/5 border-dashed"><span className="text-slate-500 font-medium">Sin noticias destacadas</span></div>
-            )}
-            <div className="grid grid-cols-1 gap-8">
-              {latestNews.slice(1, 3).map((news) => (
-                <Link key={news.id} to={`/media/articulos/${news.slug}`} className="relative h-60 rounded-3xl overflow-hidden group border border-white/10 flex">
-                  <div className="w-1/3 relative shrink-0">
-                    <img src={news.image_url || news.imageUrl || ''} alt="" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
-                  </div>
-                  <div className="p-6 bg-slate-800/80 w-2/3 flex flex-col justify-center">
-                    <span className="text-xs font-bold text-slate-400 uppercase mb-2">{news.published_at ? new Date(news.published_at).toLocaleDateString() : ''}</span>
-                    <h4 className="text-xl font-bold text-white leading-tight group-hover:text-blue-300 transition-colors mb-2">{news.title}</h4>
-                    <span className="text-sm font-bold text-blue-400 mt-auto">Leer más</span>
-                  </div>
-                </Link>
-              ))}
+            {/* Stores Stat */}
+            <div className="bg-slate-800/40 backdrop-blur-sm p-6 rounded-xl border border-slate-700/50 flex flex-col items-center hover:border-yellow-500/50 hover:bg-slate-800/60 transition-all group hover:-translate-y-1 duration-300">
+              <div className="p-3 bg-yellow-500/10 rounded-full mb-4 group-hover:bg-yellow-500/20 transition-colors text-yellow-400 shadow-[0_0_15px_rgba(234,179,8,0.2)]">
+                <svg xmlns="http://www.w3.org/2000/svg" className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                </svg>
+              </div>
+              <div className="text-4xl font-bold text-white mb-1 tabular-nums tracking-tight">
+                <CountUp end={stats.registeredStores} />
+              </div>
+              <div className="text-xs text-slate-400 uppercase tracking-widest font-bold">Tiendas</div>
+            </div>
+
+            {/* Tournaments Stat */}
+            <div className="bg-slate-800/40 backdrop-blur-sm p-6 rounded-xl border border-slate-700/50 flex flex-col items-center hover:border-purple-500/50 hover:bg-slate-800/60 transition-all group hover:-translate-y-1 duration-300">
+              <div className="p-3 bg-purple-500/10 rounded-full mb-4 group-hover:bg-purple-500/20 transition-colors text-purple-400 shadow-[0_0_15px_rgba(168,85,247,0.2)]">
+                <TrophyIcon className="w-8 h-8" />
+              </div>
+              <div className="text-4xl font-bold text-white mb-1 tabular-nums tracking-tight">
+                <CountUp end={stats.activeTournaments} />
+              </div>
+              <div className="text-xs text-slate-400 uppercase tracking-widest font-bold">Torneos</div>
+            </div>
+
+            {/* Matches Stat */}
+            <div className="bg-slate-800/40 backdrop-blur-sm p-6 rounded-xl border border-slate-700/50 flex flex-col items-center hover:border-green-500/50 hover:bg-slate-800/60 transition-all group hover:-translate-y-1 duration-300">
+              <div className="p-3 bg-green-500/10 rounded-full mb-4 group-hover:bg-green-500/20 transition-colors text-green-400 shadow-[0_0_15px_rgba(34,197,94,0.2)]">
+                <SparklesIcon className="w-8 h-8" />
+              </div>
+              <div className="text-4xl font-bold text-white mb-1 tabular-nums tracking-tight">
+                <CountUp end={stats.totalMatches} />
+              </div>
+              <div className="text-xs text-slate-400 uppercase tracking-widest font-bold">Partidas</div>
             </div>
           </div>
-        </section>
+        </div>
+      </section>
+
+      {/* Main Content Grid */}
+      <div className="container mx-auto px-4 py-12">
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+          {/* Column 1: Próximos Eventos */}
+          <section className="flex flex-col h-full">
+            <SectionHeader title="Próximos Eventos" linkTo="/eventos" />
+            <div className="space-y-4 flex-1">
+              {displayEvents.slice(0, 4).map((event) => (
+                <Card key={event.id} className="bg-slate-800/50 hover:bg-slate-800/70 transition-all border border-slate-700">
+                  <div className="p-4">
+                    <h3 className="text-lg font-bold text-white mb-2 line-clamp-1">{event.title}</h3>
+                    <p className="text-sm text-slate-400 mb-1">📍 {event.storeName}</p>
+                    <p className="text-sm text-slate-400 mb-1">📅 {new Date(event.date).toLocaleDateString()}</p>
+                    <div className="flex items-center justify-between mt-3 pt-3 border-t border-slate-700">
+                      <span className="text-xs bg-blue-500/20 text-blue-300 px-2 py-1 rounded">{event.format}</span>
+                      <span className="text-xs text-slate-500">{event.playerCount} jugadores</span>
+                    </div>
+                  </div>
+                </Card>
+              ))}
+            </div>
+            <div className="mt-auto text-center pt-2 border-t border-slate-700">
+              <Link to="/eventos" className="text-sky-400 hover:text-sky-300">Ver todos los eventos →</Link>
+            </div>
+          </section>
+
+          {/* Column 2: Rankings */}
+          <section className="flex flex-col h-full">
+            <SectionHeader title="Rankings" linkTo="/ranking" />
+
+            {/* PWP Ranking */}
+            <div className="mb-6">
+              <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3">Top 10 Pts</h3>
+              <div className="bg-slate-800/50 rounded-xl border border-slate-700 overflow-hidden shadow-xl">
+                {topPwpPlayers.slice(0, 5).map((player) => (
+                  <Link key={player.id} to="/ranking" className="flex items-center gap-3 p-3 hover:bg-slate-700/50 transition-colors border-b border-slate-700/50 last:border-0">
+                    <span className="text-lg font-black text-slate-600 w-6">{player.rank}</span>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-white font-bold truncate text-sm">{player.playerName}</p>
+                      <p className="text-xs text-slate-500">{player.team}</p>
+                    </div>
+                    <div className="text-right">
+                      <span className="block text-green-400 font-bold font-mono text-sm">{player.pwp}</span>
+                      <span className="text-[10px] text-slate-500 uppercase">Pts</span>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+
+            {/* Win Rate Ranking */}
+            <div>
+              <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3">Top 10 Win Rate</h3>
+              <div className="bg-slate-800/50 rounded-xl border border-slate-700 overflow-hidden shadow-xl">
+                {topWinRatePlayers.slice(0, 5).map((player) => (
+                  <Link key={player.id} to="/ranking" className="flex items-center gap-3 p-3 hover:bg-slate-700/50 transition-colors border-b border-slate-700/50 last:border-0">
+                    <span className="text-lg font-black text-slate-600 w-6">{player.rank}</span>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-white font-bold truncate text-sm">{player.playerName}</p>
+                      <p className="text-xs text-slate-500">{player.team}</p>
+                    </div>
+                    <div className="text-right">
+                      <span className="block text-blue-400 font-bold font-mono text-sm">{player.winRate}</span>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          {/* Column 3: Media (Articles & Videos) */}
+          <section className="flex flex-col h-full">
+            <SectionHeader title="Últimas Novedades" linkTo="/media" />
+
+            {/* Latest Articles */}
+            <div className="mb-6">
+              <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3">Artículos</h3>
+              <div className="space-y-3">
+                {(latestNews.length > 0 ? latestNews : mockArticles).slice(0, 2).map((article) => (
+                  <Card key={article.id} className="bg-slate-800/50 hover:bg-slate-800/70 transition-all border border-slate-700">
+                    <div className="flex gap-3 p-3">
+                      <div className="w-20 h-20 flex-shrink-0 rounded overflow-hidden">
+                        <img src={article.image_url || article.imageUrl || ''} alt={article.title} className="w-full h-full object-cover" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="text-sm font-bold text-white line-clamp-2 mb-1 group-hover:text-blue-300 transition-colors">{article.title}</h4>
+                        <p className="text-xs text-slate-500">{article.category}</p>
+                      </div>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            </div>
+
+            {/* Featured Videos */}
+            <div>
+              <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3">Videos</h3>
+              <div className="space-y-3">
+                {featuredContent.slice(0, 2).map((video) => (
+                  <a key={video.id} href={video.link} className="block group">
+                    <Card className="bg-slate-800/50 hover:bg-slate-800/70 transition-all border border-slate-700 relative overflow-hidden">
+                      <div className="relative aspect-video">
+                        <img src={video.imageUrl} alt={video.title} className="w-full h-full object-cover" />
+                        <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                          <div className="w-12 h-12 bg-red-600 rounded-full flex items-center justify-center">
+                            <svg className="w-6 h-6 text-white ml-1" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="p-3">
+                        <h4 className="text-sm font-bold text-white line-clamp-1 group-hover:text-blue-300 transition-colors">{video.title}</h4>
+                      </div>
+                    </Card>
+                  </a>
+                ))}
+              </div>
+            </div>
+          </section>
+        </div>
       </div>
     </div>
   );
