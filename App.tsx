@@ -23,6 +23,7 @@ import JudgesPage from './pages/JudgesPage';
 import StoresPage from './pages/StoresPage';
 import AuthPage from './pages/AuthPage';
 import AdminDashboardPage from './pages/AdminDashboardPage';
+import AdminCMSPage from './pages/AdminCMSPage';
 import UserManagementPage from './pages/admin/UserManagementPage';
 import ClaimReviewPage from './pages/admin/ClaimReviewPage';
 import IntegrityReviewPanel from './pages/admin/IntegrityReviewPanel';
@@ -864,6 +865,7 @@ const AppContent: React.FC = () => {
           <Route path="/admin/integrity" element={<IntegrityReviewPanel />} />
           <Route path="/admin/tournaments/edit" element={<TournamentEditPage />} />
           <Route path="/admin/subscriptions" element={<SubscriptionManagementPage />} />
+          <Route path="/admin/cms" element={<AdminCMSPage />} />
           <Route path="/notifications" element={<NotificationsPage />} />
           <Route path="/favorites" element={<FavoritesPage />} />
           <Route path="/seller/:sellerId" element={<SellerProfilePage />} />
