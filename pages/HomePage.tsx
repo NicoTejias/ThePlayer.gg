@@ -221,310 +221,261 @@ const HomePage: React.FC<HomePageProps> = ({ players, events }) => {
   // specific uniqueness check if needed, but simple concat is usually fine for visual testing
   const displayEvents = combinedEvents.slice(0, 6);
 
+  // Helper for Game Themes
+  const getGameTheme = (game: string) => {
+    switch (game) {
+      case 'mtg':
+        return {
+          bg: 'bg-slate-900',
+          accent: 'blue',
+          gradient: 'from-violet-600 to-blue-600',
+          heroImage: 'https://images.unsplash.com/photo-1642375630656-e0e985b9b653?q=80&w=2070&auto=format&fit=crop'
+        };
+      case 'pokemon':
+        return {
+          bg: 'bg-yellow-950',
+          accent: 'yellow',
+          gradient: 'from-yellow-500 to-amber-600',
+          heroImage: 'https://images.unsplash.com/photo-1613771404721-1f92d799e49f?q=80&w=2069&auto=format&fit=crop'
+        };
+      case 'one_piece':
+        return {
+          bg: 'bg-red-950',
+          accent: 'red',
+          gradient: 'from-red-600 to-orange-600',
+          heroImage: 'https://images.unsplash.com/photo-1578353022142-09264fd64295?q=80&w=1920&auto=format&fit=crop'
+        };
+      default:
+        return {
+          bg: 'bg-slate-900',
+          accent: 'blue',
+          gradient: 'from-blue-600 to-cyan-500',
+          heroImage: 'https://images.unsplash.com/photo-1511512578047-dfb367046420?q=80&w=2070&auto=format&fit=crop'
+        };
+    }
+  };
+
+  const theme = getGameTheme(currentGame);
+
+  // Updated Partners List with new local paths
   const partners = [
-    { name: 'ThePlayer', logo: '/images/partners/theplayer_logo.png', url: '#' },
-    { name: 'Blood Moon', logo: '/images/partners/bloodmoon.png', url: '#' },
-    { name: 'Moss Eisley', logo: '/images/partners/moss_eisley.jpg', url: '#' },
-    { name: 'Command Center', logo: '/images/partners/command_center.jpg', url: '#' },
-    { name: 'Blue Robot', logo: '/images/partners/blue_robot.png', url: '#' },
+    { name: 'StreamCaster Mage', logo: '/images/streamcaster-mage-logo.png', url: '#' },
+    { name: 'Partner 1', logo: '/images/partners/partner_0.png', url: '#' },
+    { name: 'Partner 2', logo: '/images/partners/partner_1.png', url: '#' },
+    { name: 'Partner 3', logo: '/images/partners/partner_2.jpg', url: '#' },
+    { name: 'Partner 4', logo: '/images/partners/partner_3.png', url: '#' },
+    { name: 'Partner 5', logo: '/images/partners/partner_4.jpg', url: '#' },
   ];
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0f172a] flex items-center justify-center">
-        <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+      <div className={`min-h-screen ${theme.bg} flex items-center justify-center`}>
+        <div className={`w-16 h-16 border-4 border-${theme.accent}-500 border-t-transparent rounded-full animate-spin`}></div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-16 pb-20">
+    <div className={`min-h-screen ${theme.bg} pb-20 transition-colors duration-700`}>
 
       {/* Hero Section */}
-      <section className="relative h-[600px] flex items-center justify-center overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-[#0f172a]/70 to-[#0f172a] z-10"></div>
-        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1642375630656-e0e985b9b653?q=80&w=2070&auto=format&fit=crop')] bg-cover bg-center opacity-40 animate-pulse-slow"></div>
+      <section className="relative h-[85vh] flex items-center justify-center overflow-hidden">
+        <div className={`absolute inset-0 bg-gradient-to-b from-black/80 via-${theme.accent}-950/20 to-${theme.bg.split('-')[1]}-900 z-10`}></div>
+        <div
+          className="absolute inset-0 bg-cover bg-center opacity-50 animate-pulse-slow"
+          style={{ backgroundImage: `url('${theme.heroImage}')` }}
+        ></div>
 
-        <div className="relative z-20 text-center px-4 max-w-4xl mx-auto space-y-8 animate-fade-in-up">
-          <h1 className="text-6xl md:text-8xl font-black text-white tracking-tighter drop-shadow-2xl">
-            THE <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-emerald-400">PLAYER</span>
+        <div className="relative z-20 text-center px-4 max-w-5xl mx-auto space-y-10 animate-fade-in-up">
+          <h1 className="text-6xl md:text-9xl font-black text-white tracking-tighter drop-shadow-[0_0_25px_rgba(0,0,0,0.8)]">
+            THE <span className={`text-transparent bg-clip-text bg-gradient-to-r ${theme.gradient}`}>PLAYER</span>
           </h1>
-          <p className="text-2xl md:text-3xl text-slate-300 font-light max-w-2xl mx-auto drop-shadow-md">
-            El ecosistema definitivo para TCG en Latinoamérica. Compite, rankea y domina.
+          <p className="text-2xl md:text-3xl text-slate-200 font-light max-w-3xl mx-auto drop-shadow-md leading-relaxed">
+            Domina el metajuego en el ecosistema número uno de Latinoamérica.
           </p>
           <div className="flex flex-col sm:flex-row gap-6 justify-center pt-8">
             <Link
               to="/eventos"
-              className="px-8 py-4 bg-blue-600 hover:bg-blue-500 text-white font-bold text-lg rounded-xl shadow-lg shadow-blue-600/30 transition-all transform hover:scale-105 hover:-translate-y-1"
+              className={`px-10 py-5 bg-gradient-to-r ${theme.gradient} hover:brightness-110 text-white font-bold text-xl rounded-2xl shadow-2xl shadow-${theme.accent}-500/30 transition-all transform hover:scale-105 hover:-translate-y-1 border border-white/10`}
             >
-              Ver Eventos
+              🏆 Competir
             </Link>
             <Link
               to="/ranking"
-              className="px-8 py-4 bg-slate-800/80 backdrop-blur-md border border-slate-600 hover:bg-slate-700 text-white font-bold text-lg rounded-xl transition-all transform hover:scale-105 hover:-translate-y-1"
+              className="px-10 py-5 bg-white/5 backdrop-blur-xl border border-white/10 hover:bg-white/10 text-white font-bold text-xl rounded-2xl transition-all transform hover:scale-105 hover:-translate-y-1"
             >
-              Consultar Ranking
+              📊 Ver Rankings
             </Link>
           </div>
         </div>
       </section>
 
-      {/* Community Stats */}
-      <section className="container mx-auto px-4 max-w-6xl -mt-20 relative z-30">
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 bg-slate-800/80 backdrop-blur-md p-8 rounded-2xl border border-slate-700 shadow-2xl">
-          <div className="text-center">
-            <p className="text-4xl font-black text-white">{stats.totalPlayers}</p>
-            <p className="text-xs uppercase tracking-widest text-slate-400 mt-1">Jugadores</p>
+      {/* Stats Bar */}
+      <section className="container mx-auto px-4 relative z-30 -mt-24 mb-24">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 bg-black/40 backdrop-blur-xl p-8 rounded-3xl border border-white/10 shadow-2xl">
+          <div className="text-center group">
+            <p className="text-4xl md:text-5xl font-black text-white group-hover:text-blue-400 transition-colors">{stats.totalPlayers}</p>
+            <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-400 mt-2">Jugadores</p>
           </div>
-          <div className="text-center">
-            <p className="text-4xl font-black text-emerald-400">{stats.activeTournaments}</p>
-            <p className="text-xs uppercase tracking-widest text-slate-400 mt-1">Torneos Activos</p>
+          <div className="text-center group">
+            <p className="text-4xl md:text-5xl font-black text-white group-hover:text-emerald-400 transition-colors">{stats.activeTournaments}</p>
+            <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-400 mt-2">Torneos</p>
           </div>
-          <div className="text-center">
-            <p className="text-4xl font-black text-blue-400">{stats.registeredStores}</p>
-            <p className="text-xs uppercase tracking-widest text-slate-400 mt-1">Tiendas Oficiales</p>
+          <div className="text-center group">
+            <p className="text-4xl md:text-5xl font-black text-white group-hover:text-yellow-400 transition-colors">{stats.registeredStores}</p>
+            <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-400 mt-2">Tiendas</p>
           </div>
-          <div className="text-center">
-            <p className="text-4xl font-black text-purple-400">{stats.totalMatches}</p>
-            <p className="text-xs uppercase tracking-widest text-slate-400 mt-1">Partidas Jugadas</p>
+          <div className="text-center group">
+            <p className="text-4xl md:text-5xl font-black text-white group-hover:text-purple-400 transition-colors">{stats.totalMatches}</p>
+            <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-400 mt-2">Partidas</p>
           </div>
         </div>
       </section>
 
-      {/* Featured News & Updates */}
-      <section className="container mx-auto px-4 max-w-7xl">
-        <div className="flex items-center justify-between mb-8">
-          <h2 className="text-3xl font-bold text-white uppercase tracking-wider border-l-4 border-blue-500 pl-4">Novedades</h2>
-          <Link to="/noticias" className="text-blue-400 hover:text-blue-300 text-sm font-bold uppercase">Ver Todo &rarr;</Link>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {featuredContent.map((content) => (
-            <Link key={content.id} to={content.link} className="group bg-slate-800 rounded-xl overflow-hidden border border-slate-700 hover:border-blue-500 transition-all hover:shadow-xl hover:shadow-blue-500/10">
-              <div className="h-48 overflow-hidden relative">
-                <img src={content.imageUrl} alt={content.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
-                <div className="absolute top-2 right-2 bg-black/60 backdrop-blur px-2 py-1 rounded text-xs font-bold text-white uppercase">{content.type}</div>
-              </div>
-              <div className="p-6">
-                <p className="text-blue-400 text-xs font-bold mb-2">{content.date}</p>
-                <h3 className="text-xl font-bold text-white group-hover:text-blue-300 transition-colors mb-2">{content.title}</h3>
-                <span className="text-slate-500 text-sm group-hover:text-slate-400">Leer más &rarr;</span>
-              </div>
+      {/* Content Grid */}
+      <div className="container mx-auto px-4 max-w-7xl space-y-24">
+
+        {/* Latest News */}
+        <section>
+          <div className="flex items-end justify-between mb-12">
+            <h2 className="text-4xl font-black text-white uppercase tracking-tighter">
+              <span className={`text-${theme.accent}-500/80 mr-2`}>///</span>
+              Novedades
+            </h2>
+            <Link to="/media/articulos" className="hidden md:flex items-center gap-2 text-slate-400 hover:text-white transition-colors font-bold uppercase text-sm tracking-wider">
+              Ver Archivo <span className="text-xl">→</span>
             </Link>
-          ))}
-        </div>
-      </section>
+          </div>
 
-      {/* Ranking Spotlight */}
-      <section className="py-20 bg-slate-900/50 border-y border-slate-800">
-        <div className="container mx-auto px-4 max-w-7xl">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-12">
-
-            <div className="md:w-1/2 space-y-6">
-              <h2 className="text-4xl font-black text-white uppercase tracking-wide">
-                Player Latam <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-amber-600">Series</span>
-              </h2>
-              <p className="text-lg text-slate-300">
-                El ranking más prestigioso de la región. Acumula puntos participando en torneos oficiales y clasifica para el gran invitacional de fin de temporada.
-              </p>
-
-              <div className="grid grid-cols-2 gap-4 pt-4">
-                <div className="bg-slate-800 p-4 rounded-lg border-l-4 border-yellow-500">
-                  <p className="font-bold text-white">Premios en Efectivo</p>
-                  <p className="text-xs text-slate-400">Para el Top 8 Final</p>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {latestNews.length > 0 ? (
+              <Link to={`/media/articulos/${latestNews[0].slug}`} className="relative h-[500px] rounded-3xl overflow-hidden group border border-white/10 shadow-2xl">
+                <div className="absolute inset-0 bg-black/20 group-hover:bg-black/0 transition-colors z-10"></div>
+                <img src={latestNews[0].image_url || latestNews[0].imageUrl || ''} alt={latestNews[0].title} className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent z-20"></div>
+                <div className="absolute bottom-0 left-0 p-8 z-30 w-full">
+                  <span className={`inline-block px-3 py-1 bg-${theme.accent}-600 text-white text-xs font-black rounded uppercase tracking-wider mb-4`}>
+                    Destacado
+                  </span>
+                  <h3 className="text-3xl md:text-4xl font-bold text-white mb-4 leading-tight group-hover:text-blue-300 transition-colors">
+                    {latestNews[0].title}
+                  </h3>
+                  <p className="text-slate-300 line-clamp-2 md:text-lg mb-4">{latestNews[0].excerpt}</p>
                 </div>
-                <div className="bg-slate-800 p-4 rounded-lg border-l-4 border-blue-500">
-                  <p className="font-bold text-white">Invitaciones Pro Tour</p>
-                  <p className="text-xs text-slate-400">Clasificatorios Regionales</p>
-                </div>
-              </div>
-
-              <Link to="/ranking" className="inline-block px-8 py-3 bg-white text-slate-900 font-bold rounded-lg hover:bg-slate-200 transition-colors mt-4">
-                VER TABLA DE POSICIONES
               </Link>
-            </div>
+            ) : (
+              <div className="h-[500px] bg-slate-800/50 rounded-3xl flex items-center justify-center border border-white/5 border-dashed">
+                <span className="text-slate-500 font-medium">Sin noticias destacadas</span>
+              </div>
+            )}
 
-            {/* Top 5 Table Snippet */}
-            <div className="md:w-1/2 w-full bg-slate-800 rounded-xl border border-slate-700 p-6 shadow-2xl relative">
-              <div className="absolute -top-4 -right-4 bg-yellow-500 text-black font-black px-4 py-2 rounded-lg rotate-3 shadow-lg uppercase text-sm">
-                Líderes de Temporada
-              </div>
-              <table className="w-full text-left">
-                <thead>
-                  <tr className="text-slate-500 text-xs uppercase tracking-wider border-b border-slate-700">
-                    <th className="pb-3 pl-2">Rank</th>
-                    <th className="pb-3">Jugador</th>
-                    <th className="pb-3 text-right pr-2">Pts</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-700/50">
-                  {topPwpPlayers.slice(0, 5).map((player) => (
-                    <tr key={player.id} className="group hover:bg-slate-700/30 transition-colors">
-                      <td className="py-3 pl-2 font-mono font-bold text-slate-400 group-hover:text-yellow-400">#{player.rank}</td>
-                      <td className="py-3 font-medium text-white group-hover:text-blue-300 flex items-center gap-2">
-                        <img src={`https://ui-avatars.com/api/?name=${player.playerName}&background=random&color=fff&size=24`} className="w-6 h-6 rounded-full" alt="" />
-                        {player.playerName}
-                      </td>
-                      <td className="py-3 pr-2 text-right font-bold text-emerald-400 font-mono">{player.pwp}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              <div className="mt-4 text-center border-t border-slate-700 pt-3">
-                <Link to="/ranking" className="text-xs text-slate-400 hover:text-white uppercase tracking-wider font-bold">Ver todos los jugadores &darr;</Link>
-              </div>
-            </div>
-          </div>
-          <div className="md:col-span-2">
-            {latestNews.length > 0 ?
-              latestNews.map((news) => (
-                <Link key={news.id} to={`/media/articulos/${news.slug}`} className="group relative h-96 rounded-xl overflow-hidden shadow-xl block">
-                  <div className="absolute inset-0 bg-slate-900 group-hover:scale-105 transition-transform duration-700">
-                    {news.image_url ? (
-                      <img src={news.image_url} alt={news.title} className="w-full h-full object-cover opacity-60 group-hover:opacity-40 transition-opacity" />
-                    ) : (
-                      <div className="w-full h-full bg-gradient-to-br from-slate-800 to-slate-900"></div>
-                    )}
+            <div className="grid grid-cols-1 gap-8">
+              {latestNews.slice(1, 3).map((news) => (
+                <Link key={news.id} to={`/media/articulos/${news.slug}`} className="relative h-60 rounded-3xl overflow-hidden group border border-white/10 flex">
+                  <div className="w-1/3 relative shrink-0">
+                    <img src={news.image_url || news.imageUrl || ''} alt="" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
                   </div>
-                  <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/40 to-transparent"></div>
-                  <div className="absolute bottom-0 left-0 p-6 w-full">
-                    <span className="inline-block px-3 py-1 bg-blue-600/90 text-white text-xs font-bold rounded mb-3 uppercase tracking-wider">
-                      {news.game_type}
-                    </span>
-                    <h3 className="text-xl font-bold text-white mb-2 leading-tight group-hover:text-blue-300 transition-colors">
-                      {news.title}
-                    </h3>
-                    <p className="text-slate-300 text-sm line-clamp-2 mb-4">
-                      {news.excerpt}
-                    </p>
-                    <span className="text-slate-400 text-xs font-bold uppercase tracking-wider">
-                      Leer Artículo &rarr;
-                    </span>
+                  <div className="p-6 bg-slate-800/80 w-2/3 flex flex-col justify-center">
+                    <span className="text-xs font-bold text-slate-400 uppercase mb-2">{news.published_at ? new Date(news.published_at).toLocaleDateString() : ''}</span>
+                    <h4 className="text-xl font-bold text-white leading-tight group-hover:text-blue-300 transition-colors mb-2">{news.title}</h4>
+                    <span className="text-sm font-bold text-blue-400 mt-auto">Leer más</span>
                   </div>
                 </Link>
-              )) : (
-                <div className="col-span-3 text-center py-12 bg-slate-800/50 rounded-xl border border-slate-700 border-dashed">
-                  <p className="text-slate-400">No hay noticias recientes.</p>
-                </div>
-              )}
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* Featured Videos Section */}
-      <section className="container mx-auto px-4 max-w-7xl">
-        <div className="flex justify-between items-end mb-8">
-          <div>
-            <h2 className="text-3xl font-bold text-white uppercase tracking-wider">Videos Destacados</h2>
-            <div className="h-1 w-20 bg-red-500 mt-2"></div>
+        {/* Featured Videos */}
+        <section>
+          <div className="flex items-end justify-between mb-12">
+            <h2 className="text-4xl font-black text-white uppercase tracking-tighter">
+              <span className={`text-${theme.accent}-500/80 mr-2`}>►</span>
+              Media
+            </h2>
+            <Link to="/media/videos" className="hidden md:flex items-center gap-2 text-slate-400 hover:text-white transition-colors font-bold uppercase text-sm tracking-wider">
+              Ver Galería <span className="text-xl">→</span>
+            </Link>
           </div>
-          <Link to="/media/videos" className="text-slate-400 hover:text-white flex items-center gap-2 text-sm font-bold uppercase tracking-wider transition-colors">
-            Ver galería <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
-          </Link>
-        </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {featuredContent.map((content) => (
-            <div key={content.id} className="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden shadow-lg group">
-              <div className="relative aspect-video">
-                <img src={content.imageUrl} alt={content.title} className="w-full h-full object-cover" />
-                <a href={content.link} className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-all duration-300">
-                  <div className="w-16 h-16 bg-red-600 rounded-full flex items-center justify-center pl-1 shadow-xl transform scale-75 group-hover:scale-100 transition-transform">
-                    <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {featuredContent.map((video) => (
+              <a href={video.link} key={video.id} className="group relative aspect-video rounded-2xl overflow-hidden shadow-lg border border-white/10 block">
+                <img src={video.imageUrl} alt={video.title} className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500" />
+                <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                  <div className="w-16 h-16 bg-red-600 rounded-full flex items-center justify-center shadow-2xl">
+                    <svg className="w-8 h-8 text-white ml-1" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
                   </div>
-                </a>
-              </div>
-              <div className="p-4">
-                <h3 className="font-bold text-white line-clamp-2 mb-2 group-hover:text-red-400 transition-colors">{content.title}</h3>
-                <p className="text-xs text-slate-500">{content.date}</p>
-              </div>
-            </div>
-          ))}
-          {featuredContent.length === 0 && (
-            <div className="col-span-3 text-center py-12 bg-slate-800/50 rounded-xl border border-slate-700 border-dashed">
-              <p className="text-slate-400">Pronto más videos.</p>
-            </div>
-          )}
-        </div>
-      </section>
-
-      {/* Rankings Preview & Join CTA */}
-      <section className="container mx-auto px-4 max-w-7xl grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Top 10 Ranking */}
-        <div className="lg:col-span-1 bg-slate-900 rounded-xl border border-slate-800 p-6 shadow-2xl">
-          <div className="flex justify-between items-center mb-6">
-            <h3 className="text-xl font-bold text-white uppercase tracking-wider">Top 10 - Puntos</h3>
-            <Link to="/ranking" className="text-xs text-blue-400 hover:text-blue-300 uppercase font-bold">Ver Completo</Link>
-          </div>
-          <div className="space-y-4">
-            {topPwpPlayers.map((player) => (
-              <div key={player.id} className="flex items-center gap-3 p-3 bg-slate-800/50 rounded-lg hover:bg-slate-800 transition-colors border border-transparent hover:border-slate-600">
-                <span className={`font-mono text-xl font-bold w-6 text-center ${player.rank === 1 ? 'text-yellow-400' : player.rank === 2 ? 'text-slate-300' : player.rank === 3 ? 'text-amber-600' : 'text-slate-600'}`}>
-                  {player.rank}
-                </span>
-                <div className="w-10 h-10 rounded-full bg-slate-700 overflow-hidden flex-shrink-0">
-                  <img src={`https://ui-avatars.com/api/?name=${player.name}&background=random`} alt={player.name} className="w-full h-full object-cover" />
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-white font-bold truncate">{player.name}</p>
-                  <p className="text-xs text-slate-500">{player.team || 'Sin Equipo'}</p>
+                <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black to-transparent">
+                  <h3 className="text-white font-bold truncate">{video.title}</h3>
                 </div>
-                <div className="text-right">
-                  <span className="block text-emerald-400 font-bold font-mono">{player.pwp}</span>
-                  <span className="text-[10px] text-slate-500 uppercase">Pts</span>
-                </div>
-              </div>
-            ))}
-            <div className="text-xs text-slate-400 uppercase tracking-widest font-bold">Jugadores</div>
-          </div>
-
-          {/* Stores Stat */}
-          <div className="bg-slate-800/40 backdrop-blur-sm p-6 rounded-xl border border-slate-700/50 flex flex-col items-center hover:border-yellow-500/50 hover:bg-slate-800/60 transition-all group hover:-translate-y-1 duration-300">
-            <div className="p-3 bg-yellow-500/10 rounded-full mb-4 group-hover:bg-yellow-500/20 transition-colors text-yellow-400 shadow-[0_0_15px_rgba(234,179,8,0.2)]">
-              <svg xmlns="http://www.w3.org/2000/svg" className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-              </svg>
-            </div>
-            <div className="text-4xl font-bold text-white mb-1 tabular-nums tracking-tight">
-              <CountUp end={stats.stores} />
-            </div>
-            <div className="text-xs text-slate-400 uppercase tracking-widest font-bold">Tiendas</div>
-          </div>
-
-          {/* Tournaments Stat */}
-          <div className="bg-slate-800/40 backdrop-blur-sm p-6 rounded-xl border border-slate-700/50 flex flex-col items-center hover:border-purple-500/50 hover:bg-slate-800/60 transition-all group hover:-translate-y-1 duration-300">
-            <div className="p-3 bg-purple-500/10 rounded-full mb-4 group-hover:bg-purple-500/20 transition-colors text-purple-400 shadow-[0_0_15px_rgba(168,85,247,0.2)]">
-              <TrophyIcon className="w-8 h-8" />
-            </div>
-            <div className="text-4xl font-bold text-white mb-1 tabular-nums tracking-tight">
-              <CountUp end={stats.tournaments} />
-            </div>
-            <div className="text-xs text-slate-400 uppercase tracking-widest font-bold">Torneos</div>
-          </div>
-
-          {/* Matches Stat */}
-          <div className="bg-slate-800/40 backdrop-blur-sm p-6 rounded-xl border border-slate-700/50 flex flex-col items-center hover:border-green-500/50 hover:bg-slate-800/60 transition-all group hover:-translate-y-1 duration-300">
-            <div className="p-3 bg-green-500/10 rounded-full mb-4 group-hover:bg-green-500/20 transition-colors text-green-400 shadow-[0_0_15px_rgba(34,197,94,0.2)]">
-              <SparklesIcon className="w-8 h-8" />
-            </div>
-            <div className="text-4xl font-bold text-white mb-1 tabular-nums tracking-tight">
-              <CountUp end={stats.matches} />
-            </div>
-            <div className="text-xs text-slate-400 uppercase tracking-widest font-bold">Partidas</div>
-          </div>
-        </div>
-      </section>
-
-      {/* Marquee Brands/Partners */}
-      <div className="border-t border-slate-800 py-12">
-        <div className="container mx-auto px-4 text-center">
-          <p className="text-slate-500 text-sm uppercase tracking-widest mb-8 font-bold">Nuestros Aliados</p>
-          <div className="flex flex-wrap justify-center items-center gap-12 opacity-60 grayscale hover:grayscale-0 transition-all hover:opacity-100 duration-500">
-            {partners.map((partner, idx) => (
-              <img key={idx} src={partner.logo} alt={partner.name} className="h-10 md:h-14 object-contain" />
+              </a>
             ))}
           </div>
-        </div>
+        </section>
+
+        {/* Rankings & Leaderboard */}
+        <section className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start py-8">
+          <div className="lg:col-span-5 space-y-8">
+            <div className="inline-block px-4 py-2 bg-gradient-to-r from-yellow-600/20 to-transparent border-l-4 border-yellow-500">
+              <span className="text-yellow-400 font-bold uppercase tracking-widest text-sm">Clasificación Oficial 2025</span>
+            </div>
+            <h2 className="text-5xl font-black text-white uppercase leading-none">
+              Leader<br />board
+            </h2>
+            <p className="text-lg text-slate-400 leading-relaxed">
+              Los mejores jugadores de la región compiten aquí. Sube de rango, gana premios y califica para el Invitacional de Fin de Año.
+            </p>
+            <Link to="/ranking" className="inline-flex items-center gap-3 px-8 py-4 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-xl transition-colors border border-slate-600">
+              Ver Tabla Completa
+              <span className="text-lg">→</span>
+            </Link>
+          </div>
+
+          <div className="lg:col-span-7">
+            <div className="bg-slate-800/50 rounded-3xl border border-white/5 overflow-hidden shadow-2xl">
+              {topPwpPlayers.slice(0, 5).map((player, idx) => (
+                <div key={player.id} className="flex items-center gap-6 p-6 border-b border-white/5 hover:bg-white/5 transition-colors group">
+                  <span className={`text-4xl font-black w-12 text-center ${idx === 0 ? 'text-yellow-400' : idx === 1 ? 'text-slate-300' : idx === 2 ? 'text-amber-700' : 'text-slate-700'}`}>
+                    {player.rank}
+                  </span>
+                  <div className="w-12 h-12 rounded-full overflow-hidden bg-slate-700 shrink-0">
+                    <img src={`https://ui-avatars.com/api/?name=${player.playerName}&background=random`} alt={player.playerName} className="w-full h-full object-cover" />
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="text-xl font-bold text-white group-hover:text-blue-300 transition-colors">{player.playerName}</h4>
+                    <div className="flex items-center gap-2 text-sm text-slate-500">
+                      <span>{player.team || 'Sin Equipo'}</span>
+                      <span>•</span>
+                      <span>{player.region}</span>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <span className="block text-2xl font-black text-white font-mono">{player.pwp}</span>
+                    <span className="text-xs font-bold text-slate-500 uppercase">Pts</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
       </div>
+
+      {/* Partners Marquee */}
+      <section className="mt-32 border-t border-white/5 bg-black/20 py-16 backdrop-blur">
+        <div className="container mx-auto px-4">
+          <p className="text-center text-slate-600 font-bold uppercase tracking-[0.3em] mb-10 text-sm">Strategic Partners</p>
+          <div className="flex flex-wrap justify-center items-center gap-16 md:gap-24 opacity-50 grayscale hover:grayscale-0 transition-all duration-700 hover:opacity-100">
+            {partners.map((partner, i) => (
+              <div key={i} className="group relative">
+                <img src={partner.logo} alt={partner.name} className="h-12 md:h-16 object-contain brightness-125 contrast-125" />
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
 
     </div>
   );

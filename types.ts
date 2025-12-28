@@ -61,8 +61,12 @@ export interface MediaArticle {
   title: string;
   author: string;
   excerpt: string;
-  imageUrl: string;
+  imageUrl?: string; // Optional because Supabase might separate it or use different casing
+  image_url?: string; // Add snake_case for DB compatibility if raw fetch
   category: string;
+  slug?: string;
+  published_at?: string;
+  game_type?: string;
 }
 
 export interface MediaVideo {
