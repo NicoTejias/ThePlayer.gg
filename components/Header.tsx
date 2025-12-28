@@ -163,8 +163,8 @@ const Header: React.FC<HeaderProps> = ({ isLoggedIn, userRole, userName = 'Jugad
                   <svg className="w-3 h-3 ml-1 opacity-50 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
                 </button>
 
-                <div className="absolute top-full left-0 mt-2 w-56 bg-slate-800 rounded-xl shadow-2xl border border-slate-700/50 overflow-visible opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 transform origin-top-left">
-                  <div className="p-1 max-h-[80vh] overflow-y-auto custom-scrollbar">
+                <div className="absolute top-full left-0 mt-2 w-56 bg-slate-800 rounded-xl shadow-2xl border border-slate-700/50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 transform origin-top-left">
+                  <div className="p-1">
                     <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider px-3 py-2">Selecciona Universo</div>
                     {(Object.keys(GAME_LABELS) as GameType[]).map((game) => (
                       <div key={game} className="relative group/game">
@@ -183,26 +183,27 @@ const Header: React.FC<HeaderProps> = ({ isLoggedIn, userRole, userName = 'Jugad
                             </svg>
                           )}
                         </button>
-
-                        {/* Submenu for Magic formats - appears to the RIGHT of the dropdown */}
-                        {game === 'mtg' && (
-                          <div className="absolute top-0 left-full ml-1 w-44 bg-slate-800 rounded-xl shadow-2xl border border-slate-700/50 opacity-0 invisible group-hover/game:opacity-100 group-hover/game:visible transition-all z-[60]">
-                            <div className="p-1">
-                              <div className="text-[10px] font-bold text-purple-400 uppercase tracking-wider px-3 py-2">Formatos Casuales</div>
-                              <Link to="/commander" className="block px-3 py-2 text-sm text-slate-300 hover:bg-slate-700/50 hover:text-sky-300 rounded-lg transition-colors">
-                                Commander
-                              </Link>
-                              <Link to="/pauper" className="block px-3 py-2 text-sm text-slate-300 hover:bg-slate-700/50 hover:text-sky-300 rounded-lg transition-colors">
-                                Pauper
-                              </Link>
-                              <Link to="/premodern" className="block px-3 py-2 text-sm text-slate-300 hover:bg-slate-700/50 hover:text-sky-300 rounded-lg transition-colors">
-                                Premodern
-                              </Link>
-                            </div>
-                          </div>
-                        )}
                       </div>
                     ))}
+                  </div>
+                </div>
+
+                {/* Magic Submenu - Completely independent floating panel */}
+                <div className="absolute top-full left-[14.5rem] mt-2 w-44 bg-slate-800 rounded-xl shadow-2xl border border-purple-500/30 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-[100] transform origin-top-left">
+                  <div className="p-1">
+                    <div className="text-[10px] font-bold text-purple-400 uppercase tracking-wider px-3 py-2 flex items-center gap-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-purple-400"></span>
+                      Formatos MTG
+                    </div>
+                    <Link to="/commander" className="block px-3 py-2 text-sm text-slate-300 hover:bg-purple-600/20 hover:text-purple-300 rounded-lg transition-colors">
+                      🏰 Commander
+                    </Link>
+                    <Link to="/pauper" className="block px-3 py-2 text-sm text-slate-300 hover:bg-purple-600/20 hover:text-purple-300 rounded-lg transition-colors">
+                      💎 Pauper
+                    </Link>
+                    <Link to="/premodern" className="block px-3 py-2 text-sm text-slate-300 hover:bg-purple-600/20 hover:text-purple-300 rounded-lg transition-colors">
+                      📜 Premodern
+                    </Link>
                   </div>
                 </div>
               </div>
