@@ -44,6 +44,7 @@ import LiveStreamPage from './pages/LiveStreamPage';
 import SubscriptionSuccessPage from './pages/SubscriptionSuccessPage';
 import SubscriptionFailurePage from './pages/SubscriptionFailurePage';
 import HeadJudgeDashboard from './pages/HeadJudgeDashboard';
+import JudgesForumPage from './pages/JudgesForumPage';
 import type { TournamentResult, CommunityEvent, PlayerProfile, TournamentParseResult, Team } from './types';
 import OnboardingModal from './components/OnboardingModal';
 import ClaimResultsModal from './components/ClaimResultsModal';
@@ -871,6 +872,7 @@ const AppContent: React.FC = () => {
           <Route path="/dashboard/tienda" element={<StoreDashboardPage onTournamentUpload={handleTournamentUpload} onDeleteTournament={handleDeleteTournament} userRole={userRole} tournaments={tournamentResults} storeStatus={userProfile?.status} storeName={userProfile?.username} />} />
           <Route path="/dashboard/jugador" element={<PlayerDashboardPage profile={userProfile} />} />
           <Route path="/dashboard/head-judge" element={<HeadJudgeDashboard />} />
+          <Route path="/jueces/foro" element={<JudgesForumPage />} />
           <Route path="/subscription/success" element={<SubscriptionSuccessPage />} />
           <Route path="/subscription/failure" element={<SubscriptionFailurePage />} />
         </Routes>

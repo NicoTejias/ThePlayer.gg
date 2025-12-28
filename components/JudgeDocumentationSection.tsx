@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { toast } from 'sonner';
 import { judgeDocuments, categoryLabels, categoryIcons, type DocumentResource } from '../utils/judge-resources';
 
 const JudgeDocumentationSection: React.FC = () => {
@@ -53,8 +54,8 @@ const JudgeDocumentationSection: React.FC = () => {
                                 <button
                                     onClick={() => setSelectedCategory('all')}
                                     className={`px-4 py-2 rounded-lg font-semibold transition-all ${selectedCategory === 'all'
-                                            ? 'bg-gradient-to-r from-blue-600 to-cyan-600 text-white'
-                                            : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+                                        ? 'bg-gradient-to-r from-blue-600 to-cyan-600 text-white'
+                                        : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
                                         }`}
                                 >
                                     Todos
@@ -64,8 +65,8 @@ const JudgeDocumentationSection: React.FC = () => {
                                         key={category}
                                         onClick={() => setSelectedCategory(category)}
                                         className={`px-4 py-2 rounded-lg font-semibold transition-all ${selectedCategory === category
-                                                ? 'bg-gradient-to-r from-blue-600 to-cyan-600 text-white'
-                                                : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+                                            ? 'bg-gradient-to-r from-blue-600 to-cyan-600 text-white'
+                                            : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
                                             }`}
                                     >
                                         {categoryIcons[category]} {categoryLabels[category]}
@@ -141,7 +142,12 @@ const JudgeDocumentationSection: React.FC = () => {
                                 Ver Documento
                             </a>
                         ) : doc.downloadable ? (
-                            <button className="inline-flex items-center gap-2 text-blue-400 hover:text-blue-300 font-semibold transition-colors">
+                            <button
+                                onClick={() => toast.info('Este documento estará disponible próximamente', {
+                                    description: 'Estamos trabajando en digitalizar todos los recursos.'
+                                })}
+                                className="inline-flex items-center gap-2 text-blue-400 hover:text-blue-300 font-semibold transition-colors"
+                            >
                                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                 </svg>
