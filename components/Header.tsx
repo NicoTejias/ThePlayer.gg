@@ -186,7 +186,7 @@ const Header: React.FC<HeaderProps> = ({ isLoggedIn, userRole, userName = 'Jugad
 
                         {/* Submenu for Magic formats */}
                         {game === 'mtg' && (
-                          <div className="absolute top-0 left-full ml-1 w-44 bg-slate-800 rounded-xl shadow-2xl border border-slate-700/50 opacity-0 invisible group-hover/game:opacity-100 group-hover/game:visible transition-all z-50">
+                          <div className="absolute bottom-0 left-full ml-1 w-44 bg-slate-800 rounded-xl shadow-2xl border border-slate-700/50 opacity-0 invisible group-hover/game:opacity-100 group-hover/game:visible transition-all z-50">
                             <div className="p-1">
                               <div className="text-[10px] font-bold text-purple-400 uppercase tracking-wider px-3 py-2">Formatos Casuales</div>
                               <Link to="/commander" className="block px-3 py-2 text-sm text-slate-300 hover:bg-slate-700/50 hover:text-sky-300 rounded-lg transition-colors">
