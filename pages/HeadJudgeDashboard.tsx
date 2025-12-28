@@ -118,7 +118,8 @@ const HeadJudgeDashboard: React.FC = () => {
                 .from('infractions')
                 .select(`
                     *,
-                    judge:profiles(username)
+                    *,
+                    judge:profiles!reported_by(username)
                 `)
                 .order('created_at', { ascending: false })
                 .limit(100);
@@ -510,9 +511,9 @@ const HeadJudgeDashboard: React.FC = () => {
                                                     </td>
                                                     <td className="p-4">
                                                         <span className={`px-2 py-0.5 rounded text-xs font-bold border uppercase ${inf.severity === 'dq' ? 'bg-red-900/30 text-red-400 border-red-500/30' :
-                                                                inf.severity === 'match_loss' ? 'bg-orange-900/30 text-orange-400 border-orange-500/30' :
-                                                                    inf.severity === 'game_loss' ? 'bg-yellow-900/30 text-yellow-400 border-yellow-500/30' :
-                                                                        'bg-blue-900/30 text-blue-400 border-blue-500/30'
+                                                            inf.severity === 'match_loss' ? 'bg-orange-900/30 text-orange-400 border-orange-500/30' :
+                                                                inf.severity === 'game_loss' ? 'bg-yellow-900/30 text-yellow-400 border-yellow-500/30' :
+                                                                    'bg-blue-900/30 text-blue-400 border-blue-500/30'
                                                             }`}>
                                                             {inf.severity.replace('_', ' ')}
                                                         </span>
