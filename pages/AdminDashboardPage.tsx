@@ -41,40 +41,37 @@ const AdminDashboardPage: React.FC = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        fetchAdminData();
+        let mounted = true;
+
+        const init = async () => {
+            try {
+                // Force a small delay to ensure auth is ready
+                await new Promise(resolve => setTimeout(resolve, 500));
+
+                const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+
+                if (sessionError) throw sessionError;
+
+                if (!session) {
+                    if (mounted) navigate('/login');
+                    return;
+                }
+
+                if (mounted) fetchAdminData();
+            } catch (err) {
+                console.error("Auth check failed", err);
+                if (mounted) navigate('/login');
+            }
+        };
+
+        init();
+
+        return () => { mounted = false; };
     }, []);
-
-    const handleDeleteTournament = async (tournamentId: string, tournamentName: string) => {
-        const confirmMessage = `ADVERTENCIA ADMIN: ¿Deseas eliminar permanentemente el torneo "${tournamentName}" y TODOS sus resultados? \n\nEscribe ELIMINAR para confirmar:`;
-        const userInput = window.prompt(confirmMessage);
-        if (userInput !== 'ELIMINAR') return;
-
-        try {
-            const { data, error } = await supabase.rpc('delete_tournament_by_id', {
-                tournament_id_param: tournamentId
-            });
-
-            if (error) throw error;
-            if (!data.success) throw new Error(data.message);
-
-            toast.success('Torneo eliminado correctamente por Admin');
-            fetchAdminData();
-        } catch (error: any) {
-            console.error("Delete error:", error);
-            toast.error('Error al eliminar torneo: ' + error.message);
-        }
-    };
 
     const fetchAdminData = async () => {
         setLoading(true);
         try {
-            // Check session first
-            const { data: { session } } = await supabase.auth.getSession();
-            if (!session) {
-                navigate('/login');
-                return;
-            }
-
             // Verify admin access
             const { data: { user } } = await supabase.auth.getUser();
             if (!user || !isAdminEmail(user.email)) {
@@ -84,14 +81,13 @@ const AdminDashboardPage: React.FC = () => {
             }
 
             // 1. Fetch Pending Stores
-            const { data: storesData, error: storesError } = await supabase
+            const { data: storesData } = await supabase
                 .from('profiles')
                 .select('*')
                 .eq('role', 'store')
                 .eq('status', 'pending_approval');
 
-            if (storesError) console.error("Error fetching stores:", storesError);
-            setPendingStores(storesData || []);
+            if (storesData) setPendingStores(storesData);
 
             // 2. Fetch Recent Tournaments
             const { data: tourneysData } = await supabase
@@ -122,47 +118,22 @@ const AdminDashboardPage: React.FC = () => {
 
         } catch (error) {
             console.error("Error loading admin data", error);
+            toast.error("Error cargando datos del panel");
         } finally {
             setLoading(false);
         }
     };
 
-    const handleApproveStore = async (id: string, name: string) => {
-        setConfirmAction({ show: true, type: 'approve', storeId: id, storeName: name });
-    };
-
-    const handleRejectStore = async (id: string, name: string) => {
-        setConfirmAction({ show: true, type: 'reject', storeId: id, storeName: name });
-    };
-
-    const executeAction = async () => {
-        const { type, storeId, storeName } = confirmAction;
-        setConfirmAction({ show: false, type: null, storeId: '', storeName: '' });
-
-        if (type === 'approve') {
-            const { error } = await supabase
-                .rpc('approve_store', { store_id: storeId });
-
-            if (error) {
-                alert("Error al aprobar: " + error.message);
-            } else {
-                alert(`Tienda ${storeName} aprobada correctamente.`);
-                await fetchAdminData();
-            }
-        } else if (type === 'reject') {
-            const { error } = await supabase
-                .rpc('reject_store', { store_id: storeId });
-
-            if (error) {
-                alert("Error al rechazar: " + error.message);
-            } else {
-                alert(`Tienda ${storeName} rechazada.`);
-                await fetchAdminData();
-            }
-        }
-    };
-
-    if (loading) return <div className="p-10 text-center text-white">Cargando panel de administración...</div>;
+    if (loading) {
+        return (
+            <div className="min-h-screen flex items-center justify-center">
+                <div className="text-center text-white space-y-4">
+                    <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+                    <p className="text-xl font-semibold">Cargando panel...</p>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="space-y-12">
