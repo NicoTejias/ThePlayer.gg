@@ -374,35 +374,39 @@ const HomePage: React.FC<HomePageProps> = ({ players, events }) => {
               </div>
             </div>
           </div>
-          <Link key={news.id} to={`/media/articulos/${news.slug}`} className="group relative h-96 rounded-xl overflow-hidden shadow-xl block">
-            <div className="absolute inset-0 bg-slate-900 group-hover:scale-105 transition-transform duration-700">
-              {news.image_url ? (
-                <img src={news.image_url} alt={news.title} className="w-full h-full object-cover opacity-60 group-hover:opacity-40 transition-opacity" />
-              ) : (
-                <div className="w-full h-full bg-gradient-to-br from-slate-800 to-slate-900"></div>
+          <div className="md:col-span-2">
+            {latestNews.length > 0 ?
+              latestNews.map((news) => (
+                <Link key={news.id} to={`/media/articulos/${news.slug}`} className="group relative h-96 rounded-xl overflow-hidden shadow-xl block">
+                  <div className="absolute inset-0 bg-slate-900 group-hover:scale-105 transition-transform duration-700">
+                    {news.image_url ? (
+                      <img src={news.image_url} alt={news.title} className="w-full h-full object-cover opacity-60 group-hover:opacity-40 transition-opacity" />
+                    ) : (
+                      <div className="w-full h-full bg-gradient-to-br from-slate-800 to-slate-900"></div>
+                    )}
+                  </div>
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/40 to-transparent"></div>
+                  <div className="absolute bottom-0 left-0 p-6 w-full">
+                    <span className="inline-block px-3 py-1 bg-blue-600/90 text-white text-xs font-bold rounded mb-3 uppercase tracking-wider">
+                      {news.game_type}
+                    </span>
+                    <h3 className="text-xl font-bold text-white mb-2 leading-tight group-hover:text-blue-300 transition-colors">
+                      {news.title}
+                    </h3>
+                    <p className="text-slate-300 text-sm line-clamp-2 mb-4">
+                      {news.excerpt}
+                    </p>
+                    <span className="text-slate-400 text-xs font-bold uppercase tracking-wider">
+                      Leer Artículo &rarr;
+                    </span>
+                  </div>
+                </Link>
+              )) : (
+                <div className="col-span-3 text-center py-12 bg-slate-800/50 rounded-xl border border-slate-700 border-dashed">
+                  <p className="text-slate-400">No hay noticias recientes.</p>
+                </div>
               )}
-            </div>
-            <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/40 to-transparent"></div>
-            <div className="absolute bottom-0 left-0 p-6 w-full">
-              <span className="inline-block px-3 py-1 bg-blue-600/90 text-white text-xs font-bold rounded mb-3 uppercase tracking-wider">
-                {news.game_type}
-              </span>
-              <h3 className="text-xl font-bold text-white mb-2 leading-tight group-hover:text-blue-300 transition-colors">
-                {news.title}
-              </h3>
-              <p className="text-slate-300 text-sm line-clamp-2 mb-4">
-                {news.excerpt}
-              </p>
-              <span className="text-slate-400 text-xs font-bold uppercase tracking-wider">
-                Leer Artículo &rarr;
-              </span>
-            </div>
-          </Link>
-          )) : (
-          <div className="col-span-3 text-center py-12 bg-slate-800/50 rounded-xl border border-slate-700 border-dashed">
-            <p className="text-slate-400">No hay noticias recientes.</p>
           </div>
-                                )}
         </div>
       </section>
 
@@ -523,17 +527,6 @@ const HomePage: React.FC<HomePageProps> = ({ players, events }) => {
       </div>
 
     </div>
-                        </div >
-                      </div >
-                    </div >
-                  </div >
-                </section >
-          </div >
-      </div >
-    </div >
-        </div >
-      </div >
-    </div >
   );
 };
 

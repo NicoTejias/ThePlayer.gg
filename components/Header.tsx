@@ -40,7 +40,7 @@ const NavLinks: NavLinkType[] = [
 ];
 
 // Recursive Menu Item Component for arbitrary depth
-const MenuItem: React.FC<{ item: NavLinkType; depth?: number }> = ({ item, depth = 0 }) => {
+const MenuItem: React.FC<{ item: NavLinkType; depth?: number; isLiveSignal?: boolean }> = ({ item, depth = 0, isLiveSignal = false }) => {
   const [isOpen, setIsOpen] = useState(false);
   const hasSubItems = item.subItems && item.subItems.length > 0;
   const isTopLevel = depth === 0;
