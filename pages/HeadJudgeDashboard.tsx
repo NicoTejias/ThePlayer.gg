@@ -34,10 +34,25 @@ interface Application {
     };
 }
 
+interface Infraction {
+    id: string;
+    player_name: string;
+    infraction_type: string;
+    severity: string;
+    description: string;
+    penalty_applied: string;
+    created_at: string;
+    judge?: {
+        username: string;
+    };
+    tournament_id?: string;
+}
+
 const HeadJudgeDashboard: React.FC = () => {
-    const [activeTab, setActiveTab] = useState<'applications' | 'cases'>('applications');
+    const [activeTab, setActiveTab] = useState<'applications' | 'cases' | 'infractions'>('applications');
     const [applications, setApplications] = useState<Application[]>([]);
     const [cases, setCases] = useState<DisciplineCase[]>([]);
+    const [infractions, setInfractions] = useState<Infraction[]>([]);
     const [loading, setLoading] = useState(true);
     const [selectedApp, setSelectedApp] = useState<Application | null>(null);
     const [selectedCaseId, setSelectedCaseId] = useState<string | null>(null);
@@ -47,8 +62,10 @@ const HeadJudgeDashboard: React.FC = () => {
     useEffect(() => {
         if (activeTab === 'applications') {
             fetchApplications();
-        } else {
+        } else if (activeTab === 'cases') {
             fetchCases();
+        } else {
+            fetchInfractions();
         }
     }, [activeTab]);
 
@@ -89,6 +106,28 @@ const HeadJudgeDashboard: React.FC = () => {
         } catch (error) {
             console.error('Error fetching cases:', error);
             toast.error('Error al cargar casos');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const fetchInfractions = async () => {
+        setLoading(true);
+        try {
+            const { data, error } = await supabase
+                .from('infractions')
+                .select(`
+                    *,
+                    judge:profiles(username)
+                `)
+                .order('created_at', { ascending: false })
+                .limit(100);
+
+            if (error) throw error;
+            setInfractions(data || []);
+        } catch (error) {
+            console.error('Error fetching infractions:', error);
+            toast.error('Error al cargar infracciones');
         } finally {
             setLoading(false);
         }
@@ -226,10 +265,21 @@ const HeadJudgeDashboard: React.FC = () => {
                     >
                         Casos Disciplinarios
                     </button>
+                    <button
+                        onClick={() => setActiveTab('infractions')}
+                        className={`pb-4 px-2 font-bold transition-all ${activeTab === 'infractions'
+                            ? 'text-blue-400 border-b-2 border-blue-400'
+                            : 'text-slate-400 hover:text-white'
+                            }`}
+                    >
+                        Registro de Infracciones
+                    </button>
                 </div>
 
                 {/* Content based on Active Tab */}
-                {activeTab === 'applications' ? (
+
+                {/* APPLICATIONS TAB */}
+                {activeTab === 'applications' && (
                     <>
                         {/* Application Stats */}
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
@@ -336,7 +386,10 @@ const HeadJudgeDashboard: React.FC = () => {
                             </div>
                         )}
                     </>
-                ) : (
+                )}
+
+                {/* CASES TAB */}
+                {activeTab === 'cases' && (
                     <>
                         {/* Case Stats */}
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
@@ -417,6 +470,73 @@ const HeadJudgeDashboard: React.FC = () => {
                             </div>
                         </div>
                     </>
+                )}
+
+                {/* INFRACTIONS TAB */}
+                {activeTab === 'infractions' && (
+                    <div className="animate-fadeIn">
+                        <div className="flex justify-between items-center mb-6">
+                            <h2 className="text-2xl font-bold">Registro Global de Infracciones</h2>
+                            <div className="bg-slate-800 px-4 py-2 rounded-lg border border-slate-700 text-slate-400 text-sm">
+                                Mostrando últimas 100 infracciones
+                            </div>
+                        </div>
+
+                        <div className="bg-slate-800 border border-slate-700 rounded-xl overflow-hidden">
+                            <div className="overflow-x-auto">
+                                <table className="w-full text-left">
+                                    <thead className="bg-slate-700/50">
+                                        <tr>
+                                            <th className="p-4 text-xs font-bold text-slate-400 uppercase">Fecha</th>
+                                            <th className="p-4 text-xs font-bold text-slate-400 uppercase">Jugador</th>
+                                            <th className="p-4 text-xs font-bold text-slate-400 uppercase">Infracción</th>
+                                            <th className="p-4 text-xs font-bold text-slate-400 uppercase">Severidad</th>
+                                            <th className="p-4 text-xs font-bold text-slate-400 uppercase">Penalización</th>
+                                            <th className="p-4 text-xs font-bold text-slate-400 uppercase">Juez</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-slate-700">
+                                        {infractions.length > 0 ? (
+                                            infractions.map((inf) => (
+                                                <tr key={inf.id} className="hover:bg-slate-700/30 transition-colors">
+                                                    <td className="p-4 text-slate-300 text-sm whitespace-nowrap">
+                                                        {new Date(inf.created_at).toLocaleDateString('es-CL')}
+                                                    </td>
+                                                    <td className="p-4 font-bold text-white">
+                                                        {inf.player_name}
+                                                    </td>
+                                                    <td className="p-4 text-slate-300 text-sm">
+                                                        {inf.infraction_type}
+                                                    </td>
+                                                    <td className="p-4">
+                                                        <span className={`px-2 py-0.5 rounded text-xs font-bold border uppercase ${inf.severity === 'dq' ? 'bg-red-900/30 text-red-400 border-red-500/30' :
+                                                                inf.severity === 'match_loss' ? 'bg-orange-900/30 text-orange-400 border-orange-500/30' :
+                                                                    inf.severity === 'game_loss' ? 'bg-yellow-900/30 text-yellow-400 border-yellow-500/30' :
+                                                                        'bg-blue-900/30 text-blue-400 border-blue-500/30'
+                                                            }`}>
+                                                            {inf.severity.replace('_', ' ')}
+                                                        </span>
+                                                    </td>
+                                                    <td className="p-4 text-slate-300 text-sm">
+                                                        {inf.penalty_applied || '-'}
+                                                    </td>
+                                                    <td className="p-4 text-slate-400 text-sm">
+                                                        {inf.judge?.username || 'Desconocido'}
+                                                    </td>
+                                                </tr>
+                                            ))
+                                        ) : (
+                                            <tr>
+                                                <td colSpan={6} className="p-12 text-center text-slate-500">
+                                                    No se han registrado infracciones aún.
+                                                </td>
+                                            </tr>
+                                        )}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
                 )}
             </div>
 

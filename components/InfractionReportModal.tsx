@@ -22,7 +22,9 @@ const InfractionReportModal: React.FC<InfractionReportModalProps> = ({
         description: '',
         penaltyApplied: '',
         escalateToCase: false,
-        judgeStatement: ''
+        judgeStatement: '',
+        witnessStatement: '',
+        evidenceUrls: ''
     });
 
     const infractionTypes = [
@@ -86,7 +88,9 @@ const InfractionReportModal: React.FC<InfractionReportModalProps> = ({
                         p_infraction_id: infraction,
                         p_case_type: 'dq_review',
                         p_accused_player_name: formData.playerName,
-                        p_judge_statement: formData.judgeStatement
+                        p_judge_statement: formData.judgeStatement,
+                        p_witness_statement: formData.witnessStatement || null,
+                        p_evidence_urls: formData.evidenceUrls ? formData.evidenceUrls.split('\n').filter(url => url.trim()) : null
                     });
 
                 if (caseError) throw caseError;
@@ -104,7 +108,9 @@ const InfractionReportModal: React.FC<InfractionReportModalProps> = ({
                 description: '',
                 penaltyApplied: '',
                 escalateToCase: false,
-                judgeStatement: ''
+                judgeStatement: '',
+                witnessStatement: '',
+                evidenceUrls: ''
             });
             onClose();
 
@@ -190,8 +196,8 @@ const InfractionReportModal: React.FC<InfractionReportModalProps> = ({
                                     type="button"
                                     onClick={() => setFormData({ ...formData, infractionType: type.value })}
                                     className={`p-3 rounded-lg border text-left transition-all ${formData.infractionType === type.value
-                                            ? 'bg-amber-600/30 border-amber-500 text-white'
-                                            : 'bg-slate-900 border-slate-700 text-slate-300 hover:border-slate-600'
+                                        ? 'bg-amber-600/30 border-amber-500 text-white'
+                                        : 'bg-slate-900 border-slate-700 text-slate-300 hover:border-slate-600'
                                         }`}
                                 >
                                     <span className="text-lg mr-2">{type.icon}</span>
@@ -213,8 +219,8 @@ const InfractionReportModal: React.FC<InfractionReportModalProps> = ({
                                     type="button"
                                     onClick={() => setFormData({ ...formData, severity: sev.value })}
                                     className={`px-4 py-2 rounded-lg border font-medium transition-all flex items-center gap-2 ${formData.severity === sev.value
-                                            ? 'bg-amber-600/30 border-amber-500 text-white'
-                                            : 'bg-slate-900 border-slate-700 text-slate-300 hover:border-slate-600'
+                                        ? 'bg-amber-600/30 border-amber-500 text-white'
+                                        : 'bg-slate-900 border-slate-700 text-slate-300 hover:border-slate-600'
                                         }`}
                                 >
                                     <span className={`w-3 h-3 rounded-full ${sev.color}`}></span>
@@ -285,6 +291,39 @@ const InfractionReportModal: React.FC<InfractionReportModalProps> = ({
                                         className="w-full bg-slate-900 border border-red-500/30 rounded-lg px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-red-500 resize-none"
                                         required
                                     />
+                                </div>
+                            )}
+
+                            {formData.escalateToCase && (
+                                <div className="space-y-4 pt-4 border-t border-red-500/30">
+                                    <div>
+                                        <label className="block text-sm font-semibold text-red-300 mb-2">
+                                            Declaración de Testigo (Opcional)
+                                        </label>
+                                        <textarea
+                                            value={formData.witnessStatement}
+                                            onChange={(e) => setFormData({ ...formData, witnessStatement: e.target.value })}
+                                            placeholder="Declaración de un tercero u observador imparcial..."
+                                            rows={2}
+                                            className="w-full bg-slate-900 border border-red-500/30 rounded-lg px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-red-500 resize-none"
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-semibold text-red-300 mb-2">
+                                            Enlaces a Pruebas (Fotos/Videos)
+                                        </label>
+                                        <textarea
+                                            value={formData.evidenceUrls}
+                                            onChange={(e) => setFormData({ ...formData, evidenceUrls: e.target.value })}
+                                            placeholder="Pega aquí los enlaces a las pruebas (uno por línea)..."
+                                            rows={2}
+                                            className="w-full bg-slate-900 border border-red-500/30 rounded-lg px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-red-500 resize-none"
+                                        />
+                                        <p className="text-xs text-red-400/60 mt-1">
+                                            Sube las imágenes a un servicio externo (Imgur, Google Drive) y pega los enlaces.
+                                        </p>
+                                    </div>
                                 </div>
                             )}
                         </div>

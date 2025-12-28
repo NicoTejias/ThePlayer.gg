@@ -155,6 +155,14 @@ const JudgesPage: React.FC = () => {
                             >
                                 Ver Requisitos
                             </button>
+                            {(currentUser?.judge_role === 'judge' || currentUser?.judge_role === 'head_judge') && (
+                                <button
+                                    onClick={() => window.location.href = '/jueces/foro'}
+                                    className="px-6 py-3 bg-amber-500 text-black font-bold rounded-lg hover:bg-amber-400 transition-all shadow-lg shadow-amber-500/20"
+                                >
+                                    💬 Foro
+                                </button>
+                            )}
                         </div>
                     </div>
                 </div>
