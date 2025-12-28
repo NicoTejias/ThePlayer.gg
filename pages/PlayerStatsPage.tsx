@@ -184,7 +184,7 @@ const PlayerStatsPage: React.FC = () => {
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
                                 </svg>
                             </div>
-                            <span className="text-slate-400 text-sm">PWP Total</span>
+                            <span className="text-slate-400 text-sm">Puntos Totales</span>
                         </div>
                         <p className="text-3xl font-bold">{metrics.total_pwp}</p>
                     </div>
@@ -208,7 +208,7 @@ const PlayerStatsPage: React.FC = () => {
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
                                 </svg>
                             </div>
-                            <span className="text-slate-400 text-sm">Promedio PWP</span>
+                            <span className="text-slate-400 text-sm">Promedio Pts</span>
                         </div>
                         <p className="text-3xl font-bold">{metrics.average_pwp_per_tournament.toFixed(1)}</p>
                     </div>
@@ -261,7 +261,7 @@ const PlayerStatsPage: React.FC = () => {
                                         ? ((metrics.average_pwp_per_tournament / 10) * 100).toFixed(0)
                                         : 0}%
                                 </p>
-                                <p className="text-xs text-purple-400/70">Basado en PWP promedio</p>
+                                <p className="text-xs text-purple-400/70">Basado en Pts promedio</p>
                             </div>
 
                             {/* Tournament Participation Rate */}
@@ -321,7 +321,7 @@ const PlayerStatsPage: React.FC = () => {
                                 <div className="flex items-start gap-3">
                                     <div className="w-2 h-2 bg-purple-400 rounded-full mt-2"></div>
                                     <p className="text-sm text-slate-300">
-                                        Promedio de <span className="font-bold text-purple-300">{metrics.average_pwp_per_tournament.toFixed(1)} PWP</span> por torneo.
+                                        Promedio de <span className="font-bold text-purple-300">{metrics.average_pwp_per_tournament.toFixed(1)} Pts</span> por torneo.
                                         {metrics.average_pwp_per_tournament >= 5
                                             ? ' ¡Excelente rendimiento!'
                                             : ' Sigue mejorando para aumentar tu ranking.'}
@@ -357,7 +357,7 @@ const PlayerStatsPage: React.FC = () => {
                     {/* PWP Progression */}
                     {pwpProgression.length > 0 && (
                         <div className="bg-slate-800 border border-slate-700 rounded-lg p-6">
-                            <h2 className="text-2xl font-bold mb-4">Progresión de PWP</h2>
+                            <h2 className="text-2xl font-bold mb-4">Progresión de Puntos</h2>
                             <ResponsiveContainer width="100%" height={300}>
                                 <LineChart data={pwpProgression}>
                                     <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
@@ -377,7 +377,7 @@ const PlayerStatsPage: React.FC = () => {
                                         dataKey="cumulative_pwp"
                                         stroke={COLORS.primary}
                                         strokeWidth={2}
-                                        name="PWP Acumulado"
+                                        name="Puntos Acumulados"
                                         dot={{ fill: COLORS.primary, r: 4 }}
                                     />
                                 </LineChart>

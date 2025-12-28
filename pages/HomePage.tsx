@@ -84,13 +84,16 @@ interface HomePageProps {
 const HomePage: React.FC<HomePageProps> = ({ players, events }) => {
   const { currentGame } = useGame();
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [stats, setStats] = useState({ stores: 0, players: 0, tournaments: 0, matches: 0 });
+  const [latestNews, setLatestNews] = useState<MediaArticle[]>([]);
+  const [featuredContent, setFeaturedContent] = useState<any[]>([]);
+  const [stats, setStats] = useState({ totalPlayers: 0, registeredStores: 0, activeTournaments: 0, totalMatches: 0 });
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchStats = async () => {
       try {
         // Mock some data if tables are empty, but try real fetch first
-        const [stores, players, tournaments, results] = await Promise.all([
+        const [storesData, playersData, tournamentsData, resultsData] = await Promise.all([
           supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'store'),
           supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'player'),
           supabase.from('tournaments')
@@ -101,18 +104,59 @@ const HomePage: React.FC<HomePageProps> = ({ players, events }) => {
             .eq('tournaments.game_type', currentGame)
         ]);
 
+        // Fetch Latest News & Videos
+        const { data: articlesData } = await supabase
+          .from('articles')
+          .select('*')
+          .eq('is_published', true)
+          .order('published_at', { ascending: false })
+          .limit(3);
+
+        if (articlesData) setLatestNews(articlesData);
+
+        const { data: videosData } = await supabase
+          .from('videos')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(3);
+
+        if (videosData) {
+          setFeaturedContent(videosData.map(v => ({
+            id: v.id,
+            title: v.title,
+            type: 'video',
+            imageUrl: `https://img.youtube.com/vi/${v.youtube_id}/maxresdefault.jpg`,
+            link: `/media/videos`,
+            date: new Date(v.created_at || Date.now()).toLocaleDateString()
+          })));
+        }
+
         setStats({
-          stores: stores.count || 0,
-          players: players.count || 0,
-          tournaments: tournaments.count || 0,
-          matches: results.count || 0
+          registeredStores: storesData.count || 0,
+          totalPlayers: playersData.count || 0,
+          activeTournaments: tournamentsData.count || 0,
+          totalMatches: resultsData.count || 0
         });
+
+        setLoading(false);
+
       } catch (e) {
         console.error("Error fetching stats", e);
+        setLoading(false);
       }
     };
 
     fetchStats();
+
+    // Realtime subscription for stats updates
+    const subscription = supabase
+      .channel('public:profiles')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, fetchStats)
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(subscription);
+    };
   }, [currentGame]);
 
   // Auto-slide effect
@@ -122,7 +166,7 @@ const HomePage: React.FC<HomePageProps> = ({ players, events }) => {
     }, 5000);
     return () => clearInterval(timer);
   }, []);
-  // Derive Top 10 PWP Ranking (Player Latam Series)
+  // Derive Top 10 Pts Ranking (Player Latam Series)
   const topPwpPlayers = [...players]
     .sort((a, b) => (b.pwp || 0) - (a.pwp || 0))
     .slice(0, 10)
@@ -134,6 +178,7 @@ const HomePage: React.FC<HomePageProps> = ({ players, events }) => {
       const anonymousNumber = Math.abs(hashCode % 9000) + 1000; // Número de 4 dígitos (1000-9999)
 
       return {
+        id: p.id, // Preservar ID
         rank: i + 1,
         // Anonymous Name Logic
         playerName: p.isPublic ? p.name : `Jugador #${anonymousNumber}`,
@@ -160,6 +205,7 @@ const HomePage: React.FC<HomePageProps> = ({ players, events }) => {
       const anonymousNumber = Math.abs(hashCode % 9000) + 1000; // Número de 4 dígitos (1000-9999)
 
       return {
+        id: p.id, // Preservar ID
         rank: i + 1,
         // Anonymous Name Logic: "Jugador " + last 4 chars of ID (simulated or real)
         playerName: p.isPublic ? p.name : `Jugador #${anonymousNumber}`,
@@ -175,243 +221,255 @@ const HomePage: React.FC<HomePageProps> = ({ players, events }) => {
   // specific uniqueness check if needed, but simple concat is usually fine for visual testing
   const displayEvents = combinedEvents.slice(0, 6);
 
+  const partners = [
+    { name: 'ThePlayer', logo: '/images/partners/theplayer_logo.png', url: '#' },
+    { name: 'Blood Moon', logo: '/images/partners/bloodmoon.png', url: '#' },
+    { name: 'Moss Eisley', logo: '/images/partners/moss_eisley.jpg', url: '#' },
+    { name: 'Command Center', logo: '/images/partners/command_center.jpg', url: '#' },
+    { name: 'Blue Robot', logo: '/images/partners/blue_robot.png', url: '#' },
+  ];
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#0f172a] flex items-center justify-center">
+        <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
   return (
-    <div className="space-y-12">
+    <div className="space-y-16 pb-20">
 
-      {/* Hero Carousel Section */}
-      <section className="relative w-full h-[400px] md:h-[500px] overflow-hidden rounded-2xl shadow-2xl group">
-        {/* Slides */}
-        {sliderItems.map((item, index) => (
-          <div
-            key={item.id}
-            className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${index === currentSlide ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
-          >
-            <div className={`absolute inset-0 bg-gradient-to-t ${item.color} to-transparent opacity-60 z-10`} />
-            <div className="absolute inset-0 bg-black/20 z-10" /> {/* General overlay for readability */}
-            <img
-              src={item.imageUrl}
-              alt={item.title}
-              className="w-full h-full object-cover transform scale-105 group-hover:scale-110 transition-transform duration-[10000ms]"
-            />
-            <div className="absolute bottom-0 left-0 right-0 p-8 md:p-12 z-20 flex flex-col items-start justify-end h-full bg-gradient-to-t from-slate-900 to-transparent">
-              <h2 className="text-4xl md:text-6xl font-black text-white uppercase tracking-tighter mb-4 drop-shadow-xl animate-fade-in-up">
-                {item.title}
-              </h2>
-              <Link
-                to={item.link}
-                className="bg-white/10 hover:bg-white/20 backdrop-blur-md text-white font-bold py-3 px-8 rounded-full border border-white/30 transition-all hover:scale-105 hover:shadow-lg flex items-center gap-2"
-              >
-                Explorar
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5l6 6m0 0l-6 6m6-6H3" />
-                </svg>
-              </Link>
-            </div>
+      {/* Hero Section */}
+      <section className="relative h-[600px] flex items-center justify-center overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-b from-[#0f172a]/70 to-[#0f172a] z-10"></div>
+        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1642375630656-e0e985b9b653?q=80&w=2070&auto=format&fit=crop')] bg-cover bg-center opacity-40 animate-pulse-slow"></div>
+
+        <div className="relative z-20 text-center px-4 max-w-4xl mx-auto space-y-8 animate-fade-in-up">
+          <h1 className="text-6xl md:text-8xl font-black text-white tracking-tighter drop-shadow-2xl">
+            THE <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-emerald-400">PLAYER</span>
+          </h1>
+          <p className="text-2xl md:text-3xl text-slate-300 font-light max-w-2xl mx-auto drop-shadow-md">
+            El ecosistema definitivo para TCG en Latinoamérica. Compite, rankea y domina.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-6 justify-center pt-8">
+            <Link
+              to="/eventos"
+              className="px-8 py-4 bg-blue-600 hover:bg-blue-500 text-white font-bold text-lg rounded-xl shadow-lg shadow-blue-600/30 transition-all transform hover:scale-105 hover:-translate-y-1"
+            >
+              Ver Eventos
+            </Link>
+            <Link
+              to="/ranking"
+              className="px-8 py-4 bg-slate-800/80 backdrop-blur-md border border-slate-600 hover:bg-slate-700 text-white font-bold text-lg rounded-xl transition-all transform hover:scale-105 hover:-translate-y-1"
+            >
+              Consultar Ranking
+            </Link>
           </div>
-        ))}
+        </div>
+      </section>
 
-        {/* Indicators */}
-        <div className="absolute bottom-6 right-8 z-30 flex space-x-3">
-          {sliderItems.map((_, index) => (
-            <button
-              key={index}
-              onClick={() => setCurrentSlide(index)}
-              className={`w-3 h-3 rounded-full transition-all duration-300 ${index === currentSlide ? 'bg-white w-8' : 'bg-white/40 hover:bg-white/60'}`}
-              aria-label={`Go to slide ${index + 1}`}
-            />
+      {/* Community Stats */}
+      <section className="container mx-auto px-4 max-w-6xl -mt-20 relative z-30">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 bg-slate-800/80 backdrop-blur-md p-8 rounded-2xl border border-slate-700 shadow-2xl">
+          <div className="text-center">
+            <p className="text-4xl font-black text-white">{stats.totalPlayers}</p>
+            <p className="text-xs uppercase tracking-widest text-slate-400 mt-1">Jugadores</p>
+          </div>
+          <div className="text-center">
+            <p className="text-4xl font-black text-emerald-400">{stats.activeTournaments}</p>
+            <p className="text-xs uppercase tracking-widest text-slate-400 mt-1">Torneos Activos</p>
+          </div>
+          <div className="text-center">
+            <p className="text-4xl font-black text-blue-400">{stats.registeredStores}</p>
+            <p className="text-xs uppercase tracking-widest text-slate-400 mt-1">Tiendas Oficiales</p>
+          </div>
+          <div className="text-center">
+            <p className="text-4xl font-black text-purple-400">{stats.totalMatches}</p>
+            <p className="text-xs uppercase tracking-widest text-slate-400 mt-1">Partidas Jugadas</p>
+          </div>
+        </div>
+      </section>
+
+      {/* Featured News & Updates */}
+      <section className="container mx-auto px-4 max-w-7xl">
+        <div className="flex items-center justify-between mb-8">
+          <h2 className="text-3xl font-bold text-white uppercase tracking-wider border-l-4 border-blue-500 pl-4">Novedades</h2>
+          <Link to="/noticias" className="text-blue-400 hover:text-blue-300 text-sm font-bold uppercase">Ver Todo &rarr;</Link>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {featuredContent.map((content) => (
+            <Link key={content.id} to={content.link} className="group bg-slate-800 rounded-xl overflow-hidden border border-slate-700 hover:border-blue-500 transition-all hover:shadow-xl hover:shadow-blue-500/10">
+              <div className="h-48 overflow-hidden relative">
+                <img src={content.imageUrl} alt={content.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                <div className="absolute top-2 right-2 bg-black/60 backdrop-blur px-2 py-1 rounded text-xs font-bold text-white uppercase">{content.type}</div>
+              </div>
+              <div className="p-6">
+                <p className="text-blue-400 text-xs font-bold mb-2">{content.date}</p>
+                <h3 className="text-xl font-bold text-white group-hover:text-blue-300 transition-colors mb-2">{content.title}</h3>
+                <span className="text-slate-500 text-sm group-hover:text-slate-400">Leer más &rarr;</span>
+              </div>
+            </Link>
           ))}
         </div>
       </section>
 
-      {/* Rankings Section Grid */}
-      <div className="grid lg:grid-cols-2 gap-12 mb-20">
-        {/* Player Latam Series (PWP) Section */}
-        <section>
-          <SectionHeader title="Player Latam Series" linkTo="/ranking/pwp" />
-          <div className="bg-slate-800 rounded-lg p-5 shadow-xl border border-slate-700">
-            <ul className="space-y-2">
-              {topPwpPlayers.length > 0 ? (
-                topPwpPlayers.map((player, index) => (
-                  <li key={player.playerName} className={`flex items-center justify-between p-2 rounded-md ${index < 3 ? 'bg-slate-700/60' : 'hover:bg-slate-700/30'}`}>
-                    <div className="flex items-center space-x-3">
-                      <span className={`text-lg font-bold w-6 text-center ${index === 0 ? 'text-yellow-400' : index === 1 ? 'text-slate-300' : index === 2 ? 'text-yellow-600' : 'text-slate-500'}`}>
-                        {player.rank}
-                      </span>
-                      <div className="flex flex-col">
-                        <div className="flex items-center gap-2">
-                          {/* Anonymize logic handled in map */}
-                          <span className="text-base text-white font-medium truncate max-w-[120px] sm:max-w-xs">
-                            {player.playerName}
-                          </span>
-                        </div>
-                      </div>
-                      {/* Show TEAM instead of REGION */}
-                      <span className="text-[10px] text-sky-300 bg-sky-900/30 border border-sky-800 px-1.5 py-0.5 rounded ml-auto mr-2">
-                        {player.team || 'Unknown'}
-                      </span>
-                    </div>
-                    <div className="flex items-center space-x-2 text-sky-400 font-semibold text-sm">
-                      <span>{player.pwp} pts</span>
-                      {index < 3 && <TrophyIcon className="w-4 h-4" />}
-                    </div>
-                  </li>
-                ))
-              ) : (
-                <li className="text-slate-400 text-center py-4">No hay datos de ranking disponibles.</li>
-              )}
-            </ul>
-          </div>
-        </section>
+      {/* Ranking Spotlight */}
+      <section className="py-20 bg-slate-900/50 border-y border-slate-800">
+        <div className="container mx-auto px-4 max-w-7xl">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-12">
 
-        {/* PLS Winrate Section */}
-        <section>
-          <SectionHeader title="PLS Winrate" linkTo="/ranking/pwp" />
-          <div className="bg-slate-800 rounded-lg p-5 shadow-xl border border-slate-700">
-            <ul className="space-y-2">
-              {topWinRatePlayers.length > 0 ? (
-                topWinRatePlayers.map((player, index) => (
-                  <li key={player.playerName} className={`flex items-center justify-between p-2 rounded-md ${index < 3 ? 'bg-slate-700/60' : 'hover:bg-slate-700/30'}`}>
-                    <div className="flex items-center space-x-3">
-                      <span className={`text-lg font-bold w-6 text-center ${index === 0 ? 'text-yellow-400' : index === 1 ? 'text-slate-300' : index === 2 ? 'text-yellow-600' : 'text-slate-500'}`}>
-                        {player.rank}
-                      </span>
-                      <div className="flex flex-col">
-                        <div className="flex items-center gap-2">
-                          {/* Anonymize logic handled in map */}
-                          <span className="text-base text-white font-medium truncate max-w-[120px] sm:max-w-xs">
-                            {player.playerName}
-                          </span>
-                        </div>
-                      </div>
-                      {/* Show TEAM instead of REGION */}
-                      <span className="text-[10px] text-violet-300 bg-violet-900/30 border border-violet-800 px-1.5 py-0.5 rounded ml-auto mr-2">
-                        {player.team || 'Unknown'}
-                      </span>
-                    </div>
-                    <div className="flex items-center space-x-2 text-violet-400 font-semibold text-sm">
-                      <span>{player.winRate}</span>
-                      {index < 3 && <SparklesIcon className="w-4 h-4" />}
-                    </div>
-                  </li>
-                ))
-              ) : (
-                <li className="text-slate-400 text-center py-4">No hay datos de ranking disponibles.</li>
-              )}
-            </ul>
-          </div>
-        </section>
-      </div>
+            <div className="md:w-1/2 space-y-6">
+              <h2 className="text-4xl font-black text-white uppercase tracking-wide">
+                Player Latam <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-amber-600">Series</span>
+              </h2>
+              <p className="text-lg text-slate-300">
+                El ranking más prestigioso de la región. Acumula puntos participando en torneos oficiales y clasifica para el gran invitacional de fin de temporada.
+              </p>
 
-      {/* Unified 3-Column Layout: Events, Content, Market */}
-      <div className="grid lg:grid-cols-3 gap-8">
+              <div className="grid grid-cols-2 gap-4 pt-4">
+                <div className="bg-slate-800 p-4 rounded-lg border-l-4 border-yellow-500">
+                  <p className="font-bold text-white">Premios en Efectivo</p>
+                  <p className="text-xs text-slate-400">Para el Top 8 Final</p>
+                </div>
+                <div className="bg-slate-800 p-4 rounded-lg border-l-4 border-blue-500">
+                  <p className="font-bold text-white">Invitaciones Pro Tour</p>
+                  <p className="text-xs text-slate-400">Clasificatorios Regionales</p>
+                </div>
+              </div>
 
-        {/* Column 1: Próximos Eventos */}
-        <section className="flex flex-col h-full">
-          <SectionHeader title="Próximos Eventos" linkTo="/eventos" />
-          <div className="bg-slate-800 rounded-lg p-4 shadow-xl border border-slate-700 flex-1 flex flex-col gap-4">
-            {displayEvents.length > 0 ? (
-              displayEvents.map((event) => (
-                <Link
-                  key={event.id}
-                  to="/eventos"
-                  className="bg-slate-700/40 rounded-lg p-3 border border-slate-600/50 hover:border-sky-500/50 transition-colors group block"
-                >
-                  <div className="flex justify-between items-start mb-1">
-                    <h3 className="text-white font-bold group-hover:text-sky-400 transition-colors text-sm line-clamp-1">{event.title}</h3>
-                    <span className="text-[10px] bg-sky-900/80 text-sky-200 px-1.5 py-0.5 rounded border border-sky-700/50 whitespace-nowrap">{event.format}</span>
-                  </div>
-                  <div className="text-slate-400 text-xs mb-1">{event.storeName}</div>
-                  <div className="text-slate-500 text-[10px] flex items-center gap-1">
-                    <span>📅 {event.date}</span>
-                  </div>
-                </Link>
-              ))
-            ) : (
-              <p className="text-slate-400 text-sm text-center py-10">No hay eventos próximos.</p>
-            )}
-            <div className="mt-auto text-center pt-2">
-              <Link to="/eventos" className="text-xs text-sky-500 hover:text-sky-400 underline">Ver todos los eventos</Link>
+              <Link to="/ranking" className="inline-block px-8 py-3 bg-white text-slate-900 font-bold rounded-lg hover:bg-slate-200 transition-colors mt-4">
+                VER TABLA DE POSICIONES
+              </Link>
+            </div>
+
+            {/* Top 5 Table Snippet */}
+            <div className="md:w-1/2 w-full bg-slate-800 rounded-xl border border-slate-700 p-6 shadow-2xl relative">
+              <div className="absolute -top-4 -right-4 bg-yellow-500 text-black font-black px-4 py-2 rounded-lg rotate-3 shadow-lg uppercase text-sm">
+                Líderes de Temporada
+              </div>
+              <table className="w-full text-left">
+                <thead>
+                  <tr className="text-slate-500 text-xs uppercase tracking-wider border-b border-slate-700">
+                    <th className="pb-3 pl-2">Rank</th>
+                    <th className="pb-3">Jugador</th>
+                    <th className="pb-3 text-right pr-2">Pts</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-700/50">
+                  {topPwpPlayers.slice(0, 5).map((player) => (
+                    <tr key={player.id} className="group hover:bg-slate-700/30 transition-colors">
+                      <td className="py-3 pl-2 font-mono font-bold text-slate-400 group-hover:text-yellow-400">#{player.rank}</td>
+                      <td className="py-3 font-medium text-white group-hover:text-blue-300 flex items-center gap-2">
+                        <img src={`https://ui-avatars.com/api/?name=${player.playerName}&background=random&color=fff&size=24`} className="w-6 h-6 rounded-full" alt="" />
+                        {player.playerName}
+                      </td>
+                      <td className="py-3 pr-2 text-right font-bold text-emerald-400 font-mono">{player.pwp}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <div className="mt-4 text-center border-t border-slate-700 pt-3">
+                <Link to="/ranking" className="text-xs text-slate-400 hover:text-white uppercase tracking-wider font-bold">Ver todos los jugadores &darr;</Link>
+              </div>
             </div>
           </div>
-        </section>
+          <Link key={news.id} to={`/media/articulos/${news.slug}`} className="group relative h-96 rounded-xl overflow-hidden shadow-xl block">
+            <div className="absolute inset-0 bg-slate-900 group-hover:scale-105 transition-transform duration-700">
+              {news.image_url ? (
+                <img src={news.image_url} alt={news.title} className="w-full h-full object-cover opacity-60 group-hover:opacity-40 transition-opacity" />
+              ) : (
+                <div className="w-full h-full bg-gradient-to-br from-slate-800 to-slate-900"></div>
+              )}
+            </div>
+            <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/40 to-transparent"></div>
+            <div className="absolute bottom-0 left-0 p-6 w-full">
+              <span className="inline-block px-3 py-1 bg-blue-600/90 text-white text-xs font-bold rounded mb-3 uppercase tracking-wider">
+                {news.game_type}
+              </span>
+              <h3 className="text-xl font-bold text-white mb-2 leading-tight group-hover:text-blue-300 transition-colors">
+                {news.title}
+              </h3>
+              <p className="text-slate-300 text-sm line-clamp-2 mb-4">
+                {news.excerpt}
+              </p>
+              <span className="text-slate-400 text-xs font-bold uppercase tracking-wider">
+                Leer Artículo &rarr;
+              </span>
+            </div>
+          </Link>
+          )) : (
+          <div className="col-span-3 text-center py-12 bg-slate-800/50 rounded-xl border border-slate-700 border-dashed">
+            <p className="text-slate-400">No hay noticias recientes.</p>
+          </div>
+                                )}
+        </div>
+      </section>
 
-        {/* Column 2: Contenido Destacado */}
-        <section className="flex flex-col h-full">
-          <SectionHeader title="Contenido Destacado" linkTo="/media" />
-          <div className="bg-slate-800 rounded-lg p-4 shadow-xl border border-slate-700 flex-1 flex flex-col gap-4">
-            {mockArticles.slice(0, 6).map((article) => (
-              <div key={article.id} className="flex gap-3 bg-slate-700/40 rounded-lg p-2 border border-slate-600/50 hover:bg-slate-700/60 transition-colors group cursor-pointer">
-                <div className="w-20 h-20 shrink-0 rounded-md overflow-hidden">
-                  <img src={article.imageUrl} alt={article.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
-                </div>
-                <div className="flex-1 flex flex-col justify-between py-0.5">
-                  <h3 className="text-white font-bold text-xs leading-snug group-hover:text-green-400 transition-colors line-clamp-2">{article.title}</h3>
-                  <div className="flex justify-between items-center text-[10px] text-slate-500 mt-2">
-                    <span>{article.author}</span>
-                    <span className="bg-slate-700 px-1.5 py-0.5 rounded text-slate-300">{article.category}</span>
+      {/* Featured Videos Section */}
+      <section className="container mx-auto px-4 max-w-7xl">
+        <div className="flex justify-between items-end mb-8">
+          <div>
+            <h2 className="text-3xl font-bold text-white uppercase tracking-wider">Videos Destacados</h2>
+            <div className="h-1 w-20 bg-red-500 mt-2"></div>
+          </div>
+          <Link to="/media/videos" className="text-slate-400 hover:text-white flex items-center gap-2 text-sm font-bold uppercase tracking-wider transition-colors">
+            Ver galería <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
+          </Link>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {featuredContent.map((content) => (
+            <div key={content.id} className="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden shadow-lg group">
+              <div className="relative aspect-video">
+                <img src={content.imageUrl} alt={content.title} className="w-full h-full object-cover" />
+                <a href={content.link} className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-all duration-300">
+                  <div className="w-16 h-16 bg-red-600 rounded-full flex items-center justify-center pl-1 shadow-xl transform scale-75 group-hover:scale-100 transition-transform">
+                    <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
                   </div>
+                </a>
+              </div>
+              <div className="p-4">
+                <h3 className="font-bold text-white line-clamp-2 mb-2 group-hover:text-red-400 transition-colors">{content.title}</h3>
+                <p className="text-xs text-slate-500">{content.date}</p>
+              </div>
+            </div>
+          ))}
+          {featuredContent.length === 0 && (
+            <div className="col-span-3 text-center py-12 bg-slate-800/50 rounded-xl border border-slate-700 border-dashed">
+              <p className="text-slate-400">Pronto más videos.</p>
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* Rankings Preview & Join CTA */}
+      <section className="container mx-auto px-4 max-w-7xl grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Top 10 Ranking */}
+        <div className="lg:col-span-1 bg-slate-900 rounded-xl border border-slate-800 p-6 shadow-2xl">
+          <div className="flex justify-between items-center mb-6">
+            <h3 className="text-xl font-bold text-white uppercase tracking-wider">Top 10 - Puntos</h3>
+            <Link to="/ranking" className="text-xs text-blue-400 hover:text-blue-300 uppercase font-bold">Ver Completo</Link>
+          </div>
+          <div className="space-y-4">
+            {topPwpPlayers.map((player) => (
+              <div key={player.id} className="flex items-center gap-3 p-3 bg-slate-800/50 rounded-lg hover:bg-slate-800 transition-colors border border-transparent hover:border-slate-600">
+                <span className={`font-mono text-xl font-bold w-6 text-center ${player.rank === 1 ? 'text-yellow-400' : player.rank === 2 ? 'text-slate-300' : player.rank === 3 ? 'text-amber-600' : 'text-slate-600'}`}>
+                  {player.rank}
+                </span>
+                <div className="w-10 h-10 rounded-full bg-slate-700 overflow-hidden flex-shrink-0">
+                  <img src={`https://ui-avatars.com/api/?name=${player.name}&background=random`} alt={player.name} className="w-full h-full object-cover" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-white font-bold truncate">{player.name}</p>
+                  <p className="text-xs text-slate-500">{player.team || 'Sin Equipo'}</p>
+                </div>
+                <div className="text-right">
+                  <span className="block text-emerald-400 font-bold font-mono">{player.pwp}</span>
+                  <span className="text-[10px] text-slate-500 uppercase">Pts</span>
                 </div>
               </div>
             ))}
-            <div className="mt-auto text-center pt-2">
-              <Link to="/media" className="text-xs text-green-500 hover:text-green-400 underline">Ver todo el contenido</Link>
-            </div>
-          </div>
-        </section>
-
-        {/* Column 3: Mercado */}
-        <section className="flex flex-col h-full">
-          <SectionHeader title="Mercado TCG" linkTo="/mercado" />
-          <div className="bg-slate-800 rounded-lg p-4 shadow-xl border border-slate-700 flex-1 flex flex-col">
-            <ul className="space-y-2 divide-y divide-slate-700/50 mb-2">
-              {mockMarketplace.slice(0, 9).map(post => (
-                <li key={post.id} className="flex justify-between items-center py-2 first:pt-0 last:pb-0 hover:bg-slate-700/30 px-2 -mx-2 rounded transition-colors cursor-pointer">
-                  <div className="flex-1 min-w-0 pr-2">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded border ${post.type === 'Venta' ? 'bg-red-900/40 text-red-300 border-red-800' :
-                        post.type === 'Compra' ? 'bg-green-900/40 text-green-300 border-green-800' :
-                          'bg-blue-900/40 text-blue-300 border-blue-800'
-                        }`}>
-                        {post.type.toUpperCase()}
-                      </span>
-                      <span className="text-slate-500 text-[10px] truncate">{post.region}</span>
-                    </div>
-                    <p className="text-slate-200 text-sm truncate hover:text-white transition-colors" title={post.title}>{post.title}</p>
-                  </div>
-                  <div className="text-right">
-                    <span className="text-slate-400 text-xs block text-right">{post.seller}</span>
-                  </div>
-                </li>
-              ))}
-            </ul>
-            <div className="mt-auto text-center pt-2 border-t border-slate-700/50">
-              <Link to="/mercado" className="text-xs text-slate-500 hover:text-slate-300 underline">Ver todo el mercado</Link>
-            </div>
-          </div>
-        </section>
-
-      </div>
-
-      {/* Community Stats Section */}
-      <section className="mt-24 mb-12 relative px-4">
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-900/10 via-purple-900/10 to-blue-900/10 blur-3xl rounded-full opacity-50 -z-10 pointer-events-none"></div>
-
-        <div className="text-center mb-10">
-          <h2 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-slate-100 to-slate-400 uppercase tracking-tighter">
-            La Comunidad en Cifras
-          </h2>
-          <p className="text-slate-400 mt-2 font-medium">El ecosistema competitivo más grande de Chile</p>
-        </div>
-
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-6xl mx-auto">
-          {/* Players Stat */}
-          <div className="bg-slate-800/40 backdrop-blur-sm p-6 rounded-xl border border-slate-700/50 flex flex-col items-center hover:border-blue-500/50 hover:bg-slate-800/60 transition-all group hover:-translate-y-1 duration-300">
-            <div className="p-3 bg-blue-500/10 rounded-full mb-4 group-hover:bg-blue-500/20 transition-colors text-blue-400 shadow-[0_0_15px_rgba(59,130,246,0.2)]">
-              <UsersIcon className="w-8 h-8" />
-            </div>
-            <div className="text-4xl font-bold text-white mb-1 tabular-nums tracking-tight">
-              <CountUp end={stats.players} />
-            </div>
             <div className="text-xs text-slate-400 uppercase tracking-widest font-bold">Jugadores</div>
           </div>
 
@@ -452,7 +510,30 @@ const HomePage: React.FC<HomePageProps> = ({ players, events }) => {
         </div>
       </section>
 
+      {/* Marquee Brands/Partners */}
+      <div className="border-t border-slate-800 py-12">
+        <div className="container mx-auto px-4 text-center">
+          <p className="text-slate-500 text-sm uppercase tracking-widest mb-8 font-bold">Nuestros Aliados</p>
+          <div className="flex flex-wrap justify-center items-center gap-12 opacity-60 grayscale hover:grayscale-0 transition-all hover:opacity-100 duration-500">
+            {partners.map((partner, idx) => (
+              <img key={idx} src={partner.logo} alt={partner.name} className="h-10 md:h-14 object-contain" />
+            ))}
+          </div>
+        </div>
+      </div>
+
     </div>
+                        </div >
+                      </div >
+                    </div >
+                  </div >
+                </section >
+          </div >
+      </div >
+    </div >
+        </div >
+      </div >
+    </div >
   );
 };
 

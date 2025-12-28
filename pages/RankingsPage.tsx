@@ -18,7 +18,7 @@ const RankingsPage: React.FC<RankingsPageProps> = ({ players, teams }) => {
 
     const getPointsLabel = () => {
         switch (currentGame) {
-            case 'mtg': return 'PWP';
+            case 'mtg': return 'Pts';
             case 'pokemon': return 'CP';
             default: return 'Puntos';
         }
@@ -107,7 +107,7 @@ const RankingsPage: React.FC<RankingsPageProps> = ({ players, teams }) => {
 
             {activeTab === 'individual' ? (
                 <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 items-start">
-                    {/* Ranking PWP */}
+                    {/* Ranking Pts */}
                     <div className="space-y-4 animate-fade-in-up">
                         <div className="text-center md:text-left h-28 flex flex-col justify-center">
                             <h2 className="text-3xl font-bold text-white uppercase tracking-wider">{getRankingTitle()}</h2>
@@ -180,8 +180,8 @@ const RankingsPage: React.FC<RankingsPageProps> = ({ players, teams }) => {
                                         <tr
                                             key={`${player.id}-wr`}
                                             className={`transition-colors ${player.is_pro
-                                                    ? 'bg-gradient-to-r from-purple-900/20 to-transparent border-l-4 border-purple-500 hover:from-purple-900/30'
-                                                    : 'hover:bg-slate-700/40'
+                                                ? 'bg-gradient-to-r from-purple-900/20 to-transparent border-l-4 border-purple-500 hover:from-purple-900/30'
+                                                : 'hover:bg-slate-700/40'
                                                 }`}
                                         >
                                             <td className="px-6 py-4 whitespace-nowrap font-bold text-slate-400">{index + 1}</td>

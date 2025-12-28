@@ -23,6 +23,7 @@ export interface PlayerProfile {
   team?: string; // Legacy text field (still used for display if teamId is null)
   teamData?: Team; // Formal team entity
   isPublic?: boolean;
+  is_pro?: boolean;
 }
 
 // FIX: Add RankingEntry and WinRateRankingEntry types used in HomePage.tsx

@@ -27,37 +27,48 @@ const JudgeApplicationModal: React.FC<JudgeApplicationModalProps> = ({ isOpen, o
 
         try {
             // Verificar si ya tiene una aplicación pendiente
-            const { data: existingApp } = await supabase
+            const { data: existingApp, error: fetchError } = await supabase
                 .from('judge_applications')
                 .select('*')
                 .eq('applicant_id', userProfile.id)
-                .eq('status', 'pending')
-                .single();
+                .in('status', ['pending', 'approved']) // Check for approved too to avoid duplicates
+                .maybeSingle();
+
+            if (fetchError) throw fetchError;
 
             if (existingApp) {
-                toast.error('Ya tienes una aplicación pendiente');
+                toast.error('Ya tienes una aplicación pendiente o aprobada');
                 setLoading(false);
+                onClose(); // Close if existing
                 return;
             }
 
             // Crear aplicación
-            const { error } = await supabase
+            const { error: insertError } = await supabase
                 .from('judge_applications')
-                .insert({
+                .insert([{
                     applicant_id: userProfile.id,
-                    ...formData
-                });
+                    game_type: formData.game_type,
+                    requested_level: formData.requested_level,
+                    experience_years: formData.experience_years,
+                    previous_certifications: formData.previous_certifications,
+                    motivation: formData.motivation,
+                    referee_contacts: formData.referee_contacts,
+                    status: 'pending'
+                }]);
 
-            if (error) throw error;
+            if (insertError) throw insertError;
 
             // Actualizar perfil como applicant
-            await supabase
+            const { error: updateError } = await supabase
                 .from('profiles')
                 .update({
                     judge_role: 'applicant',
                     judge_status: 'pending'
                 })
                 .eq('id', userProfile.id);
+
+            if (updateError) throw updateError;
 
             toast.success('¡Aplicación enviada! Recibirás una respuesta pronto.');
             onClose();

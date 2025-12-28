@@ -94,10 +94,10 @@ const ClaimResultsModal: React.FC<ClaimResultsModalProps> = ({
                             <div
                                 key={idx}
                                 className={`h-1.5 rounded-full transition-all ${idx === currentIndex
-                                        ? 'w-8 bg-sky-500'
-                                        : idx < currentIndex
-                                            ? 'w-1.5 bg-emerald-500'
-                                            : 'w-1.5 bg-slate-700'
+                                    ? 'w-8 bg-sky-500'
+                                    : idx < currentIndex
+                                        ? 'w-1.5 bg-emerald-500'
+                                        : 'w-1.5 bg-slate-700'
                                     }`}
                             />
                         ))}
@@ -128,7 +128,7 @@ const ClaimResultsModal: React.FC<ClaimResultsModalProps> = ({
 
                     <div className="grid grid-cols-2 gap-4 pt-2">
                         <div className="bg-slate-800/50 rounded-lg p-3 text-center">
-                            <p className="text-xs text-slate-500 uppercase tracking-wider font-bold">PWP Ganados</p>
+                            <p className="text-xs text-slate-500 uppercase tracking-wider font-bold">Puntos Ganados</p>
                             <p className="text-2xl font-black text-emerald-400">{currentResult.pwp_earned}</p>
                         </div>
                         <div className="bg-slate-800/50 rounded-lg p-3 text-center">

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useGame } from '../context/GameContext';
 import { GAME_LABELS } from '../types';
+import { supabase } from '../supabaseClient';
 
 interface ScheduleTournamentModalProps {
     isOpen: boolean;
@@ -10,43 +11,79 @@ interface ScheduleTournamentModalProps {
 
 const ScheduleTournamentModal: React.FC<ScheduleTournamentModalProps> = ({ isOpen, onClose, onSchedule }) => {
     const { currentGame } = useGame();
+    const [loading, setLoading] = useState(false);
+    const [userProfile, setUserProfile] = useState<any>(null);
     const [formData, setFormData] = useState({
         title: '',
         date: '',
         time: '19:00',
         format: 'Standard',
         storeName: '',
+        storeId: '', // Added to store the ID
         maxPlayers: 64,
         recurring: false,
         recurrenceType: 'weekly',
         recurrenceEnd: '',
         description: '',
+        entry_fee: '', // Added entry_fee
         game_type: currentGame
     });
+
+    // Fetch user profile on mount or open
+    useEffect(() => {
+        const fetchProfile = async () => {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session?.user) {
+                const { data } = await supabase.from('profiles').select('*').eq('id', session.user.id).single();
+                if (data) {
+                    setUserProfile(data);
+                    // If user is a store, auto-fill and lock store name
+                    if (data.role === 'store') {
+                        setFormData(prev => ({
+                            ...prev,
+                            storeName: data.name || '',
+                            storeId: data.id
+                        }));
+                    }
+                }
+            }
+        };
+        if (isOpen) fetchProfile();
+    }, [isOpen]);
+
 
     // Update game_type when modal opens or context changes
     useEffect(() => {
         setFormData(prev => ({ ...prev, game_type: currentGame }));
     }, [currentGame, isOpen]);
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        onSchedule(formData);
-        onClose();
-        // Reset form
-        setFormData({
-            title: '',
-            date: '',
-            time: '19:00',
-            format: 'Standard',
-            storeName: '',
-            maxPlayers: 64,
-            recurring: false,
-            recurrenceType: 'weekly',
-            recurrenceEnd: '',
-            description: '',
-            game_type: currentGame
-        });
+        setLoading(true);
+        try {
+            await onSchedule(formData);
+            onClose();
+            // Reset form
+            setFormData({
+                title: '',
+                date: '',
+                time: '19:00',
+                format: 'Standard',
+                storeName: userProfile?.role === 'store' ? userProfile.name : '',
+                storeId: userProfile?.role === 'store' ? userProfile.id : '',
+                maxPlayers: 64,
+                recurring: false,
+                recurrenceType: 'weekly',
+                recurrenceEnd: '',
+                description: '',
+                entry_fee: '',
+                game_type: currentGame
+            });
+        } catch (error) {
+            console.error('Error scheduling tournament:', error);
+        } finally {
+            setLoading(false);
+        }
     };
 
     if (!isOpen) return null;
@@ -112,47 +149,62 @@ const ScheduleTournamentModal: React.FC<ScheduleTournamentModalProps> = ({ isOpe
                         </div>
                     </div>
 
-                    {/* Formato */}
-                    <div>
-                        <label className="block text-sm font-medium text-slate-300 mb-2">
-                            Formato *
-                        </label>
-                        <select
-                            value={formData.format}
-                            onChange={(e) => setFormData({ ...formData, format: e.target.value })}
-                            className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-green-500"
-                        >
-                            {currentGame === 'mtg' && (
-                                <>
+                    {/* Formato y Costo */}
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <label className="block text-sm font-medium text-slate-300 mb-2">
+                                Formato *
+                            </label>
+                            <select
+                                value={formData.format}
+                                onChange={(e) => setFormData({ ...formData, format: e.target.value })}
+                                className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-green-500"
+                            >
+                                {currentGame === 'mtg' && (
+                                    <>
+                                        <option value="Standard">Standard</option>
+                                        <option value="Modern">Modern</option>
+                                        <option value="Pioneer">Pioneer</option>
+                                        <option value="Legacy">Legacy</option>
+                                        <option value="Pauper">Pauper</option>
+                                        <option value="Commander">Commander</option>
+                                        <option value="Draft">Draft</option>
+                                        <option value="Sealed">Sealed</option>
+                                    </>
+                                )}
+                                {currentGame === 'pokemon' && (
+                                    <>
+                                        <option value="Standard">Standard</option>
+                                        <option value="Expanded">Expanded</option>
+                                        <option value="Unlimited">Unlimited</option>
+                                    </>
+                                )}
+                                {currentGame === 'one_piece' && (
+                                    <>
+                                        <option value="Standard">Standard</option>
+                                        <option value="Sealed">Sealed</option>
+                                        <option value="Team Battle">Team Battle</option>
+                                    </>
+                                )}
+                                {/* Fallback for others */}
+                                {!['mtg', 'pokemon', 'one_piece'].includes(currentGame) && (
                                     <option value="Standard">Standard</option>
-                                    <option value="Modern">Modern</option>
-                                    <option value="Pioneer">Pioneer</option>
-                                    <option value="Legacy">Legacy</option>
-                                    <option value="Pauper">Pauper</option>
-                                    <option value="Commander">Commander</option>
-                                    <option value="Draft">Draft</option>
-                                    <option value="Sealed">Sealed</option>
-                                </>
-                            )}
-                            {currentGame === 'pokemon' && (
-                                <>
-                                    <option value="Standard">Standard</option>
-                                    <option value="Expanded">Expanded</option>
-                                    <option value="Unlimited">Unlimited</option>
-                                </>
-                            )}
-                            {currentGame === 'one_piece' && (
-                                <>
-                                    <option value="Standard">Standard</option>
-                                    <option value="Sealed">Sealed</option>
-                                    <option value="Team Battle">Team Battle</option>
-                                </>
-                            )}
-                            {/* Fallback for others */}
-                            {!['mtg', 'pokemon', 'one_piece'].includes(currentGame) && (
-                                <option value="Standard">Standard</option>
-                            )}
-                        </select>
+                                )}
+                            </select>
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-slate-300 mb-2">
+                                Inscripción (CLP) *
+                            </label>
+                            <input
+                                type="text"
+                                required
+                                value={formData.entry_fee}
+                                onChange={(e) => setFormData({ ...formData, entry_fee: e.target.value })}
+                                placeholder="Ej: 5000"
+                                className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-green-500"
+                            />
+                        </div>
                     </div>
 
                     {/* Tienda */}
@@ -166,8 +218,14 @@ const ScheduleTournamentModal: React.FC<ScheduleTournamentModalProps> = ({ isOpe
                             value={formData.storeName}
                             onChange={(e) => setFormData({ ...formData, storeName: e.target.value })}
                             placeholder="Nombre de tu tienda"
-                            className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-green-500"
+                            disabled={userProfile?.role === 'store'} // Disable if user is a store
+                            className={`w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-green-500 ${userProfile?.role === 'store' ? 'opacity-50 cursor-not-allowed' : ''}`}
                         />
+                        {userProfile?.role === 'store' && (
+                            <p className="text-xs text-slate-500 mt-1">
+                                La tienda se asigna automáticamente a tu usuario.
+                            </p>
+                        )}
                     </div>
 
                     {/* Máximo de Jugadores */}
@@ -259,9 +317,10 @@ const ScheduleTournamentModal: React.FC<ScheduleTournamentModalProps> = ({ isOpe
                         </button>
                         <button
                             type="submit"
-                            className="flex-1 px-4 py-2 bg-green-600 hover:bg-green-500 text-white font-bold rounded-lg transition-colors shadow-lg"
+                            disabled={loading}
+                            className={`flex-1 px-4 py-2 bg-green-600 hover:bg-green-500 text-white font-bold rounded-lg transition-colors shadow-lg ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
                         >
-                            Agendar Torneo
+                            {loading ? 'Agendando...' : 'Agendar Torneo'}
                         </button>
                     </div>
                 </form>

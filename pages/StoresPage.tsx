@@ -113,124 +113,148 @@ const StoresPage: React.FC = () => {
                         💡 Todos los precios son en CLP (Pesos Chilenos) por mes. Sin permanencia mínima.
                     </p>
                 </div>
-            </div>
-
-            {/* Stores Directory Section */}
-            <div className="text-center">
-                <h1 className="text-4xl sm:text-5xl font-bold text-white tracking-tighter uppercase">Directorio de Tiendas Asociadas</h1>
-                <p className="text-lg text-slate-300 mt-2 max-w-4xl mx-auto">
-                    Encuentra tu tienda local más cercana. Apoya a los organizadores que hacen crecer nuestra comunidad.
-                </p>
-            </div>
-
-            {/* Toolbar */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 bg-slate-800/50 p-4 rounded-lg border border-slate-700 items-center">
-                <div className="relative flex-grow md:col-span-2">
-                    <input
-                        type="search"
-                        placeholder="Buscar por nombre o ciudad..."
-                        className="bg-slate-900/80 text-white placeholder-slate-400 rounded-md py-2 px-4 w-full focus:outline-none focus:ring-2 focus:ring-sky-500 border border-slate-700"
-                    />
+                {/* Map Section */}
+                <div className="bg-slate-800 rounded-xl overflow-hidden border border-slate-700 shadow-2xl relative z-10">
+                    <div className="p-4 bg-slate-900 border-b border-slate-800 flex justify-between items-center">
+                        <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                            <MapPinIcon className="w-5 h-5 text-sky-400" />
+                            Mapa de Tiendas
+                        </h3>
+                        <span className="text-xs text-slate-400">Mostrando tiendas principales</span>
+                    </div>
+                    <div className="w-full h-96 bg-slate-900 relative">
+                        <iframe
+                            width="100%"
+                            height="100%"
+                            frameBorder="0"
+                            scrolling="no"
+                            marginHeight={0}
+                            marginWidth={0}
+                            src="https://www.openstreetmap.org/export/embed.html?bbox=-75.608%2C-55.0%2C-66.0%2C-17.5&amp;layer=mapnik"
+                            className="w-full h-full opacity-80 hover:opacity-100 transition-opacity"
+                        ></iframe>
+                        <div className="absolute bottom-4 right-4 bg-slate-900/90 px-3 py-1 rounded text-xs text-white pointer-events-none border border-slate-700">
+                            Solo referencial
+                        </div>
+                    </div>
                 </div>
-                <div className="relative">
-                    <select className="bg-slate-900/80 text-white rounded-md py-2.5 px-4 w-full appearance-none focus:outline-none focus:ring-2 focus:ring-sky-500 border border-slate-700">
-                        <option>Todas las Regiones</option>
-                        <option>Arica y Parinacota</option>
-                        <option>Tarapacá</option>
-                        <option>Antofagasta</option>
-                        <option>Atacama</option>
-                        <option>Coquimbo</option>
-                        <option>Valparaíso</option>
-                        <option>Metropolitana</option>
-                        <option>O'Higgins</option>
-                        <option>Maule</option>
-                        <option>Ñuble</option>
-                        <option>Biobío</option>
-                        <option>La Araucanía</option>
-                        <option>Los Ríos</option>
-                        <option>Los Lagos</option>
-                        <option>Aysén</option>
-                        <option>Magallanes</option>
-                    </select>
+
+                {/* Stores Directory Section */}
+                <div className="text-center">
+                    <h1 className="text-4xl sm:text-5xl font-bold text-white tracking-tighter uppercase">Directorio de Tiendas Asociadas</h1>
+                    <p className="text-lg text-slate-300 mt-2 max-w-4xl mx-auto">
+                        Encuentra tu tienda local más cercana. Apoya a los organizadores que hacen crecer nuestra comunidad.
+                    </p>
                 </div>
-            </div>
 
-            {/* Stores Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-8">
-                {mockStores.map((store) => {
-                    const isFollowing = followedStores.includes(store.id);
-                    const tier = store.subscription_tier || 'free';
+                {/* Toolbar */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 bg-slate-800/50 p-4 rounded-lg border border-slate-700 items-center">
+                    <div className="relative flex-grow md:col-span-2">
+                        <input
+                            type="search"
+                            placeholder="Buscar por nombre o ciudad..."
+                            className="bg-slate-900/80 text-white placeholder-slate-400 rounded-md py-2 px-4 w-full focus:outline-none focus:ring-2 focus:ring-sky-500 border border-slate-700"
+                        />
+                    </div>
+                    <div className="relative">
+                        <select className="bg-slate-900/80 text-white rounded-md py-2.5 px-4 w-full appearance-none focus:outline-none focus:ring-2 focus:ring-sky-500 border border-slate-700">
+                            <option>Todas las Regiones</option>
+                            <option>Arica y Parinacota</option>
+                            <option>Tarapacá</option>
+                            <option>Antofagasta</option>
+                            <option>Atacama</option>
+                            <option>Coquimbo</option>
+                            <option>Valparaíso</option>
+                            <option>Metropolitana</option>
+                            <option>O'Higgins</option>
+                            <option>Maule</option>
+                            <option>Ñuble</option>
+                            <option>Biobío</option>
+                            <option>La Araucanía</option>
+                            <option>Los Ríos</option>
+                            <option>Los Lagos</option>
+                            <option>Aysén</option>
+                            <option>Magallanes</option>
+                        </select>
+                    </div>
+                </div>
 
-                    // Conditional styling based on tier
-                    const borderClass = {
-                        premium: 'border-2 border-yellow-500 shadow-2xl shadow-yellow-900/30',
-                        medium: 'border-2 border-sky-500 shadow-xl shadow-sky-900/20',
-                        basic: 'border border-emerald-500/50 shadow-lg',
-                        free: 'border border-slate-700'
-                    }[tier];
+                {/* Stores Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-8">
+                    {mockStores.map((store) => {
+                        const isFollowing = followedStores.includes(store.id);
+                        const tier = store.subscription_tier || 'free';
 
-                    const bgClass = {
-                        premium: 'bg-gradient-to-br from-slate-800 via-slate-800 to-yellow-900/20',
-                        medium: 'bg-slate-800',
-                        basic: 'bg-slate-800',
-                        free: 'bg-slate-800'
-                    }[tier];
+                        // Conditional styling based on tier
+                        const borderClass = {
+                            premium: 'border-2 border-yellow-500 shadow-2xl shadow-yellow-900/30',
+                            medium: 'border-2 border-sky-500 shadow-xl shadow-sky-900/20',
+                            basic: 'border border-emerald-500/50 shadow-lg',
+                            free: 'border border-slate-700'
+                        }[tier];
 
-                    return (
-                        <div key={store.id} className={`${bgClass} rounded-lg overflow-hidden hover:shadow-sky-500/20 transition-all duration-300 ease-in-out transform hover:-translate-y-1 ${borderClass} flex flex-col text-center relative group`}>
+                        const bgClass = {
+                            premium: 'bg-gradient-to-br from-slate-800 via-slate-800 to-yellow-900/20',
+                            medium: 'bg-slate-800',
+                            basic: 'bg-slate-800',
+                            free: 'bg-slate-800'
+                        }[tier];
 
-                            {/* Follow Button */}
-                            <button
-                                onClick={() => toggleFollow(store.id)}
-                                className="absolute top-3 right-3 z-10 p-2 rounded-full bg-slate-900/50 hover:bg-slate-900/80 transition-colors focus:outline-none"
-                                title={isFollowing ? "Dejar de seguir" : "Seguir tienda"}
-                            >
-                                <HeartIcon className={`w-6 h-6 transition-colors duration-300 ${isFollowing ? 'text-red-500' : 'text-slate-400 group-hover:text-white'}`} fill={isFollowing} />
-                            </button>
+                        return (
+                            <div key={store.id} className={`${bgClass} rounded-lg overflow-hidden hover:shadow-sky-500/20 transition-all duration-300 ease-in-out transform hover:-translate-y-1 ${borderClass} flex flex-col text-center relative group`}>
 
-                            {/* Subscription Badge */}
-                            {tier !== 'free' && (
-                                <div className="absolute top-3 left-3 z-10">
-                                    <SubscriptionBadge tier={tier} size="small" />
-                                </div>
-                            )}
+                                {/* Follow Button */}
+                                <button
+                                    onClick={() => toggleFollow(store.id)}
+                                    className="absolute top-3 right-3 z-10 p-2 rounded-full bg-slate-900/50 hover:bg-slate-900/80 transition-colors focus:outline-none"
+                                    title={isFollowing ? "Dejar de seguir" : "Seguir tienda"}
+                                >
+                                    <HeartIcon className={`w-6 h-6 transition-colors duration-300 ${isFollowing ? 'text-red-500' : 'text-slate-400 group-hover:text-white'}`} fill={isFollowing} />
+                                </button>
 
-                            <div className="p-6 bg-slate-700/50 relative">
-                                <img className={`w-24 h-24 object-contain rounded-full mx-auto border-4 ${tier === 'premium' ? 'border-yellow-500 shadow-lg shadow-yellow-900/50' :
+                                {/* Subscription Badge */}
+                                {tier !== 'free' && (
+                                    <div className="absolute top-3 left-3 z-10">
+                                        <SubscriptionBadge tier={tier} size="small" />
+                                    </div>
+                                )}
+
+                                <div className="p-6 bg-slate-700/50 relative">
+                                    <img className={`w-24 h-24 object-contain rounded-full mx-auto border-4 ${tier === 'premium' ? 'border-yellow-500 shadow-lg shadow-yellow-900/50' :
                                         tier === 'medium' ? 'border-sky-500' :
                                             tier === 'basic' ? 'border-emerald-500' :
                                                 'border-slate-600'
-                                    }`} src={store.logoUrl} alt={`${store.name} logo`} />
-                            </div>
-                            <div className="p-6 flex-grow flex flex-col items-center">
-                                <h3 className="font-bold text-xl mb-2 text-white uppercase">{store.name}</h3>
-                                <span className="inline-block bg-slate-700 rounded-full px-3 py-1 text-sm font-semibold text-slate-300 mb-4">{store.region}</span>
-                                <div className="space-y-2 text-slate-300 text-sm">
-                                    <div className="flex items-center gap-2">
-                                        <MapPinIcon className="w-4 h-4 text-slate-400" />
-                                        <span>{store.address}</span>
+                                        }`} src={store.logoUrl} alt={`${store.name} logo`} />
+                                </div>
+                                <div className="p-6 flex-grow flex flex-col items-center">
+                                    <h3 className="font-bold text-xl mb-2 text-white uppercase">{store.name}</h3>
+                                    <span className="inline-block bg-slate-700 rounded-full px-3 py-1 text-sm font-semibold text-slate-300 mb-4">{store.region}</span>
+                                    <div className="space-y-2 text-slate-300 text-sm">
+                                        <div className="flex items-center gap-2">
+                                            <MapPinIcon className="w-4 h-4 text-slate-400" />
+                                            <span>{store.address}</span>
+                                        </div>
                                     </div>
                                 </div>
+                                <div className="px-6 py-4 bg-slate-800/50 mt-auto border-t border-slate-700">
+                                    <a href={store.website} target="_blank" rel="noopener noreferrer" className="w-full inline-flex items-center justify-center gap-2 bg-sky-600 text-white font-bold py-2 px-4 rounded-md hover:bg-sky-700 transition duration-300">
+                                        <GlobeAltIcon className="w-5 h-5" />
+                                        Visitar Sitio Web
+                                    </a>
+                                </div>
                             </div>
-                            <div className="px-6 py-4 bg-slate-800/50 mt-auto border-t border-slate-700">
-                                <a href={store.website} target="_blank" rel="noopener noreferrer" className="w-full inline-flex items-center justify-center gap-2 bg-sky-600 text-white font-bold py-2 px-4 rounded-md hover:bg-sky-700 transition duration-300">
-                                    <GlobeAltIcon className="w-5 h-5" />
-                                    Visitar Sitio Web
-                                </a>
-                            </div>
-                        </div>
-                    );
-                })}
-            </div>
+                        );
+                    })}
+                </div>
 
-            {/* Subscription Modal */}
-            <StoreSubscriptionModal
-                isOpen={showSubscriptionModal}
-                onClose={() => setShowSubscriptionModal(false)}
-                selectedPlan={selectedPlan}
-            />
-        </div>
-    );
+                {/* Subscription Modal */}
+                <StoreSubscriptionModal
+                    isOpen={showSubscriptionModal}
+                    onClose={() => setShowSubscriptionModal(false)}
+                    selectedPlan={selectedPlan}
+                />
+            </div>
+            );
 };
 
-export default StoresPage;
+            export default StoresPage;

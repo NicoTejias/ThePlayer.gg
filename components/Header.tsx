@@ -23,7 +23,7 @@ const NavLinks: NavLinkType[] = [
   { name: 'PLS', path: '/pls' },
   { name: 'Ranking', path: '/ranking/pwp' },
   { name: 'Eventos', path: '/eventos' },
-  { name: 'Calendario', path: '/calendario' },
+
   { name: 'Mercado TCG', path: '/mercado' },
   {
     name: 'Media',
