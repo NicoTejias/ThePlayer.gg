@@ -90,8 +90,9 @@ const JudgesPage: React.FC = () => {
     return (
         <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white">
             {/* Hero Section */}
-            <div className="relative overflow-hidden pb-24">
-                <div className="absolute inset-0 bg-gradient-to-r from-purple-600/20 to-pink-600/20"></div>
+            <div className="relative overflow-hidden pb-12">
+                {/* Gradient background - limited height so it doesn't bleed into stat cards */}
+                <div className="absolute inset-x-0 top-0 h-[85%] bg-gradient-to-r from-purple-600/20 to-pink-600/20"></div>
                 <div className="relative max-w-7xl mx-auto px-6 py-20">
                     <div className="text-center">
                         <div className="inline-flex items-center gap-2 bg-purple-500/20 border border-purple-500/50 rounded-full px-4 py-2 mb-6">

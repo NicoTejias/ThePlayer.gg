@@ -14,8 +14,8 @@ import { GAME_LABELS, GameType } from '../types';
 type NavLinkType = {
   name: string;
   path: string;
-  subItems?: { name: string; path: string }[];
-  isLive?: boolean; // Optional property to mark the live link
+  subItems?: NavLinkType[]; // Recursive definition
+  isLive?: boolean;
 };
 
 const NavLinks: NavLinkType[] = [
@@ -24,7 +24,21 @@ const NavLinks: NavLinkType[] = [
   { name: 'Ranking', path: '/ranking/pwp' },
   { name: 'Eventos', path: '/eventos' },
   { name: 'Calendario', path: '/calendario' },
-  { name: 'Commander', path: '/commander' },
+  {
+    name: 'Mundos',
+    path: '#', // Placeholder for top level
+    subItems: [
+      {
+        name: 'Magic',
+        path: '#',
+        subItems: [
+          { name: 'Commander', path: '/commander' },
+          { name: 'Pauper', path: '/pauper' },
+          { name: 'Premodern', path: '/premodern' },
+        ]
+      }
+    ]
+  },
   { name: 'Mercado TCG', path: '/mercado' },
   {
     name: 'Media',
@@ -39,6 +53,68 @@ const NavLinks: NavLinkType[] = [
   { name: 'Tiendas', path: '/tiendas' },
   { name: 'Señal Online', path: '/envivo', isLive: true },
 ];
+
+// Recursive Menu Item Component for arbitrary depth
+const MenuItem: React.FC<{ item: NavLinkType; depth?: number }> = ({ item, depth = 0 }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const hasSubItems = item.subItems && item.subItems.length > 0;
+  const isTopLevel = depth === 0;
+
+  // Logic to handle mouse enter/leave for desktop hover interactions
+  // For mobile, we might want click. This implementation focuses on desktop hover.
+
+  const baseLinkClass = "block rounded transition-colors duration-200 whitespace-nowrap cursor-pointer select-none text-sm font-medium";
+  const topLevelClass = "py-2 px-3 text-slate-300 hover:bg-slate-700 hover:text-white";
+  const subLevelClass = "px-4 py-2.5 text-slate-300 hover:bg-slate-700/80 hover:text-sky-300 flex items-center justify-between";
+
+  // For top level active state, we check if one of the children is active really, otherwise relying on simple NavLink active logic is tricky for # paths.
+  // Simplifying: Just render Link or span.
+
+  return (
+    <div
+      className={`relative group ${isTopLevel ? 'h-full flex items-center' : 'w-full'}`}
+      onMouseEnter={() => setIsOpen(true)}
+      onMouseLeave={() => setIsOpen(false)}
+    >
+      {/* Main Link for this Item */}
+      {hasSubItems ? (
+        <div
+          className={`${isTopLevel ? topLevelClass : subLevelClass} flex items-center gap-1 group-hover:text-white`}
+          data-name={item.name}
+        >
+          {item.name}
+          <svg className={`w-3 h-3 transition-transform duration-200 opacity-70 ${isTopLevel ? 'group-hover:rotate-180' : '-rotate-90 group-hover:rotate-0'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+          </svg>
+        </div>
+      ) : (
+        <NavLink
+          to={item.path}
+          className={({ isActive }) =>
+            `${baseLinkClass} ${isTopLevel ? 'py-2 px-3 text-slate-300 hover:bg-slate-700 hover:text-white' : 'block px-4 py-2 text-slate-300 hover:bg-slate-700 hover:text-sky-300'} 
+                        ${isActive ? 'text-white bg-sky-600 shadow-md shadow-sky-900/20' : ''}`
+          }
+        >
+          {item.name}
+        </NavLink>
+      )}
+
+      {/* Render SubMenu if it has children */}
+      {hasSubItems && (
+        <div
+          className={`absolute ${isTopLevel ? 'top-full left-0 pt-2' : 'top-0 left-full pl-0.5'} w-48 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 ease-in-out z-50`}
+        >
+          <div className="bg-slate-800 rounded-xl shadow-xl border border-slate-700/50 overflow-hidden ring-1 ring-black ring-opacity-10 py-1">
+            {item.subItems!.map((subItem) => (
+              <MenuItem key={subItem.name} item={subItem} depth={depth + 1} />
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
 
 interface HeaderProps {
   isLoggedIn: boolean;
@@ -126,64 +202,7 @@ const Header: React.FC<HeaderProps> = ({ isLoggedIn, userRole, userName = 'Jugad
           <div className="flex-grow overflow-x-auto md:overflow-visible no-scrollbar mx-2">
             <div className="flex items-center gap-1 sm:gap-2 px-2 w-fit mx-auto">
               {NavLinks.map((link) => (
-                <div key={link.name} className="relative group">
-                  {link.subItems ? (
-                    // Dropdown logic for Media
-                    <>
-                      <NavLink
-                        to={link.path}
-                        className={({ isActive }) =>
-                          `${baseLinkClass} flex items-center gap-1 ${isActive ? activeClass : inactiveClass}`
-                        }
-                      >
-                        {link.name}
-                        <svg className="w-3 h-3 transition-transform duration-200 group-hover:rotate-180 opacity-70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                        </svg>
-                      </NavLink>
-
-                      {/* Invisible bridge to prevent mouse gap issues */}
-                      <div className="absolute top-full left-0 w-full h-2 bg-transparent hidden group-hover:block" />
-
-                      {/* Dropdown Menu */}
-                      <div className="absolute left-1/2 transform -translate-x-1/2 mt-2 w-48 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 ease-in-out z-50 pt-2">
-                        <div className="bg-slate-800 rounded-xl shadow-xl border border-slate-700/50 overflow-hidden ring-1 ring-black ring-opacity-10 py-1">
-                          {link.subItems.map((subItem) => (
-                            <NavLink
-                              key={subItem.name}
-                              to={subItem.path}
-                              end={subItem.path === link.path}
-                              className={({ isActive }) =>
-                                `block px-4 py-2.5 text-sm transition-colors hover:bg-slate-700/80 ${isActive ? 'text-sky-400 font-semibold bg-slate-700/30' : 'text-slate-300'
-                                }`
-                              }
-                            >
-                              {subItem.name}
-                            </NavLink>
-                          ))}
-                        </div>
-                      </div>
-                    </>
-                  ) : (
-                    // Standard Link
-                    <NavLink
-                      to={link.path}
-                      className={({ isActive }) =>
-                        `${baseLinkClass} ${isActive ? activeClass : inactiveClass} ${link.isLive && isLiveSignal ? 'text-red-400 hover:text-red-300' : ''}`
-                      }
-                    >
-                      <span className="flex items-center gap-2">
-                        {link.name}
-                        {link.isLive && isLiveSignal && (
-                          <span className="relative flex h-2.5 w-2.5">
-                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75"></span>
-                            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-600"></span>
-                          </span>
-                        )}
-                      </span>
-                    </NavLink>
-                  )}
-                </div>
+                <MenuItem key={link.name} item={link} isLiveSignal={isLiveSignal} />
               ))}
             </div>
           </div>

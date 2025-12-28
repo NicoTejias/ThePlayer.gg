@@ -13,6 +13,8 @@ import MarketplacePage from './pages/MarketplacePage';
 import MyListingsPage from './pages/MyListingsPage';
 import MarketplaceDetailPage from './pages/MarketplaceDetailPage';
 import CommanderPage from './pages/CommanderPage';
+import PauperPage from './pages/PauperPage';
+import PremodernPage from './pages/PremodernPage';
 import MediaPage from './pages/MediaPage';
 import MediaArticlesPage from './pages/MediaArticlesPage';
 import MediaVideosPage from './pages/MediaVideosPage';
