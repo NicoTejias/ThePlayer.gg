@@ -266,38 +266,36 @@ const HomePage: React.FC<HomePageProps> = ({ players, events }) => {
         </div>
       </section>
 
-      {/* Main Content Grid */}
-      <div className="container mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
-          {/* Column 1: Próximos Eventos */}
-          <section className="flex flex-col h-full">
-            <SectionHeader title="Próximos Eventos" linkTo="/eventos" />
-            <div className="space-y-4 flex-1">
-              {displayEvents.slice(0, 4).map((event) => (
-                <Card key={event.id} className="bg-slate-800/50 hover:bg-slate-800/70 transition-all border border-slate-700">
-                  <div className="p-4">
-                    <h3 className="text-lg font-bold text-white mb-2 line-clamp-1">{event.title}</h3>
-                    <p className="text-sm text-slate-400 mb-1">📍 {event.storeName}</p>
-                    <p className="text-sm text-slate-400 mb-1">📅 {new Date(event.date).toLocaleDateString()}</p>
-                    <div className="flex items-center justify-between mt-3 pt-3 border-t border-slate-700">
-                      <span className="text-xs bg-blue-500/20 text-blue-300 px-2 py-1 rounded">{event.format}</span>
-                      <span className="text-xs text-slate-500">{event.playerCount} jugadores</span>
-                    </div>
-                  </div>
-                </Card>
-              ))}
-            </div>
-            <div className="mt-auto text-center pt-2 border-t border-slate-700">
-              <Link to="/eventos" className="text-sky-400 hover:text-sky-300">Ver todos los eventos →</Link>
-            </div>
-          </section>
+      {/* Main Content - Row-based Layout */}
+      <div className="container mx-auto px-4 py-12 space-y-16">
 
-          {/* Column 2: Rankings */}
-          <section className="flex flex-col h-full">
-            <SectionHeader title="Rankings" linkTo="/ranking" />
+        {/* Próximos Eventos - Full Width Row */}
+        <section>
+          <SectionHeader title="Próximos Eventos" linkTo="/eventos" />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {displayEvents.slice(0, 4).map((event) => (
+              <Card key={event.id} className="bg-slate-800/50 hover:bg-slate-800/70 transition-all border border-slate-700">
+                <div className="p-4">
+                  <h3 className="text-lg font-bold text-white mb-2 line-clamp-1">{event.title}</h3>
+                  <p className="text-sm text-slate-400 mb-1">📍 {event.storeName}</p>
+                  <p className="text-sm text-slate-400 mb-1">📅 {new Date(event.date).toLocaleDateString()}</p>
+                  <div className="flex items-center justify-between mt-3 pt-3 border-t border-slate-700">
+                    <span className="text-xs bg-blue-500/20 text-blue-300 px-2 py-1 rounded">{event.format}</span>
+                    <span className="text-xs text-slate-500">{event.playerCount} jugadores</span>
+                  </div>
+                </div>
+              </Card>
+            ))}
+          </div>
+        </section>
+
+        {/* Rankings - Full Width Row with 2 Internal Columns */}
+        <section>
+          <SectionHeader title="Rankings" linkTo="/ranking" />
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
             {/* PWP Ranking */}
-            <div className="mb-6">
+            <div>
               <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3">Top 10 Pts</h3>
               <div className="bg-slate-800/50 rounded-xl border border-slate-700 overflow-hidden shadow-xl">
                 {topPwpPlayers.slice(0, 5).map((player) => (
@@ -334,25 +332,28 @@ const HomePage: React.FC<HomePageProps> = ({ players, events }) => {
                 ))}
               </div>
             </div>
-          </section>
+          </div>
+        </section>
 
-          {/* Column 3: Media (Articles & Videos) */}
-          <section className="flex flex-col h-full">
-            <SectionHeader title="Últimas Novedades" linkTo="/media" />
+        {/* Últimas Novedades - Full Width Row with 2 Internal Columns */}
+        <section>
+          <SectionHeader title="Últimas Novedades" linkTo="/media" />
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
             {/* Latest Articles */}
-            <div className="mb-6">
+            <div>
               <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3">Artículos</h3>
               <div className="space-y-3">
-                {(latestNews.length > 0 ? latestNews : mockArticles).slice(0, 2).map((article) => (
+                {(latestNews.length > 0 ? latestNews : mockArticles).slice(0, 3).map((article) => (
                   <Card key={article.id} className="bg-slate-800/50 hover:bg-slate-800/70 transition-all border border-slate-700">
                     <div className="flex gap-3 p-3">
-                      <div className="w-20 h-20 flex-shrink-0 rounded overflow-hidden">
+                      <div className="w-24 h-24 flex-shrink-0 rounded overflow-hidden">
                         <img src={article.image_url || article.imageUrl || ''} alt={article.title} className="w-full h-full object-cover" />
                       </div>
                       <div className="flex-1 min-w-0">
                         <h4 className="text-sm font-bold text-white line-clamp-2 mb-1 group-hover:text-blue-300 transition-colors">{article.title}</h4>
-                        <p className="text-xs text-slate-500">{article.category}</p>
+                        <p className="text-xs text-slate-500 mb-2">{article.category}</p>
+                        <p className="text-xs text-slate-400 line-clamp-2">{article.excerpt}</p>
                       </div>
                     </div>
                   </Card>
@@ -364,27 +365,30 @@ const HomePage: React.FC<HomePageProps> = ({ players, events }) => {
             <div>
               <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3">Videos</h3>
               <div className="space-y-3">
-                {featuredContent.slice(0, 2).map((video) => (
+                {featuredContent.slice(0, 3).map((video) => (
                   <a key={video.id} href={video.link} className="block group">
-                    <Card className="bg-slate-800/50 hover:bg-slate-800/70 transition-all border border-slate-700 relative overflow-hidden">
-                      <div className="relative aspect-video">
-                        <img src={video.imageUrl} alt={video.title} className="w-full h-full object-cover" />
-                        <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                          <div className="w-12 h-12 bg-red-600 rounded-full flex items-center justify-center">
-                            <svg className="w-6 h-6 text-white ml-1" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
+                    <Card className="bg-slate-800/50 hover:bg-slate-800/70 transition-all border border-slate-700">
+                      <div className="flex gap-3 p-3">
+                        <div className="w-32 h-20 flex-shrink-0 rounded overflow-hidden relative">
+                          <img src={video.imageUrl} alt={video.title} className="w-full h-full object-cover" />
+                          <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                            <div className="w-8 h-8 bg-red-600 rounded-full flex items-center justify-center">
+                              <svg className="w-4 h-4 text-white ml-0.5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                      <div className="p-3">
-                        <h4 className="text-sm font-bold text-white line-clamp-1 group-hover:text-blue-300 transition-colors">{video.title}</h4>
+                        <div className="flex-1 min-w-0">
+                          <h4 className="text-sm font-bold text-white line-clamp-2 group-hover:text-blue-300 transition-colors">{video.title}</h4>
+                          <p className="text-xs text-slate-500 mt-1">{video.date}</p>
+                        </div>
                       </div>
                     </Card>
                   </a>
                 ))}
               </div>
             </div>
-          </section>
-        </div>
+          </div>
+        </section>
       </div>
     </div>
   );
