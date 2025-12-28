@@ -5,6 +5,9 @@ import JudgeApplicationModal from '../components/JudgeApplicationModal';
 import JudgeRequirementsSection from '../components/JudgeRequirementsSection';
 import JudgeDocumentationSection from '../components/JudgeDocumentationSection';
 import WhyBecomeJudgeSection from '../components/WhyBecomeJudgeSection';
+import DisciplineSection from '../components/DisciplineSection';
+import InfractionReportModal from '../components/InfractionReportModal';
+import PlayerHistoryModal from '../components/PlayerHistoryModal';
 import { toast } from 'sonner';
 
 interface Judge {
@@ -25,11 +28,15 @@ const JudgesPage: React.FC = () => {
     const [selectedGame, setSelectedGame] = useState<string>('all');
     const [selectedRegion, setSelectedRegion] = useState<string>('all');
     const [showApplicationModal, setShowApplicationModal] = useState(false);
+    const [showInfractionModal, setShowInfractionModal] = useState(false);
+    const [showHistoryModal, setShowHistoryModal] = useState(false);
     const [currentUser, setCurrentUser] = useState<any>(null);
+    const [disciplineStats, setDisciplineStats] = useState({ pending: 0, resolved: 0, totalInfractions: 0 });
 
     useEffect(() => {
         fetchJudges();
         fetchCurrentUser();
+        fetchDisciplineStats();
     }, []);
 
     const fetchCurrentUser = async () => {
@@ -60,6 +67,35 @@ const JudgesPage: React.FC = () => {
             toast.error('Error al cargar jueces');
         } finally {
             setLoading(false);
+        }
+    };
+
+    const fetchDisciplineStats = async () => {
+        try {
+            // Fetch total infractions
+            const { count: totalInfractions } = await supabase
+                .from('infractions')
+                .select('*', { count: 'exact', head: true });
+
+            // Fetch pending cases
+            const { count: pending } = await supabase
+                .from('discipline_cases')
+                .select('*', { count: 'exact', head: true })
+                .in('status', ['pending', 'under_review', 'deliberating']);
+
+            // Fetch resolved cases
+            const { count: resolved } = await supabase
+                .from('discipline_cases')
+                .select('*', { count: 'exact', head: true })
+                .eq('status', 'resolved');
+
+            setDisciplineStats({
+                totalInfractions: totalInfractions || 0,
+                pending: pending || 0,
+                resolved: resolved || 0
+            });
+        } catch (error) {
+            console.error('Error fetching discipline stats:', error);
         }
     };
 
@@ -155,6 +191,15 @@ const JudgesPage: React.FC = () => {
             {/* Documentation Section */}
             <JudgeDocumentationSection />
 
+            {/* Discipline Committee Section */}
+            <DisciplineSection
+                isJudge={currentUser?.judge_role === 'judge' || currentUser?.judge_role === 'head_judge'}
+                isOrganizer={currentUser?.role === 'store' || currentUser?.role === 'admin'}
+                onReportClick={() => setShowInfractionModal(true)}
+                onHistoryClick={() => setShowHistoryModal(true)}
+                caseStats={disciplineStats}
+            />
+
             {/* Filters */}
             <div className="max-w-7xl mx-auto px-6 mb-8">
                 <div className="bg-slate-800 border border-slate-700 rounded-xl p-6">
@@ -233,6 +278,18 @@ const JudgesPage: React.FC = () => {
                 isOpen={showApplicationModal}
                 onClose={() => setShowApplicationModal(false)}
                 userProfile={currentUser}
+            />
+
+            {/* Infraction Report Modal */}
+            <InfractionReportModal
+                isOpen={showInfractionModal}
+                onClose={() => setShowInfractionModal(false)}
+            />
+
+            {/* Player History Modal */}
+            <PlayerHistoryModal
+                isOpen={showHistoryModal}
+                onClose={() => setShowHistoryModal(false)}
             />
         </div>
     );

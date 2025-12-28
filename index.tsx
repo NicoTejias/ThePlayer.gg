@@ -18,34 +18,57 @@ import { supabase } from './supabaseClient';
 const handleOAuthCallback = async () => {
   const hash = window.location.hash;
 
-  // Check if the hash contains OAuth tokens (not a route)
-  if (hash && hash.includes('access_token=')) {
+  // Check if the hash contains OAuth tokens (access_token)
+  // We use includes checks to be safe before doing heavy parsing
+  if (hash && (hash.includes('access_token=') || hash.includes('refresh_token='))) {
     console.log('🔐 OAuth callback detected, processing tokens...');
+    console.log('Raw hash:', hash);
 
     try {
-      // Extract the fragment (remove the leading #)
-      const hashParams = new URLSearchParams(hash.substring(1));
-      const accessToken = hashParams.get('access_token');
-      const refreshToken = hashParams.get('refresh_token');
+      // Robust extraction using Regex to handle various router hash prefix scenarios
+      // Matches both "access_token=XYZ" and "access_token=XYZ&" patterns
+      const accessTokenMatch = hash.match(/access_token=([^&]+)/);
+      const refreshTokenMatch = hash.match(/refresh_token=([^&]+)/);
+      const typeMatch = hash.match(/type=([^&]+)/);
 
-      if (accessToken && refreshToken) {
-        console.log('🔑 Setting session from OAuth tokens...');
+      const accessToken = accessTokenMatch ? accessTokenMatch[1] : null;
+      const refreshToken = refreshTokenMatch ? refreshTokenMatch[1] : null;
+      const type = typeMatch ? typeMatch[1] : null;
 
-        // Set the session using the tokens from the URL
-        const { data, error } = await supabase.auth.setSession({
-          access_token: accessToken,
-          refresh_token: refreshToken,
-        });
+      console.log('Extracted structure:', {
+        hasAccessToken: !!accessToken,
+        hasRefreshToken: !!refreshToken,
+        type: type
+      });
 
-        if (error) {
-          console.error('❌ Error setting session from OAuth:', error);
-        } else {
-          console.log('✅ Session established successfully!');
+      if (accessToken) {
+        if (refreshToken) {
+          console.log('🔑 Setting session from OAuth tokens (Access + Refresh)...');
+          const { data, error } = await supabase.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken,
+          });
+
+          if (error) throw error;
+          console.log('✅ Session established successfully with Refresh Token!');
           console.log('👤 User:', data.user?.email);
+        } else {
+          // Fallback: This is unusual for 'offline' access_type but might happen
+          console.log('⚠️ Warning: No refresh_token found. Setting session with access_token only.');
+          // supabase.auth.setSession supports partial sessions in some contexts or we might just rely on the token
+          // However, types usually require both. Let's try passing what we have if the library allows it, 
+          // otherwise we might need to manually set the cookie or just accept that session might be short lived.
+          // For now, let's try standard setSession and see if it accepts it or throw.
+          // Note: setSession({ access_token, refresh_token }) expects refresh_token.
+          // If we don't have it, we can't persist the session efficiently.
+          console.error('❌ Cannot set session: Missing refresh_token.');
         }
+      } else {
+        console.error('❌ OAuth detected but could not extract access_token.');
       }
 
       // Clean the URL by removing OAuth params and redirect to home
+      // We explicitly clear the hash to a clean state
       window.history.replaceState(null, '', window.location.pathname + '#/');
 
     } catch (err) {
