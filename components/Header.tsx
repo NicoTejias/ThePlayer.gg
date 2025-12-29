@@ -153,7 +153,7 @@ const Header: React.FC<HeaderProps> = ({ isLoggedIn, userRole, userName = 'Jugad
               {/* Logo Image */}
               <Link to="/" className="block">
                 <img
-                  src="/logo.png"
+                  src="/logotheplayer.png"
                   alt="ThePlayer.gg"
                   className="h-10 w-auto"
                 />
@@ -171,11 +171,14 @@ const Header: React.FC<HeaderProps> = ({ isLoggedIn, userRole, userName = 'Jugad
                   <div className="p-1">
                     <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider px-3 py-2">Selecciona Universo</div>
                     {(Object.keys(GAME_LABELS) as GameType[]).map((game) => (
-                      <div key={game} className="relative">
+                      <div
+                        key={game}
+                        className="relative"
+                        onMouseEnter={() => game === 'mtg' && setIsMagicHovered(true)}
+                        onMouseLeave={() => game === 'mtg' && setIsMagicHovered(false)}
+                      >
                         <button
                           onClick={() => setGame(game)}
-                          onMouseEnter={() => game === 'mtg' && setIsMagicHovered(true)}
-                          onMouseLeave={() => game === 'mtg' && setIsMagicHovered(false)}
                           className={`flex items-center justify-between w-full text-left px-3 py-2 text-sm rounded-lg transition-colors mb-0.5 ${currentGame === game ? 'bg-sky-600/20 text-sky-300 border border-sky-600/30' : 'text-slate-300 hover:bg-slate-700/50 hover:text-white'}`}
                         >
                           <span className="flex items-center">
@@ -189,35 +192,33 @@ const Header: React.FC<HeaderProps> = ({ isLoggedIn, userRole, userName = 'Jugad
                             </svg>
                           )}
                         </button>
+
+                        {/* Magic Submenu - Only for MTG */}
+                        {game === 'mtg' && isMagicHovered && (
+                          <div className="absolute top-0 left-full ml-2 w-44 bg-slate-800 rounded-xl shadow-2xl border border-purple-500/30 z-[100]">
+                            <div className="p-1">
+                              <div className="text-[10px] font-bold text-purple-400 uppercase tracking-wider px-3 py-2 flex items-center gap-2">
+                                <span className="w-1.5 h-1.5 rounded-full bg-purple-400"></span>
+                                Formatos MTG
+                              </div>
+                              <Link to="/commander" className="block px-3 py-2 text-sm text-slate-300 hover:bg-purple-600/20 hover:text-purple-300 rounded-lg transition-colors">
+                                🏰 Commander
+                              </Link>
+                              <Link to="/pauper" className="block px-3 py-2 text-sm text-slate-300 hover:bg-purple-600/20 hover:text-purple-300 rounded-lg transition-colors">
+                                💎 Pauper
+                              </Link>
+                              <Link to="/premodern" className="block px-3 py-2 text-sm text-slate-300 hover:bg-purple-600/20 hover:text-purple-300 rounded-lg transition-colors">
+                                📜 Premodern
+                              </Link>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>
                 </div>
 
-                {/* Magic Submenu - Only visible when hovering Magic option */}
-                {isMagicHovered && (
-                  <div
-                    className="absolute top-full left-[14.5rem] mt-2 w-44 bg-slate-800 rounded-xl shadow-2xl border border-purple-500/30 z-[100] transform origin-top-left animate-in fade-in slide-in-from-left-2 duration-200"
-                    onMouseEnter={() => setIsMagicHovered(true)}
-                    onMouseLeave={() => setIsMagicHovered(false)}
-                  >
-                    <div className="p-1">
-                      <div className="text-[10px] font-bold text-purple-400 uppercase tracking-wider px-3 py-2 flex items-center gap-2">
-                        <span className="w-1.5 h-1.5 rounded-full bg-purple-400"></span>
-                        Formatos MTG
-                      </div>
-                      <Link to="/commander" className="block px-3 py-2 text-sm text-slate-300 hover:bg-purple-600/20 hover:text-purple-300 rounded-lg transition-colors">
-                        🏰 Commander
-                      </Link>
-                      <Link to="/pauper" className="block px-3 py-2 text-sm text-slate-300 hover:bg-purple-600/20 hover:text-purple-300 rounded-lg transition-colors">
-                        💎 Pauper
-                      </Link>
-                      <Link to="/premodern" className="block px-3 py-2 text-sm text-slate-300 hover:bg-purple-600/20 hover:text-purple-300 rounded-lg transition-colors">
-                        📜 Premodern
-                      </Link>
-                    </div>
-                  </div>
-                )}
+
               </div>
             </div>
           </div>
