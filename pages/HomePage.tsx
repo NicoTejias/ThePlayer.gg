@@ -354,39 +354,173 @@ const HomePage: React.FC<HomePageProps> = ({ players, events, session, userRole,
             <div>
               <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3">Top 10 Pts</h3>
               <div className="bg-slate-800/50 rounded-xl border border-slate-700 overflow-hidden shadow-xl">
-                {topPwpPlayers.slice(0, 5).map((player) => (
-                  <Link key={player.id} to="/ranking" className="flex items-center gap-3 p-3 hover:bg-slate-700/50 transition-colors border-b border-slate-700/50 last:border-0">
-                    <span className="text-lg font-black text-slate-600 w-6">{player.rank}</span>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-white font-bold truncate text-sm">{player.playerName}</p>
-                      <p className="text-xs text-slate-500">{player.team}</p>
-                    </div>
-                    <div className="text-right">
-                      <span className="block text-green-400 font-bold font-mono text-sm">{player.pwp}</span>
-                      <span className="text-[10px] text-slate-500 uppercase">Pts</span>
-                    </div>
-                  </Link>
-                ))}
+                {topPwpPlayers.slice(0, 5).map((player) => {
+                  const isCurrentPlayer = session?.user?.id && player.id === session.user.id;
+
+                  return (
+                    <Link
+                      key={player.id}
+                      to="/ranking"
+                      className={`flex items-center gap-3 p-3 hover:bg-slate-700/50 transition-colors border-b border-slate-700/50 last:border-0 ${isCurrentPlayer ? 'bg-blue-500/10 border-l-4 border-l-blue-500' : ''
+                        }`}
+                    >
+                      <span className={`text-lg font-black w-6 ${isCurrentPlayer ? 'text-blue-400' : 'text-slate-600'
+                        }`}>
+                        {player.rank}
+                      </span>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <p className="text-white font-bold truncate text-sm">{player.playerName}</p>
+                          {isCurrentPlayer && (
+                            <span className="px-2 py-0.5 bg-blue-500 text-white text-xs font-bold rounded-full">
+                              Tú
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-xs text-slate-500">{player.team}</p>
+                      </div>
+                      <div className="text-right">
+                        <span className={`block font-bold font-mono text-sm ${isCurrentPlayer ? 'text-blue-400' : 'text-green-400'
+                          }`}>
+                          {player.pwp}
+                        </span>
+                        <span className="text-[10px] text-slate-500 uppercase">Pts</span>
+                      </div>
+                    </Link>
+                  );
+                })}
               </div>
+
+              {/* Show player position if not in top 5 */}
+              {userRole === 'player' && session?.user?.id && (() => {
+                const playerData = topPwpPlayers.find(p => p.id === session.user.id);
+                const isInTop5 = topPwpPlayers.slice(0, 5).some(p => p.id === session.user.id);
+
+                if (playerData && !isInTop5) {
+                  return (
+                    <div className="mt-3 p-3 bg-blue-500/10 rounded-lg border border-blue-500/30">
+                      <p className="text-xs text-slate-400 mb-2">Tu posición:</p>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <span className="text-lg font-black text-blue-400">#{playerData.rank}</span>
+                          <div>
+                            <p className="text-white font-bold text-sm">{playerData.playerName}</p>
+                            <span className="px-2 py-0.5 bg-blue-500 text-white text-xs font-bold rounded-full">
+                              Tú
+                            </span>
+                          </div>
+                        </div>
+                        <span className="text-blue-400 font-bold font-mono">{playerData.pwp} Pts</span>
+                      </div>
+                    </div>
+                  );
+                }
+                return null;
+              })()}
+
+              {/* CTA if player not in top 5 */}
+              {userRole === 'player' && !topPwpPlayers.slice(0, 5).some(p => p.id === session?.user?.id) && (
+                <div className="mt-4 p-4 bg-gradient-to-r from-blue-900/20 to-purple-900/20 rounded-xl border border-blue-500/30">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                    <div>
+                      <p className="text-white font-bold text-sm">¿Quieres subir en el ranking?</p>
+                      <p className="text-slate-400 text-xs">Participa en más torneos para ganar puntos</p>
+                    </div>
+                    <Link
+                      to="/eventos"
+                      className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-bold rounded-lg transition-colors whitespace-nowrap w-full sm:w-auto text-center"
+                    >
+                      Ver Eventos
+                    </Link>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Win Rate Ranking */}
             <div>
               <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3">Top 10 Win Rate</h3>
               <div className="bg-slate-800/50 rounded-xl border border-slate-700 overflow-hidden shadow-xl">
-                {topWinRatePlayers.slice(0, 5).map((player) => (
-                  <Link key={player.id} to="/ranking" className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 hover:bg-slate-700/50 transition-colors border-b border-slate-700/50 last:border-0">
-                    <span className="text-lg font-black text-slate-600 w-6">{player.rank}</span>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-white font-bold truncate text-sm">{player.playerName}</p>
-                      <p className="text-xs text-slate-500">{player.team}</p>
-                    </div>
-                    <div className="text-right">
-                      <span className="block text-blue-400 font-bold font-mono text-sm">{player.winRate}</span>
-                    </div>
-                  </Link>
-                ))}
+                {topWinRatePlayers.slice(0, 5).map((player) => {
+                  const isCurrentPlayer = session?.user?.id && player.id === session.user.id;
+
+                  return (
+                    <Link
+                      key={player.id}
+                      to="/ranking"
+                      className={`flex items-center gap-2 sm:gap-3 p-2 sm:p-3 hover:bg-slate-700/50 transition-colors border-b border-slate-700/50 last:border-0 ${isCurrentPlayer ? 'bg-purple-500/10 border-l-4 border-l-purple-500' : ''
+                        }`}
+                    >
+                      <span className={`text-lg font-black w-6 ${isCurrentPlayer ? 'text-purple-400' : 'text-slate-600'
+                        }`}>
+                        {player.rank}
+                      </span>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <p className="text-white font-bold truncate text-sm">{player.playerName}</p>
+                          {isCurrentPlayer && (
+                            <span className="px-2 py-0.5 bg-purple-500 text-white text-xs font-bold rounded-full">
+                              Tú
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-xs text-slate-500">{player.team}</p>
+                      </div>
+                      <div className="text-right">
+                        <span className={`block font-bold font-mono text-sm ${isCurrentPlayer ? 'text-purple-400' : 'text-blue-400'
+                          }`}>
+                          {player.winRate}
+                        </span>
+                      </div>
+                    </Link>
+                  );
+                })}
               </div>
+
+              {/* Show player position if not in top 5 */}
+              {userRole === 'player' && session?.user?.id && (() => {
+                const playerData = topWinRatePlayers.find(p => p.id === session.user.id);
+                const isInTop5 = topWinRatePlayers.slice(0, 5).some(p => p.id === session.user.id);
+
+                if (playerData && !isInTop5) {
+                  return (
+                    <div className="mt-3 p-3 bg-purple-500/10 rounded-lg border border-purple-500/30">
+                      <p className="text-xs text-slate-400 mb-2">Tu posición:</p>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <span className="text-lg font-black text-purple-400">#{playerData.rank}</span>
+                          <div>
+                            <p className="text-white font-bold text-sm">{playerData.playerName}</p>
+                            <span className="px-2 py-0.5 bg-purple-500 text-white text-xs font-bold rounded-full">
+                              Tú
+                            </span>
+                          </div>
+                        </div>
+                        <span className="text-purple-400 font-bold font-mono">{playerData.winRate}</span>
+                      </div>
+                    </div>
+                  );
+                }
+                return null;
+              })()}
+
+              {/* CTA if player not in top 5 */}
+              {userRole === 'player' && !topWinRatePlayers.slice(0, 5).some(p => p.id === session?.user?.id) && (
+                <div className="mt-4 p-4 bg-gradient-to-r from-purple-900/20 to-pink-900/20 rounded-xl border border-purple-500/30">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                    <div>
+                      <p className="text-white font-bold text-sm">¿Quieres mejorar tu Win Rate?</p>
+                      <p className="text-slate-400 text-xs">Practica y participa en más torneos</p>
+                    </div>
+                    <Link
+                      to="/eventos"
+                      className="px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white text-sm font-bold rounded-lg transition-colors whitespace-nowrap w-full sm:w-auto text-center"
+                    >
+                      Ver Eventos
+                    </Link>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </section>
