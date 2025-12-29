@@ -28,7 +28,7 @@ const PartnersSection: React.FC = () => {
         },
         {
             name: 'Moss Eisley',
-            logo: '/images/partners/moss_eisley.jpg',
+            logo: '/Moss-logo-color.png',
             url: '#',
             description: 'Tienda'
         },
