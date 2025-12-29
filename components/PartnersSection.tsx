@@ -32,12 +32,6 @@ const PartnersSection: React.FC = () => {
             url: '#',
             description: 'Tienda'
         },
-        {
-            name: 'The Player',
-            logo: '/images/partners/theplayer_logo.png',
-            url: '#',
-            description: 'Tienda'
-        },
     ];
 
     return (
