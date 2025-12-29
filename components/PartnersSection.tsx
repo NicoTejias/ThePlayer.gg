@@ -50,11 +50,11 @@ const PartnersSection: React.FC = () => {
                             rel="noopener noreferrer"
                             className="group transition-all duration-300 hover:scale-110"
                         >
-                            <div className="bg-slate-900/50 p-6 rounded-xl border border-slate-700 hover:border-sky-500 transition-colors">
+                            <div className="bg-slate-900/50 p-6 rounded-xl border border-slate-700 hover:border-sky-500 transition-colors flex flex-col items-center justify-center">
                                 <img
                                     src={partner.logo}
                                     alt={`${partner.name} - ${partner.description}`}
-                                    className={`h-20 w-auto object-contain transition-all ${partner.name === 'Moss Eisley'
+                                    className={`h-20 w-auto object-contain transition-all mx-auto ${partner.name === 'Moss Eisley'
                                         ? 'p-3 h-24'
                                         : 'filter brightness-90 group-hover:brightness-110'
                                         }`}
