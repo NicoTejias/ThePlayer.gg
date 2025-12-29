@@ -149,78 +149,13 @@ const Header: React.FC<HeaderProps> = ({ isLoggedIn, userRole, userName = 'Jugad
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <div className="flex-shrink-0 mr-4">
-            <div className="flex flex-col items-start gap-1">
-              {/* Logo Image */}
-              <Link to="/" className="block">
-                <img
-                  src="/logotheplayer.png"
-                  alt="ThePlayer.gg"
-                  className="h-10 w-auto"
-                />
-              </Link>
-
-              {/* Game Selector below logo */}
-              <div className="relative group">
-                <button className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-300 hover:text-white transition-colors bg-slate-800/95 px-3 py-1.5 rounded-full border border-slate-700 hover:border-sky-500/50 hover:bg-slate-700/80 hover:shadow-lg hover:shadow-sky-900/20 backdrop-blur-sm">
-                  <span className="text-[10px] text-slate-500">Mundo:</span>
-                  <span className="text-sky-400">{GAME_LABELS[currentGame]}</span>
-                  <svg className="w-3 h-3 ml-1 opacity-50 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
-                </button>
-
-                <div className="absolute top-full left-0 mt-2 w-56 bg-slate-800 rounded-xl shadow-2xl border border-slate-700/50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 transform origin-top-left">
-                  <div className="p-1">
-                    <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider px-3 py-2">Selecciona Universo</div>
-                    {(Object.keys(GAME_LABELS) as GameType[]).map((game) => (
-                      <div
-                        key={game}
-                        className="relative"
-                        onMouseEnter={() => game === 'mtg' && setIsMagicHovered(true)}
-                        onMouseLeave={() => game === 'mtg' && setIsMagicHovered(false)}
-                      >
-                        <button
-                          onClick={() => setGame(game)}
-                          className={`flex items-center justify-between w-full text-left px-3 py-2 text-sm rounded-lg transition-colors mb-0.5 ${currentGame === game ? 'bg-sky-600/20 text-sky-300 border border-sky-600/30' : 'text-slate-300 hover:bg-slate-700/50 hover:text-white'}`}
-                        >
-                          <span className="flex items-center">
-                            {currentGame === game && <div className="w-1.5 h-1.5 rounded-full bg-sky-400 mr-2 shadow-[0_0_8px_rgba(56,189,248,0.5)]"></div>}
-                            <span className={currentGame === game ? 'font-semibold' : ''}>{GAME_LABELS[game]}</span>
-                          </span>
-                          {/* Show arrow for Magic to indicate submenu */}
-                          {game === 'mtg' && (
-                            <svg className="w-3 h-3 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                            </svg>
-                          )}
-                        </button>
-
-                        {/* Magic Submenu - Only for MTG */}
-                        {game === 'mtg' && isMagicHovered && (
-                          <div className="absolute top-0 left-full ml-2 w-44 bg-slate-800 rounded-xl shadow-2xl border border-purple-500/30 z-[100]">
-                            <div className="p-1">
-                              <div className="text-[10px] font-bold text-purple-400 uppercase tracking-wider px-3 py-2 flex items-center gap-2">
-                                <span className="w-1.5 h-1.5 rounded-full bg-purple-400"></span>
-                                Formatos MTG
-                              </div>
-                              <Link to="/commander" className="block px-3 py-2 text-sm text-slate-300 hover:bg-purple-600/20 hover:text-purple-300 rounded-lg transition-colors">
-                                🏰 Commander
-                              </Link>
-                              <Link to="/pauper" className="block px-3 py-2 text-sm text-slate-300 hover:bg-purple-600/20 hover:text-purple-300 rounded-lg transition-colors">
-                                💎 Pauper
-                              </Link>
-                              <Link to="/premodern" className="block px-3 py-2 text-sm text-slate-300 hover:bg-purple-600/20 hover:text-purple-300 rounded-lg transition-colors">
-                                📜 Premodern
-                              </Link>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-
-              </div>
-            </div>
+            <Link to="/" className="block">
+              <img
+                src="/logotheplayer.png"
+                alt="ThePlayer.gg"
+                className="h-12 w-auto"
+              />
+            </Link>
           </div>
 
           {/* Navigation */}
@@ -233,8 +168,66 @@ const Header: React.FC<HeaderProps> = ({ isLoggedIn, userRole, userName = 'Jugad
             </div>
           </div>
 
-          {/* Right Side: Auth/Profile */}
-          <div className="flex items-center gap-2">
+          {/* Right Side: Game Selector + Auth/Profile */}
+          <div className="flex items-center gap-3">
+            {/* Game Selector */}
+            <div className="relative group hidden md:block">
+              <button className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-300 hover:text-white transition-colors bg-slate-800/95 px-3 py-2 rounded-full border border-slate-700 hover:border-sky-500/50 hover:bg-slate-700/80 hover:shadow-lg hover:shadow-sky-900/20 backdrop-blur-sm">
+                <span className="text-[10px] text-slate-500">Mundo:</span>
+                <span className="text-sky-400">{GAME_LABELS[currentGame]}</span>
+                <svg className="w-3 h-3 ml-1 opacity-50 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+              </button>
+
+              <div className="absolute top-full right-0 mt-2 w-56 bg-slate-800 rounded-xl shadow-2xl border border-slate-700/50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
+                <div className="p-1">
+                  <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider px-3 py-2">Selecciona Universo</div>
+                  {(Object.keys(GAME_LABELS) as GameType[]).map((game) => (
+                    <div
+                      key={game}
+                      className="relative"
+                      onMouseEnter={() => game === 'mtg' && setIsMagicHovered(true)}
+                      onMouseLeave={() => game === 'mtg' && setIsMagicHovered(false)}
+                    >
+                      <button
+                        onClick={() => setGame(game)}
+                        className={`flex items-center justify-between w-full text-left px-3 py-2 text-sm rounded-lg transition-colors mb-0.5 ${currentGame === game ? 'bg-sky-600/20 text-sky-300 border border-sky-600/30' : 'text-slate-300 hover:bg-slate-700/50 hover:text-white'}`}
+                      >
+                        <span className="flex items-center">
+                          {currentGame === game && <div className="w-1.5 h-1.5 rounded-full bg-sky-400 mr-2 shadow-[0_0_8px_rgba(56,189,248,0.5)]"></div>}
+                          <span className={currentGame === game ? 'font-semibold' : ''}>{GAME_LABELS[game]}</span>
+                        </span>
+                        {game === 'mtg' && (
+                          <svg className="w-3 h-3 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                          </svg>
+                        )}
+                      </button>
+
+                      {/* Magic Submenu */}
+                      {game === 'mtg' && isMagicHovered && (
+                        <div className="absolute top-0 right-full mr-2 w-44 bg-slate-800 rounded-xl shadow-2xl border border-purple-500/30 z-[100]">
+                          <div className="p-1">
+                            <div className="text-[10px] font-bold text-purple-400 uppercase tracking-wider px-3 py-2 flex items-center gap-2">
+                              <span className="w-1.5 h-1.5 rounded-full bg-purple-400"></span>
+                              Formatos MTG
+                            </div>
+                            <Link to="/commander" className="block px-3 py-2 text-sm text-slate-300 hover:bg-purple-600/20 hover:text-purple-300 rounded-lg transition-colors">
+                              🏰 Commander
+                            </Link>
+                            <Link to="/pauper" className="block px-3 py-2 text-sm text-slate-300 hover:bg-purple-600/20 hover:text-purple-300 rounded-lg transition-colors">
+                              💎 Pauper
+                            </Link>
+                            <Link to="/premodern" className="block px-3 py-2 text-sm text-slate-300 hover:bg-purple-600/20 hover:text-purple-300 rounded-lg transition-colors">
+                              📜 Premodern
+                            </Link>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
             {/* Contextual CTA Button */}
             {!isLoggedIn && (
               <Link
