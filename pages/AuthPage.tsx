@@ -122,7 +122,8 @@ const AuthPage: React.FC<AuthPageProps> = ({ handleLogin }) => {
         const email = formData.get('reg-email') as string;
         const password = formData.get('reg-password') as string;
         const confirmPassword = formData.get('confirm-password') as string;
-        const region = formData.get('region') as string;
+        const country = formData.get('country') as string;
+        const city = formData.get('city') as string;
 
         if (password !== confirmPassword) {
             setAuthError("Las contraseñas no coinciden.");
@@ -141,7 +142,8 @@ const AuthPage: React.FC<AuthPageProps> = ({ handleLogin }) => {
                     data: {
                         full_name: username,
                         role: role,
-                        region: region
+                        country: country,
+                        city: city
                     }
                 }
             });
@@ -282,15 +284,74 @@ const AuthPage: React.FC<AuthPageProps> = ({ handleLogin }) => {
                                         <label htmlFor="confirm-password" className="sr-only">Confirmar Contraseña</label>
                                         <input type="password" name="confirm-password" id="confirm-password" placeholder="Confirmar Contraseña" className={commonInputClass} required />
                                     </div>
-                                    <div className="relative">
-                                        <select name="region" id="region" className={`${commonInputClass} appearance-none`} required>
-                                            <option value="" disabled selected>Selecciona tu Región</option>
-                                            <option value="Metropolitana">Metropolitana</option>
-                                            <option value="Valparaíso">Valparaíso</option>
-                                            <option value="Biobío">Biobío</option>
-                                            <option value="Sur">Sur</option>
-                                            <option value="Norte">Norte</option>
-                                        </select>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        {/* País */}
+                                        <div className="relative">
+                                            <select name="country" id="country" className={`${commonInputClass} appearance-none`} required>
+                                                <option value="" disabled selected>País</option>
+                                                <optgroup label="Sudamérica">
+                                                    <option value="Argentina">Argentina</option>
+                                                    <option value="Bolivia">Bolivia</option>
+                                                    <option value="Brasil">Brasil</option>
+                                                    <option value="Chile">Chile</option>
+                                                    <option value="Colombia">Colombia</option>
+                                                    <option value="Ecuador">Ecuador</option>
+                                                    <option value="Guyana">Guyana</option>
+                                                    <option value="Paraguay">Paraguay</option>
+                                                    <option value="Perú">Perú</option>
+                                                    <option value="Surinam">Surinam</option>
+                                                    <option value="Uruguay">Uruguay</option>
+                                                    <option value="Venezuela">Venezuela</option>
+                                                </optgroup>
+                                                <optgroup label="Centroamérica y Caribe">
+                                                    <option value="Belice">Belice</option>
+                                                    <option value="Costa Rica">Costa Rica</option>
+                                                    <option value="Cuba">Cuba</option>
+                                                    <option value="El Salvador">El Salvador</option>
+                                                    <option value="Guatemala">Guatemala</option>
+                                                    <option value="Honduras">Honduras</option>
+                                                    <option value="México">México</option>
+                                                    <option value="Nicaragua">Nicaragua</option>
+                                                    <option value="Panamá">Panamá</option>
+                                                    <option value="República Dominicana">República Dominicana</option>
+                                                </optgroup>
+                                                <optgroup label="Norteamérica">
+                                                    <option value="Canadá">Canadá</option>
+                                                    <option value="Estados Unidos">Estados Unidos</option>
+                                                </optgroup>
+                                                <optgroup label="Europa">
+                                                    <option value="Alemania">Alemania</option>
+                                                    <option value="España">España</option>
+                                                    <option value="Francia">Francia</option>
+                                                    <option value="Italia">Italia</option>
+                                                    <option value="Portugal">Portugal</option>
+                                                    <option value="Reino Unido">Reino Unido</option>
+                                                </optgroup>
+                                                <optgroup label="Otros">
+                                                    <option value="Australia">Australia</option>
+                                                    <option value="China">China</option>
+                                                    <option value="Japón">Japón</option>
+                                                    <option value="Otro">Otro</option>
+                                                </optgroup>
+                                            </select>
+                                            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-slate-400">
+                                                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                                </svg>
+                                            </div>
+                                        </div>
+
+                                        {/* Ciudad */}
+                                        <div>
+                                            <input
+                                                type="text"
+                                                name="city"
+                                                id="city"
+                                                placeholder="Ciudad"
+                                                className={commonInputClass}
+                                                required
+                                            />
+                                        </div>
                                     </div>
                                     <div className="pt-2">
                                         <label className="text-sm font-medium text-slate-300">Tipo de Cuenta</label>
