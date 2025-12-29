@@ -82,6 +82,14 @@ const HomePage: React.FC<HomePageProps> = ({ players, events, session, userRole,
   const [showRegModal, setShowRegModal] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<any>(null);
 
+  // Helper function to calculate reading time
+  const calculateReadingTime = (content: string): number => {
+    if (!content) return 1;
+    const wordsPerMinute = 200;
+    const wordCount = content.trim().split(/\s+/).length;
+    return Math.max(1, Math.ceil(wordCount / wordsPerMinute));
+  };
+
   useEffect(() => {
     const fetchStats = async () => {
       try {
@@ -533,20 +541,59 @@ const HomePage: React.FC<HomePageProps> = ({ players, events, session, userRole,
             {/* Latest Articles */}
             <div>
               <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3">Artículos</h3>
-              <div className="space-y-3">
+              <div className="space-y-4">
                 {(latestNews.length > 0 ? latestNews : mockArticles).slice(0, 3).map((article) => (
-                  <SimpleCard key={article.id} className="bg-slate-800/50 hover:bg-slate-800/70 transition-all border border-slate-700">
-                    <div className="flex gap-3 p-3">
-                      <div className="w-24 h-24 flex-shrink-0 rounded overflow-hidden">
-                        <img src={article.image_url || article.imageUrl || ''} alt={article.title} className="w-full h-full object-cover" />
+                  <Link
+                    key={article.id}
+                    to={`/media/articulos/${article.id}`}
+                    className="group relative block bg-slate-800/50 rounded-xl overflow-hidden border border-slate-700 hover:border-blue-500/50 transition-all duration-300 hover:shadow-2xl hover:shadow-blue-500/20 hover:-translate-y-1"
+                  >
+                    <div className="flex gap-4 p-4">
+                      {/* Image with zoom effect */}
+                      <div className="relative w-32 h-32 flex-shrink-0 rounded-lg overflow-hidden">
+                        <img
+                          src={article.image_url || article.imageUrl || '/images/placeholder-article.jpg'}
+                          alt={article.title}
+                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                        />
+                        {/* Overlay gradient */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+
+                        {/* Category badge */}
+                        <div className="absolute top-2 left-2 px-2 py-1 bg-blue-600/90 backdrop-blur-sm text-white text-[10px] font-bold rounded-full">
+                          {article.category || 'Artículo'}
+                        </div>
+
+                        {/* Reading time badge */}
+                        <div className="absolute bottom-2 right-2 px-2 py-1 bg-slate-900/90 backdrop-blur-sm text-white text-[10px] font-bold rounded-full border border-white/10 flex items-center gap-1">
+                          ⏱️ {calculateReadingTime(article.content || article.excerpt || '')} min
+                        </div>
+
+                        {/* Action button - appears on hover */}
+                        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                          <span className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold rounded-lg shadow-xl transform group-hover:scale-105 transition-transform">
+                            📖 Leer Ahora
+                          </span>
+                        </div>
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <h4 className="text-sm font-bold text-white line-clamp-2 mb-1 group-hover:text-blue-300 transition-colors">{article.title}</h4>
-                        <p className="text-xs text-slate-500 mb-2">{article.category}</p>
-                        <p className="text-xs text-slate-400 line-clamp-2">{article.excerpt}</p>
+
+                      {/* Content */}
+                      <div className="flex-1 min-w-0 flex flex-col">
+                        <h4 className="text-base font-bold text-white line-clamp-2 mb-2 group-hover:text-blue-400 transition-colors">
+                          {article.title}
+                        </h4>
+                        <p className="text-sm text-slate-400 line-clamp-2 mb-3 flex-1">
+                          {article.excerpt || article.content?.substring(0, 120) + '...'}
+                        </p>
+
+                        {/* Author and date */}
+                        <div className="flex items-center justify-between text-xs text-slate-500">
+                          <span>Por {article.author || 'ThePlayer'}</span>
+                          <span>{new Date(article.created_at || Date.now()).toLocaleDateString('es-CL')}</span>
+                        </div>
                       </div>
                     </div>
-                  </SimpleCard>
+                  </Link>
                 ))}
               </div>
             </div>
@@ -554,25 +601,71 @@ const HomePage: React.FC<HomePageProps> = ({ players, events, session, userRole,
             {/* Featured Videos */}
             <div>
               <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3">Videos</h3>
-              <div className="space-y-3">
+              <div className="space-y-4">
                 {featuredContent.slice(0, 3).map((video) => (
-                  <a key={video.id} href={video.link} className="block group">
-                    <SimpleCard className="bg-slate-800/50 hover:bg-slate-800/70 transition-all border border-slate-700">
-                      <div className="flex gap-3 p-3">
-                        <div className="w-32 h-20 flex-shrink-0 rounded overflow-hidden relative">
-                          <img src={video.imageUrl} alt={video.title} className="w-full h-full object-cover" />
-                          <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                            <div className="w-8 h-8 bg-red-600 rounded-full flex items-center justify-center">
-                              <svg className="w-4 h-4 text-white ml-0.5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
-                            </div>
-                          </div>
+                  <a
+                    key={video.id}
+                    href={video.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group relative block bg-slate-800/50 rounded-xl overflow-hidden border border-slate-700 hover:border-purple-500/50 transition-all duration-300 hover:shadow-2xl hover:shadow-purple-500/20 hover:-translate-y-1"
+                  >
+                    <div className="flex gap-4 p-4">
+                      {/* Thumbnail with zoom effect */}
+                      <div className="relative w-40 h-28 flex-shrink-0 rounded-lg overflow-hidden">
+                        <img
+                          src={video.imageUrl || '/images/placeholder-video.jpg'}
+                          alt={video.title}
+                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                        />
+                        {/* Overlay gradient */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+
+                        {/* Type badge */}
+                        <div className="absolute top-2 left-2 px-2 py-1 bg-purple-600/90 backdrop-blur-sm text-white text-[10px] font-bold rounded-full">
+                          Video
                         </div>
-                        <div className="flex-1 min-w-0">
-                          <h4 className="text-sm font-bold text-white line-clamp-2 group-hover:text-blue-300 transition-colors">{video.title}</h4>
-                          <p className="text-xs text-slate-500 mt-1">{video.date}</p>
+
+                        {/* Duration badge */}
+                        <div className="absolute bottom-2 right-2 px-2 py-1 bg-slate-900/90 backdrop-blur-sm text-white text-[10px] font-bold rounded-full border border-white/10 flex items-center gap-1">
+                          <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" />
+                          </svg>
+                          {video.duration || '5:30'}
+                        </div>
+
+                        {/* Action button - appears on hover */}
+                        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                          <span className="px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold rounded-lg shadow-xl transform group-hover:scale-105 transition-transform flex items-center gap-1">
+                            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                              <path d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" />
+                            </svg>
+                            Ver Video
+                          </span>
                         </div>
                       </div>
-                    </SimpleCard>
+
+                      {/* Content */}
+                      <div className="flex-1 min-w-0 flex flex-col">
+                        <h4 className="text-base font-bold text-white line-clamp-2 mb-2 group-hover:text-purple-400 transition-colors">
+                          {video.title}
+                        </h4>
+                        <p className="text-sm text-slate-400 line-clamp-2 mb-3 flex-1">
+                          {video.description || 'Mira este video destacado de nuestra comunidad'}
+                        </p>
+
+                        {/* Date and platform */}
+                        <div className="flex items-center justify-between text-xs text-slate-500">
+                          <span className="flex items-center gap-1">
+                            <svg className="w-3 h-3 text-red-500" fill="currentColor" viewBox="0 0 24 24">
+                              <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
+                            </svg>
+                            YouTube
+                          </span>
+                          <span>{video.date || new Date().toLocaleDateString('es-CL')}</span>
+                        </div>
+                      </div>
+                    </div>
                   </a>
                 ))}
               </div>
