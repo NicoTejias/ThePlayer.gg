@@ -55,7 +55,7 @@ const PartnersSection: React.FC = () => {
                                     src={partner.logo}
                                     alt={`${partner.name} - ${partner.description}`}
                                     className={`h-20 w-auto object-contain transition-all ${partner.name === 'Moss Eisley'
-                                        ? 'bg-white rounded-lg p-3 h-24'
+                                        ? 'p-3 h-24'
                                         : 'filter brightness-90 group-hover:brightness-110'
                                         }`}
                                 />
