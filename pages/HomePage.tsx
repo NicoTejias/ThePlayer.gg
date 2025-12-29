@@ -259,7 +259,7 @@ const HomePage: React.FC<HomePageProps> = ({ players, events, session, userRole,
           </h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8">
             {/* Players Stat */}
-            <div className="bg-slate-800/40 backdrop-blur-sm p-6 rounded-xl border border-slate-700/50 flex flex-col items-center hover:border-blue-500/50 hover:bg-slate-800/60 transition-all group hover:-translate-y-1 duration-300">
+            <div className="bg-slate-800/40 backdrop-blur-sm p-6 rounded-xl border border-slate-700/50 flex flex-col items-center hover:border-blue-500/50 hover:bg-slate-800/60 transition-all group hover:animate-float duration-300">
               <div className="p-3 bg-blue-500/10 rounded-full mb-4 group-hover:bg-blue-500/20 transition-colors text-blue-400 shadow-[0_0_15px_rgba(59,130,246,0.2)]">
                 <UsersIcon className="w-8 h-8" />
               </div>
