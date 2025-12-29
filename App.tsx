@@ -51,6 +51,7 @@ import JudgesForumPage from './pages/JudgesForumPage';
 import EmailConfirmationPage from './pages/EmailConfirmationPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
+import ContentCreatorApplicationPage from './pages/ContentCreatorApplicationPage';
 import type { TournamentResult, CommunityEvent, PlayerProfile, TournamentParseResult, Team } from './types';
 import OnboardingModal from './components/OnboardingModal';
 import ClaimResultsModal from './components/ClaimResultsModal';
@@ -871,6 +872,7 @@ const AppContent: React.FC = () => {
           <Route path="/confirm-email" element={<EmailConfirmationPage />} />
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           <Route path="/reset-password" element={<ResetPasswordPage />} />
+          <Route path="/creadores" element={<ContentCreatorApplicationPage />} />
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="/admin" element={<AdminDashboardPage />} />
           <Route path="/admin/users" element={<UserManagementPage />} />

@@ -35,6 +35,7 @@ const NavLinks: NavLinkType[] = [
     ]
   },
   { name: 'Jueces', path: '/jueces' },
+  { name: 'Creadores', path: '/creadores' },
   { name: 'Tiendas', path: '/tiendas' },
   { name: 'Señal Online', path: '/envivo', isLive: true },
 ];
