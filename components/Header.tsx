@@ -23,21 +23,26 @@ const NavLinks: NavLinkType[] = [
   { name: 'PLS', path: '/pls' },
   { name: 'Ranking', path: '/ranking/pwp' },
   { name: 'Eventos', path: '/eventos' },
-
   { name: 'Mercado TCG', path: '/mercado' },
   {
-    name: 'Media',
-    path: '/media',
+    name: 'Comunidad',
+    path: '#',
     subItems: [
-      { name: 'Portada', path: '/media' },
-      { name: 'Artículos', path: '/media/articulos' },
-      { name: 'Videos', path: '/media/videos' },
+      {
+        name: 'Media',
+        path: '/media',
+        subItems: [
+          { name: 'Portada', path: '/media' },
+          { name: 'Artículos', path: '/media/articulos' },
+          { name: 'Videos', path: '/media/videos' },
+        ]
+      },
+      { name: 'Jueces', path: '/jueces' },
+      { name: 'Creadores', path: '/creadores' },
+      { name: 'Tiendas', path: '/tiendas' },
+      { name: 'Señal Online', path: '/envivo', isLive: true },
     ]
   },
-  { name: 'Jueces', path: '/jueces' },
-  { name: 'Creadores', path: '/creadores' },
-  { name: 'Tiendas', path: '/tiendas' },
-  { name: 'Señal Online', path: '/envivo', isLive: true },
 ];
 
 // Recursive Menu Item Component for arbitrary depth
