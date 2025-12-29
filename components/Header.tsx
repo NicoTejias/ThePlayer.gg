@@ -148,15 +148,18 @@ const Header: React.FC<HeaderProps> = ({ isLoggedIn, userRole, userName = 'Jugad
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <div className="flex-shrink-0 mr-4 relative">
-            <Link to="/" className="flex items-center gap-2">
-              <span className="text-2xl sm:text-3xl font-bold text-white tracking-tighter font-['Rajdhani'] uppercase bg-gradient-to-r from-sky-400 to-violet-400 bg-clip-text text-transparent">
-                ThePlayer.gg
-              </span>
-            </Link>
+          <div className="flex-shrink-0 mr-4">
+            <div className="flex flex-col items-start gap-1">
+              {/* Logo Image */}
+              <Link to="/" className="block">
+                <img
+                  src="/logo.png"
+                  alt="ThePlayer.gg"
+                  className="h-10 w-auto"
+                />
+              </Link>
 
-            {/* Game Selector - Positioned below logo */}
-            <div className="absolute top-full left-0 mt-1 z-50">
+              {/* Game Selector below logo */}
               <div className="relative group">
                 <button className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-300 hover:text-white transition-colors bg-slate-800/95 px-3 py-1.5 rounded-full border border-slate-700 hover:border-sky-500/50 hover:bg-slate-700/80 hover:shadow-lg hover:shadow-sky-900/20 backdrop-blur-sm">
                   <span className="text-[10px] text-slate-500">Mundo:</span>
@@ -356,7 +359,7 @@ const Header: React.FC<HeaderProps> = ({ isLoggedIn, userRole, userName = 'Jugad
           </div>
         </div>
       </div>
-    </header>
+    </header >
   );
 };
 

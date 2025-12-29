@@ -210,7 +210,7 @@ const HomePage: React.FC<HomePageProps> = ({ players, events, session, userRole,
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950">
       {/* Hero Carousel */}
-      <section className="relative h-[500px] overflow-hidden">
+      <section className="relative h-[400px] overflow-hidden">
         {sliderItems.map((item, idx) => (
           <Link
             key={item.id}
