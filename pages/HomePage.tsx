@@ -210,7 +210,7 @@ const HomePage: React.FC<HomePageProps> = ({ players, events, session, userRole,
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950">
       {/* Hero Carousel */}
-      <section className="relative h-[400px] overflow-hidden">
+      <section className="relative h-[300px] sm:h-[350px] md:h-[400px] overflow-hidden">
         {sliderItems.map((item, idx) => (
           <Link
             key={item.id}
@@ -249,7 +249,7 @@ const HomePage: React.FC<HomePageProps> = ({ players, events, session, userRole,
           <h2 className="text-3xl font-bold text-center text-white mb-8 uppercase tracking-wide">
             Comunidad en Números
           </h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8">
             {/* Players Stat */}
             <div className="bg-slate-800/40 backdrop-blur-sm p-6 rounded-xl border border-slate-700/50 flex flex-col items-center hover:border-blue-500/50 hover:bg-slate-800/60 transition-all group hover:-translate-y-1 duration-300">
               <div className="p-3 bg-blue-500/10 rounded-full mb-4 group-hover:bg-blue-500/20 transition-colors text-blue-400 shadow-[0_0_15px_rgba(59,130,246,0.2)]">
@@ -305,7 +305,7 @@ const HomePage: React.FC<HomePageProps> = ({ players, events, session, userRole,
         {/* Próximos Eventos - Full Width Row */}
         <section>
           <SectionHeader title="Próximos Eventos" linkTo="/eventos" />
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {displayEvents.slice(0, 4).map((event) => (
               <SimpleCard key={event.id} className="bg-slate-800/50 hover:bg-slate-800/70 transition-all border border-slate-700">
                 <div className="p-4">
@@ -321,7 +321,7 @@ const HomePage: React.FC<HomePageProps> = ({ players, events, session, userRole,
                             setSelectedEvent(event);
                             setShowRegModal(true);
                           }}
-                          className="text-xs bg-green-600 hover:bg-green-500 text-white px-3 py-1.5 rounded font-bold transition-colors"
+                          className="text-xs bg-green-600 hover:bg-green-500 text-white px-4 py-2 rounded font-bold transition-colors min-h-[44px] flex items-center justify-center"
                         >
                           Inscribirse
                         </button>
@@ -375,7 +375,7 @@ const HomePage: React.FC<HomePageProps> = ({ players, events, session, userRole,
               <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3">Top 10 Win Rate</h3>
               <div className="bg-slate-800/50 rounded-xl border border-slate-700 overflow-hidden shadow-xl">
                 {topWinRatePlayers.slice(0, 5).map((player) => (
-                  <Link key={player.id} to="/ranking" className="flex items-center gap-3 p-3 hover:bg-slate-700/50 transition-colors border-b border-slate-700/50 last:border-0">
+                  <Link key={player.id} to="/ranking" className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 hover:bg-slate-700/50 transition-colors border-b border-slate-700/50 last:border-0">
                     <span className="text-lg font-black text-slate-600 w-6">{player.rank}</span>
                     <div className="flex-1 min-w-0">
                       <p className="text-white font-bold truncate text-sm">{player.playerName}</p>

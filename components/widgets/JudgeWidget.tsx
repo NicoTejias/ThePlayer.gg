@@ -89,7 +89,7 @@ const JudgeWidget: React.FC<JudgeWidgetProps> = ({ judgeId }) => {
     return (
         <div className="bg-gradient-to-r from-purple-900/10 via-slate-900/20 to-indigo-900/10 border-y border-slate-700/50 py-8">
             <div className="container mx-auto px-4">
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4 mb-6 md:mb-8">
 
                     {/* Judge Info Card */}
                     <div className="bg-slate-800/50 backdrop-blur-sm p-6 rounded-xl border border-slate-700/50">

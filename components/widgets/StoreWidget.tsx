@@ -70,9 +70,9 @@ const StoreWidget: React.FC<StoreWidgetProps> = ({ storeId }) => {
     const { profile, upcomingTournaments, playersCount, totalTournaments } = storeData || {};
 
     return (
-        <div className="bg-gradient-to-r from-yellow-900/10 via-slate-900/20 to-orange-900/10 border-y border-slate-700/50 py-8">
+        <div className="bg-gradient-to-r from-yellow-900/10 via-orange-900/10 to-yellow-900/10 border-y border-yellow-500/20 py-8 md:py-10">
             <div className="container mx-auto px-4">
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4 mb-6 md:mb-8">
 
                     {/* Store Stats Card */}
                     <div className="bg-slate-800/50 backdrop-blur-sm p-6 rounded-xl border border-slate-700/50">

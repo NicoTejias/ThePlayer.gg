@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 
 const VisitorWidget: React.FC = () => {
     return (
-        <div className="bg-gradient-to-r from-blue-900/20 via-purple-900/20 to-pink-900/20 border-y border-slate-700/50 py-12">
+        <div className="bg-gradient-to-r from-blue-900/20 via-purple-900/20 to-pink-900/20 border-y border-slate-700/50 py-8 md:py-12">
             <div className="container mx-auto px-4">
                 <div className="max-w-4xl mx-auto text-center">
                     <h2 className="text-4xl md:text-5xl font-black text-white mb-4 uppercase tracking-tight">
@@ -14,7 +14,7 @@ const VisitorWidget: React.FC = () => {
                     </p>
 
                     {/* Benefits Grid */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mb-8 md:mb-10">
                         <div className="bg-slate-800/50 backdrop-blur-sm p-6 rounded-xl border border-slate-700/50 hover:border-blue-500/50 transition-all">
                             <div className="text-4xl mb-3">🏆</div>
                             <h3 className="text-lg font-bold text-white mb-2">Rankings Oficiales</h3>
@@ -35,7 +35,7 @@ const VisitorWidget: React.FC = () => {
                     </div>
 
                     {/* CTA Buttons */}
-                    <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                    <div className="flex flex-col sm:flex-row gap-3 md:gap-4 justify-center items-stretch sm:items-center">
                         <Link
                             to="/auth?mode=register"
                             className="px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-bold text-lg rounded-xl shadow-2xl shadow-blue-500/30 transition-all transform hover:scale-105 hover:-translate-y-1 border border-white/10"

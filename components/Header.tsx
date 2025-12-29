@@ -153,7 +153,7 @@ const Header: React.FC<HeaderProps> = ({ isLoggedIn, userRole, userName = 'Jugad
               <img
                 src="/logotheplayer.png"
                 alt="ThePlayer.gg"
-                className="h-12 w-auto"
+                className="h-8 sm:h-10 md:h-12 w-auto"
               />
             </Link>
           </div>

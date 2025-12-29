@@ -65,9 +65,9 @@ const PlayerWidget: React.FC<PlayerWidgetProps> = ({ userId }) => {
     const { profile, upcomingEvents, recentResults } = playerData || {};
 
     return (
-        <div className="bg-gradient-to-r from-blue-900/10 via-slate-900/20 to-purple-900/10 border-y border-slate-700/50 py-8">
+        <div className="bg-gradient-to-r from-blue-900/10 via-purple-900/10 to-blue-900/10 border-y border-blue-500/20 py-8 md:py-10">
             <div className="container mx-auto px-4">
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4 mb-6 md:mb-8">
 
                     {/* Player Stats Card */}
                     <div className="bg-slate-800/50 backdrop-blur-sm p-6 rounded-xl border border-slate-700/50">
@@ -133,7 +133,7 @@ const PlayerWidget: React.FC<PlayerWidgetProps> = ({ userId }) => {
                             <div className="space-y-2">
                                 {recentResults.slice(0, 2).map((result: any, idx: number) => (
                                     <div key={idx} className="flex justify-between items-center text-sm">
-                                        <div className="flex-1 min-w-0">
+                                        <div className="flex flex-col sm:flex-row gap-2 md:gap-3">
                                             <p className="text-white font-bold line-clamp-1">{result.tournaments?.title}</p>
                                             <p className="text-slate-400 text-xs">{new Date(result.tournaments?.date).toLocaleDateString()}</p>
                                         </div>
