@@ -94,7 +94,16 @@ const AuthPage: React.FC<AuthPageProps> = ({ handleLogin }) => {
             }
         } catch (error: any) {
             console.error('Login error:', error);
-            setAuthError(error.message || 'Error al iniciar sesión.');
+            // Mejorar mensajes de error
+            let errorMessage = 'Error al iniciar sesión.';
+            if (error.message?.includes('Invalid login credentials')) {
+                errorMessage = 'Email o contraseña incorrectos';
+            } else if (error.message?.includes('Email not confirmed')) {
+                errorMessage = 'Por favor confirma tu email antes de iniciar sesión. Revisa tu bandeja de entrada.';
+            } else if (error.message) {
+                errorMessage = error.message;
+            }
+            setAuthError(errorMessage);
             setIsLoading(false);
         }
     };
@@ -244,7 +253,9 @@ const AuthPage: React.FC<AuthPageProps> = ({ handleLogin }) => {
                                             <input id="remember-me" name="remember-me" type="checkbox" className="h-4 w-4 rounded border-slate-600 bg-slate-800 text-sky-600 focus:ring-sky-500" />
                                             <label htmlFor="remember-me" className="ml-2 block text-slate-400">Recordarme</label>
                                         </div>
-                                        <button type="button" onClick={() => setIsForgotPasswordView(true)} className="font-medium text-sky-400 hover:text-sky-300">¿Olvidaste tu contraseña?</button>
+                                        <Link to="/forgot-password" className="font-medium text-sky-400 hover:text-sky-300 transition-colors">
+                                            ¿Olvidaste tu contraseña?
+                                        </Link>
                                     </div>
                                     <div>
                                         <button type="submit" className={`${commonButtonClass} bg-sky-600 text-white hover:bg-sky-700`}>

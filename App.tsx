@@ -48,6 +48,9 @@ import SubscriptionSuccessPage from './pages/SubscriptionSuccessPage';
 import SubscriptionFailurePage from './pages/SubscriptionFailurePage';
 import HeadJudgeDashboard from './pages/HeadJudgeDashboard';
 import JudgesForumPage from './pages/JudgesForumPage';
+import EmailConfirmationPage from './pages/EmailConfirmationPage';
+import ForgotPasswordPage from './pages/ForgotPasswordPage';
+import ResetPasswordPage from './pages/ResetPasswordPage';
 import type { TournamentResult, CommunityEvent, PlayerProfile, TournamentParseResult, Team } from './types';
 import OnboardingModal from './components/OnboardingModal';
 import ClaimResultsModal from './components/ClaimResultsModal';
@@ -864,6 +867,10 @@ const AppContent: React.FC = () => {
           <Route path="/jueces" element={<JudgesPage />} />
           <Route path="/tiendas" element={<StoresPage />} />
           <Route path="/login" element={<AuthPage handleLogin={handleLogin} />} />
+          <Route path="/auth" element={<AuthPage handleLogin={handleLogin} />} />
+          <Route path="/confirm-email" element={<EmailConfirmationPage />} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+          <Route path="/reset-password" element={<ResetPasswordPage />} />
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="/admin" element={<AdminDashboardPage />} />
           <Route path="/admin/users" element={<UserManagementPage />} />
