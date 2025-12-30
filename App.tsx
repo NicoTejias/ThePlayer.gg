@@ -587,12 +587,13 @@ const AppContent: React.FC = () => {
 
       // Safety timeout for auth initialization
       const authTimeout = setTimeout(() => {
-        console.warn("Auth initialization timed out after 15 seconds. Forcing loading state off.");
+        console.warn("Auth initialization timed out after 8 seconds. Forcing loading state off.");
         setIsAuthLoading(false);
         setIsLoggedIn(false);
         setUserRole(null);
         setUserProfile(null);
-      }, 15000); // Increased from 8000 to 15000ms for slower connections
+        toast.error("La sesión tardó demasiado en cargar. Por favor, intenta nuevamente.");
+      }, 8000); // 8 seconds timeout
 
       try {
         // Get initial session
@@ -608,6 +609,14 @@ const AppContent: React.FC = () => {
         // Subscribe to auth changes
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
           console.log("Auth state changed:", event, session ? "Session exists" : "No session");
+
+          // Handle email confirmation specifically
+          if (event === 'SIGNED_IN' && session) {
+            console.log("User signed in, clearing auth loading");
+            clearTimeout(authTimeout);
+            setIsAuthLoading(false);
+          }
+
           await handleSessionState(session);
         });
 
@@ -638,17 +647,20 @@ const AppContent: React.FC = () => {
   if (isAuthLoading) {
     return (
       <div className="bg-slate-900 min-h-screen flex flex-col items-center justify-center text-white p-4">
-        <div className="flex flex-col items-center gap-6 max-w-sm text-center">
+        <div className="flex flex-col items-center gap-6 max-w-md text-center">
           <div className="w-16 h-16 border-4 border-sky-500 border-t-transparent rounded-full animate-spin"></div>
           <div className="space-y-2">
-            <p className="text-xl font-bold uppercase tracking-widest animate-pulse">Cargando sesión...</p>
-            <p className="text-slate-500 text-sm italic">Si esto tarda demasiado, por favor recarga la página o revisa tu conexión.</p>
+            <p className="text-xl font-bold uppercase tracking-widest animate-pulse">Conectando...</p>
+            <p className="text-slate-400 text-sm">Verificando tu sesión</p>
           </div>
           <button
-            onClick={() => window.location.reload()}
-            className="mt-4 px-6 py-2 bg-slate-800 hover:bg-slate-700 rounded-full text-xs font-bold uppercase tracking-tighter border border-slate-700 transition-colors"
+            onClick={() => {
+              setIsAuthLoading(false);
+              window.location.href = '/#/';
+            }}
+            className="mt-4 px-8 py-3 bg-sky-600 hover:bg-sky-500 rounded-lg text-sm font-bold uppercase tracking-wider transition-colors"
           >
-            Forzar Recarga
+            Ir al inicio
           </button>
         </div>
       </div>
