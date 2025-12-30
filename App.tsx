@@ -64,7 +64,8 @@ const mockInitialEvents: CommunityEvent[] = [];
 
 const AppContent: React.FC = () => {
   const { currentGame } = useGame(); // Use Game Context
-  const [isAuthLoading, setIsAuthLoading] = useState(true); // New loading state
+  const [isAuthLoading, setIsAuthLoading] = useState(true); // Auth loading state
+  const [isDataLoading, setIsDataLoading] = useState(false); // Data fetching loading state
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userRole, setUserRole] = useState<'player' | 'store' | 'admin' | null>(null);
   const [userProfile, setUserProfile] = useState<any>(null); // Store full profile
@@ -83,10 +84,8 @@ const AppContent: React.FC = () => {
 
   useEffect(() => {
     console.log("Game Context Changed:", currentGame);
-    // Clear data to force UI update and avoid stale data mixing
-    setPlayers([]);
-    setTournamentResults([]);
-    // Fetch new data
+    // Fetch new data for the selected game
+    // Don't clear data immediately to avoid blank screens during navigation
     fetchData();
   }, [currentGame]); // Re-fetch when game changes
 
@@ -130,248 +129,259 @@ const AppContent: React.FC = () => {
 
   // Fetch data definition
   const fetchData = async () => {
-    // =====================================================================
-    // NUEVO ENFOQUE: Construir ranking desde tournament_results
-    // Esto permite que TODOS los jugadores de torneos aparezcan en el ranking
-    // incluso si no tienen cuenta registrada.
-    // =====================================================================
+    // Set loading state
+    setIsDataLoading(true);
 
-    // 1. Fetch tournament results agrupados por player_name
-    // FILTERED BY CURRENT GAME via Inner Join on Tournaments
-    // Note: We select tournament columns to filter but don't strictly need to return them if we filter
-    const { data: resultsData, error: resultsError } = await supabase
-      .from('tournament_results')
-      .select(`
-        player_name,
-        player_id,
-        pwp_earned,
-        wins,
-        losses,
-        draws,
-        tournaments!inner(game_type)
-      `)
-      .eq('tournaments.game_type', currentGame);
+    try {
+      // =====================================================================
+      // NUEVO ENFOQUE: Construir ranking desde tournament_results
+      // Esto permite que TODOS los jugadores de torneos aparezcan en el ranking
+      // incluso si no tienen cuenta registrada.
+      // =====================================================================
 
-    // Also fetch Tournaments List filtered by game
-    const { data: tournamentsData } = await supabase
-      .from('tournaments')
-      .select('*')
-      .eq('game_type', currentGame)
-      .order('date', { ascending: false });
+      // 1. Fetch tournament results agrupados por player_name
+      // FILTERED BY CURRENT GAME via Inner Join on Tournaments
+      // Note: We select tournament columns to filter but don't strictly need to return them if we filter
+      const { data: resultsData, error: resultsError } = await supabase
+        .from('tournament_results')
+        .select(`
+          player_name,
+          player_id,
+          pwp_earned,
+          wins,
+          losses,
+          draws,
+          tournaments!inner(game_type)
+        `)
+        .eq('tournaments.game_type', currentGame);
 
-    // Filter local mock events if DB is empty, otherwise use DB events logic if applicable
-    // (Assuming communityEvents comes from DB or mock)
-    // For now, let's assume we want to query DB for upcoming events too if logic existed
-    // Or filter the tournamentsData to show recent ones
+      // Also fetch Tournaments List filtered by game
+      const { data: tournamentsData } = await supabase
+        .from('tournaments')
+        .select('*')
+        .eq('game_type', currentGame)
+        .order('date', { ascending: false });
 
-    // Update tournamentResults state
-    setTournamentResults(tournamentsData || []);
+      // Filter local mock events if DB is empty, otherwise use DB events logic if applicable
+      // (Assuming communityEvents comes from DB or mock)
+      // For now, let's assume we want to query DB for upcoming events too if logic existed
+      // Or filter the tournamentsData to show recent ones
 
-    if (resultsData) {
-      // Agrupar resultados por player_name (o player_id si existe)
-      const playerMap: Record<string, {
-        name: string;
-        playerId: string | null;
-        pwp: number;
-        wins: number;
-        losses: number;
-        draws: number;
-      }> = {};
+      // Update tournamentResults state
+      setTournamentResults(tournamentsData || []);
 
-      for (const result of resultsData) {
-        // Usar player_id como key si existe, sino usar player_name
-        const key = result.player_id || result.player_name;
+      if (resultsData) {
+        // Agrupar resultados por player_name (o player_id si existe)
+        const playerMap: Record<string, {
+          name: string;
+          playerId: string | null;
+          pwp: number;
+          wins: number;
+          losses: number;
+          draws: number;
+        }> = {};
 
-        if (!playerMap[key]) {
-          playerMap[key] = {
-            name: result.player_name,
-            playerId: result.player_id,
-            pwp: 0,
-            wins: 0,
-            losses: 0,
-            draws: 0
-          };
+        for (const result of resultsData) {
+          // Usar player_id como key si existe, sino usar player_name
+          const key = result.player_id || result.player_name;
+
+          if (!playerMap[key]) {
+            playerMap[key] = {
+              name: result.player_name,
+              playerId: result.player_id,
+              pwp: 0,
+              wins: 0,
+              losses: 0,
+              draws: 0
+            };
+          }
+
+          playerMap[key].pwp += result.pwp_earned || 0;
+          playerMap[key].wins += result.wins || 0;
+          playerMap[key].losses += result.losses || 0;
+          playerMap[key].draws += result.draws || 0;
         }
 
-        playerMap[key].pwp += result.pwp_earned || 0;
-        playerMap[key].wins += result.wins || 0;
-        playerMap[key].losses += result.losses || 0;
-        playerMap[key].draws += result.draws || 0;
-      }
+        // Obtener información adicional de profiles para jugadores vinculados
+        const playerIds = Object.values(playerMap)
+          .map(p => p.playerId)
+          .filter(id => id !== null) as string[];
 
-      // Obtener información adicional de profiles para jugadores vinculados
-      const playerIds = Object.values(playerMap)
-        .map(p => p.playerId)
-        .filter(id => id !== null) as string[];
+        let profilesMap: Record<string, {
+          firstName: string;
+          lastName: string;
+          username: string;
+          region: string;
+          team: string | null;
+          teamId: string | null;
+          isPublic: boolean;
+          isPro: boolean;
+        }> = {};
 
-      let profilesMap: Record<string, {
-        firstName: string;
-        lastName: string;
-        username: string;
-        region: string;
-        team: string | null;
-        teamId: string | null;
-        isPublic: boolean;
-        isPro: boolean;
-      }> = {};
+        if (playerIds.length > 0) {
+          const { data: profilesData } = await supabase
+            .from('profiles')
+            .select('id, username, first_name, last_name, region, team, team_id, is_public, is_pro')
+            .in('id', playerIds);
 
-      if (playerIds.length > 0) {
-        const { data: profilesData } = await supabase
-          .from('profiles')
-          .select('id, username, first_name, last_name, region, team, team_id, is_public, is_pro')
-          .in('id', playerIds);
+          if (profilesData) {
+            for (const profile of profilesData) {
+              profilesMap[profile.id] = {
+                firstName: profile.first_name || '',
+                lastName: profile.last_name || '',
+                username: profile.username || 'Unknown',
+                region: profile.region || 'Unknown',
+                team: profile.team,
+                teamId: profile.team_id,
+                isPublic: profile.is_public ?? false,
+                isPro: profile.is_pro ?? false
+              };
+            }
+          }
+        }
 
-        if (profilesData) {
-          for (const profile of profilesData) {
-            profilesMap[profile.id] = {
-              firstName: profile.first_name || '',
-              lastName: profile.last_name || '',
-              username: profile.username || 'Unknown',
-              region: profile.region || 'Unknown',
-              team: profile.team,
-              teamId: profile.team_id,
-              isPublic: profile.is_public ?? false,
-              isPro: profile.is_pro ?? false
+        // 1.5 Fetch Teams
+        const { data: teamsData } = await supabase
+          .from('teams')
+          .select('*');
+
+        const teamsMap: Record<string, Team> = {};
+        if (teamsData) {
+          for (const t of teamsData) {
+            teamsMap[t.id] = {
+              id: t.id,
+              name: t.name,
+              logoUrl: t.logo_url,
+              description: t.description,
+              captainId: t.captain_id,
+              totalPwp: 0,
+              memberCount: 0
             };
           }
         }
-      }
 
-      // 1.5 Fetch Teams
-      const { data: teamsData } = await supabase
-        .from('teams')
-        .select('*');
+        // Mapear a PlayerProfile
+        // IMPORTANTE: Ordenar primero para asignar números consistentes
+        const sortedEntries = Object.entries(playerMap).sort((a, b) => b[1].pwp - a[1].pwp);
 
-      const teamsMap: Record<string, Team> = {};
-      if (teamsData) {
-        for (const t of teamsData) {
-          teamsMap[t.id] = {
-            id: t.id,
-            name: t.name,
-            logoUrl: t.logo_url,
-            description: t.description,
-            captainId: t.captain_id,
-            totalPwp: 0,
-            memberCount: 0
+        const mappedPlayers: PlayerProfile[] = sortedEntries.map(([key, data], index) => {
+          const profile = data.playerId ? profilesMap[data.playerId] : null;
+          const hasAccount = profile !== null;
+
+          // Generar número de jugador anónimo (basado en posición del ranking)
+          const anonymousNumber = String(index + 1).padStart(3, '0');
+
+          // Determinar el nombre a mostrar
+          let displayName: string;
+          if (hasAccount) {
+            // Si tiene cuenta → mostrar Nombre Apellido (o username como fallback)
+            const fullName = `${profile.firstName} ${profile.lastName}`.trim();
+            displayName = fullName || profile.username;
+          } else {
+            // Si NO tiene cuenta → mostrar "Jugador XXX" (anónimo)
+            displayName = `Jugador ${anonymousNumber}`;
+          }
+
+          // Link to teamData if available
+          const teamData = profile?.teamId ? teamsMap[profile.teamId] : undefined;
+
+          // Accumulate team stats
+          if (teamData) {
+            teamData.totalPwp = (teamData.totalPwp || 0) + data.pwp;
+            teamData.memberCount = (teamData.memberCount || 0) + 1;
+          }
+
+          return {
+            id: data.playerId || key, // Usar player_name como ID si no tiene cuenta
+            name: displayName,
+            region: hasAccount ? profile.region : 'Sin Región',
+            pwp: data.pwp,
+            matchesWon: data.wins,
+            matchesLost: data.losses,
+            matchesDrew: data.draws,
+            teamId: profile?.teamId || undefined,
+            team: profile?.team || null,
+            teamData: teamData,
+            // isPublic = true si tiene cuenta vinculada
+            isPublic: hasAccount,
+            is_pro: profile?.isPro || false
           };
-        }
-      }
-
-      // Mapear a PlayerProfile
-      // IMPORTANTE: Ordenar primero para asignar números consistentes
-      const sortedEntries = Object.entries(playerMap).sort((a, b) => b[1].pwp - a[1].pwp);
-
-      const mappedPlayers: PlayerProfile[] = sortedEntries.map(([key, data], index) => {
-        const profile = data.playerId ? profilesMap[data.playerId] : null;
-        const hasAccount = profile !== null;
-
-        // Generar número de jugador anónimo (basado en posición del ranking)
-        const anonymousNumber = String(index + 1).padStart(3, '0');
-
-        // Determinar el nombre a mostrar
-        let displayName: string;
-        if (hasAccount) {
-          // Si tiene cuenta → mostrar Nombre Apellido (o username como fallback)
-          const fullName = `${profile.firstName} ${profile.lastName}`.trim();
-          displayName = fullName || profile.username;
-        } else {
-          // Si NO tiene cuenta → mostrar "Jugador XXX" (anónimo)
-          displayName = `Jugador ${anonymousNumber}`;
-        }
-
-        // Link to teamData if available
-        const teamData = profile?.teamId ? teamsMap[profile.teamId] : undefined;
-
-        // Accumulate team stats
-        if (teamData) {
-          teamData.totalPwp = (teamData.totalPwp || 0) + data.pwp;
-          teamData.memberCount = (teamData.memberCount || 0) + 1;
-        }
-
-        return {
-          id: data.playerId || key, // Usar player_name como ID si no tiene cuenta
-          name: displayName,
-          region: hasAccount ? profile.region : 'Sin Región',
-          pwp: data.pwp,
-          matchesWon: data.wins,
-          matchesLost: data.losses,
-          matchesDrew: data.draws,
-          teamId: profile?.teamId || undefined,
-          team: profile?.team || null,
-          teamData: teamData,
-          // isPublic = true si tiene cuenta vinculada
-          isPublic: hasAccount,
-          is_pro: profile?.isPro || false
-        };
-      });
-
-      // Sort teams by total PWP
-      const sortedTeams = Object.values(teamsMap).sort((a, b) => (b.totalPwp || 0) - (a.totalPwp || 0));
-      setTeams(sortedTeams);
-
-      // Ya está ordenado por PWP descendente
-      setPlayers(mappedPlayers);
-    }
-
-    // 2. Fetch Tournaments
-    const { data: tourneysData, error: tourneysError } = await supabase
-      .from('tournaments')
-      .select('*')
-      .order('date', { ascending: false });
-
-    if (tourneysData) {
-      const mappedTourneys: TournamentResult[] = tourneysData.map(t => ({
-        id: t.id,
-        name: t.name,
-        date: t.date,
-        storeName: t.store_name || 'Unknown Store',
-        format: t.format || 'Unknown',
-        playerCount: t.player_count || 0
-      }));
-      setTournamentResults(mappedTourneys);
-
-      // Solo convertir torneos FUTUROS a CommunityEvents
-      // Los torneos pasados solo están en tournamentResults
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-
-      const futureTournaments: CommunityEvent[] = mappedTourneys
-        .filter(t => new Date(t.date) >= today) // Solo eventos futuros
-        .map(t => ({
-          id: t.id,
-          title: t.name,
-          date: t.date,
-          storeName: t.storeName,
-          format: t.format,
-          playerCount: t.playerCount
-        }));
-
-      // 3. Fetch Scheduled Events (eventos agendados) con contador de inscritos
-      const { data: scheduledData, error: scheduledError } = await supabase
-        .rpc('get_scheduled_events_with_registrations', {
-          p_game_type: currentGame
         });
 
-      if (scheduledError) {
-        console.error('Error fetching scheduled events:', scheduledError);
+        // Sort teams by total PWP
+        const sortedTeams = Object.values(teamsMap).sort((a, b) => (b.totalPwp || 0) - (a.totalPwp || 0));
+        setTeams(sortedTeams);
+
+        // Ya está ordenado por PWP descendente
+        setPlayers(mappedPlayers);
       }
 
-      const scheduledEvents: CommunityEvent[] = scheduledData?.map(e => ({
-        id: e.id,
-        title: e.title,
-        date: e.date,
-        storeName: e.store_name,
-        format: e.format,
-        playerCount: e.registration_count || 0, // Contador real de inscritos
-        createdBy: e.created_by, // ID del creador del evento
-        maxPlayers: e.max_players, // Máximo de jugadores
-        time: e.event_time, // Hora del evento
-        isUserRegistered: e.is_user_registered || false // Si el usuario está inscrito
-      })) || [];
+      // 2. Fetch Tournaments
+      const { data: tourneysData, error: tourneysError } = await supabase
+        .from('tournaments')
+        .select('*')
+        .order('date', { ascending: false });
 
-      // Combinar torneos futuros con eventos agendados
-      const allEvents = [...futureTournaments, ...scheduledEvents];
-      setCommunityEvents(allEvents);
+      if (tourneysData) {
+        const mappedTourneys: TournamentResult[] = tourneysData.map(t => ({
+          id: t.id,
+          name: t.name,
+          date: t.date,
+          storeName: t.store_name || 'Unknown Store',
+          format: t.format || 'Unknown',
+          playerCount: t.player_count || 0
+        }));
+        setTournamentResults(mappedTourneys);
+
+        // Solo convertir torneos FUTUROS a CommunityEvents
+        // Los torneos pasados solo están en tournamentResults
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        const futureTournaments: CommunityEvent[] = mappedTourneys
+          .filter(t => new Date(t.date) >= today) // Solo eventos futuros
+          .map(t => ({
+            id: t.id,
+            title: t.name,
+            date: t.date,
+            storeName: t.storeName,
+            format: t.format,
+            playerCount: t.playerCount
+          }));
+
+        // 3. Fetch Scheduled Events (eventos agendados) con contador de inscritos
+        const { data: scheduledData, error: scheduledError } = await supabase
+          .rpc('get_scheduled_events_with_registrations', {
+            p_game_type: currentGame
+          });
+
+        if (scheduledError) {
+          console.error('Error fetching scheduled events:', scheduledError);
+        }
+
+        const scheduledEvents: CommunityEvent[] = scheduledData?.map(e => ({
+          id: e.id,
+          title: e.title,
+          date: e.date,
+          storeName: e.store_name,
+          format: e.format,
+          playerCount: e.registration_count || 0, // Contador real de inscritos
+          createdBy: e.created_by, // ID del creador del evento
+          maxPlayers: e.max_players, // Máximo de jugadores
+          time: e.event_time, // Hora del evento
+          isUserRegistered: e.is_user_registered || false // Si el usuario está inscrito
+        })) || [];
+
+        // Combinar torneos futuros con eventos agendados
+        const allEvents = [...futureTournaments, ...scheduledEvents];
+        setCommunityEvents(allEvents);
+      }
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      toast.error("Error al cargar los datos. Por favor, intenta de nuevo.");
+    } finally {
+      // Always clear loading state
+      setIsDataLoading(false);
     }
   };
 
