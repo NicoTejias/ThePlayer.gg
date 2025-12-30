@@ -89,13 +89,13 @@ const Header: React.FC<HeaderProps> = ({
             {/* Center Section: Game Logo + Name + Format Buttons */}
             <div className="hidden md:flex items-center gap-4">
               {/* Game Logo + Name - More Prominent, No Background */}
-              <div className="flex items-center gap-3">
-                {/* Logo - Larger size (56px) */}
-                <div className="w-14 h-14 flex items-center justify-center">
+              <div className="flex items-center gap-4">
+                {/* Logo - Much Larger size (112px) */}
+                <div className="w-28 h-28 flex items-center justify-center">
                   <img
                     src={GAME_LOGOS[currentGame].src}
                     alt={GAME_LABELS[currentGame]}
-                    className="w-full h-full object-contain drop-shadow-lg"
+                    className="w-full h-full object-contain drop-shadow-2xl"
                     onError={(e) => {
                       // Fallback to emoji if image fails to load
                       e.currentTarget.style.display = 'none';
@@ -105,14 +105,14 @@ const Header: React.FC<HeaderProps> = ({
                     }}
                   />
                   <span
-                    className="text-4xl hidden drop-shadow-lg"
+                    className="text-7xl hidden drop-shadow-2xl"
                     style={{ display: GAME_LOGOS[currentGame].src ? 'none' : 'block' }}
                   >
                     {GAME_LOGOS[currentGame].emoji}
                   </span>
                 </div>
-                {/* Game Name - Larger text */}
-                <span className="text-white font-bold text-lg whitespace-nowrap">
+                {/* Game Name - Much Larger text */}
+                <span className="text-white font-bold text-2xl whitespace-nowrap">
                   {GAME_LABELS[currentGame]}
                 </span>
               </div>
