@@ -165,6 +165,59 @@ export const GAME_LABELS: Record<GameType, string> = {
   other: 'Otro'
 };
 
+// Game formats configuration
+export interface GameFormat {
+  id: string;
+  name: string;
+  path: string;
+}
+
+export const GAME_FORMATS: Record<GameType, GameFormat[]> = {
+  mtg: [
+    { id: 'competitive', name: 'Competitivo', path: '/ranking/pwp' },
+    { id: 'commander', name: 'Commander', path: '/commander' },
+    { id: 'pauper', name: 'Pauper', path: '/pauper' },
+    { id: 'premodern', name: 'Premodern', path: '/premodern' },
+  ],
+  pokemon: [
+    { id: 'competitive', name: 'Competitivo', path: '/ranking/pwp' },
+  ],
+  one_piece: [
+    { id: 'competitive', name: 'Competitivo', path: '/ranking/pwp' },
+  ],
+  lorcana: [
+    { id: 'competitive', name: 'Competitivo', path: '/ranking/pwp' },
+  ],
+  flesh_and_blood: [
+    { id: 'competitive', name: 'Competitivo', path: '/ranking/pwp' },
+  ],
+  yugioh: [
+    { id: 'competitive', name: 'Competitivo', path: '/ranking/pwp' },
+  ],
+  star_wars: [
+    { id: 'competitive', name: 'Competitivo', path: '/ranking/pwp' },
+  ],
+  board_game: [],
+  rpg: [],
+  warhammer: [],
+  other: [],
+};
+
+// Game logos configuration (with fallback emojis)
+export const GAME_LOGOS: Record<GameType, { src: string; emoji: string }> = {
+  mtg: { src: '/images/games/mtg-logo.png', emoji: '🎴' },
+  pokemon: { src: '/images/games/pokemon-logo.png', emoji: '⚡' },
+  one_piece: { src: '/images/games/onepiece-logo.png', emoji: '🏴‍☠️' },
+  lorcana: { src: '/images/games/lorcana-logo.png', emoji: '✨' },
+  flesh_and_blood: { src: '/images/games/fab-logo.png', emoji: '⚔️' },
+  yugioh: { src: '/images/games/yugioh-logo.png', emoji: '🃏' },
+  star_wars: { src: '/images/games/starwars-logo.png', emoji: '⭐' },
+  board_game: { src: '', emoji: '🎲' },
+  rpg: { src: '', emoji: '🎭' },
+  warhammer: { src: '', emoji: '🛡️' },
+  other: { src: '', emoji: '🎮' },
+};
+
 export interface TournamentResult {
   id: string;
   name: string;

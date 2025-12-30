@@ -7,7 +7,7 @@ import ShieldCheckIcon from './icons/ShieldCheckIcon';
 import NotificationBell from './NotificationBell';
 import Sidebar from './Sidebar';
 import { useGame } from '../context/GameContext';
-import { GAME_LABELS } from '../types';
+import { GAME_LABELS, GAME_LOGOS, GAME_FORMATS } from '../types';
 
 interface HeaderProps {
   isLoggedIn: boolean;
@@ -86,12 +86,53 @@ const Header: React.FC<HeaderProps> = ({
               </Link>
             </div>
 
-            {/* Center Section: Current Game Badge */}
-            <div className="hidden sm:flex items-center">
-              <div className="flex items-center gap-2 bg-slate-700/50 px-4 py-2 rounded-full border border-slate-600">
-                <span className="text-[10px] text-slate-400 uppercase tracking-wider font-bold">Mundo:</span>
-                <span className="text-sky-400 font-bold text-sm">{GAME_LABELS[currentGame]}</span>
+            {/* Center Section: Game Logo + Name + Format Buttons */}
+            <div className="hidden md:flex items-center gap-4">
+              {/* Game Logo + Name */}
+              <div className="flex items-center gap-3 bg-slate-700/30 px-4 py-2 rounded-lg border border-slate-600/50">
+                {/* Logo with fallback to emoji */}
+                <div className="w-8 h-8 flex items-center justify-center">
+                  <img
+                    src={GAME_LOGOS[currentGame].src}
+                    alt={GAME_LABELS[currentGame]}
+                    className="w-full h-full object-contain"
+                    onError={(e) => {
+                      // Fallback to emoji if image fails to load
+                      e.currentTarget.style.display = 'none';
+                      if (e.currentTarget.nextElementSibling) {
+                        (e.currentTarget.nextElementSibling as HTMLElement).style.display = 'block';
+                      }
+                    }}
+                  />
+                  <span
+                    className="text-2xl hidden"
+                    style={{ display: GAME_LOGOS[currentGame].src ? 'none' : 'block' }}
+                  >
+                    {GAME_LOGOS[currentGame].emoji}
+                  </span>
+                </div>
+                <span className="text-slate-200 font-bold text-sm whitespace-nowrap">
+                  {GAME_LABELS[currentGame]}
+                </span>
               </div>
+
+              {/* Format Buttons */}
+              {GAME_FORMATS[currentGame].length > 0 && (
+                <div className="flex items-center gap-2">
+                  {GAME_FORMATS[currentGame].map((format) => (
+                    <Link
+                      key={format.id}
+                      to={format.path}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${location.pathname === format.path
+                        ? 'bg-sky-600 text-white shadow-lg shadow-sky-900/30'
+                        : 'bg-slate-700/50 text-slate-300 hover:bg-slate-600 hover:text-white border border-slate-600/50'
+                        }`}
+                    >
+                      {format.name}
+                    </Link>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Right Section: Quick Actions + Profile */}
