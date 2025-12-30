@@ -112,9 +112,10 @@ const MenuItem: React.FC<{ item: NavLinkType; depth?: number; isLiveSignal?: boo
       {/* Render SubMenu if it has children */}
       {hasSubItems && (
         <div
-          className={`absolute ${isTopLevel ? 'top-full left-0 pt-2' : 'top-0 right-full mr-1'} w-48 transition-all duration-200 ease-in-out ${isOpen ? 'opacity-100 visible pointer-events-auto' : 'opacity-0 invisible pointer-events-none'} ${depth === 0 ? 'z-[100]' : depth === 1 ? 'z-[110]' : 'z-[120]'}`}
+          className={`absolute ${isTopLevel ? 'top-full left-0 pt-2' : 'top-0 left-full ml-2'} w-48 transition-all duration-200 ease-in-out ${isOpen ? 'opacity-100 visible pointer-events-auto' : 'opacity-0 invisible pointer-events-none'} ${depth === 0 ? 'z-[100]' : depth === 1 ? 'z-[110]' : 'z-[120]'}`}
           onMouseEnter={handleMouseEnter}
           onMouseLeave={handleMouseLeave}
+          style={{ border: depth > 0 ? '2px solid red' : 'none' }}
         >
           <div className="bg-slate-800 rounded-xl shadow-xl border border-slate-700/50 overflow-hidden ring-1 ring-black ring-opacity-10 py-1">
             {item.subItems!.map((subItem) => (
