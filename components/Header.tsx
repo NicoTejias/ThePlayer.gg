@@ -65,6 +65,7 @@ const MenuItem: React.FC<{ item: NavLinkType; depth?: number; isLiveSignal?: boo
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
     }
+    console.log(`[MenuItem] Mouse ENTER on "${item.name}" (depth: ${depth})`);
     setIsOpen(true);
   };
 
@@ -72,8 +73,12 @@ const MenuItem: React.FC<{ item: NavLinkType; depth?: number; isLiveSignal?: boo
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
     }
+    console.log(`[MenuItem] Mouse LEAVE on "${item.name}" (depth: ${depth})`);
     // Add delay to allow mouse to move to submenu
-    timeoutRef.current = setTimeout(() => setIsOpen(false), 150);
+    timeoutRef.current = setTimeout(() => {
+      console.log(`[MenuItem] Closing "${item.name}" after delay`);
+      setIsOpen(false);
+    }, 150);
   };
 
   const baseLinkClass = "block rounded transition-colors duration-200 whitespace-nowrap cursor-pointer select-none text-sm font-medium";
@@ -116,6 +121,11 @@ const MenuItem: React.FC<{ item: NavLinkType; depth?: number; isLiveSignal?: boo
           onMouseEnter={handleMouseEnter}
           onMouseLeave={handleMouseLeave}
           style={{ border: depth > 0 ? '2px solid red' : 'none' }}
+          ref={(el) => {
+            if (el && depth > 0) {
+              console.log(`[Submenu] "${item.name}" submenu div rendered, isOpen: ${isOpen}, depth: ${depth}`);
+            }
+          }}
         >
           <div className="bg-slate-800 rounded-xl shadow-xl border border-slate-700/50 overflow-hidden ring-1 ring-black ring-opacity-10 py-1">
             {item.subItems!.map((subItem) => (
