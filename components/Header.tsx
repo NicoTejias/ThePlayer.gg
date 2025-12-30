@@ -88,14 +88,14 @@ const Header: React.FC<HeaderProps> = ({
 
             {/* Center Section: Game Logo + Name + Format Buttons */}
             <div className="hidden md:flex items-center gap-4">
-              {/* Game Logo + Name */}
-              <div className="flex items-center gap-3 bg-slate-700/30 px-4 py-2 rounded-lg border border-slate-600/50">
-                {/* Logo with fallback to emoji */}
-                <div className="w-8 h-8 flex items-center justify-center">
+              {/* Game Logo + Name - More Prominent, No Background */}
+              <div className="flex items-center gap-3">
+                {/* Logo - Larger size (40px) */}
+                <div className="w-10 h-10 flex items-center justify-center">
                   <img
                     src={GAME_LOGOS[currentGame].src}
                     alt={GAME_LABELS[currentGame]}
-                    className="w-full h-full object-contain"
+                    className="w-full h-full object-contain drop-shadow-lg"
                     onError={(e) => {
                       // Fallback to emoji if image fails to load
                       e.currentTarget.style.display = 'none';
@@ -105,16 +105,22 @@ const Header: React.FC<HeaderProps> = ({
                     }}
                   />
                   <span
-                    className="text-2xl hidden"
+                    className="text-3xl hidden drop-shadow-lg"
                     style={{ display: GAME_LOGOS[currentGame].src ? 'none' : 'block' }}
                   >
                     {GAME_LOGOS[currentGame].emoji}
                   </span>
                 </div>
-                <span className="text-slate-200 font-bold text-sm whitespace-nowrap">
+                {/* Game Name - Larger text */}
+                <span className="text-white font-bold text-lg whitespace-nowrap">
                   {GAME_LABELS[currentGame]}
                 </span>
               </div>
+
+              {/* Separator */}
+              {GAME_FORMATS[currentGame].length > 0 && (
+                <div className="h-8 w-px bg-slate-600"></div>
+              )}
 
               {/* Format Buttons */}
               {GAME_FORMATS[currentGame].length > 0 && (
