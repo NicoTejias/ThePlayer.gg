@@ -264,7 +264,7 @@ const Header: React.FC<HeaderProps> = ({ isLoggedIn, userRole, userName = 'Jugad
                         {/* Magic Submenu */}
                         {isMagic && isMagicHovered && (
                           <div
-                            className="absolute top-0 right-full mr-2 w-44 bg-slate-800 rounded-xl shadow-2xl border border-purple-500/30 z-[100]"
+                            className="absolute top-0 right-full w-44 bg-slate-800 rounded-xl shadow-2xl border border-purple-500/30 z-[100]"
                             onMouseEnter={() => {
                               // Clear any pending timeout when entering submenu
                               if (magicTimeoutRef.current) {
@@ -280,6 +280,8 @@ const Header: React.FC<HeaderProps> = ({ isLoggedIn, userRole, userName = 'Jugad
                               magicTimeoutRef.current = setTimeout(() => setIsMagicHovered(false), 100);
                             }}
                           >
+                            {/* Bridge to prevent gap between button and submenu */}
+                            <div className="absolute left-full top-0 bottom-0 w-2" />
                             <div className="p-1">
                               <div className="text-[10px] font-bold text-purple-400 uppercase tracking-wider px-3 py-2 flex items-center gap-2">
                                 <span className="w-1.5 h-1.5 rounded-full bg-purple-400"></span>
