@@ -24,6 +24,7 @@ export interface PlayerProfile {
   teamData?: Team; // Formal team entity
   isPublic?: boolean;
   is_pro?: boolean;
+  game_type?: GameType; // Primary game the player participates in
 }
 
 // FIX: Add RankingEntry and WinRateRankingEntry types used in HomePage.tsx

@@ -33,7 +33,14 @@ const RankingsPage: React.FC<RankingsPageProps> = ({ players, teams }) => {
 
 
     const pwpRanking = useMemo(() => {
-        return [...players]
+        // Filter players by current game
+        const filteredPlayers = players.filter(p => {
+            // If no game_type specified, include in MTG by default
+            const playerGame = p.game_type || 'mtg';
+            return playerGame === currentGame;
+        });
+
+        return [...filteredPlayers]
             .sort((a, b) => b.pwp - a.pwp)
             .map((player, index) => {
                 const hashCode = player.id.split('').reduce((acc, char) => {
@@ -47,10 +54,17 @@ const RankingsPage: React.FC<RankingsPageProps> = ({ players, teams }) => {
                     name: player.isPublic ? player.name : `Jugador #${anonymousNumber}`
                 };
             });
-    }, [players]);
+    }, [players, currentGame]);
 
     const winRateRanking = useMemo(() => {
-        return [...players]
+        // Filter players by current game
+        const filteredPlayers = players.filter(p => {
+            // If no game_type specified, include in MTG by default
+            const playerGame = p.game_type || 'mtg';
+            return playerGame === currentGame;
+        });
+
+        return [...filteredPlayers]
             .map(player => {
                 const totalMatches = player.matchesWon + player.matchesLost + player.matchesDrew;
                 const winRate = totalMatches > 0 ? (player.matchesWon / totalMatches) * 100 : 0;
@@ -69,7 +83,7 @@ const RankingsPage: React.FC<RankingsPageProps> = ({ players, teams }) => {
                     name: player.isPublic ? player.name : `Jugador #${anonymousNumber}`
                 };
             });
-    }, [players]);
+    }, [players, currentGame]);
 
     return (
         <div className="space-y-12">

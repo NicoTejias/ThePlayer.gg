@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../supabaseClient';
+import { useGame } from '../context/GameContext';
+import { GAME_LABELS, GameType } from '../types';
 
 interface Video {
     id: string;
@@ -14,6 +16,7 @@ interface Video {
 const MediaVideosPage: React.FC = () => {
     const [videos, setVideos] = useState<Video[]>([]);
     const [loading, setLoading] = useState(true);
+    const { currentGame } = useGame();
 
     useEffect(() => {
         const fetchVideos = async () => {
@@ -30,6 +33,13 @@ const MediaVideosPage: React.FC = () => {
 
         fetchVideos();
     }, []);
+
+    // Filter videos by current game
+    const filteredVideos = videos.filter(video => {
+        // If no game_type specified, show in all games
+        if (!video.game_type) return true;
+        return video.game_type === currentGame;
+    });
 
     if (loading) return (
         <div className="flex justify-center items-center min-h-[50vh]">
@@ -54,14 +64,14 @@ const MediaVideosPage: React.FC = () => {
                 <div className="h-1 w-24 bg-gradient-to-r from-red-500 to-orange-500 rounded-full"></div>
             </div>
 
-            {videos.length === 0 ? (
+            {filteredVideos.length === 0 ? (
                 <div className="text-center text-slate-500 py-12 border border-slate-700 rounded-lg bg-slate-800/50">
-                    <p className="text-xl">Aún no hay videos publicados.</p>
+                    <p className="text-xl">No hay videos de {GAME_LABELS[currentGame]} publicados.</p>
                     <p className="text-sm mt-2">¡Vuelve pronto para ver contenido nuevo!</p>
                 </div>
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    {videos.map(video => (
+                    {filteredVideos.map(video => (
                         <div key={video.id} className="bg-slate-800 rounded-xl overflow-hidden border border-slate-700 shadow-xl hover:shadow-2xl transition-all hover:border-red-500/50 group">
                             <div className="aspect-video relative overflow-hidden">
                                 <iframe
@@ -78,8 +88,8 @@ const MediaVideosPage: React.FC = () => {
                             <div className="p-6">
                                 <div className="flex justify-between items-start mb-2">
                                     <span className={`text-xs font-bold px-2 py-1 rounded uppercase tracking-wider ${video.game_type === 'mtg' ? 'bg-purple-900/50 text-purple-300' :
-                                            video.game_type === 'pokemon' ? 'bg-yellow-900/50 text-yellow-300' :
-                                                'bg-slate-700 text-slate-300'
+                                        video.game_type === 'pokemon' ? 'bg-yellow-900/50 text-yellow-300' :
+                                            'bg-slate-700 text-slate-300'
                                         }`}>
                                         {video.game_type}
                                     </span>
