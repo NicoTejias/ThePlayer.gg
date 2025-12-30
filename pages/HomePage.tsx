@@ -39,11 +39,21 @@ const mockArticles: MediaArticle[] = [
   { id: '3', title: 'Reporte: Ganador del RCQ Santiago', author: 'JuezLocal', excerpt: 'Entrevista exclusiva con el ganador del último Regional Championship Qualifier.', imageUrl: 'https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&q=80&w=800', category: 'Reporte' },
 ];
 
-const mockEventsData: CommunityEvent[] = [
-  { id: 'e1', title: 'Gran Open Modern', date: '2025-01-15', storeName: 'MagicSur Santiago', format: 'Modern', playerCount: 64, imageUrl: '' },
-  { id: 'e2', title: 'Commander Party Night', date: '2025-01-18', storeName: 'La Comarca', format: 'Commander', playerCount: 32, imageUrl: '' },
-  { id: 'e3', title: 'RCQ Pioneer Qualifier', date: '2025-01-22', storeName: 'Entre Juegos', format: 'Pioneer', playerCount: 48, imageUrl: '' },
-];
+const mockEventsData: Record<string, CommunityEvent[]> = {
+  mtg: [
+    { id: 'e1', title: 'Gran Open Modern', date: '2025-01-15', storeName: 'MagicSur Santiago', format: 'Modern', playerCount: 64, imageUrl: '' },
+    { id: 'e2', title: 'Commander Party Night', date: '2025-01-18', storeName: 'La Comarca', format: 'Commander', playerCount: 32, imageUrl: '' },
+    { id: 'e3', title: 'RCQ Pioneer Qualifier', date: '2025-01-22', storeName: 'Entre Juegos', format: 'Pioneer', playerCount: 48, imageUrl: '' },
+  ],
+  pokemon: [
+    { id: 'p1', title: 'Liga Pokémon Semanal', date: '2025-01-20', storeName: 'Entre Juegos', format: 'Standard', playerCount: 24, imageUrl: '' },
+    { id: 'p2', title: 'Copa Regional Santiago', date: '2025-02-05', storeName: 'MagicSur', format: 'Standard', playerCount: 64, imageUrl: '' },
+  ],
+  one_piece: [
+    { id: 'op1', title: 'Store Tournament Vol.5', date: '2025-01-19', storeName: 'La Comarca', format: 'Constructed', playerCount: 32, imageUrl: '' },
+  ],
+  default: []
+};
 
 
 
@@ -204,8 +214,9 @@ const HomePage: React.FC<HomePageProps> = ({ players, events, session, userRole,
       };
     });
 
-  // Use real events if available, otherwise fallback to mock data
-  const displayEvents = (events && events.length > 0) ? events.slice(0, 4) : mockEventsData.slice(0, 4);
+  // Use real events if available, otherwise fallback to mock data for current game
+  const currentMockEvents = mockEventsData[currentGame] || mockEventsData['default'] || [];
+  const displayEvents = (events && events.length > 0) ? events.slice(0, 4) : currentMockEvents.slice(0, 4);
 
   if (loading) {
     return (

@@ -7,7 +7,7 @@ Para completar la implementación del header, necesitas descargar los logos ofic
 ### Magic: The Gathering
 - **Archivo**: `mtg-logo.png`
 - **Buscar**: "Magic The Gathering planeswalker symbol PNG"
-- **URL sugerida**: https://logos-world.net/magic-the-gathering-logo/ 
+- **URL sugerida**: https://logos-world.net/magi estc-the-gathering-logo/ 
 - **Tamaño recomendado**: 128x128px o 256x256px
 
 ### Pokémon TCG
