@@ -33,27 +33,9 @@ const CountUp: React.FC<{ end: number, duration?: number }> = ({ end, duration =
 };
 
 // Mock Data for Media and Marketplace
-const mockArticles: MediaArticle[] = [
-  { id: '1', title: 'Análisis del Metajuego Moderno Post-Baneos', author: 'Admin', excerpt: 'Exploramos cómo los últimos cambios han afectado el panorama competitivo de Modern.', imageUrl: 'https://images.unsplash.com/photo-1613771404784-3a5686aa2be3?auto=format&fit=crop&q=80&w=800', category: 'Modern' },
-  { id: '2', title: 'Top 5 Cartas de Commander', author: 'Invitado', excerpt: 'Un ranking de las cartas más impactantes y versátiles para tu próximo mazo de Commander.', imageUrl: 'https://images.unsplash.com/photo-1635326444826-06c8f84991a9?auto=format&fit=crop&q=80&w=800', category: 'Commander' },
-  { id: '3', title: 'Reporte: Ganador del RCQ Santiago', author: 'JuezLocal', excerpt: 'Entrevista exclusiva con el ganador del último Regional Championship Qualifier.', imageUrl: 'https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&q=80&w=800', category: 'Reporte' },
-];
+const mockArticles: MediaArticle[] = [];
 
-const mockEventsData: Record<string, CommunityEvent[]> = {
-  mtg: [
-    { id: 'e1', title: 'Gran Open Modern', date: '2025-01-15', storeName: 'MagicSur Santiago', format: 'Modern', playerCount: 64, imageUrl: '' },
-    { id: 'e2', title: 'Commander Party Night', date: '2025-01-18', storeName: 'La Comarca', format: 'Commander', playerCount: 32, imageUrl: '' },
-    { id: 'e3', title: 'RCQ Pioneer Qualifier', date: '2025-01-22', storeName: 'Entre Juegos', format: 'Pioneer', playerCount: 48, imageUrl: '' },
-  ],
-  pokemon: [
-    { id: 'p1', title: 'Liga Pokémon Semanal', date: '2025-01-20', storeName: 'Entre Juegos', format: 'Standard', playerCount: 24, imageUrl: '' },
-    { id: 'p2', title: 'Copa Regional Santiago', date: '2025-02-05', storeName: 'MagicSur', format: 'Standard', playerCount: 64, imageUrl: '' },
-  ],
-  one_piece: [
-    { id: 'op1', title: 'Store Tournament Vol.5', date: '2025-01-19', storeName: 'La Comarca', format: 'Constructed', playerCount: 32, imageUrl: '' },
-  ],
-  default: []
-};
+const mockEventsData: Record<string, CommunityEvent[]> = {};
 
 
 
@@ -215,8 +197,8 @@ const HomePage: React.FC<HomePageProps> = ({ players, events, session, userRole,
     });
 
   // Use real events if available, otherwise fallback to mock data for current game
-  const currentMockEvents = mockEventsData[currentGame] || mockEventsData['default'] || [];
-  const displayEvents = (events && events.length > 0) ? events.slice(0, 4) : currentMockEvents.slice(0, 4);
+  const currentMockEvents = mockEventsData[currentGame]  // Use real events if available, otherwise show empty state
+  const displayEvents = (events && events.length > 0) ? events.slice(0, 4) : [];
 
   if (loading) {
     return (
@@ -325,47 +307,57 @@ const HomePage: React.FC<HomePageProps> = ({ players, events, session, userRole,
         <section>
           <SectionHeader title="Próximos Eventos" linkTo="/eventos" />
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {displayEvents.slice(0, 4).map((event) => (
-              <SimpleCard key={event.id} className="bg-slate-800/50 hover:bg-slate-800/70 transition-all border border-slate-700">
-                <div className="p-4">
-                  <h3 className="text-lg font-bold text-white mb-2 line-clamp-1">{event.title}</h3>
-                  <p className="text-sm text-slate-400 mb-1">📍 {event.storeName}</p>
-                  <p className="text-sm text-slate-400 mb-1">📅 {new Date(event.date).toLocaleDateString()}</p>
-                  <div className="flex items-center justify-between mt-3 pt-3 border-t border-slate-700">
-                    <span className="text-xs bg-blue-500/20 text-blue-300 px-2 py-1 rounded">{event.format}</span>
-                    <div className="flex items-center gap-2">
-                      {userRole === 'player' && userId && !registrations.has(event.id) && (
-                        <button
-                          onClick={() => {
-                            setSelectedEvent(event);
-                            setShowRegModal(true);
-                          }}
-                          className="text-xs bg-green-600 hover:bg-green-500 text-white px-4 py-2 rounded font-bold transition-colors min-h-[44px] flex items-center justify-center"
-                        >
-                          Inscribirse
-                        </button>
-                      )}
-                      {userRole === 'player' && registrations.has(event.id) && (
-                        <span className="text-xs text-green-400 font-bold flex items-center gap-1">
-                          <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                          </svg>
-                          Inscrito
-                        </span>
-                      )}
-                      {!userRole && (
-                        <span className="text-xs text-slate-500">{event.playerCount} jugadores</span>
-                      )}
+            {displayEvents.length > 0 ? (
+              displayEvents.map((event) => (
+                <SimpleCard key={event.id} className="bg-slate-800/50 hover:bg-slate-800/70 transition-all border border-slate-700">
+                  <div className="p-4">
+                    <h3 className="text-lg font-bold text-white mb-2 line-clamp-1">{event.title}</h3>
+                    <p className="text-sm text-slate-400 mb-1">📍 {event.storeName}</p>
+                    <p className="text-sm text-slate-400 mb-1">📅 {new Date(event.date).toLocaleDateString()}</p>
+                    <div className="flex items-center justify-between mt-3 pt-3 border-t border-slate-700">
+                      <span className="text-xs bg-blue-500/20 text-blue-300 px-2 py-1 rounded">{event.format}</span>
+                      <div className="flex items-center gap-2">
+                        {/* registration buttons */}
+                      </div>
                     </div>
                   </div>
-                </div>
-              </SimpleCard>
-            ))}
+                </SimpleCard>
+              ))
+            ) : (
+              <p className="text-slate-400">No hay eventos próximos.</p>
+            )}
+            {userRole === 'player' && userId && !registrations.has(event.id) && (
+              <button
+                onClick={() => {
+                  setSelectedEvent(event);
+                  setShowRegModal(true);
+                }}
+                className="text-xs bg-green-600 hover:bg-green-500 text-white px-4 py-2 rounded font-bold transition-colors min-h-[44px] flex items-center justify-center"
+              >
+                Inscribirse
+              </button>
+            )}
+            {userRole === 'player' && registrations.has(event.id) && (
+              <span className="text-xs text-green-400 font-bold flex items-center gap-1">
+                <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                </svg>
+                Inscrito
+              </span>
+            )}
+            {!userRole && (
+              <span className="text-xs text-slate-500">{event.playerCount} jugadores</span>
+            )}
           </div>
-        </section>
+      </div>
+    </div>
+              </SimpleCard >
+            ))}
+          </div >
+        </section >
 
-        {/* Rankings - Full Width Row with 2 Internal Columns */}
-        <section>
+  {/* Rankings - Full Width Row with 2 Internal Columns */ }
+  < section >
           <SectionHeader title="Rankings" linkTo="/ranking" />
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
@@ -542,10 +534,10 @@ const HomePage: React.FC<HomePageProps> = ({ players, events, session, userRole,
               )}
             </div>
           </div>
-        </section>
+        </section >
 
-        {/* Últimas Novedades - Full Width Row with 2 Internal Columns */}
-        <section>
+  {/* Últimas Novedades - Full Width Row with 2 Internal Columns */ }
+  < section >
           <SectionHeader title="Últimas Novedades" linkTo="/media" />
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
@@ -553,14 +545,21 @@ const HomePage: React.FC<HomePageProps> = ({ players, events, session, userRole,
             <div>
               <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3">Artículos</h3>
               <div className="space-y-4">
-                {(latestNews.length > 0 ? latestNews : mockArticles).slice(0, 3).map((article) => (
-                  <Link
-                    key={article.id}
-                    to={`/media/articulos/${article.id}`}
-                    className="group relative block bg-slate-800/50 rounded-xl overflow-hidden border border-slate-700 hover:border-blue-500/50 transition-all duration-300 hover:shadow-2xl hover:shadow-blue-500/20 hover:-translate-y-1"
-                  >
-                    <div className="flex gap-4 p-4">
-                      {/* Image with zoom effect */}
+                {latestNews.length > 0 ? (
+                  latestNews.slice(0, 3).map((article) => (
+                    <Link
+                      key={article.id}
+                      to={`/media/articulos/${article.id}`}
+                      className="group relative block bg-slate-800/50 rounded-xl overflow-hidden border border-slate-700 hover:border-blue-500/50 transition-all duration-300 hover:shadow-2xl hover:shadow-blue-500/20 hover:-translate-y-1"
+                    >
+                      <div className="flex gap-4 p-4">
+                        {/* Image with zoom effect */
+                      </div>
+                    </Link>
+                  ))
+                ) : (
+                  <p className="text-slate-400">No hay noticias recientes.</p>
+                )}
                       <div className="relative w-32 h-32 flex-shrink-0 rounded-lg overflow-hidden">
                         <img
                           src={article.image_url || article.imageUrl || '/images/placeholder-article.jpg'}
@@ -607,22 +606,29 @@ const HomePage: React.FC<HomePageProps> = ({ players, events, session, userRole,
                   </Link>
                 ))}
               </div>
-            </div>
+            </div >
 
-            {/* Featured Videos */}
-            <div>
+  {/* Featured Videos */ }
+  < div >
               <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3">Videos</h3>
               <div className="space-y-4">
-                {featuredContent.slice(0, 3).map((video) => (
-                  <a
-                    key={video.id}
-                    href={video.link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="group relative block bg-slate-800/50 rounded-xl overflow-hidden border border-slate-700 hover:border-purple-500/50 transition-all duration-300 hover:shadow-2xl hover:shadow-purple-500/20 hover:-translate-y-1"
-                  >
-                    <div className="flex gap-4 p-4">
-                      {/* Thumbnail with zoom effect */}
+                {featuredContent.length > 0 ? (
+                  featuredContent.slice(0, 3).map((video) => (
+                    <a
+                      key={video.id}
+                      href={video.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="group relative block bg-slate-800/50 rounded-xl overflow-hidden border border-slate-700 hover:border-purple-500/50 transition-all duration-300 hover:shadow-2xl hover:shadow-purple-500/20 hover:-translate-y-1"
+                    >
+                      <div className="flex gap-4 p-4">
+                        {/* Thumbnail with zoom effect */
+                      </div>
+                    </a>
+                  ))
+                ) : (
+                  <p className="text-slate-400">No hay videos destacados.</p>
+                )}
                       <div className="relative w-40 h-28 flex-shrink-0 rounded-lg overflow-hidden">
                         <img
                           src={video.imageUrl || '/images/placeholder-video.jpg'}
@@ -677,36 +683,38 @@ const HomePage: React.FC<HomePageProps> = ({ players, events, session, userRole,
                         </div>
                       </div>
                     </div>
-                  </a>
+                  </a >
                 ))}
-              </div>
-            </div>
-          </div>
-        </section>
-      </div>
+              </div >
+            </div >
+          </div >
+        </section >
+      </div >
 
-      {/* Quick Registration Modal */}
-      {selectedEvent && (
-        <QuickRegistrationModal
-          isOpen={showRegModal}
-          onClose={() => {
-            setShowRegModal(false);
-            setSelectedEvent(null);
-          }}
-          event={{
-            id: selectedEvent.id,
-            title: selectedEvent.title,
-            date: selectedEvent.date,
-            storeName: selectedEvent.storeName,
-            format: selectedEvent.format
-          }}
-          userId={userId || ''}
-          onSuccess={() => {
-            setRegistrations(prev => new Set([...prev, selectedEvent.id]));
-          }}
-        />
-      )}
-    </div>
+  {/* Quick Registration Modal */ }
+{
+  selectedEvent && (
+    <QuickRegistrationModal
+      isOpen={showRegModal}
+      onClose={() => {
+        setShowRegModal(false);
+        setSelectedEvent(null);
+      }}
+      event={{
+        id: selectedEvent.id,
+        title: selectedEvent.title,
+        date: selectedEvent.date,
+        storeName: selectedEvent.storeName,
+        format: selectedEvent.format
+      }}
+      userId={userId || ''}
+      onSuccess={() => {
+        setRegistrations(prev => new Set([...prev, selectedEvent.id]));
+      }}
+    />
+  )
+}
+    </div >
   );
 };
 
