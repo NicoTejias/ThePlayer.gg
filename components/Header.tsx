@@ -48,33 +48,52 @@ const NavLinks: NavLinkType[] = [
 // Recursive Menu Item Component for arbitrary depth
 const MenuItem: React.FC<{ item: NavLinkType; depth?: number; isLiveSignal?: boolean }> = ({ item, depth = 0, isLiveSignal = false }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const hasSubItems = item.subItems && item.subItems.length > 0;
   const isTopLevel = depth === 0;
 
-  // Logic to handle mouse enter/leave for desktop hover interactions
-  // For mobile, we might want click. This implementation focuses on desktop hover.
+  // Clean up timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
+
+  const handleMouseEnter = () => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+    setIsOpen(true);
+  };
+
+  const handleMouseLeave = () => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+    // Add delay to allow mouse to move to submenu
+    timeoutRef.current = setTimeout(() => setIsOpen(false), 150);
+  };
 
   const baseLinkClass = "block rounded transition-colors duration-200 whitespace-nowrap cursor-pointer select-none text-sm font-medium";
   const topLevelClass = "py-2 px-3 text-slate-300 hover:bg-slate-700 hover:text-white";
   const subLevelClass = "px-4 py-2.5 text-slate-300 hover:bg-slate-700/80 hover:text-sky-300 flex items-center justify-between";
 
-  // For top level active state, we check if one of the children is active really, otherwise relying on simple NavLink active logic is tricky for # paths.
-  // Simplifying: Just render Link or span.
-
   return (
     <div
-      className={`relative group ${isTopLevel ? 'h-full flex items-center' : 'w-full'}`}
-      onMouseEnter={() => setIsOpen(true)}
-      onMouseLeave={() => setIsOpen(false)}
+      className={`relative ${isTopLevel ? 'h-full flex items-center' : 'w-full'}`}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
     >
       {/* Main Link for this Item */}
       {hasSubItems ? (
         <div
-          className={`${isTopLevel ? topLevelClass : subLevelClass} flex items-center gap-1 group-hover:text-white`}
+          className={`${isTopLevel ? topLevelClass : subLevelClass} flex items-center gap-1 ${isOpen ? 'text-white' : ''}`}
           data-name={item.name}
         >
           {item.name}
-          <svg className={`w-3 h-3 transition-transform duration-200 opacity-70 ${isTopLevel ? 'group-hover:rotate-180' : '-rotate-90 group-hover:rotate-0'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg className={`w-3 h-3 transition-transform duration-200 opacity-70 ${isOpen ? (isTopLevel ? 'rotate-180' : 'rotate-0') : (isTopLevel ? '' : '-rotate-90')}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
           </svg>
         </div>
@@ -93,7 +112,8 @@ const MenuItem: React.FC<{ item: NavLinkType; depth?: number; isLiveSignal?: boo
       {/* Render SubMenu if it has children */}
       {hasSubItems && (
         <div
-          className={`absolute ${isTopLevel ? 'top-full left-0 pt-2' : 'top-0 left-full ml-1'} w-48 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 ease-in-out pointer-events-none group-hover:pointer-events-auto ${depth === 0 ? 'z-50' : depth === 1 ? 'z-[60]' : 'z-[70]'}`}
+          className={`absolute ${isTopLevel ? 'top-full left-0 pt-2' : 'top-0 left-full ml-1'} w-48 transition-all duration-200 ease-in-out ${isOpen ? 'opacity-100 visible pointer-events-auto' : 'opacity-0 invisible pointer-events-none'
+            } ${depth === 0 ? 'z-50' : depth === 1 ? 'z-[60]' : 'z-[70]'}`}
         >
           <div className="bg-slate-800 rounded-xl shadow-xl border border-slate-700/50 overflow-hidden ring-1 ring-black ring-opacity-10 py-1">
             {item.subItems!.map((subItem) => (
