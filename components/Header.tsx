@@ -90,8 +90,8 @@ const Header: React.FC<HeaderProps> = ({
             <div className="hidden md:flex items-center gap-4">
               {/* Game Logo + Name - More Prominent, No Background */}
               <div className="flex items-center gap-3">
-                {/* Logo - Larger size (40px) */}
-                <div className="w-10 h-10 flex items-center justify-center">
+                {/* Logo - Larger size (56px) */}
+                <div className="w-14 h-14 flex items-center justify-center">
                   <img
                     src={GAME_LOGOS[currentGame].src}
                     alt={GAME_LABELS[currentGame]}
@@ -105,7 +105,7 @@ const Header: React.FC<HeaderProps> = ({
                     }}
                   />
                   <span
-                    className="text-3xl hidden drop-shadow-lg"
+                    className="text-4xl hidden drop-shadow-lg"
                     style={{ display: GAME_LOGOS[currentGame].src ? 'none' : 'block' }}
                   >
                     {GAME_LOGOS[currentGame].emoji}
