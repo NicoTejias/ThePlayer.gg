@@ -37,7 +37,7 @@ const UserManagementPage: React.FC = () => {
     // Modal states
     const [selectedUser, setSelectedUser] = useState<User | null>(null);
     const [showActionModal, setShowActionModal] = useState(false);
-    const [actionType, setActionType] = useState<'suspend' | 'ban' | 'activate'>('suspend');
+    const [actionType, setActionType] = useState<'suspend' | 'ban' | 'activate' | 'delete'>('suspend');
     const [actionReason, setActionReason] = useState('');
     const [suspensionDays, setSuspensionDays] = useState(7);
     const [actionHistory, setActionHistory] = useState<ActionHistory[]>([]);
@@ -93,11 +93,22 @@ const UserManagementPage: React.FC = () => {
                     p_user_id: selectedUser.id,
                     p_reason: actionReason || 'Cuenta reactivada'
                 });
+            } else if (actionType === 'delete') {
+                result = await supabase.rpc('admin_delete_user', {
+                    p_user_id: selectedUser.id,
+                    p_reason: actionReason
+                });
             }
 
             if (result?.error) throw result.error;
 
-            toast.success(`Usuario ${actionType === 'suspend' ? 'suspendido' : actionType === 'ban' ? 'baneado' : 'activado'} exitosamente`);
+            const actionMessages = {
+                suspend: 'suspendido',
+                ban: 'baneado',
+                activate: 'activado',
+                delete: 'eliminado'
+            };
+            toast.success(`Usuario ${actionMessages[actionType]} exitosamente`);
             setShowActionModal(false);
             setActionReason('');
             fetchUsers();
@@ -107,7 +118,7 @@ const UserManagementPage: React.FC = () => {
         }
     };
 
-    const openActionModal = (user: User, type: 'suspend' | 'ban' | 'activate') => {
+    const openActionModal = (user: User, type: 'suspend' | 'ban' | 'activate' | 'delete') => {
         setSelectedUser(user);
         setActionType(type);
         setShowActionModal(true);
@@ -292,6 +303,15 @@ const UserManagementPage: React.FC = () => {
                                                         </button>
                                                     </>
                                                 )}
+                                                {user.role !== 'admin' && (
+                                                    <button
+                                                        onClick={() => openActionModal(user, 'delete')}
+                                                        className="px-3 py-1.5 bg-rose-900/50 hover:bg-rose-800 text-rose-300 rounded text-xs font-medium transition-colors border border-rose-700/50"
+                                                        title="Eliminar permanentemente"
+                                                    >
+                                                        Eliminar
+                                                    </button>
+                                                )}
                                                 {(user.account_status === 'suspended' || user.account_status === 'banned') && (
                                                     <button
                                                         onClick={() => openActionModal(user, 'activate')}
@@ -322,7 +342,10 @@ const UserManagementPage: React.FC = () => {
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
                     <div className="bg-slate-800 rounded-2xl border border-slate-700 shadow-2xl max-w-md w-full p-6">
                         <h2 className="text-2xl font-bold text-white mb-4">
-                            {actionType === 'suspend' ? 'Suspender Usuario' : actionType === 'ban' ? 'Banear Usuario' : 'Activar Usuario'}
+                            {actionType === 'suspend' ? 'Suspender Usuario' :
+                                actionType === 'ban' ? 'Banear Usuario' :
+                                    actionType === 'delete' ? '⚠️ Eliminar Usuario Permanentemente' :
+                                        'Activar Usuario'}
                         </h2>
                         <p className="text-slate-400 mb-4">
                             Usuario: <span className="text-white font-bold">{selectedUser.username}</span>
@@ -339,6 +362,24 @@ const UserManagementPage: React.FC = () => {
                                     max="365"
                                     className="w-full px-4 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-sky-500"
                                 />
+                            </div>
+                        )}
+
+                        {actionType === 'delete' && (
+                            <div className="mb-4 p-4 bg-rose-900/20 border border-rose-700/50 rounded-lg">
+                                <p className="text-rose-300 text-sm font-bold mb-2">⚠️ ADVERTENCIA</p>
+                                <p className="text-slate-300 text-xs">
+                                    Esta acción eliminará permanentemente:
+                                </p>
+                                <ul className="text-slate-400 text-xs mt-2 space-y-1 list-disc list-inside">
+                                    <li>El perfil del usuario</li>
+                                    <li>Todos sus anuncios del marketplace</li>
+                                    <li>Sus favoritos y notificaciones</li>
+                                    <li>Su historial de acciones administrativas</li>
+                                </ul>
+                                <p className="text-rose-300 text-xs mt-2 font-bold">
+                                    Los resultados de torneos se mantendrán pero quedarán desvinculados.
+                                </p>
                             </div>
                         )}
 
@@ -367,10 +408,11 @@ const UserManagementPage: React.FC = () => {
                                 onClick={handleAction}
                                 className={`flex-1 py-2 px-4 font-bold rounded-lg transition-colors ${actionType === 'suspend' ? 'bg-yellow-600 hover:bg-yellow-500' :
                                         actionType === 'ban' ? 'bg-red-600 hover:bg-red-500' :
-                                            'bg-green-600 hover:bg-green-500'
+                                            actionType === 'delete' ? 'bg-rose-600 hover:bg-rose-500' :
+                                                'bg-green-600 hover:bg-green-500'
                                     } text-white`}
                             >
-                                Confirmar
+                                {actionType === 'delete' ? '⚠️ Eliminar Permanentemente' : 'Confirmar'}
                             </button>
                         </div>
                     </div>
