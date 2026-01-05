@@ -42,8 +42,9 @@ BEGIN
 END $$;
 
 -- Paso 3: Migrar datos de 'game' a 'game_type' si están vacíos
+-- Usar CAST para convertir text a game_type_enum
 UPDATE marketplace_listings
-SET game_type = game
+SET game_type = game::game_type_enum
 WHERE game_type IS NULL AND game IS NOT NULL;
 
 -- Paso 4: Eliminar la función anterior (de cualquier forma)
@@ -91,7 +92,7 @@ BEGIN
             m.description,
             m.listing_type,
             m.price,
-            COALESCE(m.game_type, m.game, ''mtg'')::text as game,
+            COALESCE(m.game_type::text, m.game, ''mtg'') as game,
             ''Standard'' as format,
             m.condition,
             m.quantity,
@@ -110,9 +111,9 @@ BEGIN
         where_clauses := array_append(where_clauses, format('m.listing_type = %L', p_type));
     END IF;
 
-    -- Usar COALESCE para buscar en game_type o game
+    -- Usar CAST para comparar con el enum game_type
     IF p_game_type IS NOT NULL AND p_game_type <> '' THEN
-        where_clauses := array_append(where_clauses, format('(m.game_type = %L OR m.game = %L)', p_game_type, p_game_type));
+        where_clauses := array_append(where_clauses, format('(m.game_type = %L::game_type_enum OR m.game = %L)', p_game_type, p_game_type));
     END IF;
 
     -- Construir WHERE 
