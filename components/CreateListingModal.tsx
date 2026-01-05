@@ -149,6 +149,7 @@ const CreateListingModal: React.FC<CreateListingModalProps> = ({ isOpen, onClose
                     description: description.trim() || null,
                     listing_type: listingType,
                     price: listingType !== 'trade' ? parseFloat(price) : null,
+                    game: currentGame, // For backward compatibility
                     game_type: currentGame, // Use ENUM
                     format: format || null,
                     condition: condition || null,
