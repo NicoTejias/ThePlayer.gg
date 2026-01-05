@@ -329,7 +329,7 @@ const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpl
             </div>
 
             {/* Quick Actions Widget */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Store Stats Card */}
                 <div className="bg-gradient-to-br from-slate-800 to-slate-900 p-6 rounded-xl border border-slate-700 shadow-xl">
                     <div className="flex items-center gap-3 mb-4">
@@ -355,58 +355,52 @@ const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpl
                     </div>
                 </div>
 
-                {/* Upload Tournament Card */}
-                <div className="bg-gradient-to-br from-sky-600 to-blue-700 p-6 rounded-xl shadow-xl hover:shadow-2xl transition-all hover:scale-105 cursor-pointer group"
-                    onClick={() => {
-                        if (step === 'confirm') {
-                            handleCancel();
-                        }
-                        // Scroll to upload form
-                        const uploadSection = document.getElementById('upload-section');
-                        uploadSection?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    }}>
-                    <div className="flex items-center gap-3 mb-3">
-                        <div className="p-3 bg-white/10 rounded-lg group-hover:bg-white/20 transition-colors">
-                            <UploadIcon className="w-6 h-6 text-white" />
-                        </div>
-                        <div>
-                            <h3 className="text-sm font-medium text-sky-100 uppercase tracking-wider">Acción Rápida</h3>
-                            <p className="text-xl font-bold text-white">Subir Torneo</p>
-                        </div>
-                    </div>
-                    <p className="text-sm text-sky-100/80 leading-relaxed">
-                        Reporta los resultados de tu último torneo y actualiza el ranking automáticamente.
-                    </p>
-                    <div className="mt-4 flex items-center gap-2 text-white font-medium text-sm">
-                        <span>Comenzar</span>
-                        <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                        </svg>
-                    </div>
-                </div>
-
-                {/* Manage Events Card */}
-                <div className="bg-gradient-to-br from-purple-600 to-pink-600 p-6 rounded-xl shadow-xl hover:shadow-2xl transition-all hover:scale-105 cursor-pointer group"
-                    onClick={() => window.location.href = '/#/eventos'}>
-                    <div className="flex items-center gap-3 mb-3">
-                        <div className="p-3 bg-white/10 rounded-lg group-hover:bg-white/20 transition-colors">
+                {/* Quick Actions Card with Buttons */}
+                <div className="bg-gradient-to-br from-sky-600 to-blue-700 p-6 rounded-xl shadow-xl">
+                    <div className="flex items-center gap-3 mb-4">
+                        <div className="p-3 bg-white/10 rounded-lg">
                             <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                             </svg>
                         </div>
                         <div>
-                            <h3 className="text-sm font-medium text-purple-100 uppercase tracking-wider">Gestionar</h3>
-                            <p className="text-xl font-bold text-white">Eventos</p>
+                            <h3 className="text-sm font-medium text-sky-100 uppercase tracking-wider">Acciones Rápidas</h3>
+                            <p className="text-xl font-bold text-white">Gestionar Torneos</p>
                         </div>
                     </div>
-                    <p className="text-sm text-purple-100/80 leading-relaxed">
-                        Programa y administra tus próximos eventos y torneos.
+                    <p className="text-sm text-sky-100/80 leading-relaxed mb-4">
+                        Reporta resultados o programa nuevos eventos para tu tienda.
                     </p>
-                    <div className="mt-4 flex items-center gap-2 text-white font-medium text-sm">
-                        <span>Ir a Eventos</span>
-                        <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                        </svg>
+
+                    {/* Action Buttons */}
+                    <div className="grid grid-cols-2 gap-3">
+                        <button
+                            onClick={() => {
+                                if (step === 'confirm') {
+                                    handleCancel();
+                                }
+                                const uploadSection = document.getElementById('upload-section');
+                                uploadSection?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                            }}
+                            className="flex flex-col items-center gap-2 p-4 bg-white/10 hover:bg-white/20 rounded-lg transition-all group border border-white/20 hover:border-white/40"
+                        >
+                            <div className="p-2 bg-white/10 rounded-full group-hover:scale-110 transition-transform">
+                                <UploadIcon className="w-5 h-5 text-white" />
+                            </div>
+                            <span className="text-white font-medium text-sm text-center">Reportar Torneo</span>
+                        </button>
+
+                        <button
+                            onClick={() => window.location.href = '/#/eventos'}
+                            className="flex flex-col items-center gap-2 p-4 bg-white/10 hover:bg-white/20 rounded-lg transition-all group border border-white/20 hover:border-white/40"
+                        >
+                            <div className="p-2 bg-white/10 rounded-full group-hover:scale-110 transition-transform">
+                                <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                            </div>
+                            <span className="text-white font-medium text-sm text-center">Crear Evento</span>
+                        </button>
                     </div>
                 </div>
             </div>
