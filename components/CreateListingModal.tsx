@@ -321,28 +321,15 @@ const CreateListingModal: React.FC<CreateListingModalProps> = ({ isOpen, onClose
                         />
                     </div>
 
-                    {/* Juego y Formato */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label className={labelClass}>Juego</label>
-                            <input
-                                type="text"
-                                value={currentGame.toUpperCase()}
-                                disabled
-                                className={`${inputClass} opacity-60 cursor-not-allowed font-bold`}
-                            />
-                        </div>
-                        <div>
-                            <label className={labelClass}>Formato</label>
-                            <select
-                                value={format}
-                                onChange={(e) => setFormat(e.target.value)}
-                                className={inputClass}
-                            >
-                                <option value="">Selecciona formato (opcional)</option>
-                                {FORMATS.map(f => <option key={f} value={f}>{f}</option>)}
-                            </select>
-                        </div>
+                    {/* Juego */}
+                    <div>
+                        <label className={labelClass}>Juego</label>
+                        <input
+                            type="text"
+                            value={currentGame.toUpperCase()}
+                            disabled
+                            className={`${inputClass} opacity-60 cursor-not-allowed font-bold`}
+                        />
                     </div>
 
                     {/* Precio, Condición */}
