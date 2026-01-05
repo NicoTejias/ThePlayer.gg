@@ -15,7 +15,6 @@ interface HeaderProps {
   userName?: string;
   handleLogout: () => void;
   isLiveSignal?: boolean;
-  judgeRole?: string | null;
 }
 
 const Header: React.FC<HeaderProps> = ({
@@ -23,8 +22,7 @@ const Header: React.FC<HeaderProps> = ({
   userRole,
   userName = 'Jugador',
   handleLogout,
-  isLiveSignal = false,
-  judgeRole = null
+  isLiveSignal = false
 }) => {
   const { currentGame } = useGame();
   const [isProfileMenuOpen, setProfileMenuOpen] = useState(false);
@@ -164,14 +162,7 @@ const Header: React.FC<HeaderProps> = ({
                 </Link>
               )}
 
-              {isLoggedIn && (judgeRole === 'judge' || judgeRole === 'head_judge') && (
-                <Link
-                  to="/jueces"
-                  className="hidden md:block px-3 py-1.5 bg-purple-600 hover:bg-purple-500 text-white font-bold rounded-lg transition-colors text-xs"
-                >
-                  Juez
-                </Link>
-              )}
+
 
               {/* Notification Bell */}
               {isLoggedIn && <NotificationBell />}
@@ -255,7 +246,6 @@ const Header: React.FC<HeaderProps> = ({
         onClose={() => setSidebarOpen(false)}
         isLoggedIn={isLoggedIn}
         userRole={userRole}
-        judgeRole={judgeRole}
       />
     </>
   );

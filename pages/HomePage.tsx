@@ -10,7 +10,7 @@ import { useGame } from '../context/GameContext';
 import VisitorWidget from '../components/widgets/VisitorWidget';
 import PlayerWidget from '../components/widgets/PlayerWidget';
 import StoreWidget from '../components/widgets/StoreWidget';
-import JudgeWidget from '../components/widgets/JudgeWidget';
+
 import AdminWidget from '../components/widgets/AdminWidget';
 import QuickRegistrationModal from '../components/QuickRegistrationModal';
 
@@ -38,7 +38,7 @@ interface HomePageProps {
   players: PlayerProfile[];
   events: CommunityEvent[];
   session?: any;
-  userRole?: 'player' | 'store' | 'admin' | 'judge' | 'head_judge' | null;
+  userRole?: 'player' | 'store' | 'admin' | null;
   userId?: string;
 }
 
@@ -201,7 +201,7 @@ const HomePage: React.FC<HomePageProps> = ({ players, events, session, userRole,
       {!session && <VisitorWidget />}
       {session && userRole === 'player' && userId && <PlayerWidget userId={userId} />}
       {session && userRole === 'store' && userId && <StoreWidget storeId={userId} />}
-      {session && (userRole === 'judge' || userRole === 'head_judge') && userId && <JudgeWidget judgeId={userId} />}
+
       {session && userRole === 'admin' && <AdminWidget />}
 
       {/* Community Stats */}

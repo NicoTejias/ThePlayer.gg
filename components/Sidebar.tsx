@@ -8,7 +8,6 @@ interface SidebarProps {
     onClose: () => void;
     isLoggedIn: boolean;
     userRole: 'player' | 'store' | 'admin' | null;
-    judgeRole?: string | null;
 }
 
 // Navigation structure
@@ -22,7 +21,6 @@ const mainNavItems = [
 ];
 
 const communityItems = [
-    { name: 'Jueces', path: '/jueces', icon: '⚖️' },
     { name: 'Creadores', path: '/creadores', icon: '🎬' },
     { name: 'Tiendas', path: '/tiendas', icon: '🏪' },
     { name: 'Señal Online', path: '/envivo', icon: '📺' },
@@ -40,7 +38,7 @@ const mtgFormats = [
     { name: 'Premodern', path: '/premodern', icon: '📜' },
 ];
 
-const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, isLoggedIn, userRole, judgeRole }) => {
+const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, isLoggedIn, userRole }) => {
     const { currentGame, setGame } = useGame();
     const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['main']));
     const sidebarRef = useRef<HTMLDivElement>(null);
@@ -236,12 +234,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, isLoggedIn, userRole
                                     {userRole === 'player' && (
                                         <NavItem item={{ name: 'Mi Panel', path: '/dashboard/jugador', icon: '🎮' }} />
                                     )}
-                                    {(judgeRole === 'judge' || judgeRole === 'head_judge') && (
-                                        <NavItem item={{ name: 'Panel de Juez', path: '/jueces', icon: '⚖️' }} />
-                                    )}
-                                    {judgeRole === 'head_judge' && (
-                                        <NavItem item={{ name: 'Dashboard Jueces', path: '/dashboard/head-judge', icon: '👑' }} />
-                                    )}
+
                                     <NavItem item={{ name: 'Favoritos', path: '/favorites', icon: '❤️' }} />
                                     <NavItem item={{ name: 'Notificaciones', path: '/notifications', icon: '🔔' }} />
                                     <NavItem item={{ name: 'Estadísticas', path: '/stats', icon: '📈' }} />

@@ -101,21 +101,8 @@ export interface MarketplacePost {
   contactInfo?: string;
 }
 
-export interface Judge {
-  id: string;
-  name: string;
-  level: 'L1' | 'L2' | 'L3';
-  region: string;
-  status: 'Activo' | 'Inactivo';
-}
-
-export interface StudyMaterial {
-  id: string;
-  title: string;
-  description: string;
-  type: 'Documento' | 'Guía' | 'Video';
-  url: string;
-}
+// JudgeBadge component is kept for identifying players who are judges
+// The full judge system was removed pending Wizards' new judge program
 
 export interface Store {
   id: string;

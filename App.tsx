@@ -20,7 +20,7 @@ import MediaPage from './pages/MediaPage';
 import MediaArticlesPage from './pages/MediaArticlesPage';
 import MediaVideosPage from './pages/MediaVideosPage';
 import PLSPage from './pages/PLSPage';
-import JudgesPage from './pages/JudgesPage';
+
 import StoresPage from './pages/StoresPage';
 import AuthPage from './pages/AuthPage';
 import AdminDashboardPage from './pages/AdminDashboardPage';
@@ -46,8 +46,7 @@ import SettingsPage from './pages/SettingsPage';
 import LiveStreamPage from './pages/LiveStreamPage';
 import SubscriptionSuccessPage from './pages/SubscriptionSuccessPage';
 import SubscriptionFailurePage from './pages/SubscriptionFailurePage';
-import HeadJudgeDashboard from './pages/HeadJudgeDashboard';
-import JudgesForumPage from './pages/JudgesForumPage';
+
 import EmailConfirmationPage from './pages/EmailConfirmationPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
@@ -849,7 +848,6 @@ const AppContent: React.FC = () => {
       <Header isLoggedIn={isLoggedIn} userRole={userRole} handleLogout={handleLogout}
         isLiveSignal={isLiveSignal}
         userName={userProfile?.username || 'Jugador'}
-        judgeRole={userProfile?.judge_role}
       />
 
       {/* Floating Action Button for Stores */}
@@ -887,7 +885,7 @@ const AppContent: React.FC = () => {
           <Route path="/media/articulos" element={<MediaArticlesPage />} />
           <Route path="/media/articulos/:slug" element={<ArticleDetailPage />} />
           <Route path="/media/videos" element={<MediaVideosPage />} />
-          <Route path="/jueces" element={<JudgesPage />} />
+
           <Route path="/tiendas" element={<StoresPage />} />
           <Route path="/login" element={<AuthPage handleLogin={handleLogin} />} />
           <Route path="/auth" element={<AuthPage handleLogin={handleLogin} />} />
@@ -910,8 +908,7 @@ const AppContent: React.FC = () => {
           <Route path="/stats" element={<PlayerStatsPage />} />
           <Route path="/dashboard/tienda" element={<StoreDashboardPage onTournamentUpload={handleTournamentUpload} onDeleteTournament={handleDeleteTournament} userRole={userRole} tournaments={tournamentResults} storeStatus={userProfile?.status} storeName={userProfile?.username} />} />
           <Route path="/dashboard/jugador" element={<PlayerDashboardPage profile={userProfile} />} />
-          <Route path="/dashboard/head-judge" element={<HeadJudgeDashboard />} />
-          <Route path="/jueces/foro" element={<JudgesForumPage />} />
+
           <Route path="/subscription/success" element={<SubscriptionSuccessPage />} />
           <Route path="/subscription/failure" element={<SubscriptionFailurePage />} />
         </Routes>
