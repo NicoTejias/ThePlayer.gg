@@ -9,6 +9,7 @@ import { parseEventLinkHtml } from '../utils/HtmlParser';
 import { checkTournamentIntegrity, IntegrityWarning, getTournamentFingerprint } from '../utils/IntegrityChecker';
 import { supabase } from '../supabaseClient';
 import { useGame } from '../context/GameContext';
+import ScheduleTournamentModal from '../components/ScheduleTournamentModal';
 
 interface StoreDashboardPageProps {
     onTournamentUpload: (tournamentData: Omit<TournamentResult, 'id'>, players: TournamentParseResult[]) => void;
@@ -34,6 +35,7 @@ const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpl
     const [warnings, setWarnings] = useState<IntegrityWarning[]>([]);
     const [isUploading, setIsUploading] = useState(false);
     const [isDeleting, setIsDeleting] = useState<string | null>(null);
+    const [showScheduleModal, setShowScheduleModal] = useState(false);
 
     // BLOCKED VIEW FOR PENDING STORES
     if (storeStatus === 'pending_approval') {
@@ -391,7 +393,7 @@ const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpl
                         </button>
 
                         <button
-                            onClick={() => window.location.href = '/#/eventos'}
+                            onClick={() => setShowScheduleModal(true)}
                             className="flex flex-col items-center gap-2 p-4 bg-white/10 hover:bg-white/20 rounded-lg transition-all group border border-white/20 hover:border-white/40"
                         >
                             <div className="p-2 bg-white/10 rounded-full group-hover:scale-110 transition-transform">
@@ -640,6 +642,17 @@ const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpl
                     </div>
                 </section>
             </div>
+
+            {/* Schedule Tournament Modal */}
+            <ScheduleTournamentModal
+                isOpen={showScheduleModal}
+                onClose={() => setShowScheduleModal(false)}
+                onSchedule={async (eventData) => {
+                    // Handle event creation - you can add logic here if needed
+                    console.log('Event scheduled:', eventData);
+                    setShowScheduleModal(false);
+                }}
+            />
         </div>
     );
 };
