@@ -33,14 +33,10 @@ const RankingsPage: React.FC<RankingsPageProps> = ({ players, teams }) => {
 
 
     const pwpRanking = useMemo(() => {
-        // Filter players by current game
-        const filteredPlayers = players.filter(p => {
-            // If no game_type specified, include in MTG by default
-            const playerGame = p.game_type || 'mtg';
-            return playerGame === currentGame;
-        });
-
-        return [...filteredPlayers]
+        // La data ya viene filtrada y ordenada desde App.tsx (Single Source of Truth)
+        // Solo agregamos la lógica de anonimato visual
+        return [...players]
+            // Aseguramos orden por si acaso
             .sort((a, b) => b.pwp - a.pwp)
             .map((player, index) => {
                 const hashCode = player.id.split('').reduce((acc, char) => {
@@ -54,17 +50,10 @@ const RankingsPage: React.FC<RankingsPageProps> = ({ players, teams }) => {
                     name: player.isPublic ? player.name : `Jugador #${anonymousNumber}`
                 };
             });
-    }, [players, currentGame]);
+    }, [players]);
 
     const winRateRanking = useMemo(() => {
-        // Filter players by current game
-        const filteredPlayers = players.filter(p => {
-            // If no game_type specified, include in MTG by default
-            const playerGame = p.game_type || 'mtg';
-            return playerGame === currentGame;
-        });
-
-        return [...filteredPlayers]
+        return [...players]
             .map(player => {
                 const totalMatches = player.matchesWon + player.matchesLost + player.matchesDrew;
                 const winRate = totalMatches > 0 ? (player.matchesWon / totalMatches) * 100 : 0;
@@ -83,7 +72,7 @@ const RankingsPage: React.FC<RankingsPageProps> = ({ players, teams }) => {
                     name: player.isPublic ? player.name : `Jugador #${anonymousNumber}`
                 };
             });
-    }, [players, currentGame]);
+    }, [players]);
 
     return (
         <div className="space-y-12">

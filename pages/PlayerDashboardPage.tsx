@@ -43,7 +43,7 @@ const PlayerDashboardPage: React.FC<{ profile?: any }> = ({ profile }) => {
     const fetchPlayerData = async () => {
         setLoading(true);
         try {
-            // 1. Fetch tournament history
+            // 1. Fetch tournament history (Directo de DB - Correcto)
             const { data: tournamentResults } = await supabase
                 .from('tournament_results')
                 .select(`
@@ -60,13 +60,25 @@ const PlayerDashboardPage: React.FC<{ profile?: any }> = ({ profile }) => {
 
             setTournamentHistory(tournamentResults || []);
 
-            // 2. Ranking
-            const { data: allPlayers } = await supabase
+            // 2. Ranking REAL en DB (Optimizada V2)
+            // Ya no calculamos a mano. Consultamos la posición directo de `profiles` ordenados.
+            // Esto asegura que el dash muestre LO MISMO que el ranking global.
+            const { count, error } = await supabase
                 .from('profiles')
-                .select('id, pwp')
-                .order('pwp', { ascending: false });
+                .select('id', { count: 'exact', head: true })
+                .gt('pwp', profile.pwp || 0); // Contar cuántos tienen MÁS puntos que yo
 
-            const pwpRank = (allPlayers?.findIndex(p => p.id === profile.id) || 0) + 1;
+            // Si hay 5 personas con más puntos, yo soy el 6.
+            const pwpRank = (count || 0) + 1;
+
+            // WinRate Rank (Logic similar or simplified)
+            const totalMatches = (profile.matches_won || 0) + (profile.matches_lost || 0) + (profile.matches_drew || 0);
+            const myWinRate = totalMatches > 0 ? ((profile.matches_won || 0) / totalMatches) * 100 : 0;
+
+            // Para winrate ranking es más complejo hacerlo solo con SQL sin una columna física de winrate.
+            // Por ahora, para no complicar, lo dejamos en 0 o hacemos un fetch ligero si es crítico.
+            // Dado que el usuario pidió consistencia en PWP, priorizamos PWP.
+
             setRanking({ pwpRank, winRateRank: 0 });
 
             // 3. Team Data
