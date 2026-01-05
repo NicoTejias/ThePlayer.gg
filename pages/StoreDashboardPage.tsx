@@ -328,8 +328,91 @@ const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpl
                 </p>
             </div>
 
+            {/* Quick Actions Widget */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {/* Store Stats Card */}
+                <div className="bg-gradient-to-br from-slate-800 to-slate-900 p-6 rounded-xl border border-slate-700 shadow-xl">
+                    <div className="flex items-center gap-3 mb-4">
+                        <div className="p-3 bg-sky-500/10 rounded-lg">
+                            <svg className="w-6 h-6 text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 className="text-sm font-medium text-slate-400 uppercase tracking-wider">Tu Tienda</h3>
+                            <p className="text-xl font-bold text-white">{storeName || 'Mi Tienda'}</p>
+                        </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4 mt-4 pt-4 border-t border-slate-700">
+                        <div>
+                            <p className="text-2xl font-bold text-sky-400">{tournaments.length}</p>
+                            <p className="text-xs text-slate-500 uppercase">Torneos</p>
+                        </div>
+                        <div>
+                            <p className="text-2xl font-bold text-green-400">{tournaments.reduce((sum, t) => sum + t.playerCount, 0)}</p>
+                            <p className="text-xs text-slate-500 uppercase">Jugadores</p>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Upload Tournament Card */}
+                <div className="bg-gradient-to-br from-sky-600 to-blue-700 p-6 rounded-xl shadow-xl hover:shadow-2xl transition-all hover:scale-105 cursor-pointer group"
+                    onClick={() => {
+                        if (step === 'confirm') {
+                            handleCancel();
+                        }
+                        // Scroll to upload form
+                        const uploadSection = document.getElementById('upload-section');
+                        uploadSection?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }}>
+                    <div className="flex items-center gap-3 mb-3">
+                        <div className="p-3 bg-white/10 rounded-lg group-hover:bg-white/20 transition-colors">
+                            <UploadIcon className="w-6 h-6 text-white" />
+                        </div>
+                        <div>
+                            <h3 className="text-sm font-medium text-sky-100 uppercase tracking-wider">Acción Rápida</h3>
+                            <p className="text-xl font-bold text-white">Subir Torneo</p>
+                        </div>
+                    </div>
+                    <p className="text-sm text-sky-100/80 leading-relaxed">
+                        Reporta los resultados de tu último torneo y actualiza el ranking automáticamente.
+                    </p>
+                    <div className="mt-4 flex items-center gap-2 text-white font-medium text-sm">
+                        <span>Comenzar</span>
+                        <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                    </div>
+                </div>
+
+                {/* Manage Events Card */}
+                <div className="bg-gradient-to-br from-purple-600 to-pink-600 p-6 rounded-xl shadow-xl hover:shadow-2xl transition-all hover:scale-105 cursor-pointer group"
+                    onClick={() => window.location.href = '/#/eventos'}>
+                    <div className="flex items-center gap-3 mb-3">
+                        <div className="p-3 bg-white/10 rounded-lg group-hover:bg-white/20 transition-colors">
+                            <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 className="text-sm font-medium text-purple-100 uppercase tracking-wider">Gestionar</h3>
+                            <p className="text-xl font-bold text-white">Eventos</p>
+                        </div>
+                    </div>
+                    <p className="text-sm text-purple-100/80 leading-relaxed">
+                        Programa y administra tus próximos eventos y torneos.
+                    </p>
+                    <div className="mt-4 flex items-center gap-2 text-white font-medium text-sm">
+                        <span>Ir a Eventos</span>
+                        <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
             <div className="grid grid-cols-1 lg:grid-cols-5 gap-12">
-                <section className="lg:col-span-2">
+                <section id="upload-section" className="lg:col-span-2">
                     {step === 'upload' && (
                         <div>
                             <h2 className="text-3xl font-bold text-white uppercase tracking-wider mb-6">Reportar Nuevo Torneo</h2>
