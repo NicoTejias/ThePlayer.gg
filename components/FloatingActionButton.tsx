@@ -16,7 +16,7 @@ const FloatingActionButton: React.FC<FloatingActionButtonProps> = ({ userRole })
     const handleReportTournament = () => {
         setShowFabMenu(false);
         // Navigate to store dashboard
-        window.location.href = '/#/tienda/dashboard';
+        window.location.href = '/#/dashboard/tienda';
         // Wait for navigation then scroll
         setTimeout(() => {
             const uploadSection = document.getElementById('upload-section');
@@ -66,8 +66,8 @@ const FloatingActionButton: React.FC<FloatingActionButtonProps> = ({ userRole })
                 <button
                     onClick={() => setShowFabMenu(!showFabMenu)}
                     className={`w-16 h-16 rounded-full shadow-2xl flex items-center justify-center transition-all duration-300 ${showFabMenu
-                            ? 'bg-slate-700 rotate-45'
-                            : 'bg-gradient-to-br from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 hover:scale-110'
+                        ? 'bg-slate-700 rotate-45'
+                        : 'bg-gradient-to-br from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 hover:scale-110'
                         }`}
                     aria-label="Acciones rápidas"
                 >
