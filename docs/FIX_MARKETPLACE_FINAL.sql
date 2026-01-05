@@ -67,7 +67,7 @@ RETURNS TABLE (
     title text,
     description text,
     listing_type text,
-    price integer,
+    price numeric,
     game text,
     format text,
     condition text,
@@ -87,7 +87,7 @@ BEGIN
         SELECT 
             m.id,
             m.seller_id,
-            COALESCE(p.username, p.full_name, ''Usuario Desconocido'') as seller_name,
+            COALESCE(p.username, ''Usuario Desconocido'') as seller_name,
             COALESCE(p.region, ''Sin Región'') as seller_region,
             m.title,
             m.description,
