@@ -273,7 +273,8 @@ const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [
                         format: eventData.format,
                         store_name: eventData.storeName,
                         max_players: eventData.maxPlayers,
-                        description: eventData.description || null
+                        description: eventData.description || null,
+                        game_type: eventData.game_type || 'mtg'
                     });
 
                     // Calcular siguiente fecha según tipo de recurrencia
@@ -294,7 +295,8 @@ const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [
                     format: eventData.format,
                     store_name: eventData.storeName,
                     max_players: eventData.maxPlayers,
-                    description: eventData.description || null
+                    description: eventData.description || null,
+                    game_type: eventData.game_type || 'mtg'
                 });
             }
 
