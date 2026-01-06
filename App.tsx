@@ -139,7 +139,12 @@ const AppContent: React.FC = () => {
       // Solo leemos la data, no procesamos nada pesado aquí.
       // =====================================================================
 
-      // 1. Fetch Players (Ranking) con Tipado Explícito y Teams
+      // =====================================================================
+      // NUEVO ENFOQUE OPTIMIZADO (V3) - RANKING DINÁMICO POR JUEGO
+      // Usamos una RPC que calcula los puntos al vuelo filtrando por game_type
+      // =====================================================================
+
+      // 1. Fetch Players (Ranking) usando RPC
       // Primero obtenemos los equipos para poder cruzarlos
       const { data: teamsData } = await supabase
         .from('teams')
@@ -160,29 +165,15 @@ const AppContent: React.FC = () => {
         });
       }
 
-      // Ahora obtenemos los perfiles
+      // Usamos la nueva RPC get_game_ranking
       const { data: profilesData, error: profilesError } = await supabase
-        .from('profiles')
-        .select(`
-          id, 
-          username, 
-          first_name, 
-          last_name, 
-          region, 
-          team, 
-          team_id, 
-          is_public, 
-          is_pro,
-          pwp,
-          matches_won,
-          matches_lost,
-          matches_drew
-        `)
-        .order('pwp', { ascending: false })
-        .limit(200);
+        .rpc('get_game_ranking', {
+          p_game_type: currentGame
+        });
 
       if (profilesError) {
-        console.error("Error fetching profiles:", profilesError);
+        console.error("Error fetching ranking via RPC:", profilesError);
+        // Fallback silencioso o toast, pero la RPC debería ser robusta
         toast.error(`Error cargando ranking: ${profilesError.message}`);
       }
 
@@ -533,7 +524,7 @@ const AppContent: React.FC = () => {
         authSubscription.unsubscribe();
       }
     };
-  }, []);
+  }, [currentGame]);
 
   if (isAuthLoading) {
     return (
