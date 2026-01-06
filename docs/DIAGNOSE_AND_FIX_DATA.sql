@@ -9,6 +9,7 @@ DECLARE
   total_profiles INT;
   profiles_with_game_type INT;
   profiles_mtg INT;
+  rec RECORD;
 BEGIN
   RAISE NOTICE '=== DIAGNÓSTICO DE DATOS ===';
   

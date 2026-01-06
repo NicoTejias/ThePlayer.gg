@@ -157,4 +157,8 @@ GRANT EXECUTE ON FUNCTION get_game_ranking(text) TO anon;
 GRANT EXECUTE ON FUNCTION get_scheduled_events_with_registrations(text) TO authenticated;
 GRANT EXECUTE ON FUNCTION get_scheduled_events_with_registrations(text) TO anon;
 
-RAISE NOTICE '✅ Script completado. Funciones RPC creadas correctamente.';
+-- Script completado
+DO $$
+BEGIN
+  RAISE NOTICE '✅ Script completado. Funciones RPC creadas correctamente.';
+END $$;
