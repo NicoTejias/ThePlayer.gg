@@ -183,6 +183,11 @@ const AppContent: React.FC = () => {
         .order('pwp', { ascending: false })
         .limit(200);
 
+      if (profilesError) {
+        console.error("Error fetching profiles:", profilesError);
+        toast.error(`Error cargando ranking: ${profilesError.message}`);
+      }
+
       if (profilesData) {
         // Mapear a formato PlayerProfile
         const mappedPlayers: PlayerProfile[] = (profilesData as any[]).map((p, index) => {
