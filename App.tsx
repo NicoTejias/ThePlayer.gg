@@ -500,6 +500,14 @@ const AppContent: React.FC = () => {
             setIsAuthLoading(false);
           }
 
+          // Handle sign out
+          if (event === 'SIGNED_OUT') {
+            console.log("User signed out, clearing state");
+            setIsLoggedIn(false);
+            setUserRole(null);
+            setUserProfile(null);
+          }
+
           await handleSessionState(session);
         });
 
@@ -571,6 +579,9 @@ const AppContent: React.FC = () => {
 
   const handleLogout = async () => {
     try {
+      // Clear any stored data
+      localStorage.removeItem('signup_role');
+
       await supabase.auth.signOut();
 
       // Clear local state
@@ -578,11 +589,11 @@ const AppContent: React.FC = () => {
       setUserRole(null);
       setUserProfile(null);
 
-      // Navigate to success page
-      navigate('/logout-success');
+      // Force a hard redirect to clear all state
+      window.location.href = '/#/logout-success';
     } catch (error) {
       console.error("Error signing out:", error);
-      navigate('/');
+      window.location.href = '/#/';
     }
   };
 
