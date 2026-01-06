@@ -27,6 +27,7 @@ END $$;
 DO $$
 DECLARE
   col_exists BOOLEAN;
+  rec RECORD;
 BEGIN
   RAISE NOTICE '=== VERIFICANDO ESTRUCTURA DE player_aliases ===';
   
