@@ -177,8 +177,6 @@ const AppContent: React.FC = () => {
           matches_won,
           matches_lost,
           matches_drew
-          -- game_type se podría agregar a profiles si queremos filtrar promedios,
-          -- pero por ahora asumimos el PWP global o filtramos si la estructura DB lo soporta.
         `)
         .order('pwp', { ascending: false })
         .limit(200);
