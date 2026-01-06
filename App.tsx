@@ -46,6 +46,7 @@ import SettingsPage from './pages/SettingsPage';
 import LiveStreamPage from './pages/LiveStreamPage';
 import SubscriptionSuccessPage from './pages/SubscriptionSuccessPage';
 import SubscriptionFailurePage from './pages/SubscriptionFailurePage';
+import LogoutSuccessPage from './pages/LogoutSuccessPage';
 
 import EmailConfirmationPage from './pages/EmailConfirmationPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
@@ -573,10 +574,21 @@ const AppContent: React.FC = () => {
     }
   };
 
-  const handleLogout = () => {
-    setIsLoggedIn(false);
-    setUserRole(null);
-    navigate('/');
+  const handleLogout = async () => {
+    try {
+      await supabase.auth.signOut();
+
+      // Clear local state
+      setIsLoggedIn(false);
+      setUserRole(null);
+      setUserProfile(null);
+
+      // Navigate to success page
+      navigate('/logout-success');
+    } catch (error) {
+      console.error("Error signing out:", error);
+      navigate('/');
+    }
   };
 
   const fetchUnclaimedResults = async (userId: string) => {
@@ -798,6 +810,7 @@ const AppContent: React.FC = () => {
           <Route path="/dashboard/jugador" element={<PlayerDashboardPage profile={userProfile} />} />
 
           <Route path="/subscription/success" element={<SubscriptionSuccessPage />} />
+          <Route path="/logout-success" element={<LogoutSuccessPage />} />
           <Route path="/subscription/failure" element={<SubscriptionFailurePage />} />
         </Routes>
       </main>
