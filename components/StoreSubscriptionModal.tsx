@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { supabase } from '../supabaseClient';
 import { toast } from 'sonner';
+import { StoreSubscriptionSchema, validateData } from '../utils/validation';
+import { sanitizeText } from '../utils/sanitize';
 
 interface StoreSubscriptionModalProps {
     isOpen: boolean;
@@ -22,29 +24,57 @@ const StoreSubscriptionModal: React.FC<StoreSubscriptionModalProps> = ({ isOpen,
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        // 1. Validar datos con Zod
+        const validation = validateData(StoreSubscriptionSchema, formData);
+
+        if (!validation.success) {
+            toast.error('Error de validación', {
+                description: (validation as { success: false; errors: string[] }).errors.join(', ')
+            });
+            return;
+        }
+
+        // TypeScript ahora sabe que validation.data existe
+        const validatedData = validation.data;
+
         setLoading(true);
 
         try {
-            // TODO: Implement actual subscription logic
-            // For now, just save to a "subscription_requests" table
+            // 2. Sanitizar datos (capa extra de seguridad)
+            const cleanData = {
+                store_name: sanitizeText(validatedData.storeName),
+                contact_name: sanitizeText(validatedData.contactName),
+                email: validatedData.email, // Email ya validado por Zod
+                phone: validatedData.phone,
+                region: validatedData.region,
+                plan_type: validatedData.plan,
+                message: validatedData.message ? sanitizeText(validatedData.message) : null,
+                status: 'pending' as const
+            };
+
+            // 3. Enviar a Supabase
             const { error } = await supabase
                 .from('subscription_requests')
-                .insert({
-                    store_name: formData.storeName,
-                    contact_name: formData.contactName,
-                    email: formData.email,
-                    phone: formData.phone,
-                    region: formData.region,
-                    plan_type: formData.plan,
-                    message: formData.message,
-                    status: 'pending'
-                });
+                .insert(cleanData);
 
             if (error) throw error;
 
             toast.success('¡Solicitud enviada!', {
                 description: 'Nos pondremos en contacto contigo pronto.'
             });
+
+            // Limpiar formulario
+            setFormData({
+                storeName: '',
+                contactName: '',
+                email: '',
+                phone: '',
+                region: '',
+                plan: selectedPlan,
+                message: ''
+            });
+
             onClose();
         } catch (error) {
             console.error('Error submitting subscription request:', error);
