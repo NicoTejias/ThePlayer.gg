@@ -207,7 +207,8 @@ const AppContent: React.FC = () => {
             team: p.team, // String legacy
             teamData: teamDetails, // Objeto completo
             isPublic: p.is_public ?? true,
-            is_pro: p.is_pro || false
+            is_pro: p.is_pro || false,
+            tournaments_played: p.tournaments_played || 0
           };
         });
         setPlayers(mappedPlayers);

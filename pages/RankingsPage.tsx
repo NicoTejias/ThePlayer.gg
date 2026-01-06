@@ -57,8 +57,10 @@ const RankingsPage: React.FC<RankingsPageProps> = ({ players, teams }) => {
             .map(player => {
                 const totalMatches = player.matchesWon + player.matchesLost + player.matchesDrew;
                 const winRate = totalMatches > 0 ? (player.matchesWon / totalMatches) * 100 : 0;
-                return { ...player, winRate };
+                return { ...player, winRate, totalMatches };
             })
+            // FILTRO: Solo jugadores con al menos 15 partidas (aproximadamente 5 torneos)
+            .filter(player => player.totalMatches >= 15)
             .sort((a, b) => b.winRate - a.winRate)
             .map((player, index) => {
                 const hashCode = player.id.split('').reduce((acc, char) => {

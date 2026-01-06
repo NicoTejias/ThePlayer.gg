@@ -25,6 +25,7 @@ export interface PlayerProfile {
   isPublic?: boolean;
   is_pro?: boolean;
   game_type?: GameType; // Primary game the player participates in
+  tournaments_played?: number; // Number of tournaments the player has participated in
 }
 
 // FIX: Add RankingEntry and WinRateRankingEntry types used in HomePage.tsx
