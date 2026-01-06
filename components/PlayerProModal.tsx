@@ -87,6 +87,7 @@ const PlayerProModal: React.FC<PlayerProModalProps> = ({ isOpen, onClose, profil
                 <div className="sticky top-0 bg-gradient-to-r from-purple-900 via-pink-900 to-purple-900 p-8 border-b border-purple-500/30 z-10">
                     <button
                         onClick={onClose}
+                        title="Cerrar"
                         className="absolute top-4 right-4 text-white/70 hover:text-white transition-colors"
                     >
                         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -171,8 +172,8 @@ const PlayerProModal: React.FC<PlayerProModalProps> = ({ isOpen, onClose, profil
                                 onClick={handleSubscribe}
                                 disabled={loading}
                                 className={`px-8 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold rounded-lg transition-all shadow-lg shadow-purple-900/50 ${loading
-                                        ? 'opacity-50 cursor-not-allowed'
-                                        : 'hover:from-purple-500 hover:to-pink-500'
+                                    ? 'opacity-50 cursor-not-allowed'
+                                    : 'hover:from-purple-500 hover:to-pink-500'
                                     }`}
                             >
                                 {loading ? 'Procesando...' : 'Suscribirse Ahora'}

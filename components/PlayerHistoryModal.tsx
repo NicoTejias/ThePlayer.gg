@@ -144,6 +144,7 @@ const PlayerHistoryModal: React.FC<PlayerHistoryModalProps> = ({
                         </div>
                         <button
                             onClick={onClose}
+                            title="Cerrar"
                             className="text-slate-400 hover:text-white transition-colors p-2"
                         >
                             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -201,8 +202,8 @@ const PlayerHistoryModal: React.FC<PlayerHistoryModalProps> = ({
                             {/* Pattern Warning */}
                             {patternWarning && (
                                 <div className={`mb-6 p-4 rounded-lg border ${patternWarning.level === 'warning'
-                                        ? 'bg-red-900/20 border-red-500/30 text-red-300'
-                                        : 'bg-yellow-900/20 border-yellow-500/30 text-yellow-300'
+                                    ? 'bg-red-900/20 border-red-500/30 text-red-300'
+                                    : 'bg-yellow-900/20 border-yellow-500/30 text-yellow-300'
                                     }`}>
                                     <div className="flex items-center gap-2">
                                         <span className="text-xl">{patternWarning.level === 'warning' ? '⚠️' : '👁️'}</span>

@@ -126,6 +126,7 @@ const StoresPage: React.FC = () => {
                 </div>
                 <div className="w-full h-96 bg-slate-900 relative">
                     <iframe
+                        title="Mapa de Tiendas"
                         width="100%"
                         height="100%"
                         frameBorder="0"
@@ -155,11 +156,16 @@ const StoresPage: React.FC = () => {
                     <input
                         type="search"
                         placeholder="Buscar por nombre o ciudad..."
+                        aria-label="Buscar tiendas por nombre o ciudad"
                         className="bg-slate-900/80 text-white placeholder-slate-400 rounded-md py-2 px-4 w-full focus:outline-none focus:ring-2 focus:ring-sky-500 border border-slate-700"
                     />
                 </div>
                 <div className="relative">
-                    <select className="bg-slate-900/80 text-white rounded-md py-2.5 px-4 w-full appearance-none focus:outline-none focus:ring-2 focus:ring-sky-500 border border-slate-700">
+                    <select
+                        title="Filtrar por región"
+                        aria-label="Filtrar por región"
+                        className="bg-slate-900/80 text-white rounded-md py-2.5 px-4 w-full appearance-none focus:outline-none focus:ring-2 focus:ring-sky-500 border border-slate-700"
+                    >
                         <option>Todas las Regiones</option>
                         <option>Arica y Parinacota</option>
                         <option>Tarapacá</option>

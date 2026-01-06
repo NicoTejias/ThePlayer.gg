@@ -177,8 +177,9 @@ const ArticleManager: React.FC = () => {
                 <form onSubmit={handleSubmit} className="space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
-                            <label className="block text-slate-400 mb-2">Título</label>
+                            <label htmlFor="article-title" className="block text-slate-400 mb-2">Título</label>
                             <input
+                                id="article-title"
                                 type="text"
                                 value={formData.title}
                                 onChange={handleTitleChange}
@@ -187,8 +188,9 @@ const ArticleManager: React.FC = () => {
                             />
                         </div>
                         <div>
-                            <label className="block text-slate-400 mb-2">Slug (URL)</label>
+                            <label htmlFor="article-slug" className="block text-slate-400 mb-2">Slug (URL)</label>
                             <input
+                                id="article-slug"
                                 type="text"
                                 value={formData.slug}
                                 onChange={e => setFormData({ ...formData, slug: e.target.value })}
@@ -199,8 +201,9 @@ const ArticleManager: React.FC = () => {
                     </div>
 
                     <div>
-                        <label className="block text-slate-400 mb-2">Contenido (Markdown)</label>
+                        <label htmlFor="article-content" className="block text-slate-400 mb-2">Contenido (Markdown)</label>
                         <textarea
+                            id="article-content"
                             value={formData.content}
                             onChange={e => setFormData({ ...formData, content: e.target.value })}
                             className="w-full h-64 bg-slate-900 border border-slate-700 rounded p-3 text-white font-mono"
@@ -210,8 +213,9 @@ const ArticleManager: React.FC = () => {
                     </div>
 
                     <div>
-                        <label className="block text-slate-400 mb-2">Resumen (Excerpt)</label>
+                        <label htmlFor="article-excerpt" className="block text-slate-400 mb-2">Resumen (Excerpt)</label>
                         <textarea
+                            id="article-excerpt"
                             value={formData.excerpt}
                             onChange={e => setFormData({ ...formData, excerpt: e.target.value })}
                             className="w-full h-20 bg-slate-900 border border-slate-700 rounded p-3 text-white"
@@ -220,8 +224,9 @@ const ArticleManager: React.FC = () => {
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div>
-                            <label className="block text-slate-400 mb-2">Categoría</label>
+                            <label htmlFor="article-category" className="block text-slate-400 mb-2">Categoría</label>
                             <select
+                                id="article-category"
                                 value={formData.category}
                                 onChange={e => setFormData({ ...formData, category: e.target.value })}
                                 className="w-full bg-slate-900 border border-slate-700 rounded p-3 text-white"
@@ -233,8 +238,9 @@ const ArticleManager: React.FC = () => {
                             </select>
                         </div>
                         <div>
-                            <label className="block text-slate-400 mb-2">Juego</label>
+                            <label htmlFor="article-gametype" className="block text-slate-400 mb-2">Juego</label>
                             <select
+                                id="article-gametype"
                                 value={formData.gameType}
                                 onChange={e => setFormData({ ...formData, gameType: e.target.value })}
                                 className="w-full bg-slate-900 border border-slate-700 rounded p-3 text-white"

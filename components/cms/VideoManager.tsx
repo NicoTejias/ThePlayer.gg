@@ -111,8 +111,9 @@ const VideoManager: React.FC = () => {
                     <form onSubmit={handleSubmit} className="space-y-4">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                <label className="block text-slate-400 mb-1">URL de YouTube o ID</label>
+                                <label htmlFor="video-url" className="block text-slate-400 mb-1">URL de YouTube o ID</label>
                                 <input
+                                    id="video-url"
                                     type="text"
                                     value={formData.youtubeId}
                                     onChange={e => setFormData({ ...formData, youtubeId: e.target.value })}
@@ -122,8 +123,9 @@ const VideoManager: React.FC = () => {
                                 />
                             </div>
                             <div>
-                                <label className="block text-slate-400 mb-1">Título</label>
+                                <label htmlFor="video-title" className="block text-slate-400 mb-1">Título</label>
                                 <input
+                                    id="video-title"
                                     type="text"
                                     value={formData.title}
                                     onChange={e => setFormData({ ...formData, title: e.target.value })}
@@ -134,8 +136,9 @@ const VideoManager: React.FC = () => {
                         </div>
 
                         <div>
-                            <label className="block text-slate-400 mb-1">Descripción</label>
+                            <label htmlFor="video-desc" className="block text-slate-400 mb-1">Descripción</label>
                             <input
+                                id="video-desc"
                                 type="text"
                                 value={formData.description}
                                 onChange={e => setFormData({ ...formData, description: e.target.value })}
@@ -145,8 +148,9 @@ const VideoManager: React.FC = () => {
 
                         <div className="flex gap-4">
                             <div className="flex-1">
-                                <label className="block text-slate-400 mb-1">Juego</label>
+                                <label htmlFor="video-game" className="block text-slate-400 mb-1">Juego</label>
                                 <select
+                                    id="video-game"
                                     value={formData.gameType}
                                     onChange={e => setFormData({ ...formData, gameType: e.target.value })}
                                     className="w-full bg-slate-900 border border-slate-700 rounded p-2 text-white"

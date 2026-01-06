@@ -180,6 +180,7 @@ const UserManagementPage: React.FC = () => {
                 <input
                     type="search"
                     placeholder="Buscar por nombre o email..."
+                    aria-label="Buscar usuarios"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="flex-1 bg-slate-900 text-white placeholder-slate-500 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-sky-500 border border-slate-700 text-sm"
@@ -187,6 +188,8 @@ const UserManagementPage: React.FC = () => {
                 <select
                     value={filterStatus}
                     onChange={(e) => setFilterStatus(e.target.value)}
+                    title="Filtrar por estado"
+                    aria-label="Filtrar por estado"
                     className="bg-slate-900 text-white rounded px-4 py-2 focus:outline-none border border-slate-700 text-sm"
                 >
                     <option value="">Todos los Estados</option>
@@ -197,6 +200,8 @@ const UserManagementPage: React.FC = () => {
                 <select
                     value={filterRole}
                     onChange={(e) => setFilterRole(e.target.value)}
+                    title="Filtrar por rol"
+                    aria-label="Filtrar por rol"
                     className="bg-slate-900 text-white rounded px-4 py-2 focus:outline-none border border-slate-700 text-sm"
                 >
                     <option value="">Todos los Roles</option>
@@ -353,8 +358,9 @@ const UserManagementPage: React.FC = () => {
 
                         {actionType === 'suspend' && (
                             <div className="mb-4">
-                                <label className="block text-sm font-medium text-slate-300 mb-2">Duración (días)</label>
+                                <label htmlFor="suspension-days" className="block text-sm font-medium text-slate-300 mb-2">Duración (días)</label>
                                 <input
+                                    id="suspension-days"
                                     type="number"
                                     value={suspensionDays}
                                     onChange={(e) => setSuspensionDays(parseInt(e.target.value) || 1)}
@@ -384,10 +390,11 @@ const UserManagementPage: React.FC = () => {
                         )}
 
                         <div className="mb-6">
-                            <label className="block text-sm font-medium text-slate-300 mb-2">
+                            <label htmlFor="action-reason" className="block text-sm font-medium text-slate-300 mb-2">
                                 Razón {actionType !== 'activate' && '*'}
                             </label>
                             <textarea
+                                id="action-reason"
                                 value={actionReason}
                                 onChange={(e) => setActionReason(e.target.value)}
                                 rows={4}
@@ -407,9 +414,9 @@ const UserManagementPage: React.FC = () => {
                             <button
                                 onClick={handleAction}
                                 className={`flex-1 py-2 px-4 font-bold rounded-lg transition-colors ${actionType === 'suspend' ? 'bg-yellow-600 hover:bg-yellow-500' :
-                                        actionType === 'ban' ? 'bg-red-600 hover:bg-red-500' :
-                                            actionType === 'delete' ? 'bg-rose-600 hover:bg-rose-500' :
-                                                'bg-green-600 hover:bg-green-500'
+                                    actionType === 'ban' ? 'bg-red-600 hover:bg-red-500' :
+                                        actionType === 'delete' ? 'bg-rose-600 hover:bg-rose-500' :
+                                            'bg-green-600 hover:bg-green-500'
                                     } text-white`}
                             >
                                 {actionType === 'delete' ? '⚠️ Eliminar Permanentemente' : 'Confirmar'}

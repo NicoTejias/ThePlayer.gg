@@ -198,6 +198,7 @@ const CreateListingModal: React.FC<CreateListingModalProps> = ({ isOpen, onClose
                     </h2>
                     <button
                         onClick={onClose}
+                        title="Cerrar"
                         className="text-slate-400 hover:text-white transition-colors"
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" viewBox="0 0 20 20" fill="currentColor">
@@ -296,8 +297,9 @@ const CreateListingModal: React.FC<CreateListingModalProps> = ({ isOpen, onClose
 
                     {/* Título */}
                     <div>
-                        <label className={labelClass}>Título del Anuncio *</label>
+                        <label htmlFor="listing-title" className={labelClass}>Título del Anuncio *</label>
                         <input
+                            id="listing-title"
                             type="text"
                             value={title}
                             onChange={(e) => setTitle(e.target.value)}
@@ -310,8 +312,9 @@ const CreateListingModal: React.FC<CreateListingModalProps> = ({ isOpen, onClose
 
                     {/* Descripción */}
                     <div>
-                        <label className={labelClass}>Descripción</label>
+                        <label htmlFor="listing-description" className={labelClass}>Descripción</label>
                         <textarea
+                            id="listing-description"
                             value={description}
                             onChange={(e) => setDescription(e.target.value)}
                             className={inputClass}
@@ -323,8 +326,9 @@ const CreateListingModal: React.FC<CreateListingModalProps> = ({ isOpen, onClose
 
                     {/* Juego */}
                     <div>
-                        <label className={labelClass}>Juego</label>
+                        <label htmlFor="listing-game" className={labelClass}>Juego</label>
                         <input
+                            id="listing-game"
                             type="text"
                             value={currentGame.toUpperCase()}
                             disabled
@@ -336,8 +340,9 @@ const CreateListingModal: React.FC<CreateListingModalProps> = ({ isOpen, onClose
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {listingType !== 'trade' && (
                             <div>
-                                <label className={labelClass}>Precio Total (CLP) *</label>
+                                <label htmlFor="listing-price" className={labelClass}>Precio Total (CLP) *</label>
                                 <input
+                                    id="listing-price"
                                     type="number"
                                     value={price}
                                     onChange={(e) => setPrice(e.target.value)}
@@ -345,13 +350,14 @@ const CreateListingModal: React.FC<CreateListingModalProps> = ({ isOpen, onClose
                                     placeholder="15000"
                                     min="0"
                                     step="100"
-                                    required={listingType !== 'trade'}
+                                    required={(listingType as string) !== 'trade'}
                                 />
                             </div>
                         )}
                         <div>
-                            <label className={labelClass}>Condición</label>
+                            <label htmlFor="listing-condition" className={labelClass}>Condición</label>
                             <select
+                                id="listing-condition"
                                 value={condition}
                                 onChange={(e) => setCondition(e.target.value)}
                                 className={inputClass}

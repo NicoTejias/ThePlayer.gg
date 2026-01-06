@@ -11,6 +11,7 @@ interface CaseReviewPanelProps {
 interface CommitteeMember {
     member_id: string;
     role: string;
+    is_recused?: boolean;
     profile: {
         username: string;
         email: string;
@@ -94,8 +95,9 @@ const CaseReviewPanel: React.FC<CaseReviewPanelProps> = ({
             if (votesError) throw votesError;
 
             // Merge details
-            const committeeWithVotes = members.map(m => ({
+            const committeeWithVotes = members.map((m: any) => ({
                 ...m,
+                profile: Array.isArray(m.profile) ? m.profile[0] : m.profile,
                 vote: votes.find(v => v.member_id === m.member_id)
             }));
 
@@ -103,7 +105,7 @@ const CaseReviewPanel: React.FC<CaseReviewPanelProps> = ({
 
             // Find my record if logged in
             if (currentUserId) {
-                const myRecord = committeeWithVotes.find(m => m.member_id === currentUserId);
+                const myRecord = committeeWithVotes.find((m: any) => m.member_id === currentUserId);
                 setMyCommitteeRecord(myRecord);
             }
 
@@ -322,6 +324,7 @@ const CaseReviewPanel: React.FC<CaseReviewPanelProps> = ({
                         </div>
                         <button
                             onClick={onClose}
+                            title="Cerrar"
                             className="text-slate-400 hover:text-white transition-colors p-2"
                         >
                             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -450,8 +453,8 @@ const CaseReviewPanel: React.FC<CaseReviewPanelProps> = ({
                                     comments.map(comment => (
                                         <div key={comment.id} className={`flex flex-col ${comment.author_id === currentUserId ? 'items-end' : 'items-start'}`}>
                                             <div className={`max-w-[80%] rounded-lg p-3 ${comment.author_id === currentUserId
-                                                    ? 'bg-amber-900/40 border border-amber-500/30 rounded-tr-none'
-                                                    : 'bg-slate-800 border border-slate-700 rounded-tl-none'
+                                                ? 'bg-amber-900/40 border border-amber-500/30 rounded-tr-none'
+                                                : 'bg-slate-800 border border-slate-700 rounded-tl-none'
                                                 }`}>
                                                 <div className="flex items-center gap-2 mb-1">
                                                     <span className={`text-xs font-bold ${comment.author_id === currentUserId ? 'text-amber-400' : 'text-slate-300'}`}>
@@ -596,6 +599,7 @@ const CaseReviewPanel: React.FC<CaseReviewPanelProps> = ({
                                     Recomendación de Sanción
                                 </label>
                                 <select
+                                    title="Sanción"
                                     value={sanction}
                                     onChange={(e) => setSanction(e.target.value)}
                                     className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-amber-500"

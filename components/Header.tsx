@@ -27,8 +27,14 @@ const Header: React.FC<HeaderProps> = ({
   const { currentGame } = useGame();
   const [isProfileMenuOpen, setProfileMenuOpen] = useState(false);
   const [isSidebarOpen, setSidebarOpen] = useState(false);
+  const [imgError, setImgError] = useState(false);
   const profileMenuRef = useRef<HTMLDivElement>(null);
   const location = useLocation();
+
+  // Reset image error when game changes
+  useEffect(() => {
+    setImgError(false);
+  }, [currentGame]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -93,18 +99,11 @@ const Header: React.FC<HeaderProps> = ({
                   <img
                     src={GAME_LOGOS[currentGame].src}
                     alt={GAME_LABELS[currentGame]}
-                    className="w-full h-full object-contain drop-shadow-2xl"
-                    onError={(e) => {
-                      // Fallback to emoji if image fails to load
-                      e.currentTarget.style.display = 'none';
-                      if (e.currentTarget.nextElementSibling) {
-                        (e.currentTarget.nextElementSibling as HTMLElement).style.display = 'block';
-                      }
-                    }}
+                    className={`w-full h-full object-contain drop-shadow-2xl ${imgError ? 'hidden' : 'block'}`}
+                    onError={() => setImgError(true)}
                   />
                   <span
-                    className="text-7xl hidden drop-shadow-2xl"
-                    style={{ display: GAME_LOGOS[currentGame].src ? 'none' : 'block' }}
+                    className={`text-7xl drop-shadow-2xl ${!imgError && GAME_LOGOS[currentGame].src ? 'hidden' : 'block'}`}
                   >
                     {GAME_LOGOS[currentGame].emoji}
                   </span>
@@ -173,6 +172,9 @@ const Header: React.FC<HeaderProps> = ({
                   <button
                     onClick={() => setProfileMenuOpen(!isProfileMenuOpen)}
                     className="flex items-center gap-2 bg-slate-700/50 p-1.5 pr-3 rounded-full hover:bg-slate-700 transition-all border border-slate-600 hover:border-slate-500"
+                    aria-haspopup="true"
+                    aria-expanded={isProfileMenuOpen ? "true" : "false"}
+                    aria-label="Menú de usuario"
                   >
                     <UserCircleIcon className="w-8 h-8 text-sky-400" />
                     <span className="text-white font-semibold text-sm hidden sm:block max-w-[100px] truncate">{userName}</span>
@@ -183,7 +185,10 @@ const Header: React.FC<HeaderProps> = ({
 
                   {/* Profile Dropdown */}
                   {isProfileMenuOpen && (
-                    <div className="absolute right-0 mt-2 w-56 rounded-xl shadow-2xl bg-slate-800 ring-1 ring-black ring-opacity-5 border border-slate-700/50 divide-y divide-slate-700/50 animate-in fade-in slide-in-from-top-2 z-50">
+                    <div
+                      role="menu"
+                      className="absolute right-0 mt-2 w-56 rounded-xl shadow-2xl bg-slate-800 ring-1 ring-black ring-opacity-5 border border-slate-700/50 divide-y divide-slate-700/50 animate-in fade-in slide-in-from-top-2 z-50"
+                    >
                       <div className="py-2">
                         <div className="px-4 py-2 sm:hidden border-b border-slate-700/50 mb-2">
                           <p className="text-xs text-slate-400">Logueado como</p>

@@ -190,6 +190,7 @@ const HomePage: React.FC<HomePageProps> = ({ players, events, session, userRole,
           {sliderItems.map((_, idx) => (
             <button
               key={idx}
+              title={`Slide ${idx + 1}`}
               onClick={() => setCurrentSlide(idx)}
               className={`w-3 h-3 rounded-full transition-all ${idx === currentSlide ? 'bg-white w-8' : 'bg-white/50'}`}
             />

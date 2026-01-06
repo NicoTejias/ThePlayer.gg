@@ -102,6 +102,7 @@ const MarketplacePage: React.FC = () => {
                 <input
                     type="search"
                     placeholder="Buscar cartas..."
+                    aria-label="Buscar cartas"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="bg-slate-900/60 text-white placeholder-slate-500 rounded px-3 py-2 w-full md:w-64 focus:outline-none focus:ring-1 focus:ring-sky-500 border border-slate-700 text-sm"
@@ -109,6 +110,8 @@ const MarketplacePage: React.FC = () => {
                 <select
                     value={filterType}
                     onChange={(e) => setFilterType(e.target.value)}
+                    title="Filtrar por tipo"
+                    aria-label="Filtrar por tipo"
                     className="bg-slate-900/60 text-white rounded px-3 py-2 focus:outline-none border border-slate-700 text-sm"
                 >
                     <option value="">Todos los Tipos</option>
@@ -120,6 +123,8 @@ const MarketplacePage: React.FC = () => {
                 <select
                     value={sortBy}
                     onChange={(e) => setSortBy(e.target.value)}
+                    title="Ordenar por"
+                    aria-label="Ordenar por"
                     className="bg-slate-900/60 text-white rounded px-3 py-2 focus:outline-none border border-slate-700 text-sm"
                 >
                     <option value="recent">Más Recientes</option>

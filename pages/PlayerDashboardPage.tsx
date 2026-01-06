@@ -152,7 +152,7 @@ const PlayerDashboardPage: React.FC<{ profile?: any }> = ({ profile }) => {
                 {/* Team Status in Header */}
                 <div className="bg-slate-800/80 p-4 rounded-xl border border-slate-700 flex items-center gap-4">
                     <div className="w-12 h-12 bg-sky-500/10 rounded-full flex items-center justify-center border border-sky-500/20">
-                        {teamData?.logo_url ? <img src={teamData.logo_url} className="w-full h-full rounded-full" /> :
+                        {teamData?.logo_url ? <img src={teamData.logo_url} alt={teamData.name || 'Team Logo'} className="w-full h-full rounded-full" /> :
                             <TrophyIcon className="w-6 h-6 text-sky-400" />}
                     </div>
                     <div>
@@ -253,7 +253,7 @@ const PlayerDashboardPage: React.FC<{ profile?: any }> = ({ profile }) => {
                         {teamData ? (
                             <div className="space-y-6 w-full">
                                 <div className="w-24 h-24 mx-auto bg-slate-900 rounded-2xl flex items-center justify-center border-2 border-sky-500/30">
-                                    {teamData.logo_url ? <img src={teamData.logo_url} className="w-full h-full rounded-2xl" /> :
+                                    {teamData.logo_url ? <img src={teamData.logo_url} alt={teamData.name || 'Team Logo'} className="w-full h-full rounded-2xl" /> :
                                         <TrophyIcon className="w-10 h-10 text-sky-400" />}
                                 </div>
                                 <div>

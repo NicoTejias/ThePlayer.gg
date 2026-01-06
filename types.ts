@@ -68,6 +68,8 @@ export interface MediaArticle {
   slug?: string;
   published_at?: string;
   game_type?: string;
+  content?: string;
+  created_at?: string;
 }
 
 export interface MediaVideo {

@@ -542,17 +542,22 @@ const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [
                     <input
                         type="search"
                         placeholder="Buscar por nombre o tienda..."
+                        aria-label="Buscar eventos por nombre o tienda"
                         className="bg-slate-900/80 text-white placeholder-slate-400 rounded-md py-2 px-4 w-full focus:outline-none focus:ring-2 focus:ring-sky-500 border border-slate-700"
                     />
                 </div>
                 <div className="relative">
                     <input
                         type="date"
+                        aria-label="Filtrar por fecha"
                         className="bg-slate-900/80 text-white rounded-md py-2 px-4 w-full appearance-none focus:outline-none focus:ring-2 focus:ring-sky-500 border border-slate-700"
                     />
                 </div>
                 <div className="relative">
-                    <select className="bg-slate-900/80 text-white rounded-md py-2.5 px-4 w-full appearance-none focus:outline-none focus:ring-2 focus:ring-sky-500 border border-slate-700">
+                    <select
+                        aria-label="Filtrar por formato"
+                        className="bg-slate-900/80 text-white rounded-md py-2.5 px-4 w-full appearance-none focus:outline-none focus:ring-2 focus:ring-sky-500 border border-slate-700"
+                    >
                         <option>Todos los Formatos</option>
                         <option>Standard</option>
                         <option>Modern</option>
@@ -565,7 +570,10 @@ const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [
                     </select>
                 </div>
                 <div className="relative">
-                    <select className="bg-slate-900/80 text-white rounded-md py-2.5 px-4 w-full appearance-none focus:outline-none focus:ring-2 focus:ring-sky-500 border border-slate-700">
+                    <select
+                        aria-label="Filtrar por región"
+                        className="bg-slate-900/80 text-white rounded-md py-2.5 px-4 w-full appearance-none focus:outline-none focus:ring-2 focus:ring-sky-500 border border-slate-700"
+                    >
                         <option>Todas las Regiones</option>
                         <option>Arica y Parinacota</option>
                         <option>Tarapacá</option>

@@ -464,11 +464,10 @@ const PlayerStatsPage: React.FC = () => {
                                             </td>
                                             <td className="py-3 px-4 text-center">
                                                 <span
-                                                    className="px-3 py-1 rounded-full font-semibold"
-                                                    style={{
-                                                        backgroundColor: `${getWinRateColor(stat.win_rate)}20`,
-                                                        color: getWinRateColor(stat.win_rate)
-                                                    }}
+                                                    className={`px-3 py-1 rounded-full font-semibold ${stat.win_rate >= 60 ? 'bg-emerald-500/20 text-emerald-500' :
+                                                            stat.win_rate >= 40 ? 'bg-amber-500/20 text-amber-500' :
+                                                                'bg-red-500/20 text-red-500'
+                                                        }`}
                                                 >
                                                     {stat.win_rate.toFixed(1)}%
                                                 </span>

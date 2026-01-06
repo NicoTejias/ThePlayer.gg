@@ -138,6 +138,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, isLoggedIn, userRole
                     </Link>
                     <button
                         onClick={onClose}
+                        title="Cerrar menú"
                         className="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors"
                     >
                         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -153,6 +154,8 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, isLoggedIn, userRole
                         <select
                             value={currentGame}
                             onChange={(e) => setGame(e.target.value as GameType)}
+                            title="Universo Actual"
+                            aria-label="Seleccionar universo de juego"
                             className="w-full appearance-none bg-slate-800 text-sky-400 font-bold px-4 py-3 rounded-lg border border-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent cursor-pointer"
                         >
                             {(Object.keys(GAME_LABELS) as GameType[]).map((game) => (

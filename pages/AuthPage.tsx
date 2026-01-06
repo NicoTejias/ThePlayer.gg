@@ -287,7 +287,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ handleLogin }) => {
                                     <div className="grid grid-cols-2 gap-4">
                                         {/* País */}
                                         <div className="relative">
-                                            <select name="country" id="country" className={`${commonInputClass} appearance-none`} required>
+                                            <select name="country" id="country" aria-label="Seleccionar país" className={`${commonInputClass} appearance-none`} required>
                                                 <option value="" disabled selected>País</option>
                                                 <optgroup label="Sudamérica">
                                                     <option value="Argentina">Argentina</option>

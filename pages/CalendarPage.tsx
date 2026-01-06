@@ -303,6 +303,7 @@ const CalendarPage: React.FC = () => {
                             <h3 className="text-2xl font-bold text-white">{selectedEvent.title}</h3>
                             <button
                                 onClick={() => setSelectedEvent(null)}
+                                title="Cerrar"
                                 className="text-slate-400 hover:text-white"
                             >
                                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">

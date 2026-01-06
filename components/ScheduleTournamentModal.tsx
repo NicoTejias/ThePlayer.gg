@@ -96,6 +96,7 @@ const ScheduleTournamentModal: React.FC<ScheduleTournamentModalProps> = ({ isOpe
                     <h2 className="text-2xl font-bold text-white">Agendar Torneo</h2>
                     <button
                         onClick={onClose}
+                        title="Cerrar"
                         className="text-slate-400 hover:text-white transition-colors"
                     >
                         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -108,10 +109,11 @@ const ScheduleTournamentModal: React.FC<ScheduleTournamentModalProps> = ({ isOpe
                 <form onSubmit={handleSubmit} className="p-6 space-y-6">
                     {/* Nombre del Torneo */}
                     <div>
-                        <label className="block text-sm font-medium text-slate-300 mb-2">
+                        <label htmlFor="tournamentTitle" className="block text-sm font-medium text-slate-300 mb-2">
                             Nombre del Torneo *
                         </label>
                         <input
+                            id="tournamentTitle"
                             type="text"
                             required
                             value={formData.title}
@@ -124,10 +126,11 @@ const ScheduleTournamentModal: React.FC<ScheduleTournamentModalProps> = ({ isOpe
                     {/* Fecha y Hora */}
                     <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-sm font-medium text-slate-300 mb-2">
+                            <label htmlFor="tournamentDate" className="block text-sm font-medium text-slate-300 mb-2">
                                 Fecha *
                             </label>
                             <input
+                                id="tournamentDate"
                                 type="date"
                                 required
                                 value={formData.date}
@@ -136,10 +139,11 @@ const ScheduleTournamentModal: React.FC<ScheduleTournamentModalProps> = ({ isOpe
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-slate-300 mb-2">
+                            <label htmlFor="tournamentTime" className="block text-sm font-medium text-slate-300 mb-2">
                                 Hora *
                             </label>
                             <input
+                                id="tournamentTime"
                                 type="time"
                                 required
                                 value={formData.time}
@@ -152,10 +156,11 @@ const ScheduleTournamentModal: React.FC<ScheduleTournamentModalProps> = ({ isOpe
                     {/* Formato y Costo */}
                     <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-sm font-medium text-slate-300 mb-2">
+                            <label htmlFor="tournamentFormat" className="block text-sm font-medium text-slate-300 mb-2">
                                 Formato *
                             </label>
                             <select
+                                id="tournamentFormat"
                                 value={formData.format}
                                 onChange={(e) => setFormData({ ...formData, format: e.target.value })}
                                 className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-green-500"
@@ -193,10 +198,11 @@ const ScheduleTournamentModal: React.FC<ScheduleTournamentModalProps> = ({ isOpe
                             </select>
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-slate-300 mb-2">
+                            <label htmlFor="entryFee" className="block text-sm font-medium text-slate-300 mb-2">
                                 Inscripción (CLP) *
                             </label>
                             <input
+                                id="entryFee"
                                 type="text"
                                 required
                                 value={formData.entry_fee}
@@ -209,10 +215,11 @@ const ScheduleTournamentModal: React.FC<ScheduleTournamentModalProps> = ({ isOpe
 
                     {/* Tienda */}
                     <div>
-                        <label className="block text-sm font-medium text-slate-300 mb-2">
+                        <label htmlFor="storeName" className="block text-sm font-medium text-slate-300 mb-2">
                             Tienda *
                         </label>
                         <input
+                            id="storeName"
                             type="text"
                             required
                             value={formData.storeName}
@@ -230,10 +237,11 @@ const ScheduleTournamentModal: React.FC<ScheduleTournamentModalProps> = ({ isOpe
 
                     {/* Máximo de Jugadores */}
                     <div>
-                        <label className="block text-sm font-medium text-slate-300 mb-2">
+                        <label htmlFor="maxPlayers" className="block text-sm font-medium text-slate-300 mb-2">
                             Máximo de Jugadores
                         </label>
                         <input
+                            id="maxPlayers"
                             type="number"
                             min="4"
                             max="256"
@@ -261,10 +269,11 @@ const ScheduleTournamentModal: React.FC<ScheduleTournamentModalProps> = ({ isOpe
                         {formData.recurring && (
                             <div className="space-y-4 pl-8">
                                 <div>
-                                    <label className="block text-sm font-medium text-slate-300 mb-2">
+                                    <label htmlFor="recurrenceType" className="block text-sm font-medium text-slate-300 mb-2">
                                         Frecuencia
                                     </label>
                                     <select
+                                        id="recurrenceType"
                                         value={formData.recurrenceType}
                                         onChange={(e) => setFormData({ ...formData, recurrenceType: e.target.value })}
                                         className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-green-500"
@@ -275,10 +284,11 @@ const ScheduleTournamentModal: React.FC<ScheduleTournamentModalProps> = ({ isOpe
                                     </select>
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-slate-300 mb-2">
+                                    <label htmlFor="recurrenceEnd" className="block text-sm font-medium text-slate-300 mb-2">
                                         Repetir hasta
                                     </label>
                                     <input
+                                        id="recurrenceEnd"
                                         type="date"
                                         value={formData.recurrenceEnd}
                                         onChange={(e) => setFormData({ ...formData, recurrenceEnd: e.target.value })}
@@ -294,10 +304,11 @@ const ScheduleTournamentModal: React.FC<ScheduleTournamentModalProps> = ({ isOpe
 
                     {/* Descripción */}
                     <div>
-                        <label className="block text-sm font-medium text-slate-300 mb-2">
+                        <label htmlFor="description" className="block text-sm font-medium text-slate-300 mb-2">
                             Descripción (opcional)
                         </label>
                         <textarea
+                            id="description"
                             value={formData.description}
                             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                             rows={3}

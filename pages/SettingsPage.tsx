@@ -282,24 +282,24 @@ const SettingsPage: React.FC = () => {
                         <h2 className="text-xl font-bold text-white mb-4 border-b border-slate-700 pb-2">Información Personal</h2>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
-                                <label className={labelClass}>Nombre(s)</label>
-                                <input type="text" value={firstName} onChange={(e) => setFirstName(e.target.value)} className={commonInputClass} />
+                                <label htmlFor="firstName" className={labelClass}>Nombre(s)</label>
+                                <input id="firstName" type="text" value={firstName} onChange={(e) => setFirstName(e.target.value)} className={commonInputClass} />
                             </div>
                             <div>
-                                <label className={labelClass}>Apellido(s)</label>
-                                <input type="text" value={lastName} onChange={(e) => setLastName(e.target.value)} className={commonInputClass} />
+                                <label htmlFor="lastName" className={labelClass}>Apellido(s)</label>
+                                <input id="lastName" type="text" value={lastName} onChange={(e) => setLastName(e.target.value)} className={commonInputClass} />
                             </div>
                             <div>
-                                <label className={labelClass}>Nombre de Usuario (Nick)</label>
-                                <input type="text" value={username} onChange={(e) => setUsername(e.target.value)} className={commonInputClass} />
+                                <label htmlFor="username" className={labelClass}>Nombre de Usuario (Nick)</label>
+                                <input id="username" type="text" value={username} onChange={(e) => setUsername(e.target.value)} className={commonInputClass} />
                             </div>
                             <div>
-                                <label className={labelClass}>Fecha de Nacimiento</label>
-                                <input type="date" value={birthDate} onChange={(e) => setBirthDate(e.target.value)} className={commonInputClass} />
+                                <label htmlFor="birthDate" className={labelClass}>Fecha de Nacimiento</label>
+                                <input id="birthDate" type="date" value={birthDate} onChange={(e) => setBirthDate(e.target.value)} className={commonInputClass} />
                             </div>
                             <div>
-                                <label className={labelClass}>Género</label>
-                                <select value={gender} onChange={(e) => setGender(e.target.value)} className={commonInputClass}>
+                                <label htmlFor="gender" className={labelClass}>Género</label>
+                                <select id="gender" value={gender} onChange={(e) => setGender(e.target.value)} className={commonInputClass}>
                                     <option value="">Seleccionar</option>
                                     <option value="Masculino">Masculino</option>
                                     <option value="Femenino">Femenino</option>
@@ -308,8 +308,8 @@ const SettingsPage: React.FC = () => {
                                 </select>
                             </div>
                             <div>
-                                <label className={labelClass}>Teléfono</label>
-                                <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} className={commonInputClass} placeholder="+56 9 ..." />
+                                <label htmlFor="phone" className={labelClass}>Teléfono</label>
+                                <input id="phone" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} className={commonInputClass} placeholder="+56 9 ..." />
                             </div>
                         </div>
                     </section>
@@ -319,12 +319,12 @@ const SettingsPage: React.FC = () => {
                         <h2 className="text-xl font-bold text-white mb-4 border-b border-slate-700 pb-2">Ubicación</h2>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div className="md:col-span-2">
-                                <label className={labelClass}>Dirección</label>
-                                <input type="text" value={address} onChange={(e) => setAddress(e.target.value)} className={commonInputClass} placeholder="Calle, Número, Depto..." />
+                                <label htmlFor="address" className={labelClass}>Dirección</label>
+                                <input id="address" type="text" value={address} onChange={(e) => setAddress(e.target.value)} className={commonInputClass} placeholder="Calle, Número, Depto..." />
                             </div>
                             <div>
-                                <label className={labelClass}>País</label>
-                                <select value={country} onChange={(e) => { setCountry(e.target.value); setCity(''); }} className={commonInputClass}>
+                                <label htmlFor="country" className={labelClass}>País</label>
+                                <select id="country" value={country} onChange={(e) => { setCountry(e.target.value); setCity(''); }} className={commonInputClass}>
                                     <option value="">Selecciona tu país</option>
                                     <optgroup label="Latinoamérica">
                                         {LATAM_COUNTRIES.map(c => <option key={c} value={c}>{c}</option>)}
@@ -335,14 +335,14 @@ const SettingsPage: React.FC = () => {
                                 </select>
                             </div>
                             <div>
-                                <label className={labelClass}>Región / Ciudad</label>
+                                <label htmlFor="city" className={labelClass}>Región / Ciudad</label>
                                 {country && CITIES_BY_COUNTRY[country] ? (
-                                    <select value={city} onChange={(e) => setCity(e.target.value)} className={commonInputClass}>
+                                    <select id="city" value={city} onChange={(e) => setCity(e.target.value)} className={commonInputClass}>
                                         <option value="">Selecciona tu ciudad/región</option>
                                         {CITIES_BY_COUNTRY[country].map(c => <option key={c} value={c}>{c}</option>)}
                                     </select>
                                 ) : (
-                                    <input type="text" value={city} onChange={(e) => setCity(e.target.value)} className={commonInputClass} placeholder="Escribe tu ciudad o región" />
+                                    <input id="city" type="text" value={city} onChange={(e) => setCity(e.target.value)} className={commonInputClass} placeholder="Escribe tu ciudad o región" />
                                 )}
                             </div>
                         </div>
@@ -373,8 +373,8 @@ const SettingsPage: React.FC = () => {
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
-                                    <label className={labelClass}>Formato Favorito</label>
-                                    <select value={favoriteFormat} onChange={(e) => setFavoriteFormat(e.target.value)} className={commonInputClass}>
+                                    <label htmlFor="favoriteFormat" className={labelClass}>Formato Favorito</label>
+                                    <select id="favoriteFormat" value={favoriteFormat} onChange={(e) => setFavoriteFormat(e.target.value)} className={commonInputClass}>
                                         <option value="">Selecciona un formato</option>
                                         {FORMATS.map(f => <option key={f} value={f}>{f}</option>)}
                                     </select>

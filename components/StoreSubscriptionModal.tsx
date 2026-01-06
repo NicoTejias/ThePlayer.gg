@@ -74,6 +74,7 @@ const StoreSubscriptionModal: React.FC<StoreSubscriptionModalProps> = ({ isOpen,
                     </div>
                     <button
                         onClick={onClose}
+                        title="Cerrar"
                         className="text-slate-400 hover:text-white transition-colors"
                     >
                         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -85,10 +86,11 @@ const StoreSubscriptionModal: React.FC<StoreSubscriptionModalProps> = ({ isOpen,
                 <form onSubmit={handleSubmit} className="space-y-6">
                     {/* Plan Selection */}
                     <div>
-                        <label className="block text-sm font-bold text-slate-300 mb-2">
+                        <label htmlFor="plan-select" className="block text-sm font-bold text-slate-300 mb-2">
                             Plan Seleccionado
                         </label>
                         <select
+                            id="plan-select"
                             value={formData.plan}
                             onChange={(e) => setFormData({ ...formData, plan: e.target.value as any })}
                             className="w-full bg-slate-900 text-white rounded-lg px-4 py-3 border border-slate-700 focus:border-sky-500 focus:outline-none"
@@ -101,10 +103,11 @@ const StoreSubscriptionModal: React.FC<StoreSubscriptionModalProps> = ({ isOpen,
 
                     {/* Store Name */}
                     <div>
-                        <label className="block text-sm font-bold text-slate-300 mb-2">
+                        <label htmlFor="store-name" className="block text-sm font-bold text-slate-300 mb-2">
                             Nombre de la Tienda *
                         </label>
                         <input
+                            id="store-name"
                             type="text"
                             required
                             value={formData.storeName}
@@ -117,10 +120,11 @@ const StoreSubscriptionModal: React.FC<StoreSubscriptionModalProps> = ({ isOpen,
                     {/* Contact Info Grid */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-sm font-bold text-slate-300 mb-2">
+                            <label htmlFor="contact-name" className="block text-sm font-bold text-slate-300 mb-2">
                                 Nombre de Contacto *
                             </label>
                             <input
+                                id="contact-name"
                                 type="text"
                                 required
                                 value={formData.contactName}
@@ -130,10 +134,11 @@ const StoreSubscriptionModal: React.FC<StoreSubscriptionModalProps> = ({ isOpen,
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-bold text-slate-300 mb-2">
+                            <label htmlFor="region-select" className="block text-sm font-bold text-slate-300 mb-2">
                                 Región *
                             </label>
                             <select
+                                id="region-select"
                                 required
                                 value={formData.region}
                                 onChange={(e) => setFormData({ ...formData, region: e.target.value })}
@@ -162,10 +167,11 @@ const StoreSubscriptionModal: React.FC<StoreSubscriptionModalProps> = ({ isOpen,
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-sm font-bold text-slate-300 mb-2">
+                            <label htmlFor="email" className="block text-sm font-bold text-slate-300 mb-2">
                                 Email *
                             </label>
                             <input
+                                id="email"
                                 type="email"
                                 required
                                 value={formData.email}
@@ -175,10 +181,11 @@ const StoreSubscriptionModal: React.FC<StoreSubscriptionModalProps> = ({ isOpen,
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-bold text-slate-300 mb-2">
+                            <label htmlFor="phone" className="block text-sm font-bold text-slate-300 mb-2">
                                 Teléfono *
                             </label>
                             <input
+                                id="phone"
                                 type="tel"
                                 required
                                 value={formData.phone}
@@ -191,10 +198,11 @@ const StoreSubscriptionModal: React.FC<StoreSubscriptionModalProps> = ({ isOpen,
 
                     {/* Message */}
                     <div>
-                        <label className="block text-sm font-bold text-slate-300 mb-2">
+                        <label htmlFor="message" className="block text-sm font-bold text-slate-300 mb-2">
                             Mensaje (Opcional)
                         </label>
                         <textarea
+                            id="message"
                             value={formData.message}
                             onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                             rows={4}

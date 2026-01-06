@@ -430,11 +430,11 @@ const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpl
 
                                 <div>
                                     <label htmlFor="tournament-date" className="block text-sm font-medium text-slate-300 mb-2">Fecha del Torneo</label>
-                                    <input type="date" value={tournamentDate} onChange={e => setTournamentDate(e.target.value)} className="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 text-white" />
+                                    <input id="tournament-date" type="date" value={tournamentDate} onChange={e => setTournamentDate(e.target.value)} className="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 text-white" />
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-medium text-slate-300 mb-2">Archivo de Resultados</label>
+                                    <label htmlFor="tournament-file" className="block text-sm font-medium text-slate-300 mb-2">Archivo de Resultados</label>
                                     <div className={`relative border-2 border-dashed rounded-lg p-6 text-center transition-colors ${selectedFile ? 'border-sky-500 bg-sky-900/20' : 'border-slate-600 hover:border-slate-500 bg-slate-900'}`}>
                                         <input
                                             type="file"
@@ -484,6 +484,8 @@ const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpl
                                                 <textarea
                                                     value={pastedText}
                                                     readOnly
+                                                    aria-label="Texto pegado del portapapeles"
+                                                    placeholder="El contenido del texto pegado aparecerá aquí"
                                                     className="w-full px-4 py-2 bg-slate-950 border border-slate-800 rounded-lg text-slate-400 font-mono text-xs"
                                                     rows={3}
                                                 />
@@ -557,6 +559,7 @@ const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpl
                                                         <input
                                                             type="text"
                                                             value={player.playerName}
+                                                            aria-label={`Nombre del jugador ${index + 1}`}
                                                             onChange={(e) => handlePlayerNameChange(index, e.target.value)}
                                                             readOnly={userRole !== 'admin'}
                                                             className={`w-full bg-slate-900 text-white rounded p-1 border border-slate-700 ${userRole !== 'admin' ? 'cursor-default' : ''}`}

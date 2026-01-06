@@ -101,7 +101,11 @@ const RankingsPage: React.FC<RankingsPageProps> = ({ players, teams }) => {
                 </div>
 
                 <div className="relative w-full sm:w-auto">
-                    <select className="bg-slate-900/80 text-white rounded-md py-2.5 px-4 w-full sm:w-72 appearance-none focus:outline-none focus:ring-2 focus:ring-sky-500 border border-slate-700 font-bold text-center">
+                    <select
+                        title="Seleccionar temporada"
+                        aria-label="Seleccionar temporada"
+                        className="bg-slate-900/80 text-white rounded-md py-2.5 px-4 w-full sm:w-72 appearance-none focus:outline-none focus:ring-2 focus:ring-sky-500 border border-slate-700 font-bold text-center"
+                    >
                         <option value="2025">Temporada Actual (2025)</option>
                         <option value="2024">Temporada 2024</option>
                     </select>
@@ -163,7 +167,7 @@ const RankingsPage: React.FC<RankingsPageProps> = ({ players, teams }) => {
                     </div>
 
                     {/* Ranking Winrate */}
-                    <div className="space-y-4 animate-fade-in-up" style={{ animationDelay: '100ms' }}>
+                    <div className="space-y-4 animate-fade-in-up animate-delay-100">
                         <div className="text-center md:text-left h-28 flex flex-col justify-center">
                             <h2 className="text-3xl font-bold text-white uppercase tracking-wider">PLS Winrate</h2>
                             <p className="text-md text-slate-400 mt-1">Premia la efectividad en el campo de batalla.</p>
