@@ -233,21 +233,22 @@ const SettingsPage: React.FC = () => {
 
             if (!user) throw new Error('No user logged in');
 
+            // Sanitizar todos los campos de texto
             const updates = {
                 id: user.id,
-                username,
-                first_name: firstName,
-                last_name: lastName,
+                username: sanitizeText(username),
+                first_name: sanitizeText(firstName),
+                last_name: sanitizeText(lastName),
                 birth_date: birthDate || null,
-                gender,
-                phone,
-                address,
-                country,
-                city, // Mapping to 'city' column, serves as Region/City
-                preferred_games: preferredGames,
-                favorite_format: favoriteFormat,
-                team,
-                avatar_url: avatarUrl,
+                gender: sanitizeText(gender),
+                phone: sanitizeText(phone),
+                address: sanitizeText(address),
+                country: sanitizeText(country),
+                city: sanitizeText(city),
+                preferred_games: preferredGames, // Array de strings predefinidos, seguro
+                favorite_format: sanitizeText(favoriteFormat),
+                team: sanitizeText(team),
+                avatar_url: avatarUrl ? sanitizeUrl(avatarUrl) : '',
                 updated_at: new Date().toISOString(),
             };
 
