@@ -468,15 +468,15 @@ const AppContent: React.FC = () => {
     const initAuth = async () => {
       setIsAuthLoading(true);
 
-      // Safety timeout for auth initialization
+      // Safety timeout for auth initialization (increased to 20 seconds)
       const authTimeout = setTimeout(() => {
-        console.warn("Auth initialization timed out after 8 seconds. Forcing loading state off.");
+        console.warn("Auth initialization timed out after 20 seconds. Forcing loading state off.");
         setIsAuthLoading(false);
         setIsLoggedIn(false);
         setUserRole(null);
         setUserProfile(null);
-        toast.error("La sesión tardó demasiado en cargar. Por favor, intenta nuevamente.");
-      }, 8000); // 8 seconds timeout
+        toast.error("La sesión tardó demasiado en cargar. Por favor, recarga la página.");
+      }, 20000); // 20 seconds timeout
 
       try {
         // Get initial session
