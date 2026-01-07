@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../supabaseClient';
 import { useNavigate } from 'react-router-dom';
+import { sanitizeText, sanitizeUrl } from '../utils/sanitize';
+import { z } from 'zod';
 
 const LATAM_COUNTRIES = [
     "Argentina", "Bolivia", "Brasil", "Chile", "Colombia", "Costa Rica", "Cuba", "Ecuador",
@@ -74,20 +76,36 @@ const SettingsPage: React.FC = () => {
     };
 
     const handleAddAlias = async () => {
-        if (!newAlias.trim()) return;
+        const trimmedAlias = newAlias.trim();
+
+        // Validación
+        if (!trimmedAlias) return;
+        if (trimmedAlias.length < 2) {
+            setAliasError('❌ El alias debe tener al menos 2 caracteres.');
+            return;
+        }
+        if (trimmedAlias.length > 100) {
+            setAliasError('❌ El alias no puede exceder 100 caracteres.');
+            return;
+        }
+
         setAliasLoading(true);
-        setAliasError(null); // Clear previous errors
+        setAliasError(null);
+
         try {
             const { data: { user } } = await supabase.auth.getUser();
             if (!user) return;
 
+            // Sanitizar antes de enviar
+            const sanitizedAlias = sanitizeText(trimmedAlias);
+
             const { error } = await supabase.from('player_aliases').insert({
                 player_id: user.id,
-                alias_name: newAlias.trim()
+                alias_name: sanitizedAlias
             });
 
             if (error) {
-                if (error.code === '23505') { // Unique violation
+                if (error.code === '23505') {
                     setAliasError('❌ Este alias ya está registrado por otro usuario o por ti mismo.');
                 } else {
                     setAliasError(`Error: ${error.message}`);
