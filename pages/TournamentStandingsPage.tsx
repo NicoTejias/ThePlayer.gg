@@ -57,7 +57,8 @@ const TournamentStandingsPage: React.FC = () => {
 
                 const mappedStandings: TournamentStanding[] = (resultsData || []).map((r, index) => ({
                     rank: r.rank || index + 1,
-                    playerName: r.player_name,
+                    // Si no tiene player_id, es porque no está registrado en la base de datos como usuario
+                    playerName: r.player_id ? r.player_name : 'Anónimo',
                     matchRecord: `${r.wins}-${r.losses}-${r.draws}`,
                     pwpEarned: r.pwp_earned
                 }));
