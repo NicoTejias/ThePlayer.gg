@@ -173,7 +173,7 @@ const LeagueRankingPage = () => {
                                         <th className="p-4">Jugador</th>
                                         <th className="p-4 text-center">Torneos</th>
                                         <th className="p-4 text-center">W-L-D</th>
-                                        <th className="p-4 text-right">Puntos PWP</th>
+                                        <th className="p-4 text-right">Pts Ranking</th>
                                         <th className="p-4 text-right">Puntos Liga</th>
                                     </tr>
                                 </thead>
