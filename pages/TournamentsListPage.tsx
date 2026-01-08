@@ -23,31 +23,25 @@ const TournamentsListPage: React.FC<TournamentsListPageProps> = ({ tournaments }
                 <div className="relative flex-grow md:col-span-2">
                     <input
                         type="search"
-                        placeholder="Buscar por nombre, tienda o formato..."
+                        aria-label="Buscar torneos"
+                        placeholder="Buscar por nombre o tienda..."
                         className="bg-slate-900/80 text-white placeholder-slate-400 rounded-md py-2 px-4 w-full focus:outline-none focus:ring-2 focus:ring-sky-500 border border-slate-700"
                     />
                 </div>
                 <div className="relative">
-                    <select className="bg-slate-900/80 text-white rounded-md py-2.5 px-4 w-full appearance-none focus:outline-none focus:ring-2 focus:ring-sky-500 border border-slate-700">
-                        <option>Todos los Formatos</option>
-                        <option>Standard</option>
-                        <option>Modern</option>
-                        <option>Pioneer</option>
-                        <option>Legacy</option>
-                        <option>Pauper</option>
-                        <option>Commander</option>
-                        <option>Draft</option>
-                        <option>Sealed</option>
-                    </select>
+                    <input
+                        type="date"
+                        aria-label="Filtrar por fecha"
+                        className="bg-slate-900/80 text-white placeholder-slate-400 rounded-md py-2 px-4 w-full focus:outline-none focus:ring-2 focus:ring-sky-500 border border-slate-700"
+                    />
                 </div>
                 <div className="relative">
-                    <select className="bg-slate-900/80 text-white rounded-md py-2.5 px-4 w-full appearance-none focus:outline-none focus:ring-2 focus:ring-sky-500 border border-slate-700">
-                        <option>Todas las Regiones</option>
-                        <option>Metropolitana</option>
-                        <option>Valparaíso</option>
-                        <option>Biobío</option>
-                        <option>Sur</option>
-                        <option>Norte</option>
+                    <select
+                        aria-label="Filtrar por tienda"
+                        className="bg-slate-900/80 text-white rounded-md py-2.5 px-4 w-full appearance-none focus:outline-none focus:ring-2 focus:ring-sky-500 border border-slate-700"
+                    >
+                        <option>Todas las Tiendas</option>
+                        {/* Aquí se deberían cargar dinámicamente las tiendas */}
                     </select>
                 </div>
             </div>
@@ -58,9 +52,9 @@ const TournamentsListPage: React.FC<TournamentsListPageProps> = ({ tournaments }
                     <thead className="bg-slate-700/50">
                         <tr>
                             <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Fecha</th>
-                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Nombre del Torneo</th>
+                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Evento</th>
                             <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Tienda</th>
-                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Formato</th>
+                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Torneo</th>
                             <th scope="col" className="px-6 py-3 text-center text-xs font-medium text-slate-300 uppercase tracking-wider">Jugadores</th>
                             <th scope="col" className="px-6 py-3 text-center text-xs font-medium text-slate-300 uppercase tracking-wider">Acciones</th>
                         </tr>
