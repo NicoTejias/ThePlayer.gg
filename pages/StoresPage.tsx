@@ -28,6 +28,7 @@ const StoresPage: React.FC = () => {
     const [followedStores, setFollowedStores] = React.useState<string[]>([]);
     const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
     const [selectedPlan, setSelectedPlan] = useState<'basic' | 'medium' | 'premium'>('medium');
+    const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('monthly');
 
     const toggleFollow = (storeId: string) => {
         setFollowedStores(prev =>
@@ -55,11 +56,33 @@ const StoresPage: React.FC = () => {
                     </p>
                 </div>
 
+                <div className="flex justify-center mb-10 relative z-10">
+                    <div className="bg-slate-800 p-1 rounded-full border border-slate-700 inline-flex relative">
+                        {/* Background slider animation */}
+                        <div className={`absolute top-1 bottom-1 w-1/2 bg-sky-600 rounded-full transition-all duration-300 ease-in-out ${billingCycle === 'annual' ? 'left-1/2 right-1' : 'left-1'}`}></div>
+
+                        <button
+                            onClick={() => setBillingCycle('monthly')}
+                            className={`relative z-10 px-6 py-2 rounded-full text-sm font-bold transition-colors ${billingCycle === 'monthly' ? 'text-white' : 'text-slate-400 hover:text-white'}`}
+                        >
+                            Mensual
+                        </button>
+                        <button
+                            onClick={() => setBillingCycle('annual')}
+                            className={`relative z-10 px-6 py-2 rounded-full text-sm font-bold transition-colors flex items-center gap-2 ${billingCycle === 'annual' ? 'text-white' : 'text-slate-400 hover:text-white'}`}
+                        >
+                            Anual
+                            <span className="bg-green-500 text-white text-[10px] px-1.5 py-0.5 rounded-full">Ahorra 17%</span>
+                        </button>
+                    </div>
+                </div>
+
                 {/* Pricing Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto relative z-10">
                     <PricingCard
                         title="Plan Básico"
-                        price="25.000"
+                        price={billingCycle === 'monthly' ? "25.000" : "250.000"}
+                        period={billingCycle === 'monthly' ? "/mes" : "/año"}
                         features={[
                             'Puntos PLS oficiales en torneos',
                             'Torneos en calendario ThePlayer',
@@ -67,13 +90,14 @@ const StoresPage: React.FC = () => {
                             'Gestión de eventos desde dashboard',
                             'Estadísticas básicas de asistencia'
                         ]}
-                        ctaText="Comenzar"
+                        ctaText={billingCycle === 'monthly' ? "Comenzar Mensual" : "Comenzar Anual"}
                         onCTAClick={() => handleSubscribe('basic')}
                     />
 
                     <PricingCard
                         title="Plan Medio"
-                        price="50.000"
+                        price={billingCycle === 'monthly' ? "50.000" : "500.000"}
+                        period={billingCycle === 'monthly' ? "/mes" : "/año"}
                         badge="Más Popular"
                         highlighted={true}
                         features={[
@@ -85,13 +109,14 @@ const StoresPage: React.FC = () => {
                             'Prioridad en búsquedas',
                             'Estadísticas avanzadas'
                         ]}
-                        ctaText="Elegir Plan"
+                        ctaText={billingCycle === 'monthly' ? "Elegir Plan" : "Elegir Anual"}
                         onCTAClick={() => handleSubscribe('medium')}
                     />
 
                     <PricingCard
                         title="Plan Premium"
-                        price="100.000"
+                        price={billingCycle === 'monthly' ? "100.000" : "1.000.000"}
+                        period={billingCycle === 'monthly' ? "/mes" : "/año"}
                         badge="Mejor Valor"
                         features={[
                             'Todo lo del Plan Medio',
@@ -110,7 +135,7 @@ const StoresPage: React.FC = () => {
 
                 <div className="text-center mt-12 relative z-10">
                     <p className="text-slate-400 text-sm">
-                        💡 Todos los precios son en CLP (Pesos Chilenos) por mes. Sin permanencia mínima.
+                        💡 Todos los precios son en CLP (Pesos Chilenos). {billingCycle === 'annual' ? '¡Disfruta de 2 meses gratis con el plan anual!' : 'Sin permanencia mínima.'}
                     </p>
                 </div>
             </div>
@@ -260,6 +285,7 @@ const StoresPage: React.FC = () => {
                 isOpen={showSubscriptionModal}
                 onClose={() => setShowSubscriptionModal(false)}
                 selectedPlan={selectedPlan}
+                billingCycle={billingCycle}
             />
         </div>
     );

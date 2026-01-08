@@ -124,6 +124,13 @@ export const StoreSubscriptionSchema = z.object({
             message: 'Plan inválido'
         }),
 
+    billingCycle: z
+        .enum(['monthly', 'annual'], {
+            message: 'Ciclo de facturación inválido'
+        })
+        .optional()
+        .default('monthly'),
+
     message: z
         .string()
         .max(1000, 'El mensaje no puede exceder 1000 caracteres')

@@ -8,9 +8,10 @@ interface StoreSubscriptionModalProps {
     isOpen: boolean;
     onClose: () => void;
     selectedPlan?: 'basic' | 'medium' | 'premium';
+    billingCycle?: 'monthly' | 'annual';
 }
 
-const StoreSubscriptionModal: React.FC<StoreSubscriptionModalProps> = ({ isOpen, onClose, selectedPlan = 'medium' }) => {
+const StoreSubscriptionModal: React.FC<StoreSubscriptionModalProps> = ({ isOpen, onClose, selectedPlan = 'medium', billingCycle = 'monthly' }) => {
     const [formData, setFormData] = useState({
         storeName: '',
         contactName: '',
@@ -18,15 +19,29 @@ const StoreSubscriptionModal: React.FC<StoreSubscriptionModalProps> = ({ isOpen,
         phone: '',
         region: '',
         plan: selectedPlan,
+        billingCycle: billingCycle,
         message: ''
     });
     const [loading, setLoading] = useState(false);
+
+    // Update form when props change
+    React.useEffect(() => {
+        setFormData(prev => ({
+            ...prev,
+            plan: selectedPlan,
+            billingCycle: billingCycle
+        }));
+    }, [selectedPlan, billingCycle]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
         // 1. Validar datos con Zod
-        const validation = validateData(StoreSubscriptionSchema, formData);
+        // Nota: Asegúrate de que StoreSubscriptionSchema permita billingCycle o actualiza la validación
+        const validation = validateData(StoreSubscriptionSchema, {
+            ...formData,
+            plan: formData.plan
+        });
 
         if (!validation.success) {
             toast.error('Error de validación', {
@@ -48,7 +63,8 @@ const StoreSubscriptionModal: React.FC<StoreSubscriptionModalProps> = ({ isOpen,
                 email: validatedData.email, // Email ya validado por Zod
                 phone: validatedData.phone,
                 region: validatedData.region,
-                plan_type: validatedData.plan,
+                plan_type: formData.plan,
+                billing_cycle: formData.billingCycle,
                 message: validatedData.message ? sanitizeText(validatedData.message) : null,
                 status: 'pending' as const
             };
@@ -72,6 +88,7 @@ const StoreSubscriptionModal: React.FC<StoreSubscriptionModalProps> = ({ isOpen,
                 phone: '',
                 region: '',
                 plan: selectedPlan,
+                billingCycle: billingCycle,
                 message: ''
             });
 
@@ -88,10 +105,21 @@ const StoreSubscriptionModal: React.FC<StoreSubscriptionModalProps> = ({ isOpen,
 
     if (!isOpen) return null;
 
+    const getPlanPrice = (plan: 'basic' | 'medium' | 'premium', cycle: 'monthly' | 'annual') => {
+        const prices = {
+            basic: { monthly: '25.000', annual: '250.000' },
+            medium: { monthly: '50.000', annual: '500.000' },
+            premium: { monthly: '100.000', annual: '1.000.000' }
+        };
+        return prices[plan][cycle];
+    };
+
+    const periodLabel = formData.billingCycle === 'monthly' ? '/mes' : '/año';
+
     const planNames = {
-        basic: 'Plan Básico - $25.000/mes',
-        medium: 'Plan Medio - $50.000/mes',
-        premium: 'Plan Premium - $100.000/mes'
+        basic: `Plan Básico - $${getPlanPrice('basic', formData.billingCycle)}${periodLabel}`,
+        medium: `Plan Medio - $${getPlanPrice('medium', formData.billingCycle)}${periodLabel}`,
+        premium: `Plan Premium - $${getPlanPrice('premium', formData.billingCycle)}${periodLabel}`
     };
 
     return (
@@ -115,20 +143,36 @@ const StoreSubscriptionModal: React.FC<StoreSubscriptionModalProps> = ({ isOpen,
 
                 <form onSubmit={handleSubmit} className="space-y-6">
                     {/* Plan Selection */}
-                    <div>
-                        <label htmlFor="plan-select" className="block text-sm font-bold text-slate-300 mb-2">
-                            Plan Seleccionado
-                        </label>
-                        <select
-                            id="plan-select"
-                            value={formData.plan}
-                            onChange={(e) => setFormData({ ...formData, plan: e.target.value as any })}
-                            className="w-full bg-slate-900 text-white rounded-lg px-4 py-3 border border-slate-700 focus:border-sky-500 focus:outline-none"
-                        >
-                            <option value="basic">{planNames.basic}</option>
-                            <option value="medium">{planNames.medium}</option>
-                            <option value="premium">{planNames.premium}</option>
-                        </select>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label htmlFor="plan-select" className="block text-sm font-bold text-slate-300 mb-2">
+                                Plan Seleccionado
+                            </label>
+                            <select
+                                id="plan-select"
+                                value={formData.plan}
+                                onChange={(e) => setFormData({ ...formData, plan: e.target.value as any })}
+                                className="w-full bg-slate-900 text-white rounded-lg px-4 py-3 border border-slate-700 focus:border-sky-500 focus:outline-none"
+                            >
+                                <option value="basic">{planNames.basic}</option>
+                                <option value="medium">{planNames.medium}</option>
+                                <option value="premium">{planNames.premium}</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label htmlFor="cycle-select" className="block text-sm font-bold text-slate-300 mb-2">
+                                Ciclo de Facturación
+                            </label>
+                            <select
+                                id="cycle-select"
+                                value={formData.billingCycle}
+                                onChange={(e) => setFormData({ ...formData, billingCycle: e.target.value as any })}
+                                className="w-full bg-slate-900 text-white rounded-lg px-4 py-3 border border-slate-700 focus:border-sky-500 focus:outline-none"
+                            >
+                                <option value="monthly">Mensual</option>
+                                <option value="annual">Anual (Ahorra ~17%)</option>
+                            </select>
+                        </div>
                     </div>
 
                     {/* Store Name */}
