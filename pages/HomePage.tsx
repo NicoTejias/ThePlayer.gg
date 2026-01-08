@@ -165,7 +165,21 @@ const HomePage: React.FC<HomePageProps> = ({ players, events, session, userRole,
       is_content_creator: p.is_content_creator || false,
     }));
 
-  const displayEvents = (events && events.length > 0) ? events.slice(0, 4) : [];
+  // Filtrar eventos pasados y mostrar solo los próximos (incluyendo hoy)
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const upcomingEvents = (events || [])
+    .filter(event => {
+      // Asumimos que event.date viene en formato YYYY-MM-DD
+      // Agregamos T00:00:00 para asegurar que se interprete como local time al inicio del día
+      // o usamos una comparación de strings directa si el formato es consistente ISO
+      const eventDate = new Date(`${event.date}T00:00:00`);
+      return eventDate >= today;
+    })
+    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+  const displayEvents = upcomingEvents.slice(0, 4);
 
   if (loading) {
     return (
