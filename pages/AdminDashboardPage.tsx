@@ -4,7 +4,7 @@ import ShieldCheckIcon from '../components/icons/ShieldCheckIcon';
 import ClipboardListIcon from '../components/icons/ClipboardListIcon';
 import TrophyIcon from '../components/icons/TrophyIcon';
 import UsersIcon from '../components/icons/UserIcon';
-import ScaleIcon from '../components/icons/ScaleIcon';
+
 import { supabase } from '../supabaseClient';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -107,12 +107,10 @@ const AdminDashboardPage: React.FC = () => {
 
             // 3. Stats
             const { count: playersCount } = await supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'player');
-            const { count: judgesCount } = await supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'judge');
-
             setStats({
                 pendingStores: storesData?.length || 0,
                 tournaments: tourneysData?.length || 0,
-                activeJudges: judgesCount || 0,
+                activeJudges: 0,
                 totalPlayers: playersCount || 0
             });
 
@@ -204,7 +202,6 @@ const AdminDashboardPage: React.FC = () => {
             <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <StatCard icon={<ShieldCheckIcon className="w-8 h-8" />} title="Tiendas Pendientes" value={stats.pendingStores} color="yellow" />
                 <StatCard icon={<ClipboardListIcon className="w-8 h-8" />} title="Torneos (Recientes)" value={stats.tournaments} color="sky" />
-                <StatCard icon={<ScaleIcon className="w-8 h-8" />} title="Jueces Activos" value={stats.activeJudges} color="green" />
                 <StatCard icon={<UsersIcon className="w-8 h-8" />} title="Total Jugadores" value={stats.totalPlayers} color="violet" />
             </section>
 
