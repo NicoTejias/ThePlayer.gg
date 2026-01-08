@@ -23,6 +23,7 @@ const mainNavItems = [
 const communityItems = [
     { name: 'Creadores', path: '/creadores', icon: '🎬' },
     { name: 'Tiendas', path: '/tiendas', icon: '🏪' },
+    { name: 'Ligas', path: '/ligas', icon: '🏆' },
     { name: 'Señal Online', path: '/envivo', icon: '📺' },
 ];
 

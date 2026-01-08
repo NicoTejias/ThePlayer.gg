@@ -39,6 +39,8 @@ import SellerProfilePage from './pages/SellerProfilePage';
 import CalendarPage from './pages/CalendarPage';
 import PlayerStatsPage from './pages/PlayerStatsPage';
 import StoreDashboardPage from './pages/StoreDashboardPage';
+import LeagueRankingPage from './pages/LeagueRankingPage';
+import CommunityLeaguesPage from './pages/CommunityLeaguesPage';
 import PlayerDashboardPage from './pages/PlayerDashboardPage';
 import TeamProfilePage from './pages/TeamProfilePage';
 import TournamentsListPage from './pages/TournamentsListPage';
@@ -825,6 +827,9 @@ const AppContent: React.FC = () => {
           <Route path="/calendario" element={<CalendarPage />} />
           <Route path="/stats" element={<PlayerStatsPage />} />
           <Route path="/dashboard/tienda" element={<StoreDashboardPage onTournamentUpload={handleTournamentUpload} onDeleteTournament={handleDeleteTournament} userRole={userRole} tournaments={tournamentResults} storeStatus={userProfile?.status} storeName={userProfile?.username} />} />
+          <Route path="/leagues/:leagueId" element={<LeagueRankingPage />} />
+          <Route path="/ligas" element={<CommunityLeaguesPage />} />
+          <Route path="/community-leagues" element={<CommunityLeaguesPage />} />
           <Route path="/dashboard/jugador" element={<PlayerDashboardPage profile={userProfile} />} />
 
           <Route path="/subscription/success" element={<SubscriptionSuccessPage />} />

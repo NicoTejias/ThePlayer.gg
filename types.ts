@@ -217,6 +217,7 @@ export interface TournamentResult {
   format: TournamentFormat | string;
   playerCount: number;
   gameType?: GameType;
+  leagueId?: string;
 }
 
 export type TournamentFormat =

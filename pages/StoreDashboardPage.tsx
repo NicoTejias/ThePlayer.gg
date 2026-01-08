@@ -9,6 +9,7 @@ import { parseEventLinkHtml } from '../utils/HtmlParser';
 import { checkTournamentIntegrity, IntegrityWarning, getTournamentFingerprint } from '../utils/IntegrityChecker';
 import { supabase } from '../supabaseClient';
 import { useGame } from '../context/GameContext';
+import { toast } from 'sonner';
 
 interface StoreDashboardPageProps {
     onTournamentUpload: (tournamentData: Omit<TournamentResult, 'id'>, players: TournamentParseResult[]) => void;
@@ -34,6 +35,87 @@ const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpl
     const [warnings, setWarnings] = useState<IntegrityWarning[]>([]);
     const [isUploading, setIsUploading] = useState(false);
     const [isDeleting, setIsDeleting] = useState<string | null>(null);
+
+    // League State
+    const [leagues, setLeagues] = useState<any[]>([]);
+    const [view, setView] = useState<'tournaments' | 'leagues'>('tournaments');
+    const [isCreatingLeague, setIsCreatingLeague] = useState(false);
+    const [newLeagueData, setNewLeagueData] = useState({ name: '', format: 'Pauper', is_private: false });
+    const [selectedLeagueId, setSelectedLeagueId] = useState<string>('');
+    const [editingLeague, setEditingLeague] = useState<any>(null); // State for editing
+
+    React.useEffect(() => {
+        // Fetch leagues on mount to populate selector and view
+        fetchLeagues();
+    }, []);
+
+    const fetchLeagues = async () => {
+        const { data } = await supabase
+            .from('store_leagues')
+            .select('*')
+            .order('created_at', { ascending: false });
+        if (data) setLeagues(data);
+    };
+
+    const handleUpdateLeague = async () => {
+        if (!editingLeague) return;
+        try {
+            const { error } = await supabase
+                .from('store_leagues')
+                .update({
+                    name: editingLeague.name,
+                    format: editingLeague.format,
+                    is_private: editingLeague.is_private,
+                    status: editingLeague.status
+                })
+                .eq('id', editingLeague.id);
+
+            if (error) throw error;
+            toast.success('Liga actualizada correctamente');
+            setEditingLeague(null);
+            fetchLeagues();
+        } catch (error: any) {
+            toast.error('Error al actualizar: ' + error.message);
+        }
+    };
+
+    const handleDeleteLeague = async (leagueId: string) => {
+        if (!confirm("¿Estás seguro de eliminar esta liga? Se conservarán los torneos pero se desvincularán de esta liga.")) return;
+        try {
+            // First unlink tournaments
+            await supabase.from('tournaments').update({ league_id: null }).eq('league_id', leagueId);
+            // Then delete league
+            const { error } = await supabase.from('store_leagues').delete().eq('id', leagueId);
+
+            if (error) throw error;
+            toast.success('Liga eliminada');
+            setEditingLeague(null);
+            fetchLeagues();
+        } catch (error: any) {
+            toast.error('Error al eliminar: ' + error.message);
+        }
+    };
+
+    const handleCreateLeague = async () => {
+        try {
+            const { error } = await supabase
+                .from('store_leagues')
+                .insert({
+                    name: newLeagueData.name,
+                    format: newLeagueData.format,
+                    is_private: newLeagueData.is_private,
+                    store_id: (await supabase.auth.getUser()).data.user?.id
+                });
+
+            if (error) throw error;
+            toast.success('Liga creada correctamente');
+            setIsCreatingLeague(false);
+            setNewLeagueData({ name: '', format: 'Pauper', is_private: false });
+            fetchLeagues();
+        } catch (error: any) {
+            toast.error('Error al crear la liga: ' + error.message);
+        }
+    };
 
     // BLOCKED VIEW FOR PENDING STORES
     if (storeStatus === 'pending_approval') {
@@ -306,7 +388,8 @@ const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpl
             date: tournamentDate,
             storeName: storeName || 'Tienda sin nombre',
             format: tournamentType.charAt(0).toUpperCase() + tournamentType.slice(1),
-            playerCount: parsedData.length
+            playerCount: parsedData.length,
+            leagueId: selectedLeagueId || undefined // Pass league ID
         };
 
         try {
@@ -324,7 +407,7 @@ const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpl
             <div className="text-center">
                 <h1 className="text-4xl sm:text-5xl font-bold text-white tracking-tighter uppercase">Panel de Tienda</h1>
                 <p className="text-lg text-slate-300 mt-2 max-w-4xl mx-auto">
-                    Reporta los resultados de tus torneos de forma simple y automática.
+                    Gestiona tus torneos y ligas personalizadas.
                 </p>
             </div>
 
@@ -349,8 +432,8 @@ const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpl
                             <p className="text-xs text-slate-500 uppercase">Torneos</p>
                         </div>
                         <div>
-                            <p className="text-2xl font-bold text-green-400">{tournaments.reduce((sum, t) => sum + t.playerCount, 0)}</p>
-                            <p className="text-xs text-slate-500 uppercase">Jugadores</p>
+                            <p className="text-2xl font-bold text-violet-400">{leagues.length}</p>
+                            <p className="text-xs text-slate-500 uppercase">Ligas Activas</p>
                         </div>
                     </div>
                 </div>
@@ -365,47 +448,270 @@ const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpl
                         </div>
                         <div>
                             <h3 className="text-sm font-medium text-sky-100 uppercase tracking-wider">Acciones Rápidas</h3>
-                            <p className="text-xl font-bold text-white">Gestionar Torneos</p>
+                            <p className="text-xl font-bold text-white max-w-[200px] truncate">{view === 'tournaments' ? 'Gestionar Torneos' : 'Gestionar Ligas'}</p>
                         </div>
                     </div>
-                    <p className="text-sm text-sky-100/80 leading-relaxed mb-4">
-                        Reporta resultados o programa nuevos eventos para tu tienda.
-                    </p>
+
+                    {/* Tab Switcher inside Quick Actions */}
+                    <div className="flex p-1 bg-black/20 rounded-lg mb-4">
+                        <button
+                            onClick={() => setView('tournaments')}
+                            className={`flex-1 py-1.5 text-xs font-bold uppercase tracking-wider rounded-md transition-all ${view === 'tournaments' ? 'bg-white text-sky-700 shadow-sm' : 'text-sky-100 hover:bg-white/10'}`}
+                        >
+                            Torneos
+                        </button>
+                        <button
+                            onClick={() => setView('leagues')}
+                            className={`flex-1 py-1.5 text-xs font-bold uppercase tracking-wider rounded-md transition-all ${view === 'leagues' ? 'bg-white text-sky-700 shadow-sm' : 'text-sky-100 hover:bg-white/10'}`}
+                        >
+                            Mis Ligas
+                        </button>
+                    </div>
 
                     {/* Action Buttons */}
                     <div className="grid grid-cols-2 gap-3">
-                        <button
-                            onClick={() => {
-                                if (step === 'confirm') {
-                                    handleCancel();
-                                }
-                                const uploadSection = document.getElementById('upload-section');
-                                uploadSection?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                            }}
-                            className="flex flex-col items-center gap-2 p-4 bg-white/10 hover:bg-white/20 rounded-lg transition-all group border border-white/20 hover:border-white/40"
-                        >
-                            <div className="p-2 bg-white/10 rounded-full group-hover:scale-110 transition-transform">
-                                <UploadIcon className="w-5 h-5 text-white" />
-                            </div>
-                            <span className="text-white font-medium text-sm text-center">Reportar Torneo</span>
-                        </button>
-
-                        <button
-                            onClick={() => window.location.href = '/#/eventos'}
-                            className="flex flex-col items-center gap-2 p-4 bg-white/10 hover:bg-white/20 rounded-lg transition-all group border border-white/20 hover:border-white/40"
-                        >
-                            <div className="p-2 bg-white/10 rounded-full group-hover:scale-110 transition-transform">
-                                <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                </svg>
-                            </div>
-                            <span className="text-white font-medium text-sm text-center">Crear Evento</span>
-                        </button>
+                        {view === 'tournaments' ? (
+                            <>
+                                <button
+                                    onClick={() => {
+                                        if (step === 'confirm') {
+                                            handleCancel();
+                                        }
+                                        const uploadSection = document.getElementById('upload-section');
+                                        uploadSection?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                                    }}
+                                    className="flex flex-col items-center gap-2 p-4 bg-white/10 hover:bg-white/20 rounded-lg transition-all group border border-white/20 hover:border-white/40"
+                                >
+                                    <div className="p-2 bg-white/10 rounded-full group-hover:scale-110 transition-transform">
+                                        <UploadIcon className="w-5 h-5 text-white" />
+                                    </div>
+                                    <span className="text-white font-medium text-sm text-center">Reportar Torneo</span>
+                                </button>
+                                <button
+                                    onClick={() => window.location.href = '/#/eventos'}
+                                    className="flex flex-col items-center gap-2 p-4 bg-white/10 hover:bg-white/20 rounded-lg transition-all group border border-white/20 hover:border-white/40"
+                                >
+                                    <div className="p-2 bg-white/10 rounded-full group-hover:scale-110 transition-transform">
+                                        <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                        </svg>
+                                    </div>
+                                    <span className="text-white font-medium text-sm text-center">Crear Evento</span>
+                                </button>
+                            </>
+                        ) : (
+                            <>
+                                <button
+                                    onClick={() => setIsCreatingLeague(true)}
+                                    className="flex flex-col items-center gap-2 p-4 bg-white/10 hover:bg-white/20 rounded-lg transition-all group border border-white/20 hover:border-white/40 col-span-2"
+                                >
+                                    <div className="p-2 bg-white/10 rounded-full group-hover:scale-110 transition-transform">
+                                        <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                                        </svg>
+                                    </div>
+                                    <span className="text-white font-medium text-sm text-center">Crear Nueva Liga</span>
+                                </button>
+                            </>
+                        )}
                     </div>
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-5 gap-12">
+            {/* LEAGUES VIEW */}
+            {view === 'leagues' && (
+                <div className="space-y-8">
+                    {isCreatingLeague && (
+                        <div className="bg-slate-800 p-6 rounded-lg border border-slate-700 animate-in fade-in slide-in-from-top-4">
+                            <h3 className="text-xl font-bold text-white mb-4">Nueva Liga Personalizada</h3>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-300 mb-1">Nombre de la Liga</label>
+                                    <input
+                                        type="text"
+                                        value={newLeagueData.name}
+                                        onChange={e => setNewLeagueData({ ...newLeagueData, name: e.target.value })}
+                                        className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-white"
+                                        placeholder="Ej: Liga Pauper Verano 2026"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-300 mb-1">Formato</label>
+                                    <select
+                                        aria-label="Seleccionar Formato"
+                                        value={newLeagueData.format}
+                                        onChange={e => setNewLeagueData({ ...newLeagueData, format: e.target.value })}
+                                        className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-white"
+                                    >
+                                        <option value="Pauper">Pauper</option>
+                                        <option value="Modern">Modern</option>
+                                        <option value="Standard">Standard</option>
+                                        <option value="Legacy">Legacy</option>
+                                        <option value="Commander">Commander</option>
+                                        <option value="Premodern">Premodern</option>
+                                        <option value="Custom">Formato Personalizado</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div className="mb-6">
+                                <label className="flex items-center gap-2 cursor-pointer">
+                                    <input
+                                        type="checkbox"
+                                        checked={newLeagueData.is_private}
+                                        onChange={e => setNewLeagueData({ ...newLeagueData, is_private: e.target.checked })}
+                                        className="rounded bg-slate-900 border-slate-700 text-sky-600 focus:ring-sky-500"
+                                    />
+                                    <span className="text-slate-300 text-sm">Liga Privada (Visible solo con enlace)</span>
+                                </label>
+                            </div>
+                            <div className="flex gap-3">
+                                <button
+                                    onClick={() => setIsCreatingLeague(false)}
+                                    className="px-4 py-2 bg-slate-700 text-white rounded-lg hover:bg-slate-600 font-bold"
+                                >
+                                    Cancelar
+                                </button>
+                                <button
+                                    onClick={handleCreateLeague}
+                                    className="px-4 py-2 bg-sky-600 text-white rounded-lg hover:bg-sky-500 font-bold"
+                                >
+                                    Crear Liga
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {leagues.map((league) => (
+                            <div key={league.id} className="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden hover:border-sky-500/50 transition-colors group">
+                                <div className="p-6">
+                                    <div className="flex justify-between items-start mb-4">
+                                        <div>
+                                            <h3 className="text-lg font-bold text-white group-hover:text-sky-400 transition-colors">{league.name}</h3>
+                                            <span className="inline-block px-2 py-0.5 bg-slate-700 rounded text-xs text-slate-300 mt-1">{league.format}</span>
+                                        </div>
+                                        {league.is_private ? (
+                                            <span className="text-xs bg-slate-900 text-slate-400 px-2 py-1 rounded border border-slate-700">🔒 Privada</span>
+                                        ) : (
+                                            <span className="text-xs bg-green-900/30 text-green-400 px-2 py-1 rounded border border-green-900/50">🌍 Pública</span>
+                                        )}
+                                    </div>
+                                    <p className="text-sm text-slate-400 mb-4 line-clamp-2">
+                                        Liga organizada por {storeName}.
+                                    </p>
+                                    <div className="flex gap-2">
+                                        <button
+                                            onClick={() => window.open(`/#/leagues/${league.id}`, '_blank')}
+                                            className="flex-1 px-3 py-2 bg-slate-700 hover:bg-slate-600 text-white text-xs font-bold rounded-lg transition-colors">
+                                            Ver Ranking
+                                        </button>
+                                        <button
+                                            onClick={() => setEditingLeague(league)}
+                                            className="flex-1 px-3 py-2 bg-blue-600/20 hover:bg-blue-600/30 text-blue-400 text-xs font-bold rounded-lg transition-colors border border-blue-500/20">
+                                            Configurar
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                        {leagues.length === 0 && !isCreatingLeague && (
+                            <div className="col-span-full py-12 text-center border-2 border-dashed border-slate-700 rounded-xl">
+                                <p className="text-slate-400 mb-4">No has creado ninguna liga personalizada aún.</p>
+                                <button
+                                    onClick={() => setIsCreatingLeague(true)}
+                                    className="text-sky-400 hover:text-sky-300 font-bold underline"
+                                >
+                                    Crear mi primera liga
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
+
+            {/* EDIT LEAGUE MODAL */}
+            {editingLeague && (
+                <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
+                    <div className="bg-slate-900 rounded-xl border border-slate-700 p-6 w-full max-w-md">
+                        <h3 className="text-xl font-bold text-white mb-4">Configurar Liga</h3>
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-slate-300 mb-1">Nombre</label>
+                                <input
+                                    type="text"
+                                    aria-label="Nombre de la liga"
+                                    value={editingLeague.name}
+                                    onChange={e => setEditingLeague({ ...editingLeague, name: e.target.value })}
+                                    className="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 text-white"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-slate-300 mb-1">Formato</label>
+                                <select
+                                    value={editingLeague.format}
+                                    onChange={e => setEditingLeague({ ...editingLeague, format: e.target.value })}
+                                    className="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 text-white"
+                                    aria-label="Editar Formato"
+                                >
+                                    <option value="Pauper">Pauper</option>
+                                    <option value="Modern">Modern</option>
+                                    <option value="Standard">Standard</option>
+                                    <option value="Legacy">Legacy</option>
+                                    <option value="Commander">Commander</option>
+                                    <option value="Premodern">Premodern</option>
+                                    <option value="Custom">Formato Personalizado</option>
+                                </select>
+                            </div>
+                            <div className="flex items-center justify-between">
+                                <label className="flex items-center gap-2 cursor-pointer">
+                                    <input
+                                        type="checkbox"
+                                        checked={editingLeague.is_private}
+                                        onChange={e => setEditingLeague({ ...editingLeague, is_private: e.target.checked })}
+                                        className="rounded bg-slate-800 border-slate-700 text-sky-600 focus:ring-sky-500"
+                                    />
+                                    <span className="text-slate-300 text-sm">Privada</span>
+                                </label>
+                                <label className="flex items-center gap-2 cursor-pointer">
+                                    <select
+                                        value={editingLeague.status || 'active'}
+                                        onChange={e => setEditingLeague({ ...editingLeague, status: e.target.value })}
+                                        className="bg-slate-800 border border-slate-700 rounded text-xs px-2 py-1 text-white"
+                                        aria-label="Estado de la liga"
+                                    >
+                                        <option value="active">Activa</option>
+                                        <option value="finished">Finalizada</option>
+                                    </select>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div className="mt-6 flex gap-3">
+                            <button
+                                onClick={() => handleDeleteLeague(editingLeague.id)}
+                                className="px-4 py-2 bg-red-900/30 text-red-400 border border-red-900/50 rounded-lg hover:bg-red-900/50 text-sm font-medium"
+                            >
+                                Eliminar
+                            </button>
+                            <div className="flex-1"></div>
+                            <button
+                                onClick={() => setEditingLeague(null)}
+                                className="px-4 py-2 bg-slate-700 text-white rounded-lg hover:bg-slate-600 font-bold"
+                            >
+                                Cancelar
+                            </button>
+                            <button
+                                onClick={handleUpdateLeague}
+                                className="px-4 py-2 bg-sky-600 text-white rounded-lg hover:bg-sky-500 font-bold"
+                            >
+                                Guardar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            <div className={`grid grid-cols-1 lg:grid-cols-5 gap-12 ${view === 'leagues' ? 'hidden' : ''}`}>
                 <section id="upload-section" className="lg:col-span-2">
                     {step === 'upload' && (
                         <div>
@@ -427,6 +733,24 @@ const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpl
                                         ))}
                                     </select>
                                 </div>
+
+                                {leagues.length > 0 && (
+                                    <div>
+                                        <label htmlFor="league-select" className="block text-sm font-medium text-slate-300 mb-2">Asignar a Liga (Opcional)</label>
+                                        <select
+                                            id="league-select"
+                                            value={selectedLeagueId}
+                                            onChange={e => setSelectedLeagueId(e.target.value)}
+                                            className="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 appearance-none text-white"
+                                        >
+                                            <option value="">Ninguna (Torneo Normal)</option>
+                                            {leagues.map(l => (
+                                                <option key={l.id} value={l.id}>{l.name}</option>
+                                            ))}
+                                        </select>
+                                        <p className="text-xs text-slate-500 mt-1">Si seleccionas una liga, este torneo sumará puntos para ella.</p>
+                                    </div>
+                                )}
 
                                 <div>
                                     <label htmlFor="tournament-date" className="block text-sm font-medium text-slate-300 mb-2">Fecha del Torneo</label>
@@ -539,6 +863,14 @@ const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpl
                                             <p className="font-bold text-white">{tournamentDate}</p>
                                         </div>
                                     </div>
+                                    {selectedLeagueId && (
+                                        <div className="bg-violet-900/20 p-3 rounded-lg border border-violet-500/30">
+                                            <p className="text-xs text-violet-300">Liga Asignada</p>
+                                            <p className="font-bold text-white">
+                                                {leagues.find(l => l.id === selectedLeagueId)?.name || 'Desconocida'}
+                                            </p>
+                                        </div>
+                                    )}
                                 </div>
 
                                 <p className="text-slate-300 text-sm">Se encontraron <span className="font-bold text-white">{parsedData.length}</span> jugadores.</p>
