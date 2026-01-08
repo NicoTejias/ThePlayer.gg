@@ -133,7 +133,7 @@ const StoresPage: React.FC = () => {
                         scrolling="no"
                         marginHeight={0}
                         marginWidth={0}
-                        src="https://www.openstreetmap.org/export/embed.html?bbox=-75.608%2C-55.0%2C-66.0%2C-17.5&amp;layer=mapnik"
+                        src="https://www.openstreetmap.org/export/embed.html?bbox=-75.608%2C-55.0%2C-66.0%2C-17.5&layer=mapnik"
                         className="w-full h-full opacity-80 hover:opacity-100 transition-opacity"
                     ></iframe>
                     <div className="absolute bottom-4 right-4 bg-slate-900/90 px-3 py-1 rounded text-xs text-white pointer-events-none border border-slate-700">
