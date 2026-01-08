@@ -19,7 +19,7 @@ import PremodernPage from './pages/PremodernPage';
 import MediaPage from './pages/MediaPage';
 import MediaArticlesPage from './pages/MediaArticlesPage';
 import MediaVideosPage from './pages/MediaVideosPage';
-import PLSPage from './pages/PLSPage';
+// Removed duplicate import
 
 import StoresPage from './pages/StoresPage';
 import AuthPage from './pages/AuthPage';
@@ -52,6 +52,7 @@ import LogoutSuccessPage from './pages/LogoutSuccessPage';
 import AboutPage from './pages/AboutPage';
 import ContentPage from './pages/ContentPage';
 import ReglamentoPage from './pages/ReglamentoPage';
+import PLSPage from './pages/PLSPage';
 import EmailConfirmationPage from './pages/EmailConfirmationPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
@@ -803,9 +804,10 @@ const AppContent: React.FC = () => {
           <Route path="/confirm-email" element={<EmailConfirmationPage />} />
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           <Route path="/reset-password" element={<ResetPasswordPage />} />
-          <Route path="/quienes-somos" element={<AboutPage />} />
+          <Route path="/content" element={<ContentPage />} />
           <Route path="/contenido" element={<ContentPage />} />
           <Route path="/reglamento" element={<ReglamentoPage />} />
+          <Route path="/pls" element={<PLSPage />} />
           <Route path="/creadores" element={<ContentCreatorApplicationPage />} />
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="/admin" element={<AdminDashboardPage />} />
