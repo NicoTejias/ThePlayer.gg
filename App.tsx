@@ -660,7 +660,8 @@ const AppContent: React.FC = () => {
           p_store_name: tournamentData.storeName,
           p_format: tournamentData.format,
           p_player_count: tournamentData.playerCount,
-          p_game_type: currentGame
+          p_game_type: currentGame,
+          p_league_id: tournamentData.leagueId || null
         });
 
       const { error: tourneyError } = await Promise.race([insertPromise, timeoutPromise]) as any;
