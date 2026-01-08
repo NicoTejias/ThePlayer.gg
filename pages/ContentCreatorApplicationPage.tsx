@@ -184,7 +184,7 @@ const ContentCreatorApplicationPage: React.FC = () => {
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                         </svg>
                     </div>
-                    <h3 className="text-lg font-bold text-white mb-2">Crece tu Audiencia</h3>
+                    <h3 className="text-lg font-bold text-white mb-2">Haz crecer tu audiencia</h3>
                     <p className="text-slate-400 text-sm">
                         Alcanza miles de jugadores activos en toda Latinoamérica
                     </p>
