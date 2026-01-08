@@ -10,6 +10,7 @@ import { checkTournamentIntegrity, IntegrityWarning, getTournamentFingerprint } 
 import { supabase } from '../supabaseClient';
 import { useGame } from '../context/GameContext';
 import { toast } from 'sonner';
+import { Trophy } from 'lucide-react';
 
 interface StoreDashboardPageProps {
     onTournamentUpload: (tournamentData: Omit<TournamentResult, 'id'>, players: TournamentParseResult[]) => void;
@@ -47,6 +48,19 @@ const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpl
     React.useEffect(() => {
         // Fetch leagues on mount to populate selector and view
         fetchLeagues();
+
+        // Listen for FAB event to switch view
+        const handleSwitchView = () => {
+            setView('tournaments');
+            // Small delay to allow view update before scrolling (if handled elsewhere) or just to ensure it's visible
+            setTimeout(() => {
+                const uploadSection = document.getElementById('upload-section');
+                uploadSection?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 100);
+        };
+
+        window.addEventListener('switchToTournaments', handleSwitchView);
+        return () => window.removeEventListener('switchToTournaments', handleSwitchView);
     }, []);
 
     const fetchLeagues = async () => {
@@ -442,77 +456,49 @@ const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpl
                 <div className="bg-gradient-to-br from-sky-600 to-blue-700 p-6 rounded-xl shadow-xl">
                     <div className="flex items-center gap-3 mb-4">
                         <div className="p-3 bg-white/10 rounded-lg">
-                            <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                            </svg>
+                            <Trophy className="w-6 h-6 text-white" />
                         </div>
                         <div>
-                            <h3 className="text-sm font-medium text-sky-100 uppercase tracking-wider">Acciones Rápidas</h3>
-                            <p className="text-xl font-bold text-white max-w-[200px] truncate">{view === 'tournaments' ? 'Gestionar Torneos' : 'Gestionar Ligas'}</p>
+                            <h3 className="text-sm font-medium text-sky-100 uppercase tracking-wider">Gestión</h3>
+                            <p className="text-xl font-bold text-white">Mis Ligas</p>
                         </div>
                     </div>
 
-                    {/* Tab Switcher inside Quick Actions */}
-                    <div className="flex p-1 bg-black/20 rounded-lg mb-4">
-                        <button
-                            onClick={() => setView('tournaments')}
-                            className={`flex-1 py-1.5 text-xs font-bold uppercase tracking-wider rounded-md transition-all ${view === 'tournaments' ? 'bg-white text-sky-700 shadow-sm' : 'text-sky-100 hover:bg-white/10'}`}
-                        >
-                            Torneos
-                        </button>
-                        <button
-                            onClick={() => setView('leagues')}
-                            className={`flex-1 py-1.5 text-xs font-bold uppercase tracking-wider rounded-md transition-all ${view === 'leagues' ? 'bg-white text-sky-700 shadow-sm' : 'text-sky-100 hover:bg-white/10'}`}
-                        >
-                            Mis Ligas
-                        </button>
-                    </div>
+                    <p className="text-sky-100/80 mb-6 text-sm">
+                        Crea y administra tus propias ligas personalizadas para tu comunidad.
+                    </p>
 
-                    {/* Action Buttons */}
-                    <div className="grid grid-cols-2 gap-3">
-                        {view === 'tournaments' ? (
-                            <>
-                                <button
-                                    onClick={() => {
-                                        if (step === 'confirm') {
-                                            handleCancel();
-                                        }
-                                        const uploadSection = document.getElementById('upload-section');
-                                        uploadSection?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                                    }}
-                                    className="flex flex-col items-center gap-2 p-4 bg-white/10 hover:bg-white/20 rounded-lg transition-all group border border-white/20 hover:border-white/40"
-                                >
-                                    <div className="p-2 bg-white/10 rounded-full group-hover:scale-110 transition-transform">
-                                        <UploadIcon className="w-5 h-5 text-white" />
-                                    </div>
-                                    <span className="text-white font-medium text-sm text-center">Reportar Torneo</span>
-                                </button>
-                                <button
-                                    onClick={() => window.location.href = '/#/eventos'}
-                                    className="flex flex-col items-center gap-2 p-4 bg-white/10 hover:bg-white/20 rounded-lg transition-all group border border-white/20 hover:border-white/40"
-                                >
-                                    <div className="p-2 bg-white/10 rounded-full group-hover:scale-110 transition-transform">
-                                        <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                        </svg>
-                                    </div>
-                                    <span className="text-white font-medium text-sm text-center">Crear Evento</span>
-                                </button>
-                            </>
+                    <div className="grid grid-cols-1 gap-3">
+                        {view === 'leagues' ? (
+                            <button
+                                onClick={() => setView('tournaments')}
+                                className="w-full py-3 px-4 bg-white/10 hover:bg-white/20 text-white font-bold rounded-lg transition-colors border border-white/20 flex items-center justify-center gap-2"
+                            >
+                                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 15l-3-3m0 0l3-3m-3 3h8M3 12a9 9 0 1118 0 9 9 0 01-18 0z" />
+                                </svg>
+                                Volver a Torneos
+                            </button>
                         ) : (
-                            <>
-                                <button
-                                    onClick={() => setIsCreatingLeague(true)}
-                                    className="flex flex-col items-center gap-2 p-4 bg-white/10 hover:bg-white/20 rounded-lg transition-all group border border-white/20 hover:border-white/40 col-span-2"
-                                >
-                                    <div className="p-2 bg-white/10 rounded-full group-hover:scale-110 transition-transform">
-                                        <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                                        </svg>
-                                    </div>
-                                    <span className="text-white font-medium text-sm text-center">Crear Nueva Liga</span>
-                                </button>
-                            </>
+                            <button
+                                onClick={() => setView('leagues')}
+                                className="w-full py-3 px-4 bg-white text-sky-700 font-bold rounded-lg shadow-lg hover:bg-sky-50 transition-colors flex items-center justify-center gap-2"
+                            >
+                                <Trophy className="w-5 h-5" />
+                                Gestionar Ligas
+                            </button>
+                        )}
+
+                        {view === 'leagues' && (
+                            <button
+                                onClick={() => setIsCreatingLeague(true)}
+                                className="w-full py-3 px-4 bg-sky-500 hover:bg-sky-400 text-white font-bold rounded-lg shadow-lg transition-colors flex items-center justify-center gap-2"
+                            >
+                                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                                </svg>
+                                Crear Nueva Liga
+                            </button>
                         )}
                     </div>
                 </div>

@@ -17,6 +17,10 @@ const FloatingActionButton: React.FC<FloatingActionButtonProps> = ({ userRole })
         setShowFabMenu(false);
         // Navigate to store dashboard
         window.location.href = '/#/dashboard/tienda';
+
+        // Dispatch event in case we are already there
+        window.dispatchEvent(new CustomEvent('switchToTournaments'));
+
         // Wait for navigation then scroll
         setTimeout(() => {
             const uploadSection = document.getElementById('upload-section');
