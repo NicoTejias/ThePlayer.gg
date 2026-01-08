@@ -44,6 +44,22 @@ const TournamentsListPage: React.FC<TournamentsListPageProps> = ({ tournaments }
                         {/* Aquí se deberían cargar dinámicamente las tiendas */}
                     </select>
                 </div>
+                <div className="relative">
+                    <select
+                        aria-label="Filtrar por tipo de torneo"
+                        className="bg-slate-900/80 text-white rounded-md py-2.5 px-4 w-full appearance-none focus:outline-none focus:ring-2 focus:ring-sky-500 border border-slate-700"
+                    >
+                        <option>Todos los Tipos</option>
+                        <option>Standard</option>
+                        <option>Modern</option>
+                        <option>Pioneer</option>
+                        <option>Legacy</option>
+                        <option>Pauper</option>
+                        <option>Commander</option>
+                        <option>Draft</option>
+                        <option>Sealed</option>
+                    </select>
+                </div>
             </div>
 
             {/* Tournaments Table */}

@@ -55,10 +55,19 @@ const TournamentStandingsPage: React.FC = () => {
 
                 if (resultsError) throw resultsError;
 
+                // Helper to generate a consistent 4-digit ID for anonymous players
+                const getAnonymousId = (str: string) => {
+                    let hash = 0;
+                    for (let i = 0; i < str.length; i++) {
+                        hash = str.charCodeAt(i) + ((hash << 5) - hash);
+                    }
+                    return Math.abs(hash % 9000) + 1000;
+                };
+
                 const mappedStandings: TournamentStanding[] = (resultsData || []).map((r, index) => ({
                     rank: r.rank || index + 1,
                     // Si no tiene player_id, es porque no está registrado en la base de datos como usuario
-                    playerName: r.player_id ? r.player_name : 'Anónimo',
+                    playerName: r.player_id ? r.player_name : `Player ${getAnonymousId(r.player_name + tournamentId)}`,
                     matchRecord: `${r.wins}-${r.losses}-${r.draws}`,
                     pwpEarned: r.pwp_earned
                 }));
