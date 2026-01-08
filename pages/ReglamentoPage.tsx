@@ -2,300 +2,140 @@ import React from 'react';
 import { useGame } from '../context/GameContext';
 import { GAME_LABELS, GameType } from '../types';
 
-interface GameRules {
-    title: string;
-    sections: {
-        title: string;
-        content: string[];
-    }[];
+interface ExternalRuleLink {
+    url: string;
+    label: string;
 }
 
-const GAME_RULES: Record<GameType, GameRules> = {
+const OFFICIAL_RULES: Record<GameType, ExternalRuleLink> = {
     mtg: {
-        title: 'Reglamento Magic: The Gathering',
-        sections: [
-            {
-                title: 'Reglas Generales de Torneo',
-                content: [
-                    'Los torneos siguen las reglas oficiales de Magic: The Gathering establecidas por Wizards of the Coast.',
-                    'Todos los jugadores deben presentar una lista de mazo válida antes del inicio del torneo.',
-                    'El tiempo límite por ronda es de 50 minutos.',
-                    'Se permite el uso de proxies solo en formatos casuales y con autorización previa del organizador.',
-                ]
-            },
-            {
-                title: 'Formatos Permitidos',
-                content: [
-                    'Standard: Solo cartas de los últimos sets legales.',
-                    'Modern: Cartas desde 8th Edition en adelante.',
-                    'Pioneer: Cartas desde Return to Ravnica en adelante.',
-                    'Commander: 100 cartas singleton con comandante.',
-                    'Pauper: Solo cartas comunes.',
-                    'Limited (Draft/Sealed): Según el producto disponible.',
-                ]
-            },
-            {
-                title: 'Conducta y Fair Play',
-                content: [
-                    'Se espera un comportamiento respetuoso hacia todos los participantes.',
-                    'Está prohibido el uso de lenguaje ofensivo o comportamiento antideportivo.',
-                    'Los jugadores deben mantener limpia su área de juego.',
-                    'Cualquier disputa debe ser resuelta por el juez o organizador del evento.',
-                ]
-            },
-        ]
+        url: 'https://magic.wizards.com/es/rules',
+        label: 'Reglamento Oficial Magic: The Gathering'
     },
     pokemon: {
-        title: 'Reglamento Pokémon TCG',
-        sections: [
-            {
-                title: 'Reglas Generales de Torneo',
-                content: [
-                    'Los torneos siguen las reglas oficiales del Pokémon TCG establecidas por The Pokémon Company.',
-                    'Todos los mazos deben contener exactamente 60 cartas.',
-                    'El tiempo límite por ronda es de 50 minutos más 3 turnos adicionales.',
-                    'Las cartas deben estar en fundas opacas del mismo color y tamaño.',
-                ]
-            },
-            {
-                title: 'Formatos Permitidos',
-                content: [
-                    'Standard: Solo cartas de los últimos sets legales (rotación anual).',
-                    'Expanded: Cartas desde Black & White en adelante.',
-                    'Unlimited: Todas las cartas son permitidas.',
-                ]
-            },
-            {
-                title: 'Construcción de Mazo',
-                content: [
-                    'Máximo 4 copias de cualquier carta (excepto Energías Básicas).',
-                    'El mazo debe contener al menos 1 Pokémon Básico.',
-                    'Las cartas deben ser originales o proxies autorizados para eventos casuales.',
-                ]
-            },
-        ]
+        url: 'https://www.pokemon.com/el/jcc-pokemon/reglas-y-recursos',
+        label: 'Reglamento Oficial Pokémon TCG'
     },
     one_piece: {
-        title: 'Reglamento One Piece Card Game',
-        sections: [
-            {
-                title: 'Reglas Generales de Torneo',
-                content: [
-                    'Los torneos siguen las reglas oficiales de Bandai.',
-                    'Todos los mazos deben contener exactamente 50 cartas más 1 carta de Líder.',
-                    'El tiempo límite por ronda es de 40 minutos.',
-                    'Las cartas deben estar en fundas opacas.',
-                ]
-            },
-            {
-                title: 'Construcción de Mazo',
-                content: [
-                    'Exactamente 50 cartas en el mazo principal.',
-                    '1 carta de Líder obligatoria.',
-                    'Máximo 4 copias de cualquier carta con el mismo número de carta.',
-                    'Todas las cartas deben coincidir con los colores del Líder.',
-                ]
-            },
-            {
-                title: 'Conducta',
-                content: [
-                    'Comportamiento respetuoso obligatorio.',
-                    'Prohibido el uso de lenguaje ofensivo.',
-                    'Las disputas se resuelven con el juez del evento.',
-                ]
-            },
-        ]
+        url: 'https://en.onepiece-cardgame.com/rules/',
+        label: 'Reglamento Oficial One Piece Card Game'
     },
     lorcana: {
-        title: 'Reglamento Disney Lorcana',
-        sections: [
-            {
-                title: 'Reglas Generales de Torneo',
-                content: [
-                    'Los torneos siguen las reglas oficiales de Ravensburger.',
-                    'Todos los mazos deben contener exactamente 60 cartas.',
-                    'El tiempo límite por ronda es de 50 minutos.',
-                    'Las cartas deben estar en fundas protectoras.',
-                ]
-            },
-            {
-                title: 'Construcción de Mazo',
-                content: [
-                    'Exactamente 60 cartas en el mazo.',
-                    'Máximo 4 copias de cualquier carta con el mismo nombre.',
-                    'Puedes usar hasta 2 colores de tinta en tu mazo.',
-                ]
-            },
-        ]
+        url: 'https://www.disneylorcana.com/en-US/how-to-play',
+        label: 'Reglamento Oficial Disney Lorcana'
     },
     yugioh: {
-        title: 'Reglamento Yu-Gi-Oh!',
-        sections: [
-            {
-                title: 'Reglas Generales de Torneo',
-                content: [
-                    'Los torneos siguen las reglas oficiales de Konami.',
-                    'El mazo principal debe contener entre 40 y 60 cartas.',
-                    'El Extra Deck puede contener hasta 15 cartas.',
-                    'El Side Deck puede contener hasta 15 cartas.',
-                ]
-            },
-            {
-                title: 'Construcción de Mazo',
-                content: [
-                    'Mazo Principal: 40-60 cartas.',
-                    'Extra Deck: 0-15 cartas (Fusion, Synchro, Xyz, Link).',
-                    'Side Deck: 0-15 cartas para cambios entre duelos.',
-                    'Máximo 3 copias de cualquier carta (salvo cartas limitadas/prohibidas).',
-                ]
-            },
-        ]
+        url: 'https://www.yugioh-card.com/lat-am/play/game-play-rules/',
+        label: 'Reglamento Oficial Yu-Gi-Oh!'
     },
     flesh_and_blood: {
-        title: 'Reglamento Flesh and Blood',
-        sections: [
-            {
-                title: 'Reglas Generales de Torneo',
-                content: [
-                    'Los torneos siguen las reglas oficiales de Legend Story Studios.',
-                    'Cada jugador debe tener una carta de Héroe, arma(s) y equipo.',
-                    'El mazo debe contener exactamente 60 cartas.',
-                ]
-            },
-            {
-                title: 'Construcción de Mazo',
-                content: [
-                    '1 carta de Héroe (define la clase).',
-                    'Armas y Equipo según el héroe.',
-                    'Exactamente 60 cartas en el mazo.',
-                    'Máximo 3 copias de cualquier carta.',
-                ]
-            },
-        ]
+        url: 'https://fabtcg.com/resources/rules-and-policy-center/',
+        label: 'Reglamento Oficial Flesh and Blood'
     },
     star_wars: {
-        title: 'Reglamento Star Wars Unlimited',
-        sections: [
-            {
-                title: 'Reglas Generales de Torneo',
-                content: [
-                    'Los torneos siguen las reglas oficiales de Fantasy Flight Games.',
-                    'Cada jugador debe tener una carta de Líder y una Base.',
-                    'El mazo debe contener entre 50 y 60 cartas.',
-                ]
-            },
-            {
-                title: 'Construcción de Mazo',
-                content: [
-                    '1 carta de Líder.',
-                    '1 carta de Base.',
-                    '50-60 cartas en el mazo.',
-                    'Máximo 3 copias de cualquier carta.',
-                ]
-            },
-        ]
+        url: 'https://starwarsunlimited.com/how-to-play',
+        label: 'Reglamento Oficial Star Wars: Unlimited'
     },
-    board_game: {
-        title: 'Reglamento Juegos de Mesa',
-        sections: [
-            {
-                title: 'Reglas Generales',
-                content: [
-                    'Cada juego de mesa tiene sus propias reglas específicas.',
-                    'Consulta con el organizador del evento para reglas particulares.',
-                    'Se espera fair play y respeto entre jugadores.',
-                ]
-            },
-        ]
-    },
-    rpg: {
-        title: 'Reglamento Juegos de Rol',
-        sections: [
-            {
-                title: 'Reglas Generales',
-                content: [
-                    'Cada sistema de RPG tiene sus propias reglas.',
-                    'El Game Master tiene la última palabra en decisiones de juego.',
-                    'Se espera colaboración y respeto entre jugadores.',
-                ]
-            },
-        ]
-    },
-    warhammer: {
-        title: 'Reglamento Warhammer / Wargames',
-        sections: [
-            {
-                title: 'Reglas Generales',
-                content: [
-                    'Los torneos siguen las reglas oficiales de Games Workshop.',
-                    'Las listas de ejército deben ser presentadas antes del torneo.',
-                    'Las miniaturas deben estar pintadas (según requisitos del evento).',
-                ]
-            },
-        ]
-    },
-    other: {
-        title: 'Reglamento General',
-        sections: [
-            {
-                title: 'Reglas Generales',
-                content: [
-                    'Consulta con el organizador del evento para reglas específicas.',
-                    'Se espera comportamiento respetuoso y deportivo.',
-                ]
-            },
-        ]
-    },
+    // Fallbacks
+    board_game: { url: '#', label: 'Reglamentos Varios' },
+    rpg: { url: '#', label: 'Sistemas de Rol' },
+    warhammer: { url: 'https://www.warhammer-community.com/en-gb/downloads/', label: 'Reglamentos Warhammer' },
+    other: { url: '#', label: 'Reglamento General' }
 };
 
 const ReglamentoPage: React.FC = () => {
     const { currentGame } = useGame();
-    const rules = GAME_RULES[currentGame];
+    const ruleLink = OFFICIAL_RULES[currentGame];
 
     return (
-        <div className="min-h-screen py-12">
-            <div className="container mx-auto px-4 max-w-5xl">
+        <div className="min-h-screen py-12 animate-fade-in">
+            <div className="container mx-auto px-4 max-w-4xl">
+
                 {/* Hero Section */}
-                <div className="text-center mb-12">
-                    <h1 className="text-4xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-purple-600 mb-4 drop-shadow-lg">
-                        {rules.title}
+                <div className="text-center mb-16">
+                    <h1 className="text-4xl md:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-purple-600 mb-6 drop-shadow-2xl">
+                        REGLAMENTO & PUNTOS
                     </h1>
-                    <p className="text-lg text-slate-400">
-                        Reglas oficiales para torneos de {GAME_LABELS[currentGame]}
+                    <p className="text-xl text-slate-300 max-w-2xl mx-auto leading-relaxed">
+                        Entiende cómo funciona el sistema de clasificación y accede a las reglas oficiales.
                     </p>
                 </div>
 
-                {/* Rules Sections */}
-                <div className="space-y-8">
-                    {rules.sections.map((section, index) => (
-                        <div
-                            key={index}
-                            className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-xl p-8 hover:bg-slate-800/70 transition-all"
-                        >
-                            <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
-                                <span className="w-8 h-8 bg-sky-600/20 rounded-lg flex items-center justify-center text-sky-400 font-black">
-                                    {index + 1}
-                                </span>
-                                {section.title}
-                            </h2>
-                            <ul className="space-y-4">
-                                {section.content.map((rule, ruleIndex) => (
-                                    <li key={ruleIndex} className="flex items-start gap-3 text-slate-300">
-                                        <span className="text-sky-400 mt-1 flex-shrink-0">▸</span>
-                                        <span className="leading-relaxed">{rule}</span>
-                                    </li>
-                                ))}
-                            </ul>
+                <div className="grid gap-12">
+
+                    {/* Section 1: PWP System */}
+                    <div className="bg-slate-800/50 border border-slate-700 rounded-3xl p-8 md:p-12 shadow-2xl relative overflow-hidden">
+                        <div className="absolute top-0 right-0 p-8 opacity-10 pointer-events-none">
+                            <span className="text-9xl">🏆</span>
                         </div>
-                    ))}
-                </div>
 
-                {/* Footer Note */}
-                <div className="mt-12 p-6 bg-blue-900/20 border border-blue-500/30 rounded-xl">
-                    <p className="text-sm text-slate-300 text-center">
-                        <strong className="text-blue-400">Nota:</strong> Estas reglas son una guía general.
-                        Cada evento puede tener reglas adicionales específicas. Consulta con el organizador para más detalles.
-                    </p>
+                        <h2 className="text-3xl font-black text-white mb-8 flex items-center gap-4">
+                            <span className="w-12 h-12 rounded-xl bg-sky-500/20 flex items-center justify-center text-sky-400">
+                                1
+                            </span>
+                            Sistema de Puntos (PWP)
+                        </h2>
+
+                        <div className="space-y-6 text-lg text-slate-300 leading-relaxed">
+                            <p>
+                                El <strong className="text-sky-400">Player Win Points (PWP)</strong> es el sistema oficial de clasificación de
+                                <span className="font-bold text-white"> ThePlayer.gg</span>.
+                            </p>
+                            <p>
+                                Los puntos se otorgan basándose estrictamente en el rendimiento durante los torneos sancionados.
+                                Acumula puntos para subir en el ranking regional y nacional.
+                            </p>
+
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-8">
+                                <div className="bg-slate-900/80 p-6 rounded-2xl border border-green-500/30 text-center">
+                                    <div className="text-4xl font-black text-green-400 mb-2">3</div>
+                                    <div className="text-sm font-bold uppercase tracking-wider text-green-200">Puntos por Victoria</div>
+                                </div>
+                                <div className="bg-slate-900/80 p-6 rounded-2xl border border-yellow-500/30 text-center">
+                                    <div className="text-4xl font-black text-yellow-400 mb-2">1</div>
+                                    <div className="text-sm font-bold uppercase tracking-wider text-yellow-200">Punto por Empate</div>
+                                </div>
+                                <div className="bg-slate-900/80 p-6 rounded-2xl border border-red-500/30 text-center">
+                                    <div className="text-4xl font-black text-slate-500 mb-2">1</div>
+                                    <div className="text-sm font-bold uppercase tracking-wider text-slate-400">Punto por participar</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Section 2: Official Rules */}
+                    <div className="bg-gradient-to-br from-slate-900 to-slate-800 border border-slate-700 rounded-3xl p-8 md:p-12 shadow-2xl relative overflow-hidden text-center">
+                        <div className="absolute top-0 left-0 p-8 opacity-5 pointer-events-none">
+                            <span className="text-9xl">📜</span>
+                        </div>
+
+                        <h2 className="text-3xl font-black text-white mb-6">
+                            Reglamento Oficial de {GAME_LABELS[currentGame]}
+                        </h2>
+
+                        <p className="text-slate-400 mb-8 max-w-xl mx-auto">
+                            Para dudas específicas sobre interacciones, fases y legalidad de cartas, consulta siempre el reglamento oficial actualizado.
+                        </p>
+
+                        <a
+                            href={ruleLink.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-3 px-8 py-4 bg-sky-600 hover:bg-sky-500 text-white font-bold text-lg rounded-full transition-all hover:scale-105 shadow-lg shadow-sky-900/50"
+                        >
+                            <span>Leer Reglamento Oficial</span>
+                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                            </svg>
+                        </a>
+
+                        {currentGame === 'mtg' && (
+                            <p className="mt-6 text-xs text-slate-500">
+                                Enlace dirige a la web oficial de Wizards of the Coast.
+                            </p>
+                        )}
+                    </div>
+
                 </div>
             </div>
         </div>
