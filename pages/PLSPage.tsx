@@ -95,6 +95,42 @@ const PLSPage: React.FC = () => {
 
             </div>
 
+            {/* Base Points System */}
+            <div className="max-w-6xl mx-auto px-4">
+                <div className="bg-slate-800/50 border border-slate-700 rounded-3xl p-8 md:p-12 shadow-2xl relative overflow-hidden">
+                    <div className="absolute top-0 right-0 p-8 opacity-10 pointer-events-none">
+                        <span className="text-9xl">🏆</span>
+                    </div>
+
+                    <div className="text-center mb-10">
+                        <h2 className="text-3xl font-bold text-white mb-4 flex items-center justify-center gap-3">
+                            <span className="w-10 h-10 rounded-lg bg-sky-500/20 flex items-center justify-center text-sky-400 text-xl">
+                                1
+                            </span>
+                            Sistema de Puntos Base
+                        </h2>
+                        <p className="text-slate-400 max-w-2xl mx-auto">
+                            Comienza sumando puntos en cada torneo oficial. Estos puntos base se multiplican según el nivel del evento.
+                        </p>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative z-10">
+                        <div className="bg-slate-900/80 p-6 rounded-2xl border border-green-500/30 text-center transform hover:scale-105 transition-all">
+                            <div className="text-5xl font-black text-green-400 mb-2">3</div>
+                            <div className="text-sm font-bold uppercase tracking-wider text-green-200">Puntos por Victoria</div>
+                        </div>
+                        <div className="bg-slate-900/80 p-6 rounded-2xl border border-yellow-500/30 text-center transform hover:scale-105 transition-all">
+                            <div className="text-5xl font-black text-yellow-400 mb-2">1</div>
+                            <div className="text-sm font-bold uppercase tracking-wider text-yellow-200">Punto por Empate</div>
+                        </div>
+                        <div className="bg-slate-900/80 p-6 rounded-2xl border border-red-500/30 text-center transform hover:scale-105 transition-all">
+                            <div className="text-5xl font-black text-slate-400 mb-2">1</div>
+                            <div className="text-sm font-bold uppercase tracking-wider text-slate-400">Punto por participar</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             {/* Multipliers Layout */}
             <div className="space-y-12">
                 <div className="text-center">

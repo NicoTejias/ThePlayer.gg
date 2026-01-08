@@ -61,47 +61,7 @@ const ReglamentoPage: React.FC = () => {
                     </p>
                 </div>
 
-                <div className="grid gap-12">
-
-                    {/* Section 1: PLS System */}
-                    <div className="bg-slate-800/50 border border-slate-700 rounded-3xl p-8 md:p-12 shadow-2xl relative overflow-hidden">
-                        <div className="absolute top-0 right-0 p-8 opacity-10 pointer-events-none">
-                            <span className="text-9xl">🏆</span>
-                        </div>
-
-                        <h2 className="text-3xl font-black text-white mb-8 flex items-center gap-4">
-                            <span className="w-12 h-12 rounded-xl bg-sky-500/20 flex items-center justify-center text-sky-400">
-                                1
-                            </span>
-                            Sistema de Puntos (PLS)
-                        </h2>
-
-                        <div className="space-y-6 text-lg text-slate-300 leading-relaxed">
-                            <p>
-                                El <strong className="text-sky-400">Player Latam Series (PLS)</strong> es el sistema oficial de clasificación de
-                                <span className="font-bold text-white"> ThePlayer.gg</span>.
-                            </p>
-                            <p>
-                                Los puntos se otorgan basándose estrictamente en el rendimiento durante los torneos sancionados.
-                                Acumula puntos para subir en el ranking regional y nacional de cada juego (PLS {GAME_LABELS[currentGame]}).
-                            </p>
-
-                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-8">
-                                <div className="bg-slate-900/80 p-6 rounded-2xl border border-green-500/30 text-center">
-                                    <div className="text-4xl font-black text-green-400 mb-2">3</div>
-                                    <div className="text-sm font-bold uppercase tracking-wider text-green-200">Puntos por Victoria</div>
-                                </div>
-                                <div className="bg-slate-900/80 p-6 rounded-2xl border border-yellow-500/30 text-center">
-                                    <div className="text-4xl font-black text-yellow-400 mb-2">1</div>
-                                    <div className="text-sm font-bold uppercase tracking-wider text-yellow-200">Punto por Empate</div>
-                                </div>
-                                <div className="bg-slate-900/80 p-6 rounded-2xl border border-red-500/30 text-center">
-                                    <div className="text-4xl font-black text-slate-500 mb-2">1</div>
-                                    <div className="text-sm font-bold uppercase tracking-wider text-slate-400">Punto por participar</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                <div className="grid gap-12 max-w-2xl mx-auto">
 
                     {/* Section 2: Official Rules */}
                     <div className="bg-gradient-to-br from-slate-900 to-slate-800 border border-slate-700 rounded-3xl p-8 md:p-12 shadow-2xl relative overflow-hidden text-center">
