@@ -8,6 +8,7 @@ import TrashIcon from '../components/icons/TrashIcon';
 import CheckCircleIcon from '../components/icons/CheckCircleIcon';
 import PlayerProModal from '../components/PlayerProModal';
 import ProBadge from '../components/ProBadge';
+import ContentCreatorBadge from '../components/ContentCreatorBadge';
 
 const StatCard: React.FC<{ icon: React.ReactNode, title: string, value: string | number, rank: string | number, color: string }> = ({ icon, title, value, rank, color }) => (
     <div className={`bg-slate-800 p-6 rounded-lg shadow-lg border border-slate-700`}>
@@ -143,6 +144,7 @@ const PlayerDashboardPage: React.FC<{ profile?: any }> = ({ profile }) => {
                     <div className="flex items-center gap-3">
                         <h1 className="text-4xl sm:text-5xl font-bold text-white tracking-tighter uppercase">Hola, {greetingName}</h1>
                         {profile?.is_pro && <ProBadge size="medium" />}
+                        {profile?.is_content_creator && <ContentCreatorBadge size="medium" />}
                     </div>
                     <p className="text-lg text-slate-300 mt-2">
                         Bienvenido a tu panel de control Player Latam Series.

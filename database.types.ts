@@ -13,7 +13,7 @@ export interface Database {
                 Row: {
                     id: string
                     username: string | null
-                    role: 'player' | 'store' | 'admin' | null
+                    role: 'player' | 'store' | 'admin' | 'content_creator' | null
                     region: string | null
                     pwp: number
                     matches_won: number
@@ -37,7 +37,7 @@ export interface Database {
                 Insert: {
                     id: string
                     username?: string | null
-                    role?: 'player' | 'store' | 'admin' | null
+                    role?: 'player' | 'store' | 'admin' | 'content_creator' | null
                     region?: string | null
                     pwp?: number
                     matches_won?: number
@@ -61,7 +61,7 @@ export interface Database {
                 Update: {
                     id?: string
                     username?: string | null
-                    role?: 'player' | 'store' | 'admin' | null
+                    role?: 'player' | 'store' | 'admin' | 'content_creator' | null
                     region?: string | null
                     pwp?: number
                     matches_won?: number

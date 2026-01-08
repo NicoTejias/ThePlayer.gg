@@ -3,6 +3,7 @@ import { supabase } from '../supabaseClient';
 import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { toast } from 'sonner';
 import ProBadge from '../components/ProBadge';
+import ContentCreatorBadge from '../components/ContentCreatorBadge';
 
 interface StatsByFormat {
     format: string;
@@ -159,6 +160,7 @@ const PlayerStatsPage: React.FC = () => {
                     <div className="flex items-center gap-3 mb-2">
                         <h1 className="text-4xl font-bold">Estadísticas Avanzadas</h1>
                         {profile?.is_pro && <ProBadge />}
+                        {profile?.role === 'content_creator' && <ContentCreatorBadge />}
                     </div>
                     <p className="text-slate-400">Análisis detallado de tu rendimiento en torneos</p>
                 </div>
@@ -465,8 +467,8 @@ const PlayerStatsPage: React.FC = () => {
                                             <td className="py-3 px-4 text-center">
                                                 <span
                                                     className={`px-3 py-1 rounded-full font-semibold ${stat.win_rate >= 60 ? 'bg-emerald-500/20 text-emerald-500' :
-                                                            stat.win_rate >= 40 ? 'bg-amber-500/20 text-amber-500' :
-                                                                'bg-red-500/20 text-red-500'
+                                                        stat.win_rate >= 40 ? 'bg-amber-500/20 text-amber-500' :
+                                                            'bg-red-500/20 text-red-500'
                                                         }`}
                                                 >
                                                     {stat.win_rate.toFixed(1)}%

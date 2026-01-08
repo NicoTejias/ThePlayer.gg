@@ -24,6 +24,7 @@ export interface PlayerProfile {
   teamData?: Team; // Formal team entity
   isPublic?: boolean;
   is_pro?: boolean;
+  is_content_creator?: boolean; // Content creator status
   game_type?: GameType; // Primary game the player participates in
   tournaments_played?: number; // Number of tournaments the player has participated in
 }

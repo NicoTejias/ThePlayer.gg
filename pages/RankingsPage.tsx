@@ -6,6 +6,7 @@ import SparklesIcon from '../components/icons/SparklesIcon';
 import UsersIcon from '../components/icons/UserIcon';
 import { useGame } from '../context/GameContext';
 import ProBadge from '../components/ProBadge';
+import ContentCreatorBadge from '../components/ContentCreatorBadge';
 
 interface RankingsPageProps {
     players: PlayerProfile[];
@@ -147,6 +148,7 @@ const RankingsPage: React.FC<RankingsPageProps> = ({ players, teams }) => {
                                                 <div className="flex items-center gap-2">
                                                     <span className="text-white font-medium">{player.name}</span>
                                                     {player.is_pro && <ProBadge size="small" />}
+                                                    {player.is_content_creator && <ContentCreatorBadge size="small" />}
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap">
@@ -198,6 +200,7 @@ const RankingsPage: React.FC<RankingsPageProps> = ({ players, teams }) => {
                                                 <div className="flex items-center gap-2">
                                                     <span className="text-white font-medium">{player.name}</span>
                                                     {player.is_pro && <ProBadge size="small" />}
+                                                    {player.is_content_creator && <ContentCreatorBadge size="small" />}
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap">

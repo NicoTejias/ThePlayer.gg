@@ -10,6 +10,8 @@ import { useGame } from '../context/GameContext';
 import VisitorWidget from '../components/widgets/VisitorWidget';
 import PlayerWidget from '../components/widgets/PlayerWidget';
 import StoreWidget from '../components/widgets/StoreWidget';
+import ProBadge from '../components/ProBadge';
+import ContentCreatorBadge from '../components/ContentCreatorBadge';
 
 import AdminWidget from '../components/widgets/AdminWidget';
 import QuickRegistrationModal from '../components/QuickRegistrationModal';
@@ -140,6 +142,8 @@ const HomePage: React.FC<HomePageProps> = ({ players, events, session, userRole,
       pwp: p.pwp || 0,
       region: p.region || 'Unknown',
       team: p.team || 'Sin Equipo',
+      is_pro: p.is_pro || false,
+      is_content_creator: p.is_content_creator || false,
     }));
 
   const topWinRatePlayers = [...players]
@@ -157,6 +161,8 @@ const HomePage: React.FC<HomePageProps> = ({ players, events, session, userRole,
       winRate: `${p.winRate.toFixed(1)}%`,
       region: p.region || 'Unknown',
       team: p.team || 'Sin Equipo',
+      is_pro: p.is_pro || false,
+      is_content_creator: p.is_content_creator || false,
     }));
 
   const displayEvents = (events && events.length > 0) ? events.slice(0, 4) : [];
@@ -303,6 +309,8 @@ const HomePage: React.FC<HomePageProps> = ({ players, events, session, userRole,
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
                           <p className="text-white font-bold truncate text-sm">{player.playerName}</p>
+                          {player.is_pro && <ProBadge size="small" />}
+                          {player.is_content_creator && <ContentCreatorBadge size="small" />}
                           {isCurrent && <span className="px-2 py-0.5 bg-blue-500 text-white text-xs font-bold rounded-full">Tú</span>}
                         </div>
                         <p className="text-xs text-slate-500">{player.team}</p>
@@ -328,6 +336,8 @@ const HomePage: React.FC<HomePageProps> = ({ players, events, session, userRole,
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
                           <p className="text-white font-bold truncate text-sm">{player.playerName}</p>
+                          {player.is_pro && <ProBadge size="small" />}
+                          {player.is_content_creator && <ContentCreatorBadge size="small" />}
                           {isCurrent && <span className="px-2 py-0.5 bg-purple-500 text-white text-xs font-bold rounded-full">Tú</span>}
                         </div>
                         <p className="text-xs text-slate-500">{player.team}</p>

@@ -210,6 +210,7 @@ const AppContent: React.FC = () => {
             teamData: teamDetails, // Objeto completo
             isPublic: p.is_public ?? true,
             is_pro: p.is_pro || false,
+            is_content_creator: p.role === 'content_creator', // Map role to content creator flag
             tournaments_played: p.tournaments_played || 0
           };
         });
