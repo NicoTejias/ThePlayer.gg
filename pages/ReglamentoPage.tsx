@@ -63,7 +63,7 @@ const ReglamentoPage: React.FC = () => {
 
                 <div className="grid gap-12">
 
-                    {/* Section 1: PWP System */}
+                    {/* Section 1: PLS System */}
                     <div className="bg-slate-800/50 border border-slate-700 rounded-3xl p-8 md:p-12 shadow-2xl relative overflow-hidden">
                         <div className="absolute top-0 right-0 p-8 opacity-10 pointer-events-none">
                             <span className="text-9xl">🏆</span>
@@ -73,17 +73,17 @@ const ReglamentoPage: React.FC = () => {
                             <span className="w-12 h-12 rounded-xl bg-sky-500/20 flex items-center justify-center text-sky-400">
                                 1
                             </span>
-                            Sistema de Puntos (PWP)
+                            Sistema de Puntos (PLS)
                         </h2>
 
                         <div className="space-y-6 text-lg text-slate-300 leading-relaxed">
                             <p>
-                                El <strong className="text-sky-400">Player Win Points (PWP)</strong> es el sistema oficial de clasificación de
+                                El <strong className="text-sky-400">Player Latam Series (PLS)</strong> es el sistema oficial de clasificación de
                                 <span className="font-bold text-white"> ThePlayer.gg</span>.
                             </p>
                             <p>
                                 Los puntos se otorgan basándose estrictamente en el rendimiento durante los torneos sancionados.
-                                Acumula puntos para subir en el ranking regional y nacional.
+                                Acumula puntos para subir en el ranking regional y nacional de cada juego (PLS {GAME_LABELS[currentGame]}).
                             </p>
 
                             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-8">

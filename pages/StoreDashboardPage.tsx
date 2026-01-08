@@ -549,7 +549,7 @@ const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpl
                                             <tr>
                                                 <th className="px-4 py-2 text-left text-xs font-medium text-slate-300 uppercase">Jugador</th>
                                                 <th className="px-4 py-2 text-center text-xs font-medium text-slate-300 uppercase">Record</th>
-                                                <th className="px-4 py-2 text-right text-xs font-medium text-slate-300 uppercase">{currentGame === 'mtg' ? 'PWP' : 'Puntos'}</th>
+                                                <th className="px-4 py-2 text-right text-xs font-medium text-slate-300 uppercase">{currentGame === 'mtg' ? 'PLS' : 'Puntos'}</th>
                                             </tr>
                                         </thead>
                                         <tbody className="divide-y divide-slate-700">

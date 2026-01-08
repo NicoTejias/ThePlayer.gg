@@ -91,7 +91,7 @@ const ClaimReviewPage: React.FC = () => {
                     <p className="text-2xl font-bold text-yellow-400 mt-1">{claims.length}</p>
                 </div>
                 <div className="bg-slate-800 p-4 rounded-lg border border-slate-700">
-                    <p className="text-slate-400 text-xs uppercase font-bold">PWP Total en Revisión</p>
+                    <p className="text-slate-400 text-xs uppercase font-bold">PLS Total en Revisión</p>
                     <p className="text-2xl font-bold text-sky-400 mt-1">
                         {claims.reduce((sum, c) => sum + (c.pwp_earned || 0), 0)}
                     </p>
@@ -122,7 +122,7 @@ const ClaimReviewPage: React.FC = () => {
                                     <th className="text-left px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Jugador</th>
                                     <th className="text-left px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Resultado</th>
                                     <th className="text-left px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Torneo</th>
-                                    <th className="text-left px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">PWP</th>
+                                    <th className="text-left px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">PLS</th>
                                     <th className="text-left px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Fecha</th>
                                     <th className="text-right px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Acciones</th>
                                 </tr>
@@ -149,7 +149,7 @@ const ClaimReviewPage: React.FC = () => {
                                         </td>
                                         <td className="px-6 py-4">
                                             <span className="px-2 py-1 bg-sky-900/40 text-sky-300 rounded-full text-xs font-bold">
-                                                {claim.pwp_earned} PWP
+                                                {claim.pwp_earned} PLS
                                             </span>
                                         </td>
                                         <td className="px-6 py-4 text-slate-400 text-sm">
@@ -213,7 +213,7 @@ const ClaimReviewPage: React.FC = () => {
                                 <span className="text-white">{selectedClaim.tournament_name}</span>
                             </div>
                             <div className="flex justify-between">
-                                <span className="text-slate-400 text-sm">PWP:</span>
+                                <span className="text-slate-400 text-sm">PLS:</span>
                                 <span className="text-sky-400 font-bold">{selectedClaim.pwp_earned}</span>
                             </div>
                         </div>
@@ -245,8 +245,8 @@ const ClaimReviewPage: React.FC = () => {
                                 onClick={handleReview}
                                 disabled={processing}
                                 className={`flex-1 py-2 px-4 font-bold rounded-lg transition-colors disabled:opacity-50 ${reviewAction === 'approve'
-                                        ? 'bg-green-600 hover:bg-green-500 text-white'
-                                        : 'bg-red-600 hover:bg-red-500 text-white'
+                                    ? 'bg-green-600 hover:bg-green-500 text-white'
+                                    : 'bg-red-600 hover:bg-red-500 text-white'
                                     }`}
                             >
                                 {processing ? 'Procesando...' : reviewAction === 'approve' ? 'Aprobar' : 'Rechazar'}

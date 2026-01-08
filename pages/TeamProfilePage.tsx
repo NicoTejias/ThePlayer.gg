@@ -67,7 +67,7 @@ const TeamProfilePage: React.FC = () => {
                     }));
                     setMembers(mappedMembers);
 
-                    // Sum PWP
+                    // Sum PLS
                     const totalPwp = mappedMembers.reduce((acc, m) => acc + m.pwp, 0);
                     setTeam(prev => prev ? { ...prev, totalPwp } : null);
                 }
@@ -203,7 +203,7 @@ const TeamProfilePage: React.FC = () => {
                                     </div>
                                     <div className="text-right">
                                         <p className="text-sky-400 font-black text-xl">{member.pwp}</p>
-                                        <p className="text-[10px] text-slate-500 uppercase font-bold">PWP</p>
+                                        <p className="text-[10px] text-slate-500 uppercase font-bold">PLS</p>
                                     </div>
                                 </div>
 
@@ -254,8 +254,8 @@ const TeamProfilePage: React.FC = () => {
                             onClick={handleJoinTeam}
                             disabled={isJoining || isMember}
                             className={`w-full py-4 font-black rounded-2xl shadow-xl transition-all uppercase tracking-widest ${isMember
-                                    ? 'bg-slate-700 text-slate-500 cursor-default'
-                                    : 'bg-sky-500 hover:bg-sky-400 text-white shadow-sky-500/20'
+                                ? 'bg-slate-700 text-slate-500 cursor-default'
+                                : 'bg-sky-500 hover:bg-sky-400 text-white shadow-sky-500/20'
                                 }`}
                         >
                             {isJoining ? 'Procesando...' : isMember ? 'Ya eres Miembro' : 'Unirse al Equipo'}

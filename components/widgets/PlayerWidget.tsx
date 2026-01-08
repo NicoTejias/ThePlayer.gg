@@ -76,7 +76,7 @@ const PlayerWidget: React.FC<PlayerWidgetProps> = ({ userId }) => {
                         </h3>
                         <div className="space-y-3">
                             <div className="flex justify-between items-center">
-                                <span className="text-slate-400 text-sm">PWP Actual</span>
+                                <span className="text-slate-400 text-sm">PLS Actual</span>
                                 <span className="text-2xl font-black text-green-400 font-mono">{profile?.pwp || 0}</span>
                             </div>
                             <div className="flex justify-between items-center">

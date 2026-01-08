@@ -78,7 +78,7 @@ const PlayerDashboardPage: React.FC<{ profile?: any }> = ({ profile }) => {
 
             // Para winrate ranking es más complejo hacerlo solo con SQL sin una columna física de winrate.
             // Por ahora, para no complicar, lo dejamos en 0 o hacemos un fetch ligero si es crítico.
-            // Dado que el usuario pidió consistencia en PWP, priorizamos PWP.
+            // Dado que el usuario pidió consistencia en PLS, priorizamos PLS.
 
             setRanking({ pwpRank, winRateRank: 0 });
 
@@ -197,7 +197,7 @@ const PlayerDashboardPage: React.FC<{ profile?: any }> = ({ profile }) => {
             <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <StatCard
                     icon={<TrophyIcon className="w-8 h-8" />}
-                    title="Puntos PWP"
+                    title="Puntos PLS"
                     value={`${profile?.pwp || 0} pts`}
                     rank={ranking.pwpRank || '-'}
                     color="sky"

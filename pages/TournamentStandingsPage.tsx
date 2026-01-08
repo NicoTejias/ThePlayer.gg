@@ -125,7 +125,7 @@ const TournamentStandingsPage: React.FC = () => {
                             <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Puesto</th>
                             <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Jugador</th>
                             <th scope="col" className="px-6 py-3 text-center text-xs font-medium text-slate-300 uppercase tracking-wider">Resultado (V-D-E)</th>
-                            <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-slate-300 uppercase tracking-wider">Puntos PWP</th>
+                            <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-slate-300 uppercase tracking-wider">Puntos PLS</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-700">
@@ -134,8 +134,8 @@ const TournamentStandingsPage: React.FC = () => {
                                 <tr key={index} className={`transition-colors duration-150 ${index < 8 ? 'bg-sky-900/20 hover:bg-sky-800/30' : 'hover:bg-slate-700/40'}`}>
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <span className={`text-lg font-bold w-8 text-center inline-block ${player.rank === 1 ? 'text-yellow-400' :
-                                                player.rank === 2 ? 'text-gray-300' :
-                                                    player.rank === 3 ? 'text-yellow-600' : 'text-slate-400'
+                                            player.rank === 2 ? 'text-gray-300' :
+                                                player.rank === 3 ? 'text-yellow-600' : 'text-slate-400'
                                             }`}>{player.rank}</span>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">{player.playerName}</td>

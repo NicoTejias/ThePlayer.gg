@@ -15,7 +15,7 @@ interface StatsByFormat {
     total_pwp: number;
 }
 
-interface PWPProgression {
+interface PLSProgression {
     tournament_date: string;
     tournament_name: string;
     format: string;
@@ -37,7 +37,7 @@ interface PerformanceMetrics {
 
 const PlayerStatsPage: React.FC = () => {
     const [statsByFormat, setStatsByFormat] = useState<StatsByFormat[]>([]);
-    const [pwpProgression, setPwpProgression] = useState<PWPProgression[]>([]);
+    const [plsProgression, setPlsProgression] = useState<PLSProgression[]>([]);
     const [metrics, setMetrics] = useState<PerformanceMetrics | null>(null);
     const [loading, setLoading] = useState(true);
     const [currentUser, setCurrentUser] = useState<any>(null);
@@ -80,12 +80,12 @@ const PlayerStatsPage: React.FC = () => {
             if (formatError) throw formatError;
             setStatsByFormat(formatData || []);
 
-            // Fetch PWP progression
+            // Fetch PLS progression
             const { data: progressionData, error: progressionError } = await supabase.rpc('get_player_pwp_progression', {
                 p_player_id: currentUser.id
             });
             if (progressionError) throw progressionError;
-            setPwpProgression(progressionData || []);
+            setPlsProgression(progressionData || []);
 
             // Fetch performance metrics
             const { data: metricsData, error: metricsError } = await supabase.rpc('get_player_performance_metrics', {
@@ -356,12 +356,12 @@ const PlayerStatsPage: React.FC = () => {
 
                 {/* Charts Grid */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-                    {/* PWP Progression */}
-                    {pwpProgression.length > 0 && (
+                    {/* PLS Progression */}
+                    {plsProgression.length > 0 && (
                         <div className="bg-slate-800 border border-slate-700 rounded-lg p-6">
                             <h2 className="text-2xl font-bold mb-4">Progresión de Puntos</h2>
                             <ResponsiveContainer width="100%" height={300}>
-                                <LineChart data={pwpProgression}>
+                                <LineChart data={plsProgression}>
                                     <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
                                     <XAxis
                                         dataKey="tournament_date"
@@ -451,7 +451,7 @@ const PlayerStatsPage: React.FC = () => {
                                         <th className="text-center py-3 px-4 text-slate-400 font-semibold">Partidas</th>
                                         <th className="text-center py-3 px-4 text-slate-400 font-semibold">W-L-D</th>
                                         <th className="text-center py-3 px-4 text-slate-400 font-semibold">Win Rate</th>
-                                        <th className="text-center py-3 px-4 text-slate-400 font-semibold">PWP</th>
+                                        <th className="text-center py-3 px-4 text-slate-400 font-semibold">PLS</th>
                                     </tr>
                                 </thead>
                                 <tbody>

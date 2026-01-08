@@ -76,7 +76,7 @@ const TournamentEditPage: React.FC = () => {
             if (error) throw error;
 
             const affectedPlayers = data?.affected_players || 0;
-            toast.success(`Torneo eliminado. ${affectedPlayers} jugador(es) afectado(s). PWP recalculado.`);
+            toast.success(`Torneo eliminado. ${affectedPlayers} jugador(es) afectado(s). PLS recalculado.`);
 
             setShowDeleteModal(false);
             setSelectedTournament(null);
@@ -246,7 +246,7 @@ const TournamentEditPage: React.FC = () => {
                         <div className="bg-red-900/20 border border-red-700/50 rounded-lg p-4 mb-4">
                             <p className="text-red-300 text-sm font-medium mb-2">⚠️ Esta acción no se puede deshacer</p>
                             <p className="text-slate-400 text-sm">
-                                Se eliminarán todos los resultados del torneo y se recalculará el PWP de los jugadores afectados.
+                                Se eliminarán todos los resultados del torneo y se recalculará el PLS de los jugadores afectados.
                             </p>
                         </div>
 

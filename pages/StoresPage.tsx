@@ -61,7 +61,7 @@ const StoresPage: React.FC = () => {
                         title="Plan Básico"
                         price="25.000"
                         features={[
-                            'Puntos PWP oficiales en torneos',
+                            'Puntos PLS oficiales en torneos',
                             'Torneos en calendario ThePlayer',
                             'Perfil de tienda completo',
                             'Gestión de eventos desde dashboard',

@@ -311,7 +311,7 @@ const HomePage: React.FC<HomePageProps> = ({ players, events, session, userRole,
         <section>
           <SectionHeader title="Rankings" linkTo="/ranking" />
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* PWP Ranking */}
+            {/* PLS Ranking */}
             <div>
               <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3">Top 10 Pts</h3>
               <div className="bg-slate-800/50 rounded-xl border border-slate-700 overflow-hidden shadow-xl">

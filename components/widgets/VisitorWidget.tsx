@@ -18,7 +18,7 @@ const VisitorWidget: React.FC = () => {
                         <div className="bg-slate-800/50 backdrop-blur-sm p-6 rounded-xl border border-slate-700/50 hover:border-blue-500/50 transition-all">
                             <div className="text-4xl mb-3">🏆</div>
                             <h3 className="text-lg font-bold text-white mb-2">Rankings Oficiales</h3>
-                            <p className="text-sm text-slate-400">Sube en el ranking PWP y Win Rate compitiendo en torneos certificados</p>
+                            <p className="text-sm text-slate-400">Sube en el ranking PLS y Win Rate compitiendo en torneos certificados</p>
                         </div>
 
                         <div className="bg-slate-800/50 backdrop-blur-sm p-6 rounded-xl border border-slate-700/50 hover:border-purple-500/50 transition-all">
