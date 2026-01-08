@@ -31,6 +31,7 @@ import ClaimReviewPage from './pages/admin/ClaimReviewPage';
 import IntegrityReviewPanel from './pages/admin/IntegrityReviewPanel';
 import TournamentEditPage from './pages/admin/TournamentEditPage';
 import SubscriptionManagementPage from './pages/admin/SubscriptionManagementPage';
+import ContentCreatorsAdminPage from './pages/admin/ContentCreatorsAdminPage';
 import NotificationsPage from './pages/NotificationsPage';
 import NotificationBell from './components/NotificationBell';
 import FavoritesPage from './pages/FavoritesPage';
@@ -48,6 +49,7 @@ import SubscriptionSuccessPage from './pages/SubscriptionSuccessPage';
 import SubscriptionFailurePage from './pages/SubscriptionFailurePage';
 import LogoutSuccessPage from './pages/LogoutSuccessPage';
 
+import AboutPage from './pages/AboutPage';
 import EmailConfirmationPage from './pages/EmailConfirmationPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
@@ -798,6 +800,7 @@ const AppContent: React.FC = () => {
           <Route path="/confirm-email" element={<EmailConfirmationPage />} />
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           <Route path="/reset-password" element={<ResetPasswordPage />} />
+          <Route path="/quienes-somos" element={<AboutPage />} />
           <Route path="/creadores" element={<ContentCreatorApplicationPage />} />
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="/admin" element={<AdminDashboardPage />} />
@@ -805,7 +808,9 @@ const AppContent: React.FC = () => {
           <Route path="/admin/claims" element={<ClaimReviewPage />} />
           <Route path="/admin/integrity" element={<IntegrityReviewPanel />} />
           <Route path="/admin/tournaments/edit" element={<TournamentEditPage />} />
+
           <Route path="/admin/subscriptions" element={<SubscriptionManagementPage />} />
+          <Route path="/admin/creators" element={<ContentCreatorsAdminPage />} />
           <Route path="/admin/cms" element={<AdminCMSPage />} />
           <Route path="/notifications" element={<NotificationsPage />} />
           <Route path="/favorites" element={<FavoritesPage />} />

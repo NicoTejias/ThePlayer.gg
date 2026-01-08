@@ -267,6 +267,17 @@ const AdminDashboardPage: React.FC = () => {
                         <p className="text-slate-400 text-sm">Gestionar solicitudes de tiendas</p>
                     </a>
 
+
+                    <a href="#/admin/creators" className="group bg-slate-800 hover:bg-slate-700 p-6 rounded-lg border border-slate-700 hover:border-purple-500 transition-all shadow-lg">
+                        <div className="flex items-center gap-4 mb-3">
+                            <div className="p-3 bg-purple-900/40 rounded-lg group-hover:bg-purple-800/60 transition-colors">
+                                <span className="text-2xl">🎥</span>
+                            </div>
+                            <h3 className="text-lg font-bold text-white">Creadores</h3>
+                        </div>
+                        <p className="text-slate-400 text-sm">Aprobar solicitudes de creadores</p>
+                    </a>
+
                     <a href="#/admin/cms" className="group bg-slate-800 hover:bg-slate-700 p-6 rounded-lg border border-slate-700 hover:border-blue-500 transition-all shadow-lg">
                         <div className="flex items-center gap-4 mb-3">
                             <div className="p-3 bg-blue-900/40 rounded-lg group-hover:bg-blue-800/60 transition-colors">
