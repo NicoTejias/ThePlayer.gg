@@ -493,6 +493,7 @@ const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [
                         </div>
                         <div className="text-3xl font-bold text-white">{occupancyRate}%</div>
                         <div className="w-full bg-slate-700 h-1.5 rounded-full mt-2 overflow-hidden">
+                            {/* eslint-disable-next-line react/forbid-dom-props */}
                             <div className="bg-green-500 h-full rounded-full" style={{ width: `${occupancyRate}%` }}></div>
                         </div>
                     </div>
@@ -529,6 +530,7 @@ const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [
                                 <div className="w-full bg-slate-700 h-2 rounded-full overflow-hidden">
                                     <div
                                         className="bg-sky-500 h-full rounded-full"
+                                        // eslint-disable-next-line react/forbid-dom-props
                                         style={{ width: `${((count as number) / totalEvents) * 100}%` }}
                                     ></div>
                                 </div>
@@ -710,6 +712,7 @@ const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [
                                                     <div className="w-16 h-1.5 bg-slate-700 rounded-full mt-1 overflow-hidden">
                                                         <div
                                                             className={`h-full ${isFull ? 'bg-red-500' : 'bg-green-500'}`}
+                                                            // eslint-disable-next-line react/forbid-dom-props
                                                             style={{ width: `${Math.min((registered / maxLimit) * 100, 100)}%` }}
                                                         ></div>
                                                     </div>

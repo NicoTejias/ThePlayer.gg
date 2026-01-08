@@ -151,8 +151,13 @@ body {
 .no-scrollbar {
   -ms-overflow-style: none;
   /* IE and Edge */
-  scrollbar-width: none;
-  /* Firefox */
+}
+
+@supports (scrollbar-width: none) {
+  .no-scrollbar {
+    scrollbar-width: none;
+    /* Firefox */
+  }
 }
 
 /* Custom Scrollbar for Sidebar */
