@@ -50,6 +50,7 @@ import SubscriptionFailurePage from './pages/SubscriptionFailurePage';
 import LogoutSuccessPage from './pages/LogoutSuccessPage';
 
 import AboutPage from './pages/AboutPage';
+import ContentPage from './pages/ContentPage';
 import EmailConfirmationPage from './pages/EmailConfirmationPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
@@ -802,6 +803,7 @@ const AppContent: React.FC = () => {
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           <Route path="/reset-password" element={<ResetPasswordPage />} />
           <Route path="/quienes-somos" element={<AboutPage />} />
+          <Route path="/contenido" element={<ContentPage />} />
           <Route path="/creadores" element={<ContentCreatorApplicationPage />} />
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="/admin" element={<AdminDashboardPage />} />

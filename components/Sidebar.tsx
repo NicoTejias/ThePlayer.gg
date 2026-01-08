@@ -40,7 +40,7 @@ const mtgFormats = [
 
 const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, isLoggedIn, userRole }) => {
     const { currentGame, setGame } = useGame();
-    const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['main']));
+    const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
     const sidebarRef = useRef<HTMLDivElement>(null);
     const location = useLocation();
 
@@ -171,81 +171,76 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, isLoggedIn, userRole
                 </div>
 
                 {/* Navigation */}
+                {/* Navigation */}
                 <div className="overflow-y-auto h-[calc(100%-180px)] custom-scrollbar">
-                    {/* Main Navigation */}
+                    {/* Sección Competencia */}
                     <div className="p-2">
-                        <SectionHeader title="Navegación" section="main" icon="🧭" />
-                        {expandedSections.has('main') && (
+                        <SectionHeader title="Competencia" section="competition" icon="🏆" />
+                        {expandedSections.has('competition') && (
                             <div className="space-y-1 mt-1">
-                                {mainNavItems.map((item) => (
-                                    <NavItem key={item.path} item={item} />
-                                ))}
+                                <NavItem item={{ name: 'Ranking', path: '/ranking/pwp', icon: '📊' }} />
+                                <NavItem item={{ name: 'Torneos', path: '/torneos', icon: '⚔️' }} />
+                                <NavItem item={{ name: 'Eventos', path: '/eventos', icon: '📅' }} />
+                                {currentGame === 'mtg' && (
+                                    <>
+                                        <NavItem item={{ name: 'Commander', path: '/commander', icon: '🏰' }} />
+                                        <NavItem item={{ name: 'Pauper', path: '/pauper', icon: '💎' }} />
+                                        <NavItem item={{ name: 'Premodern', path: '/premodern', icon: '📜' }} />
+                                        <NavItem item={{ name: 'PLS', path: '/pls', icon: '🌟' }} />
+                                    </>
+                                )}
                             </div>
                         )}
                     </div>
 
-                    {/* Media Section */}
-                    <div className="p-2 border-t border-slate-800">
-                        <SectionHeader title="Media" section="media" icon="📱" />
-                        {expandedSections.has('media') && (
-                            <div className="space-y-1 mt-1">
-                                {mediaItems.map((item) => (
-                                    <NavItem key={item.path} item={item} />
-                                ))}
-                            </div>
-                        )}
-                    </div>
 
-                    {/* Community Section */}
+                    {/* Sección Comunidad */}
                     <div className="p-2 border-t border-slate-800">
                         <SectionHeader title="Comunidad" section="community" icon="👥" />
                         {expandedSections.has('community') && (
                             <div className="space-y-1 mt-1">
-                                {communityItems.map((item) => (
-                                    <NavItem key={item.path} item={item} />
-                                ))}
+                                <NavItem item={{ name: 'Mercado TCG', path: '/mercado', icon: '🛒' }} />
+                                <NavItem item={{ name: 'Tiendas', path: '/tiendas', icon: '🏪' }} />
+                                <NavItem item={{ name: 'Señal Online', path: '/envivo', icon: '📺' }} />
+                                <NavItem item={{ name: 'Contenido', path: '/contenido', icon: '📱' }} />
                             </div>
                         )}
                     </div>
 
-                    {/* MTG Formats (only show when MTG is selected) */}
-                    {currentGame === 'mtg' && (
-                        <div className="p-2 border-t border-slate-800">
-                            <SectionHeader title="Formatos MTG" section="mtg" icon="🃏" />
-                            {expandedSections.has('mtg') && (
-                                <div className="space-y-1 mt-1">
-                                    {mtgFormats.map((item) => (
-                                        <NavItem key={item.path} item={item} />
-                                    ))}
-                                </div>
-                            )}
-                        </div>
-                    )}
-
-                    {/* Admin/User Sections */}
+                    {/* Sección Mi Perfil (Solo Logueados) */}
                     {isLoggedIn && (
                         <div className="p-2 border-t border-slate-800">
-                            <SectionHeader title="Mi Cuenta" section="account" icon="👤" />
-                            {expandedSections.has('account') && (
+                            <SectionHeader title="Mi Perfil" section="profile" icon="👤" />
+                            {expandedSections.has('profile') && (
                                 <div className="space-y-1 mt-1">
                                     {userRole === 'admin' && (
                                         <NavItem item={{ name: 'Panel Admin', path: '/admin', icon: '🛡️' }} />
                                     )}
                                     {userRole === 'store' && (
-                                        <NavItem item={{ name: 'Mi Tienda', path: '/dashboard/tienda', icon: '🏪' }} />
+                                        <NavItem item={{ name: 'Panel Tienda', path: '/dashboard/tienda', icon: '🏪' }} />
                                     )}
                                     {userRole === 'player' && (
-                                        <NavItem item={{ name: 'Mi Panel', path: '/dashboard/jugador', icon: '🎮' }} />
+                                        <NavItem item={{ name: 'Mi Dashboard', path: '/dashboard/jugador', icon: '🎮' }} />
                                     )}
-
+                                    <NavItem item={{ name: 'Mis Anuncios', path: '/mis-anuncios', icon: '🏷️' }} />
                                     <NavItem item={{ name: 'Favoritos', path: '/favorites', icon: '❤️' }} />
                                     <NavItem item={{ name: 'Notificaciones', path: '/notifications', icon: '🔔' }} />
-                                    <NavItem item={{ name: 'Estadísticas', path: '/stats', icon: '📈' }} />
                                     <NavItem item={{ name: 'Configuración', path: '/settings', icon: '⚙️' }} />
                                 </div>
                             )}
                         </div>
                     )}
+
+                    {/* Sección Información */}
+                    <div className="p-2 border-t border-slate-800">
+                        <SectionHeader title="Información" section="info" icon="ℹ️" />
+                        {expandedSections.has('info') && (
+                            <div className="space-y-1 mt-1">
+                                <NavItem item={{ name: 'Quiénes Somos', path: '/quienes-somos', icon: '🤝' }} />
+                                <NavItem item={{ name: 'Reglamento', path: '/reglamento', icon: '📜' }} />
+                            </div>
+                        )}
+                    </div>
                 </div>
             </div>
         </>
