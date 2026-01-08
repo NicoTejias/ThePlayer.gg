@@ -15,17 +15,6 @@ const AdminWidget: React.FC = () => {
                     .select('*', { count: 'exact', head: true })
                     .eq('is_published', false);
 
-                // Get pending judge applications
-                const { count: pendingJudges } = await supabase
-                    .from('judge_applications')
-                    .select('*', { count: 'exact', head: true })
-                    .eq('status', 'pending');
-
-                // Get pending discipline cases
-                const { count: pendingCases } = await supabase
-                    .from('discipline_cases')
-                    .select('*', { count: 'exact', head: true })
-                    .eq('status', 'under_review');
 
                 // Get growth metrics (last 7 days)
                 const sevenDaysAgo = new Date();
@@ -44,8 +33,6 @@ const AdminWidget: React.FC = () => {
 
                 setAdminData({
                     pendingArticles: pendingArticles || 0,
-                    pendingJudges: pendingJudges || 0,
-                    pendingCases: pendingCases || 0,
                     newPlayers: newPlayers || 0,
                     newTournaments: newTournaments || 0
                 });
@@ -69,8 +56,8 @@ const AdminWidget: React.FC = () => {
         );
     }
 
-    const { pendingArticles, pendingJudges, pendingCases, newPlayers, newTournaments } = adminData || {};
-    const totalPending = pendingArticles + pendingJudges + pendingCases;
+    const { pendingArticles, newPlayers, newTournaments } = adminData || {};
+    const totalPending = pendingArticles;
 
     return (
         <div className="bg-gradient-to-r from-red-900/10 via-orange-900/10 to-red-900/10 border-y border-red-500/20 py-8 md:py-10">
@@ -97,7 +84,7 @@ const AdminWidget: React.FC = () => {
                     </div>
                 )}
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-6 md:mb-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-6 md:mb-8">
 
                     {/* Pending Content Card */}
                     <div className="bg-slate-800/50 backdrop-blur-sm p-6 rounded-xl border border-slate-700/50">
@@ -115,37 +102,7 @@ const AdminWidget: React.FC = () => {
                         </div>
                     </div>
 
-                    {/* Pending Applications Card */}
-                    <div className="bg-slate-800/50 backdrop-blur-sm p-6 rounded-xl border border-slate-700/50">
-                        <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3">Solicitudes</h3>
-                        <div className="space-y-2">
-                            <div className="flex justify-between items-center">
-                                <span className="text-slate-300 text-sm">Jueces</span>
-                                <span className={`text-xl font-black font-mono ${pendingJudges > 0 ? 'text-yellow-400' : 'text-slate-600'}`}>
-                                    {pendingJudges}
-                                </span>
-                            </div>
-                            <Link to="/admin/jueces" className="text-sky-400 hover:text-sky-300 text-xs font-bold flex items-center gap-1 pt-1">
-                                Revisar →
-                            </Link>
-                        </div>
-                    </div>
 
-                    {/* Pending Cases Card */}
-                    <div className="bg-slate-800/50 backdrop-blur-sm p-6 rounded-xl border border-slate-700/50">
-                        <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3">Casos Disciplina</h3>
-                        <div className="space-y-2">
-                            <div className="flex justify-between items-center">
-                                <span className="text-slate-300 text-sm">En Revisión</span>
-                                <span className={`text-xl font-black font-mono ${pendingCases > 0 ? 'text-red-400' : 'text-slate-600'}`}>
-                                    {pendingCases}
-                                </span>
-                            </div>
-                            <Link to="/jueces/casos" className="text-sky-400 hover:text-sky-300 text-xs font-bold flex items-center gap-1 pt-1">
-                                Ver Casos →
-                            </Link>
-                        </div>
-                    </div>
 
                     {/* Growth Metrics Card */}
                     <div className="bg-slate-800/50 backdrop-blur-sm p-6 rounded-xl border border-slate-700/50">
