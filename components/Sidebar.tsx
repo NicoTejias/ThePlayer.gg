@@ -40,7 +40,7 @@ const mtgFormats = [
 
 const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, isLoggedIn, userRole }) => {
     const { currentGame, setGame } = useGame();
-    const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
+    const [expandedSection, setExpandedSection] = useState<string | null>(null);
     const sidebarRef = useRef<HTMLDivElement>(null);
     const location = useLocation();
 
@@ -70,15 +70,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, isLoggedIn, userRole
     }, [location.pathname]);
 
     const toggleSection = (section: string) => {
-        setExpandedSections(prev => {
-            const newSet = new Set(prev);
-            if (newSet.has(section)) {
-                newSet.delete(section);
-            } else {
-                newSet.add(section);
-            }
-            return newSet;
-        });
+        setExpandedSection(prev => prev === section ? null : section);
     };
 
     const NavItem: React.FC<{ item: { name: string; path: string; icon: string } }> = ({ item }) => (
@@ -106,7 +98,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, isLoggedIn, userRole
                 {title}
             </span>
             <svg
-                className={`w-4 h-4 transition-transform duration-200 ${expandedSections.has(section) ? 'rotate-180' : ''}`}
+                className={`w-4 h-4 transition-transform duration-200 ${expandedSection === section ? 'rotate-180' : ''}`}
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -176,7 +168,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, isLoggedIn, userRole
                     {/* Sección Competencia */}
                     <div className="p-2">
                         <SectionHeader title="Competencia" section="competition" icon="🏆" />
-                        {expandedSections.has('competition') && (
+                        {expandedSection === 'competition' && (
                             <div className="space-y-1 mt-1">
                                 <NavItem item={{ name: 'Ranking', path: '/ranking/pwp', icon: '📊' }} />
                                 <NavItem item={{ name: 'Torneos', path: '/torneos', icon: '⚔️' }} />
@@ -197,7 +189,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, isLoggedIn, userRole
                     {/* Sección Comunidad */}
                     <div className="p-2 border-t border-slate-800">
                         <SectionHeader title="Comunidad" section="community" icon="👥" />
-                        {expandedSections.has('community') && (
+                        {expandedSection === 'community' && (
                             <div className="space-y-1 mt-1">
                                 <NavItem item={{ name: 'Mercado TCG', path: '/mercado', icon: '🛒' }} />
                                 <NavItem item={{ name: 'Tiendas', path: '/tiendas', icon: '🏪' }} />
@@ -211,7 +203,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, isLoggedIn, userRole
                     {isLoggedIn && (
                         <div className="p-2 border-t border-slate-800">
                             <SectionHeader title="Mi Perfil" section="profile" icon="👤" />
-                            {expandedSections.has('profile') && (
+                            {expandedSection === 'profile' && (
                                 <div className="space-y-1 mt-1">
                                     {userRole === 'admin' && (
                                         <NavItem item={{ name: 'Panel Admin', path: '/admin', icon: '🛡️' }} />
@@ -234,7 +226,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, isLoggedIn, userRole
                     {/* Sección Información */}
                     <div className="p-2 border-t border-slate-800">
                         <SectionHeader title="Información" section="info" icon="ℹ️" />
-                        {expandedSections.has('info') && (
+                        {expandedSection === 'info' && (
                             <div className="space-y-1 mt-1">
                                 <NavItem item={{ name: 'Quiénes Somos', path: '/quienes-somos', icon: '🤝' }} />
                                 <NavItem item={{ name: 'Reglamento', path: '/reglamento', icon: '📜' }} />

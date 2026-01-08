@@ -1,93 +1,158 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { supabase } from '../supabaseClient';
+import ContentCard from '../components/ContentCard';
+import { toast } from 'sonner';
+
+interface ContentItem {
+    id: string;
+    title: string;
+    description: string | null; // For excerpt or description
+    image_url?: string | null; // Standardized image key
+    type: 'article' | 'video';
+    creator_name?: string; // We might need to join profiles
+    created_at: string;
+    external_url?: string; // For videos via youtube_id
+}
 
 const ContentPage: React.FC = () => {
-    const sections = [
-        {
-            title: 'Únete como Creador',
-            description: 'Comparte tu pasión por los TCG con la comunidad más grande de Chile',
-            icon: '🎬',
-            path: '/creadores',
-            color: 'from-purple-600 to-pink-600',
-            hoverColor: 'hover:from-purple-500 hover:to-pink-500'
-        },
-        {
-            title: 'Noticias',
-            description: 'Las últimas novedades del mundo de los Trading Card Games',
-            icon: '📰',
-            path: '/media',
-            color: 'from-blue-600 to-cyan-600',
-            hoverColor: 'hover:from-blue-500 hover:to-cyan-500'
-        },
-        {
-            title: 'Artículos',
-            description: 'Estrategias, análisis de meta y guías para mejorar tu juego',
-            icon: '📝',
-            path: '/media/articulos',
-            color: 'from-green-600 to-emerald-600',
-            hoverColor: 'hover:from-green-500 hover:to-emerald-500'
-        },
-        {
-            title: 'Videos',
-            description: 'Tutoriales, gameplays y contenido exclusivo de la comunidad',
-            icon: '🎥',
-            path: '/media/videos',
-            color: 'from-red-600 to-orange-600',
-            hoverColor: 'hover:from-red-500 hover:to-orange-500'
+    const [content, setContent] = useState<ContentItem[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        fetchContent();
+    }, []);
+
+    const fetchContent = async () => {
+        try {
+            setLoading(true);
+
+            // Fetch articles
+            const { data: articles, error: articlesError } = await supabase
+                .from('articles')
+                .select(`
+                    id, 
+                    title, 
+                    excerpt, 
+                    image_url, 
+                    created_at, 
+                    profiles:author_id (username)
+                `)
+                .eq('is_published', true)
+                .order('created_at', { ascending: false })
+                .limit(20);
+
+            if (articlesError) throw articlesError;
+
+            // Fetch videos
+            const { data: videos, error: videosError } = await supabase
+                .from('videos')
+                .select(`
+                    id, 
+                    title, 
+                    description, 
+                    youtube_id, 
+                    created_at, 
+                    profiles:creator_id (username)
+                `)
+                .order('created_at', { ascending: false })
+                .limit(20);
+
+            if (videosError) throw videosError;
+
+            // Normalize and combine data
+            const normalizedArticles: ContentItem[] = (articles || []).map((a: any) => ({
+                id: a.id,
+                title: a.title,
+                description: a.excerpt,
+                image_url: a.image_url,
+                type: 'article',
+                creator_name: a.profiles?.username || 'Redacción',
+                created_at: a.created_at
+            }));
+
+            const normalizedVideos: ContentItem[] = (videos || []).map((v: any) => ({
+                id: v.id,
+                title: v.title,
+                description: v.description,
+                image_url: v.youtube_id ? `https://img.youtube.com/vi/${v.youtube_id}/maxresdefault.jpg` : null,
+                type: 'video',
+                creator_name: v.profiles?.username || 'Creador',
+                created_at: v.created_at,
+                external_url: v.youtube_id ? `https://www.youtube.com/watch?v=${v.youtube_id}` : undefined
+            }));
+
+            const combinedContent = [...normalizedArticles, ...normalizedVideos].sort((a, b) =>
+                new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+            );
+
+            setContent(combinedContent);
+        } catch (error) {
+            console.error('Error fetching content:', error);
+            toast.error('Error al cargar el contenido');
+        } finally {
+            setLoading(false);
         }
-    ];
+    };
 
     return (
-        <div className="min-h-screen py-12">
+        <div className="min-h-screen py-12 animate-fade-in">
             <div className="container mx-auto px-4">
                 {/* Hero Section */}
-                <div className="text-center mb-16">
-                    <h1 className="text-5xl md:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-purple-600 mb-6 drop-shadow-lg">
-                        CONTENIDO
+                <div className="text-center mb-16 relative">
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[300px] bg-purple-600/30 blur-[100px] rounded-full pointer-events-none -z-10"></div>
+
+                    <h1 className="text-5xl md:text-7xl font-black text-transparent bg-clip-text bg-gradient-to-r from-sky-400 via-purple-500 to-pink-500 mb-6 drop-shadow-2xl tracking-tighter">
+                        HUB DE CONTENIDO
                     </h1>
-                    <p className="text-xl text-slate-300 max-w-3xl mx-auto leading-relaxed">
-                        Descubre todo el contenido creado por y para la comunidad de TCG
+                    <p className="text-xl text-slate-300 max-w-2xl mx-auto leading-relaxed mb-8">
+                        Noticias, Artículos, Estrategias y Videos. <br />
+                        <span className="text-sky-400 font-bold">Todo el contenido de la comunidad en un solo lugar.</span>
                     </p>
-                </div>
 
-                {/* Content Sections Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-6xl mx-auto">
-                    {sections.map((section, index) => (
+                    <div className="flex justify-center gap-4">
                         <Link
-                            key={index}
-                            to={section.path}
-                            className="group relative overflow-hidden rounded-2xl border border-slate-700/50 bg-slate-800/50 backdrop-blur-sm hover:bg-slate-800/70 transition-all duration-300 hover:shadow-2xl hover:-translate-y-1"
+                            to="/creadores"
+                            className="inline-flex items-center gap-2 px-8 py-4 rounded-full bg-gradient-to-r from-orange-500 to-pink-600 hover:from-orange-400 hover:to-pink-500 text-white font-bold text-lg shadow-lg shadow-orange-900/40 transition-all hover:scale-105"
                         >
-                            <div className="p-8">
-                                {/* Icon */}
-                                <div className="w-16 h-16 mb-6 flex items-center justify-center text-5xl">
-                                    {section.icon}
-                                </div>
-
-                                {/* Title */}
-                                <h2 className="text-2xl font-bold text-white mb-3 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-sky-400 group-hover:to-purple-500 transition-all">
-                                    {section.title}
-                                </h2>
-
-                                {/* Description */}
-                                <p className="text-slate-400 mb-6 leading-relaxed">
-                                    {section.description}
-                                </p>
-
-                                {/* CTA Button */}
-                                <div className={`inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-gradient-to-r ${section.color} ${section.hoverColor} text-white font-bold transition-all shadow-lg`}>
-                                    <span>Explorar</span>
-                                    <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                                    </svg>
-                                </div>
-                            </div>
-
-                            {/* Decorative gradient overlay */}
-                            <div className={`absolute inset-0 bg-gradient-to-br ${section.color} opacity-0 group-hover:opacity-10 transition-opacity duration-300 pointer-events-none`} />
+                            <span>🚀 Convertirme en Creador</span>
                         </Link>
-                    ))}
+                    </div>
                 </div>
+
+                {/* Filters / Tabs (Future Implementation) */}
+                {/* For now, just a unified grid */}
+
+                {/* Content Grid */}
+                {loading ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                        {[1, 2, 3, 4, 5, 6, 7, 8].map((n) => (
+                            <div key={n} className="bg-slate-800 rounded-xl aspect-[4/3] animate-pulse"></div>
+                        ))}
+                    </div>
+                ) : content.length === 0 ? (
+                    <div className="text-center py-20 bg-slate-800/30 rounded-3xl border border-slate-700/50 backdrop-blur-sm">
+                        <div className="text-6xl mb-4">📭</div>
+                        <h3 className="text-2xl font-bold text-white mb-2">Aún no hay contenido disponible</h3>
+                        <p className="text-slate-400">Sé el primero en publicar algo increíble.</p>
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                        {content.map((item) => (
+                            <ContentCard
+                                key={`${item.type}-${item.id}`}
+                                id={item.id}
+                                title={item.title}
+                                description={item.description}
+                                imageUrl={item.image_url}
+                                type={item.type}
+                                creatorName={item.creator_name}
+                                date={item.created_at}
+                                externalUrl={item.external_url}
+                            />
+                        ))}
+                    </div>
+                )}
             </div>
         </div>
     );
