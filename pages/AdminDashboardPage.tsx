@@ -284,6 +284,16 @@ const AdminDashboardPage: React.FC = () => {
                         </div>
                         <p className="text-slate-400 text-sm">Publicar noticias, guías y videos</p>
                     </a>
+                    <a href="#/admin/marketplace" className="group bg-slate-800 hover:bg-slate-700 p-6 rounded-lg border border-slate-700 hover:border-pink-500 transition-all shadow-lg">
+                        <div className="flex items-center gap-4 mb-3">
+                            <div className="p-3 bg-pink-900/40 rounded-lg group-hover:bg-pink-800/60 transition-colors">
+                                <span className="text-2xl">🏪</span>
+                            </div>
+                            <h3 className="text-lg font-bold text-white">Mercado</h3>
+                        </div>
+                        <p className="text-slate-400 text-sm">Gestionar publicaciones del mercado</p>
+                    </a>
+
                 </div>
             </section>
 

@@ -32,6 +32,7 @@ import IntegrityReviewPanel from './pages/admin/IntegrityReviewPanel';
 import TournamentEditPage from './pages/admin/TournamentEditPage';
 import SubscriptionManagementPage from './pages/admin/SubscriptionManagementPage';
 import ContentCreatorsAdminPage from './pages/admin/ContentCreatorsAdminPage';
+import MarketplaceAdminPage from './pages/admin/MarketplaceAdminPage';
 import NotificationsPage from './pages/NotificationsPage';
 import NotificationBell from './components/NotificationBell';
 import FavoritesPage from './pages/FavoritesPage';
@@ -812,6 +813,17 @@ const AppContent: React.FC = () => {
           <Route path="/contenido" element={<ContentPage />} />
           <Route path="/reglamento" element={<ReglamentoPage />} />
           <Route path="/terminos" element={<TermsPage />} />
+
+          {/* Admin Routes */}
+          <Route path="/admin" element={<AdminDashboardPage />} />
+          <Route path="/admin/users" element={<UserManagementPage />} />
+          <Route path="/admin/claims" element={<ClaimReviewPage />} />
+          <Route path="/admin/integrity" element={<IntegrityReviewPanel />} />
+          <Route path="/admin/tournaments/edit" element={<TournamentEditPage />} />
+          <Route path="/admin/subscriptions" element={<SubscriptionManagementPage />} />
+          <Route path="/admin/creators" element={<ContentCreatorsAdminPage />} />
+          <Route path="/admin/marketplace" element={<MarketplaceAdminPage />} />
+          <Route path="/admin/cms" element={<AdminCMSPage />} />
           <Route path="/pls" element={<PLSPage />} />
           <Route path="/creadores" element={<ContentCreatorApplicationPage />} />
           <Route path="/settings" element={<SettingsPage />} />
