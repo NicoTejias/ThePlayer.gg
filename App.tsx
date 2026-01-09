@@ -61,6 +61,7 @@ import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
 import ContentCreatorApplicationPage from './pages/ContentCreatorApplicationPage';
 import TermsPage from './pages/TermsPage';
+import SubscriptionPage from './pages/SubscriptionPage';
 import type { TournamentResult, CommunityEvent, PlayerProfile, TournamentParseResult, Team } from './types';
 import OnboardingModal from './components/OnboardingModal';
 import ClaimResultsModal from './components/ClaimResultsModal';
@@ -813,6 +814,8 @@ const AppContent: React.FC = () => {
           <Route path="/contenido" element={<ContentPage />} />
           <Route path="/reglamento" element={<ReglamentoPage />} />
           <Route path="/terminos" element={<TermsPage />} />
+          <Route path="/premium" element={<SubscriptionPage />} />
+          <Route path="/suscripcion" element={<SubscriptionPage />} />
 
           {/* Admin Routes */}
           <Route path="/admin" element={<AdminDashboardPage />} />

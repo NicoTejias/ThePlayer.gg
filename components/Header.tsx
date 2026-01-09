@@ -163,6 +163,14 @@ const Header: React.FC<HeaderProps> = ({
 
 
 
+              <Link
+                to="/premium"
+                className="hidden md:flex items-center gap-1 px-3 py-1.5 bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-yellow-500 hover:to-orange-500 text-white font-bold rounded-full transition-all text-xs shadow-lg shadow-yellow-900/20 mr-2"
+              >
+                <div className="w-2 h-2 rounded-full bg-white animate-pulse" />
+                PREMIUM
+              </Link>
+
               {/* Notification Bell */}
               {isLoggedIn && <NotificationBell />}
 
