@@ -482,7 +482,7 @@ const SettingsPage: React.FC = () => {
                                 <p className="text-xs text-slate-500 mt-1">El rol no se puede cambiar aquí.</p>
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-slate-400 mb-1">Avatar URL</label>
+                                <label className="block text-sm font-medium text-slate-400 mb-1">{role === 'store' ? 'Logo de la Tienda (URL)' : 'Avatar URL'}</label>
                                 <input
                                     type="text"
                                     value={avatarUrl}
@@ -490,6 +490,9 @@ const SettingsPage: React.FC = () => {
                                     className={commonInputClass}
                                     placeholder="https://..."
                                 />
+                                {role === 'store' && (
+                                    <p className="text-xs text-sky-400 mt-1">Este logo aparecerá en tus torneos, perfil de tienda y widget.</p>
+                                )}
                             </div>
                         </div>
                         {/* Placeholder for Password Change - Functional logic would require more complex auth flow */}

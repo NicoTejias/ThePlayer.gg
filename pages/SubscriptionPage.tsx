@@ -41,14 +41,14 @@ const SubscriptionPage: React.FC = () => {
     const plans = [
         {
             name: "Mensual",
-            price: "$3.990",
+            price: "$5.000",
             period: "/mes",
             features: ["Todos los beneficios PRO", "Cancelación en cualquier momento", "Apoya a la comunidad"],
             recommended: false
         },
         {
             name: "Anual",
-            price: "$39.990",
+            price: "$50.000",
             period: "/año",
             save: "Ahorra 2 meses",
             features: ["Todos los beneficios PRO", "Insignia 'Fundador' (Limitada)", "Merch de regalo (Polera)"],
@@ -129,14 +129,73 @@ const SubscriptionPage: React.FC = () => {
                 </div>
 
                 {/* Partner Stores Preview */}
-                <div className="text-center">
-                    <h3 className="text-slate-500 uppercase tracking-widest text-sm font-bold mb-8">Disponible próximamente en</h3>
-                    <div className="flex flex-wrap justify-center gap-8 opacity-50 grayscale hover:grayscale-0 transition-all duration-500">
-                        {/* Placeholder logos - replace with real store logos later */}
-                        <div className="h-10 text-2xl font-black text-slate-300">BLOODMOON</div>
-                        <div className="h-10 text-2xl font-black text-slate-300">MAGIC SUR</div>
-                        <div className="h-10 text-2xl font-black text-slate-300">LA COMARCA</div>
-                        <div className="h-10 text-2xl font-black text-slate-300">ENTRE JUEGOS</div>
+                <div className="text-center max-w-5xl mx-auto">
+                    <h3 className="text-slate-500 uppercase tracking-widest text-sm font-bold mb-12">Beneficios en Tiendas Asociadas</h3>
+
+                    <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        {/* Bloodmoon Games */}
+                        <div className="bg-slate-800/30 border border-slate-700/50 rounded-xl p-6 text-left hover:bg-slate-800/50 transition-colors">
+                            <h4 className="font-black text-xl text-white mb-2 uppercase">BLOODMOON GAMES</h4>
+                            <div className="h-0.5 w-12 bg-red-600 mb-4"></div>
+                            <ul className="space-y-2 text-sm text-slate-400">
+                                <li className="flex items-start gap-2">
+                                    <Zap className="w-4 h-4 text-yellow-500 shrink-0 mt-0.5" />
+                                    <span>Bebida gratis en torneos semanales</span>
+                                </li>
+                                <li className="flex items-start gap-2">
+                                    <Zap className="w-4 h-4 text-yellow-500 shrink-0 mt-0.5" />
+                                    <span>5% dcto en singles</span>
+                                </li>
+                                <li className="flex items-start gap-2">
+                                    <Zap className="w-4 h-4 text-yellow-500 shrink-0 mt-0.5" />
+                                    <span>Reserva anticipada de producto</span>
+                                </li>
+                            </ul>
+                        </div>
+
+                        {/* Magic Sur */}
+                        <div className="bg-slate-800/30 border border-slate-700/50 rounded-xl p-6 text-left hover:bg-slate-800/50 transition-colors">
+                            <h4 className="font-black text-xl text-white mb-2 uppercase">MAGIC SUR</h4>
+                            <div className="h-0.5 w-12 bg-blue-600 mb-4"></div>
+                            <ul className="space-y-2 text-sm text-slate-400">
+                                <li className="flex items-start gap-2">
+                                    <Zap className="w-4 h-4 text-yellow-500 shrink-0 mt-0.5" />
+                                    <span>5% dcto en accesorios</span>
+                                </li>
+                                <li className="flex items-start gap-2">
+                                    <Zap className="w-4 h-4 text-yellow-500 shrink-0 mt-0.5" />
+                                    <span>Inscripción preferente a torneos</span>
+                                </li>
+                            </ul>
+                        </div>
+
+                        {/* La Comarca */}
+                        <div className="bg-slate-800/30 border border-slate-700/50 rounded-xl p-6 text-left hover:bg-slate-800/50 transition-colors">
+                            <h4 className="font-black text-xl text-white mb-2 uppercase">LA COMARCA</h4>
+                            <div className="h-0.5 w-12 bg-green-600 mb-4"></div>
+                            <ul className="space-y-2 text-sm text-slate-400">
+                                <li className="flex items-start gap-2">
+                                    <Zap className="w-4 h-4 text-yellow-500 shrink-0 mt-0.5" />
+                                    <span>Snack de cortesía</span>
+                                </li>
+                                <li className="flex items-start gap-2">
+                                    <Zap className="w-4 h-4 text-yellow-500 shrink-0 mt-0.5" />
+                                    <span>Descuento en juegos de mesa</span>
+                                </li>
+                            </ul>
+                        </div>
+
+                        {/* Entre Juegos */}
+                        <div className="bg-slate-800/30 border border-slate-700/50 rounded-xl p-6 text-left hover:bg-slate-800/50 transition-colors">
+                            <h4 className="font-black text-xl text-white mb-2 uppercase">ENTRE JUEGOS</h4>
+                            <div className="h-0.5 w-12 bg-purple-600 mb-4"></div>
+                            <ul className="space-y-2 text-sm text-slate-400">
+                                <li className="flex items-start gap-2">
+                                    <Zap className="w-4 h-4 text-yellow-500 shrink-0 mt-0.5" />
+                                    <span>Beneficios por anunciar</span>
+                                </li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
 

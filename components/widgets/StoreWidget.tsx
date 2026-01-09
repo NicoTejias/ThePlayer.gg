@@ -77,7 +77,12 @@ const StoreWidget: React.FC<StoreWidgetProps> = ({ storeId }) => {
                     {/* Store Stats Card */}
                     <div className="bg-slate-800/50 backdrop-blur-sm p-6 rounded-xl border border-slate-700/50">
                         <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-                            <span className="text-2xl">🏪</span> Tu Tienda
+                            {profile?.avatar_url ? (
+                                <img src={profile.avatar_url} alt="Logo" className="w-8 h-8 rounded-full object-cover" />
+                            ) : (
+                                <span className="text-2xl">🏪</span>
+                            )}
+                            Tu Tienda
                         </h3>
                         <div className="space-y-3">
                             <div className="flex justify-between items-center">

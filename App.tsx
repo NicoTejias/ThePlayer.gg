@@ -844,7 +844,7 @@ const AppContent: React.FC = () => {
           <Route path="/seller/:sellerId" element={<SellerProfilePage />} />
           <Route path="/calendario" element={<CalendarPage />} />
           <Route path="/stats" element={<PlayerStatsPage />} />
-          <Route path="/dashboard/tienda" element={<StoreDashboardPage onTournamentUpload={handleTournamentUpload} onDeleteTournament={handleDeleteTournament} userRole={userRole} tournaments={tournamentResults} storeStatus={userProfile?.status} storeName={userProfile?.username} />} />
+          <Route path="/dashboard/tienda" element={<StoreDashboardPage onTournamentUpload={handleTournamentUpload} onDeleteTournament={handleDeleteTournament} userRole={userRole} tournaments={tournamentResults} storeStatus={userProfile?.status} storeName={userProfile?.username} storeLogo={userProfile?.avatar_url} />} />
           <Route path="/leagues/:leagueId" element={<LeagueRankingPage />} />
           <Route path="/ligas" element={<CommunityLeaguesPage />} />
           <Route path="/community-leagues" element={<CommunityLeaguesPage />} />
