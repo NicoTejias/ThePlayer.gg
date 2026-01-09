@@ -1026,6 +1026,7 @@ const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [
                                         <div className="w-full h-2 bg-slate-700 rounded-full mt-1 overflow-hidden">
                                             <div
                                                 className={`h-full ${(selectedCalendarEvent.playerCount || 0) >= selectedCalendarEvent.maxPlayers ? 'bg-red-500' : 'bg-green-500'}`}
+                                                // eslint-disable-next-line react/forbid-dom-props
                                                 style={{ width: `${Math.min(((selectedCalendarEvent.playerCount || 0) / selectedCalendarEvent.maxPlayers) * 100, 100)}%` }}
                                             ></div>
                                         </div>

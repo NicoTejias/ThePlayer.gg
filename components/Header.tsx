@@ -173,7 +173,7 @@ const Header: React.FC<HeaderProps> = ({
                     onClick={() => setProfileMenuOpen(!isProfileMenuOpen)}
                     className="flex items-center gap-2 bg-slate-700/50 p-1.5 pr-3 rounded-full hover:bg-slate-700 transition-all border border-slate-600 hover:border-slate-500"
                     aria-haspopup="true"
-                    aria-expanded={isProfileMenuOpen}
+                    aria-expanded={isProfileMenuOpen ? 'true' : 'false'}
                     aria-label="Menú de usuario"
                   >
                     <UserCircleIcon className="w-8 h-8 text-sky-400" />

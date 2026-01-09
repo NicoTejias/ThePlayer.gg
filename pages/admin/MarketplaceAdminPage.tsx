@@ -114,7 +114,7 @@ const MarketplaceAdminPage: React.FC = () => {
                 <select
                     value={gameFilter}
                     onChange={(e) => { setGameFilter(e.target.value); setTimeout(() => fetchListings(), 0); }} // Quick hack to trigger refetch, normally useEffect dep, but I didn't put it in dep array to avoid double fetch on mount? Actually I did not put fetchListings in dep array of useEffect.
-                    // Let's refine the strategy: I'll make useEffect depend on gameFilter but NOT searchQuery (to avoid fetch on every typing), search is manual.
+                    aria-label="Filtrar por juego"
                     className="bg-slate-900 border border-slate-700 rounded px-4 py-2 text-white"
                 >
                     <option value="">Todos los Juegos</option>
