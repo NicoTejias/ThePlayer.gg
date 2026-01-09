@@ -58,6 +58,26 @@ const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [
     // State for loading actions
     const [processingEventId, setProcessingEventId] = React.useState<string | null>(null);
 
+    // State for filtering
+    const [selectedFormat, setSelectedFormat] = React.useState('Todos los Formatos');
+
+    // Derived filtered events
+    const filteredEvents = React.useMemo(() => {
+        if (selectedFormat === 'Todos los Formatos') return events;
+
+        if (selectedFormat === 'Competitivo') {
+            const competitiveFormats = ['Standard', 'Pioneer', 'Modern', 'Sealed', 'Draft', 'Prerelease', 'Sellado', 'Limited'];
+            return events.filter(e =>
+                competitiveFormats.some(fmt =>
+                    e.format.toLowerCase().includes(fmt.toLowerCase()) ||
+                    e.title.toLowerCase().includes(fmt.toLowerCase())
+                )
+            );
+        }
+
+        return events.filter(e => e.format === selectedFormat);
+    }, [events, selectedFormat]);
+
     // State for calendar navigation
     const today = new Date();
     const [calendarYear, setCalendarYear] = React.useState(today.getFullYear());
@@ -105,7 +125,7 @@ const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [
         const dayNum = date.getDate();
 
         // Find events for this day
-        const dayEvents = events.filter(e => {
+        const dayEvents = filteredEvents.filter(e => {
             const [y, m, d] = e.date.split('-').map(Number);
             return d === dayNum && (m - 1) === calendarMonth && y === calendarYear;
         });
@@ -186,7 +206,7 @@ const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [
     const now = new Date();
     console.log('Current time:', now);
 
-    const allUpcomingEvents = events
+    const allUpcomingEvents = filteredEvents
         .filter(e => {
             // Parsear fecha correctamente (evitar problemas de zona horaria)
             const [year, month, day] = e.date.split('-').map(Number);
@@ -560,17 +580,19 @@ const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [
                 <div className="relative">
                     <select
                         aria-label="Filtrar por formato"
+                        value={selectedFormat}
+                        onChange={(e) => {
+                            setSelectedFormat(e.target.value);
+                            setUpcomingPage(0); // Reset pagination on filter change
+                        }}
                         className="bg-slate-900/80 text-white rounded-md py-2.5 px-4 w-full appearance-none focus:outline-none focus:ring-2 focus:ring-sky-500 border border-slate-700"
                     >
                         <option>Todos los Formatos</option>
-                        <option>Standard</option>
-                        <option>Modern</option>
-                        <option>Pioneer</option>
-                        <option>Legacy</option>
-                        <option>Pauper</option>
+                        <option>Competitivo</option>
                         <option>Commander</option>
-                        <option>Draft</option>
-                        <option>Sealed</option>
+                        <option>Pauper</option>
+                        <option>Premodern</option>
+                        <option>Legacy</option>
                     </select>
                 </div>
                 <div className="relative">

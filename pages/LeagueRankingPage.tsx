@@ -35,6 +35,18 @@ const LeagueRankingPage = () => {
     const [league, setLeague] = useState<LeagueDetails | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [userRole, setUserRole] = useState<string | null>(null);
+
+    useEffect(() => {
+        const fetchUserRole = async () => {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (user) {
+                const { data } = await supabase.from('profiles').select('role').eq('id', user.id).single();
+                if (data) setUserRole(data.role);
+            }
+        };
+        fetchUserRole();
+    }, []);
 
     useEffect(() => {
         const fetchLeagueData = async () => {
@@ -106,9 +118,12 @@ const LeagueRankingPage = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
             {/* Header */}
             <div className="mb-8">
-                <Link to="/tiendas" className="inline-flex items-center text-slate-400 hover:text-white mb-6 transition-colors">
+                <Link
+                    to={userRole === 'store' ? "/dashboard/tienda" : "/tiendas"}
+                    className="inline-flex items-center text-slate-400 hover:text-white mb-6 transition-colors"
+                >
                     <ArrowLeft className="w-4 h-4 mr-2" />
-                    Volver a Tiendas
+                    {userRole === 'store' ? "Volver al Panel" : "Volver a Tiendas"}
                 </Link>
 
                 <div className="bg-slate-800 rounded-2xl p-8 border border-slate-700 shadow-2xl relative overflow-hidden">

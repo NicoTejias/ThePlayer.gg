@@ -172,6 +172,7 @@ const ScheduleTournamentModal: React.FC<ScheduleTournamentModalProps> = ({ isOpe
                                         <option value="Pioneer">Pioneer</option>
                                         <option value="Legacy">Legacy</option>
                                         <option value="Pauper">Pauper</option>
+                                        <option value="Premodern">Premodern</option>
                                         <option value="Commander">Commander</option>
                                         <option value="Draft">Draft</option>
                                         <option value="Sealed">Sealed</option>
