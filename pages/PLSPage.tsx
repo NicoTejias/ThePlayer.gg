@@ -267,7 +267,7 @@ const PLSPage: React.FC = () => {
                                 <li>Reporte a las entidades oficiales del juego correspondiente (Wizards, The Pokémon Company, etc.).</li>
                             </ul>
                             <div className="mt-6 pt-6 border-t border-red-900/30">
-                                <a href="#" className="inline-flex items-center text-red-400 hover:text-red-300 font-bold transition-colors">
+                                <a href="/#/terminos" className="inline-flex items-center text-red-400 hover:text-red-300 font-bold transition-colors">
                                     Leer Términos y Condiciones Completos <span className="ml-2">→</span>
                                 </a>
                             </div>
