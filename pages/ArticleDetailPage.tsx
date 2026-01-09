@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { supabase } from '../supabaseClient';
 import ReactMarkdown from 'react-markdown';
+import { toast } from 'sonner';
 
 interface Article {
     id: string;
@@ -12,6 +13,7 @@ interface Article {
     game_type: string;
     category: string;
     created_at: string;
+    is_premium?: boolean;
     author: {
         username: string;
     };
@@ -21,13 +23,16 @@ const ArticleDetailPage: React.FC = () => {
     const { slug } = useParams<{ slug: string }>();
     const [article, setArticle] = useState<Article | null>(null);
     const [loading, setLoading] = useState(true);
+    const [hasAccess, setHasAccess] = useState(false);
+    const [checkingAccess, setCheckingAccess] = useState(true);
     const navigate = useNavigate();
 
     useEffect(() => {
-        const fetchArticle = async () => {
+        const fetchArticleAndCheckAccess = async () => {
             if (!slug) return;
 
-            const { data, error } = await supabase
+            // 1. Fetch Article
+            const { data: articleData, error } = await supabase
                 .from('articles')
                 .select(`
                     *,
@@ -36,19 +41,69 @@ const ArticleDetailPage: React.FC = () => {
                 .eq('slug', slug)
                 .single();
 
-            if (error) {
+            if (error || !articleData) {
                 console.error("Error fetching article:", error);
-                navigate('/media/articulos'); // Redirect if not found
-            } else {
-                setArticle(data);
+                navigate('/media/articulos');
+                return;
             }
-            setLoading(false);
+
+            setArticle(articleData);
+
+            // 2. Check Access
+            if (!articleData.is_premium) {
+                setHasAccess(true);
+                setCheckingAccess(false);
+                return;
+            }
+
+            // Check User Permissions
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) {
+                setHasAccess(false);
+                setCheckingAccess(false);
+                return;
+            }
+
+            const { data: profile } = await supabase
+                .from('profiles')
+                .select('role, subscription_tier')
+                .eq('id', session.user.id)
+                .single();
+
+            if (profile) {
+                // Allow admins, the author (although we didn't check author_id here, assuming admins cover moderation), 
+                // and subscribers
+                const isSubscriber = profile.subscription_tier === 'premium' || profile.subscription_tier === 'vip'; // Adjust tier names as needed
+                const isAdmin = profile.role === 'admin';
+                const isStores = profile.role === 'store'; // Stores typically spend money, maybe give access? Let's say yes for now.
+
+                if (isSubscriber || isAdmin || isStores) {
+                    setHasAccess(true);
+
+                    // 3. Log View (Only if accessing premium content)
+                    // We fire and forget this request
+                    supabase.from('content_views').insert({
+                        user_id: session.user.id,
+                        content_id: articleData.id,
+                        content_type: 'article',
+                        creator_id: articleData.author_id // Requires articleData to have author_id, usually matches selected '*'
+                    }).then(({ error }) => {
+                        if (error) console.error("Error logging view:", error);
+                    });
+
+                } else {
+                    setHasAccess(false);
+                }
+            } else {
+                setHasAccess(false);
+            }
+            setCheckingAccess(false);
         };
 
-        fetchArticle();
+        fetchArticleAndCheckAccess();
     }, [slug, navigate]);
 
-    if (loading) return (
+    if (loading && !article) return (
         <div className="flex justify-center items-center min-h-[50vh]">
             <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
         </div>
@@ -64,9 +119,14 @@ const ArticleDetailPage: React.FC = () => {
                     <img
                         src={article.image_url}
                         alt={article.title}
-                        className="w-full h-full object-cover"
+                        className={`w-full h-full object-cover ${!hasAccess && checkingAccess === false ? 'blur-sm brightness-50' : ''}`}
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-slate-900 to-transparent"></div>
+                    {article.is_premium && (
+                        <div className="absolute top-4 right-4 bg-yellow-500/90 text-black font-bold px-3 py-1 rounded-full flex items-center gap-1 shadow-lg backdrop-blur-sm">
+                            <span>👑</span> Premium
+                        </div>
+                    )}
                 </div>
             )}
 
@@ -99,11 +159,44 @@ const ArticleDetailPage: React.FC = () => {
                 </div>
 
                 {/* Content */}
-                <article className="prose prose-invert prose-lg max-w-none">
-                    <ReactMarkdown>
-                        {article.content}
-                    </ReactMarkdown>
-                </article>
+                {checkingAccess ? (
+                    <div className="py-20 text-center">
+                        <div className="inline-block w-8 h-8 border-4 border-slate-500 border-t-transparent rounded-full animate-spin"></div>
+                    </div>
+                ) : hasAccess ? (
+                    <article className="prose prose-invert prose-lg max-w-none">
+                        <ReactMarkdown>
+                            {article.content}
+                        </ReactMarkdown>
+                    </article>
+                ) : (
+                    <div className="bg-slate-800/50 border border-slate-700 rounded-2xl p-8 text-center space-y-6 backdrop-blur-sm relative overflow-hidden">
+                        {/* Fake blurred content background */}
+                        <div className="absolute inset-0 opacity-10 pointer-events-none select-none overflow-hidden blur-[2px]" aria-hidden="true">
+                            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam.</p>
+                            <p>Quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+                            <p>Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+                        </div>
+
+                        <div className="relative z-10 flex flex-col items-center">
+                            <div className="w-16 h-16 bg-yellow-500/10 rounded-full flex items-center justify-center mb-4 text-3xl ring-1 ring-yellow-500/50">
+                                👑
+                            </div>
+                            <h2 className="text-2xl font-bold text-white mb-2">Contenido Exclusivo para Suscriptores</h2>
+                            <p className="text-slate-400 max-w-md mx-auto mb-6">
+                                Este artículo está reservado para miembros de la comunidad con suscripción activa. Apoya a los creadores y accede a contenido premium.
+                            </p>
+                            <div className="flex flex-col sm:flex-row gap-4">
+                                <Link to="/auth" className="px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-lg transition-colors">
+                                    Iniciar Sesión
+                                </Link>
+                                <Link to="/suscribirse" className="px-6 py-3 bg-gradient-to-r from-yellow-600 to-yellow-500 hover:from-yellow-500 hover:to-yellow-400 text-black font-bold rounded-lg transition-all shadow-lg shadow-yellow-500/20">
+                                    Obtener Suscripción
+                                </Link>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );

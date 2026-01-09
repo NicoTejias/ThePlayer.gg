@@ -10,6 +10,7 @@ interface Article {
     image_url?: string;
     category: string;
     created_at: string;
+    is_premium?: boolean;
 }
 
 const MediaArticlesPage: React.FC = () => {
@@ -78,6 +79,11 @@ const MediaArticlesPage: React.FC = () => {
                                 <span className="text-xs font-bold text-blue-400 uppercase tracking-wider mb-2">
                                     {article.category}
                                 </span>
+                                {article.is_premium && (
+                                    <span className="text-xs font-bold text-yellow-400 uppercase tracking-wider mb-2 bg-yellow-900/40 px-2 py-0.5 rounded border border-yellow-600/50 flex items-center gap-1 w-fit">
+                                        👑 Premium
+                                    </span>
+                                )}
                                 <h3 className="text-xl font-bold text-white mb-3 group-hover:text-blue-400 transition-colors">
                                     {article.title}
                                 </h3>

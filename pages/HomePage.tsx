@@ -97,6 +97,7 @@ const HomePage: React.FC<HomePageProps> = ({ players, events, session, userRole,
             link: `https://www.youtube.com/watch?v=${v.youtube_id}`,
             imageUrl: `https://img.youtube.com/vi/${v.youtube_id}/maxresdefault.jpg`,
             description: v.description,
+            is_premium: v.is_premium
           })));
         }
         setStats({
@@ -384,6 +385,9 @@ const HomePage: React.FC<HomePageProps> = ({ players, events, session, userRole,
                           <img src={article.image_url || article.imageUrl || '/images/placeholder-article.jpg'} alt={article.title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
                           <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                           <div className="absolute top-2 left-2 px-2 py-1 bg-blue-600/90 backdrop-blur-sm text-white text-[10px] font-bold rounded-full">{article.category || 'Artículo'}</div>
+                          {article.is_premium && (
+                            <div className="absolute top-2 right-2 px-2 py-1 bg-yellow-500/90 backdrop-blur-sm text-black text-[10px] font-bold rounded-full flex items-center gap-1">👑 Premium</div>
+                          )}
                           <div className="absolute bottom-2 right-2 px-2 py-1 bg-slate-900/90 backdrop-blur-sm text-white text-[10px] font-bold rounded-full border border-white/10 flex items-center gap-1">⏱️ {calculateReadingTime(article.content || article.excerpt || '')} min</div>
                         </div>
                         <div className="flex-1 min-w-0 flex flex-col">
@@ -414,6 +418,9 @@ const HomePage: React.FC<HomePageProps> = ({ players, events, session, userRole,
                           <img src={video.imageUrl || '/images/placeholder-video.jpg'} alt={video.title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
                           <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                           <div className="absolute top-2 left-2 px-2 py-1 bg-purple-600/90 backdrop-blur-sm text-white text-[10px] font-bold rounded-full">Video</div>
+                          {video.is_premium && (
+                            <div className="absolute top-2 right-2 px-2 py-1 bg-yellow-500/90 backdrop-blur-sm text-black text-[10px] font-bold rounded-full flex items-center gap-1">👑 Premium</div>
+                          )}
                         </div>
                         <div className="flex-1 min-w-0 flex flex-col">
                           <h4 className="text-base font-bold text-white line-clamp-2 mb-2 group-hover:text-purple-400 transition-colors">{video.title}</h4>

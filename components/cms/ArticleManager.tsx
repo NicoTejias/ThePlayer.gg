@@ -14,6 +14,7 @@ interface Article {
     is_published: boolean;
     published_at?: string;
     created_at: string;
+    is_premium?: boolean;
 }
 
 const ArticleManager: React.FC = () => {
@@ -31,7 +32,8 @@ const ArticleManager: React.FC = () => {
         imageUrl: '',
         gameType: 'general',
         category: 'news',
-        isPublished: false
+        isPublished: false,
+        isPremium: false
     });
 
     useEffect(() => {
@@ -63,7 +65,8 @@ const ArticleManager: React.FC = () => {
             imageUrl: '',
             gameType: 'general',
             category: 'news',
-            isPublished: false
+            isPublished: false,
+            isPremium: false
         });
         setEditingId(null);
         setShowForm(true);
@@ -78,7 +81,8 @@ const ArticleManager: React.FC = () => {
             imageUrl: article.image_url || '',
             gameType: article.game_type,
             category: article.category || 'news',
-            isPublished: article.is_published
+            isPublished: article.is_published,
+            isPremium: article.is_premium || false
         });
         setEditingId(article.id);
         setShowForm(true);
@@ -130,6 +134,7 @@ const ArticleManager: React.FC = () => {
                 game_type: formData.gameType,
                 category: formData.category,
                 is_published: formData.isPublished,
+                is_premium: formData.isPremium,
                 author_id: user.id,
                 published_at: formData.isPublished ? new Date().toISOString() : null,
                 updated_at: new Date().toISOString()
@@ -265,15 +270,30 @@ const ArticleManager: React.FC = () => {
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-2">
-                        <input
-                            type="checkbox"
-                            checked={formData.isPublished}
-                            onChange={e => setFormData({ ...formData, isPublished: e.target.checked })}
-                            className="w-5 h-5 rounded border-slate-700 bg-slate-900 text-blue-500"
-                            id="publish-check"
-                        />
-                        <label htmlFor="publish-check" className="text-white font-bold">Publicar inmediatamente</label>
+                    <div className="flex items-center gap-6">
+                        <div className="flex items-center gap-2">
+                            <input
+                                type="checkbox"
+                                checked={formData.isPublished}
+                                onChange={e => setFormData({ ...formData, isPublished: e.target.checked })}
+                                className="w-5 h-5 rounded border-slate-700 bg-slate-900 text-blue-500"
+                                id="publish-check"
+                            />
+                            <label htmlFor="publish-check" className="text-white font-bold">Publicar inmediatamente</label>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                            <input
+                                type="checkbox"
+                                checked={formData.isPremium}
+                                onChange={e => setFormData({ ...formData, isPremium: e.target.checked })}
+                                className="w-5 h-5 rounded border-slate-700 bg-slate-900 text-yellow-500"
+                                id="premium-check"
+                            />
+                            <label htmlFor="premium-check" className="text-yellow-400 font-bold flex items-center gap-1">
+                                <span>👑</span> Premium
+                            </label>
+                        </div>
                     </div>
 
                     <div className="flex gap-4 pt-4 border-t border-slate-700">
@@ -323,6 +343,11 @@ const ArticleManager: React.FC = () => {
                                     <span className="text-slate-400 text-xs px-2 py-0.5 border border-slate-600 rounded uppercase">
                                         {article.game_type}
                                     </span>
+                                    {article.is_premium && (
+                                        <span className="text-yellow-400 text-xs px-2 py-0.5 border border-yellow-600 rounded uppercase font-bold bg-yellow-900/40">
+                                            👑 Premium
+                                        </span>
+                                    )}
                                 </div>
                                 <h3 className="text-lg font-bold text-white">{article.title}</h3>
                                 <p className="text-slate-400 text-sm">/{article.slug}</p>

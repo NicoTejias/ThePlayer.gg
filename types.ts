@@ -72,6 +72,7 @@ export interface MediaArticle {
   game_type?: string;
   content?: string;
   created_at?: string;
+  is_premium?: boolean;
 }
 
 export interface MediaVideo {
@@ -81,6 +82,7 @@ export interface MediaVideo {
   youtubeId: string;
   thumbnailUrl: string;
   category: string;
+  is_premium?: boolean;
 }
 
 export interface MarketplaceItem {

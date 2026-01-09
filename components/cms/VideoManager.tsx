@@ -9,6 +9,7 @@ interface Video {
     description?: string;
     game_type: string;
     is_featured: boolean;
+    is_premium?: boolean;
     created_at: string;
 }
 
@@ -23,7 +24,8 @@ const VideoManager: React.FC = () => {
         title: '',
         description: '',
         gameType: 'general',
-        isFeatured: false
+        isFeatured: false,
+        isPremium: false
     });
 
     useEffect(() => {
@@ -62,7 +64,8 @@ const VideoManager: React.FC = () => {
                 title: formData.title,
                 description: formData.description,
                 game_type: formData.gameType,
-                is_featured: formData.isFeatured
+                is_featured: formData.isFeatured,
+                is_premium: formData.isPremium
             }]);
 
             if (error) throw error;
@@ -74,7 +77,8 @@ const VideoManager: React.FC = () => {
                 title: '',
                 description: '',
                 gameType: 'general',
-                isFeatured: false
+                isFeatured: false,
+                isPremium: false
             });
             fetchVideos();
         } catch (error: any) {
@@ -170,6 +174,18 @@ const VideoManager: React.FC = () => {
                                 />
                                 <label htmlFor="featured-check" className="text-white">Destacado</label>
                             </div>
+                            <div className="flex items-center pt-6">
+                                <input
+                                    type="checkbox"
+                                    checked={formData.isPremium}
+                                    onChange={e => setFormData({ ...formData, isPremium: e.target.checked })}
+                                    className="w-5 h-5 rounded bg-slate-900 border-slate-700 mr-2 accent-yellow-500"
+                                    id="premium-check"
+                                />
+                                <label htmlFor="premium-check" className="text-yellow-400 font-bold flex items-center gap-1">
+                                    <span>👑</span> Premium
+                                </label>
+                            </div>
                         </div>
 
                         <button
@@ -202,6 +218,11 @@ const VideoManager: React.FC = () => {
                                 <span className="text-xs text-slate-400 uppercase border border-slate-600 px-2 py-0.5 rounded">
                                     {video.game_type}
                                 </span>
+                                {video.is_premium && (
+                                    <span className="text-xs font-bold text-yellow-500 border border-yellow-600/50 px-2 py-0.5 rounded bg-yellow-900/20">
+                                        👑 Premium
+                                    </span>
+                                )}
                                 <button
                                     onClick={() => handleDelete(video.id)}
                                     className="text-red-400 hover:text-red-300 text-sm"
