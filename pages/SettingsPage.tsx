@@ -3,6 +3,7 @@ import { supabase } from '../supabaseClient';
 import { useNavigate } from 'react-router-dom';
 import { sanitizeText, sanitizeUrl } from '../utils/sanitize';
 import { z } from 'zod';
+import { Upload, Image as ImageIcon, X } from 'lucide-react';
 
 const LATAM_COUNTRIES = [
     "Argentina", "Bolivia", "Brasil", "Chile", "Colombia", "Costa Rica", "Cuba", "Ecuador",
@@ -65,6 +66,70 @@ const SettingsPage: React.FC = () => {
     const [newAlias, setNewAlias] = useState('');
     const [aliasLoading, setAliasLoading] = useState(false);
     const [aliasError, setAliasError] = useState<string | null>(null);
+
+    // Image Upload State
+    const [uploadingImage, setUploadingImage] = useState(false);
+
+    const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+        try {
+            setUploadingImage(true);
+            setMessage(null);
+
+            if (!event.target.files || event.target.files.length === 0) {
+                return;
+            }
+
+            const file = event.target.files[0];
+
+            // Validate file size (max 2MB)
+            if (file.size > 2 * 1024 * 1024) {
+                setMessage({ type: 'error', text: 'El archivo es demasiado grande. Máximo 2MB.' });
+                return;
+            }
+
+            // Validate file type
+            if (!file.type.startsWith('image/')) {
+                setMessage({ type: 'error', text: 'El archivo debe ser una imagen.' });
+                return;
+            }
+
+            const fileExt = file.name.split('.').pop();
+            const fileName = `${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
+            const { data: userData } = await supabase.auth.getUser();
+
+            if (!userData.user) throw new Error('Usuario no autenticado');
+
+            const filePath = `${userData.user.id}/${fileName}`;
+
+            // Upload to Supabase Storage
+            const { error: uploadError } = await supabase.storage
+                .from('avatars')
+                .upload(filePath, file, {
+                    cacheControl: '3600',
+                    upsert: false
+                });
+
+            if (uploadError) {
+                throw uploadError;
+            }
+
+            // Get Public URL
+            const { data } = supabase.storage.from('avatars').getPublicUrl(filePath);
+
+            if (data) {
+                setAvatarUrl(data.publicUrl);
+                setMessage({ type: 'success', text: 'Imagen subida correctamente. Recuerda guardar los cambios.' });
+            }
+
+        } catch (error: any) {
+            console.error('Error uploading image:', error);
+            setMessage({ type: 'error', text: 'Error al subir imagen: ' + (error.message || 'Intenta nuevamente') });
+        } finally {
+            setUploadingImage(false);
+            // Clear input value to allow re-uploading same file if needed
+            event.target.value = '';
+        }
+    };
 
     const fetchAliases = async (userId: string) => {
         const { data, error } = await supabase
@@ -482,16 +547,76 @@ const SettingsPage: React.FC = () => {
                                 <p className="text-xs text-slate-500 mt-1">El rol no se puede cambiar aquí.</p>
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-slate-400 mb-1">{role === 'store' ? 'Logo de la Tienda (URL)' : 'Avatar URL'}</label>
-                                <input
-                                    type="text"
-                                    value={avatarUrl}
-                                    onChange={(e) => setAvatarUrl(e.target.value)}
-                                    className={commonInputClass}
-                                    placeholder="https://..."
-                                />
+                                <label className="block text-sm font-medium text-slate-400 mb-1">{role === 'store' ? 'Logo de la Tienda' : 'Avatar / Foto de Perfil'}</label>
+
+                                <div className="space-y-3">
+                                    {/* Preview Section */}
+                                    <div className="flex items-center gap-4">
+                                        <div className="relative w-20 h-20 bg-slate-800 rounded-full border border-slate-600 overflow-hidden flex-shrink-0 flex items-center justify-center">
+                                            {avatarUrl ? (
+                                                <img src={avatarUrl} alt="Avatar Preview" className="w-full h-full object-cover" />
+                                            ) : (
+                                                <ImageIcon className="w-8 h-8 text-slate-600" />
+                                            )}
+                                        </div>
+
+                                        <div className="flex-1 space-y-2">
+                                            {/* File Input Button */}
+                                            <div className="relative">
+                                                <input
+                                                    type="file"
+                                                    id="avatar-upload"
+                                                    accept="image/*"
+                                                    onChange={handleImageUpload}
+                                                    disabled={uploadingImage}
+                                                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10 disabled:cursor-not-allowed"
+                                                />
+                                                <div className={`flex items-center justify-center gap-2 px-4 py-2 bg-slate-800 border ${uploadingImage ? 'border-sky-500/50 text-sky-400' : 'border-slate-600 hover:bg-slate-700 text-white'} rounded-lg transition-colors`}>
+                                                    {uploadingImage ? (
+                                                        <>
+                                                            <div className="w-4 h-4 border-2 border-sky-400 border-t-transparent rounded-full animate-spin"></div>
+                                                            <span className="text-sm font-medium">Subiendo...</span>
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            <Upload className="w-4 h-4" />
+                                                            <span className="text-sm font-medium">Subir Imagen</span>
+                                                        </>
+                                                    )}
+                                                </div>
+                                            </div>
+                                            <p className="text-xs text-slate-500">
+                                                Máximo 2MB. Formatos: JPG, PNG, WEBP.
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    {/* Manual URL Input (Fallback) */}
+                                    <div className="relative">
+                                        <input
+                                            type="text"
+                                            value={avatarUrl}
+                                            onChange={(e) => setAvatarUrl(e.target.value)}
+                                            className={`${commonInputClass} text-xs py-2`}
+                                            placeholder="O pega una URL directa https://..."
+                                        />
+                                        {avatarUrl && (
+                                            <button
+                                                type="button"
+                                                onClick={() => setAvatarUrl('')}
+                                                className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
+                                            >
+                                                <X className="w-4 h-4" />
+                                            </button>
+                                        )}
+                                    </div>
+                                </div>
+
                                 {role === 'store' && (
-                                    <p className="text-xs text-sky-400 mt-1">Este logo aparecerá en tus torneos, perfil de tienda y widget.</p>
+                                    <p className="text-xs text-sky-400 mt-2 flex items-start gap-1">
+                                        <span className="text-lg leading-none">ℹ️</span>
+                                        Este logo aparecerá en tus torneos, perfil de tienda y widget. ¡Asegúrate de que se vea bien en formato circular!
+                                    </p>
                                 )}
                             </div>
                         </div>
