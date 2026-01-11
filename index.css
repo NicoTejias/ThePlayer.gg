@@ -276,3 +276,7 @@ body {
 .skeleton-pulse {
   animation: skeleton-pulse 1.5s ease-in-out infinite;
 }
+
+.dynamic-width {
+  width: var(--width, 0%);
+}

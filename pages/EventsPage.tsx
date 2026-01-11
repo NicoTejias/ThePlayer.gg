@@ -513,8 +513,16 @@ const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [
                         </div>
                         <div className="text-3xl font-bold text-white">{occupancyRate}%</div>
                         <div className="w-full bg-slate-700 h-1.5 rounded-full mt-2 overflow-hidden">
-                            {/* eslint-disable-next-line react/forbid-dom-props */}
-                            <div className="bg-green-500 h-full rounded-full" style={{ width: `${occupancyRate}%` }}></div>
+                            <div
+                                className="bg-green-500 h-full rounded-full transition-all duration-500 dynamic-width"
+                                style={{ '--width': `${occupancyRate}%` } as React.CSSProperties}
+                                role="progressbar"
+                                aria-valuenow={occupancyRate}
+                                aria-valuemin={0}
+                                aria-valuemax={100}
+                                title={`Ocupación: ${occupancyRate}%`}
+                                aria-label="Tasa de ocupación de eventos"
+                            ></div>
                         </div>
                     </div>
 
@@ -549,9 +557,14 @@ const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [
                                 </div>
                                 <div className="w-full bg-slate-700 h-2 rounded-full overflow-hidden">
                                     <div
-                                        className="bg-sky-500 h-full rounded-full"
-                                        // eslint-disable-next-line react/forbid-dom-props
-                                        style={{ width: `${((count as number) / totalEvents) * 100}%` }}
+                                        className="bg-sky-500 h-full rounded-full transition-all duration-500 dynamic-width"
+                                        style={{ '--width': `${((count as number) / totalEvents) * 100}%` } as React.CSSProperties}
+                                        role="progressbar"
+                                        aria-valuenow={Math.round(((count as number) / totalEvents) * 100)}
+                                        aria-valuemin={0}
+                                        aria-valuemax={100}
+                                        title={`${fmt}: ${count} eventos (${Math.round(((count as number) / totalEvents) * 100)}%)`}
+                                        aria-label={`Distribución de formato ${fmt}`}
                                     ></div>
                                 </div>
                             </div>
@@ -733,9 +746,14 @@ const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [
                                                     </span>
                                                     <div className="w-16 h-1.5 bg-slate-700 rounded-full mt-1 overflow-hidden">
                                                         <div
-                                                            className={`h-full ${isFull ? 'bg-red-500' : 'bg-green-500'}`}
-                                                            // eslint-disable-next-line react/forbid-dom-props
-                                                            style={{ width: `${Math.min((registered / maxLimit) * 100, 100)}%` }}
+                                                            className={`h-full ${isFull ? 'bg-red-500' : 'bg-green-500'} transition-all duration-500 dynamic-width`}
+                                                            style={{ '--width': `${Math.min((registered / maxLimit) * 100, 100)}%` } as React.CSSProperties}
+                                                            role="progressbar"
+                                                            aria-valuenow={Math.round(Math.min((registered / maxLimit) * 100, 100))}
+                                                            aria-valuemin={0}
+                                                            aria-valuemax={100}
+                                                            title={`Cupos: ${registered}/${maxLimit}`}
+                                                            aria-label={`Progreso de inscripción: ${registered} de ${maxLimit} jugadores`}
                                                         ></div>
                                                     </div>
                                                 </div>
@@ -1025,9 +1043,14 @@ const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [
                                         <p className="font-semibold">{selectedCalendarEvent.playerCount || 0} / {selectedCalendarEvent.maxPlayers}</p>
                                         <div className="w-full h-2 bg-slate-700 rounded-full mt-1 overflow-hidden">
                                             <div
-                                                className={`h-full ${(selectedCalendarEvent.playerCount || 0) >= selectedCalendarEvent.maxPlayers ? 'bg-red-500' : 'bg-green-500'}`}
-                                                // eslint-disable-next-line react/forbid-dom-props
-                                                style={{ width: `${Math.min(((selectedCalendarEvent.playerCount || 0) / selectedCalendarEvent.maxPlayers) * 100, 100)}%` }}
+                                                className={`h-full ${(selectedCalendarEvent.playerCount || 0) >= selectedCalendarEvent.maxPlayers ? 'bg-red-500' : 'bg-green-500'} transition-all duration-500 dynamic-width`}
+                                                style={{ '--width': `${Math.min(((selectedCalendarEvent.playerCount || 0) / selectedCalendarEvent.maxPlayers) * 100, 100)}%` } as React.CSSProperties}
+                                                role="progressbar"
+                                                aria-valuenow={Math.round(Math.min(((selectedCalendarEvent.playerCount || 0) / selectedCalendarEvent.maxPlayers) * 100, 100))}
+                                                aria-valuemin={0}
+                                                aria-valuemax={100}
+                                                title={`Inscritos: ${selectedCalendarEvent.playerCount || 0}/${selectedCalendarEvent.maxPlayers}`}
+                                                aria-label={`Progreso de inscripción: ${selectedCalendarEvent.playerCount || 0} de ${selectedCalendarEvent.maxPlayers} jugadores`}
                                             ></div>
                                         </div>
                                     </div>

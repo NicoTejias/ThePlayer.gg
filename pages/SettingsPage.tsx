@@ -547,7 +547,7 @@ const SettingsPage: React.FC = () => {
                                 <p className="text-xs text-slate-500 mt-1">El rol no se puede cambiar aquí.</p>
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-slate-400 mb-1">{role === 'store' ? 'Logo de la Tienda' : 'Avatar / Foto de Perfil'}</label>
+                                <label htmlFor="avatar-upload" className="block text-sm font-medium text-slate-400 mb-1">{role === 'store' ? 'Logo de la Tienda' : 'Avatar / Foto de Perfil'}</label>
 
                                 <div className="space-y-3">
                                     {/* Preview Section */}
@@ -605,6 +605,8 @@ const SettingsPage: React.FC = () => {
                                                 type="button"
                                                 onClick={() => setAvatarUrl('')}
                                                 className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
+                                                aria-label="Limpiar URL de avatar"
+                                                title="Limpiar URL de avatar"
                                             >
                                                 <X className="w-4 h-4" />
                                             </button>
