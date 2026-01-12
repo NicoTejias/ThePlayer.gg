@@ -154,8 +154,8 @@ const HomePage: React.FC<HomePageProps> = ({ players, events, session, userRole,
   useEffect(() => {
     const fetchRegistrations = async () => {
       if (!userId) return;
-      const { data } = await supabase.from('tournament_registrations').select('tournament_id').eq('player_id', userId);
-      if (data) setRegistrations(new Set(data.map((r: any) => r.tournament_id)));
+      const { data } = await supabase.from('event_registrations').select('event_id').eq('player_id', userId);
+      if (data) setRegistrations(new Set(data.map((r: any) => r.event_id)));
     };
     fetchRegistrations();
   }, [userId]);

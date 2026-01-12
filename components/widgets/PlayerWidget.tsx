@@ -22,11 +22,11 @@ const PlayerWidget: React.FC<PlayerWidgetProps> = ({ userId }) => {
 
                 // Get player's upcoming events (tournaments they're registered for)
                 const { data: registrations } = await supabase
-                    .from('tournament_registrations')
-                    .select('tournament_id, tournaments(title, date, store_name)')
+                    .from('event_registrations')
+                    .select('event_id, scheduled_events(title, date, store_name)')
                     .eq('player_id', userId)
-                    .gte('tournaments.date', new Date().toISOString())
-                    .order('tournaments.date', { ascending: true })
+                    .gte('scheduled_events.date', new Date().toISOString())
+                    .order('scheduled_events.date', { ascending: true })
                     .limit(3);
 
                 // Get recent tournament results
@@ -104,9 +104,9 @@ const PlayerWidget: React.FC<PlayerWidgetProps> = ({ userId }) => {
                             <div className="space-y-2">
                                 {upcomingEvents.slice(0, 2).map((reg: any, idx: number) => (
                                     <div key={idx} className="text-sm">
-                                        <p className="text-white font-bold line-clamp-1">{reg.tournaments?.title}</p>
+                                        <p className="text-white font-bold line-clamp-1">{reg.scheduled_events?.title}</p>
                                         <p className="text-slate-400 text-xs">
-                                            {new Date(reg.tournaments?.date).toLocaleDateString()} • {reg.tournaments?.store_name}
+                                            {reg.scheduled_events?.date ? new Date(reg.scheduled_events.date).toLocaleDateString() : 'Fecha TBD'} • {reg.scheduled_events?.store_name}
                                         </p>
                                     </div>
                                 ))}

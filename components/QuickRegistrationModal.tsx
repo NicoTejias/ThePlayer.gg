@@ -31,9 +31,9 @@ const QuickRegistrationModal: React.FC<QuickRegistrationModalProps> = ({
         setIsSubmitting(true);
         try {
             const { error } = await supabase
-                .from('tournament_registrations')
+                .from('event_registrations')
                 .insert({
-                    tournament_id: event.id,
+                    event_id: event.id,
                     player_id: userId,
                     registered_at: new Date().toISOString()
                 });

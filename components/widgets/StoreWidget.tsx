@@ -20,26 +20,26 @@ const StoreWidget: React.FC<StoreWidgetProps> = ({ storeId }) => {
                     .eq('id', storeId)
                     .single();
 
-                // Get upcoming tournaments for this store
+                // Get upcoming tournaments (scheduled events) for this store
                 const { data: upcomingTournaments } = await supabase
-                    .from('tournaments')
+                    .from('scheduled_events')
                     .select('*')
-                    .eq('store_id', storeId)
+                    .eq('created_by', storeId)
                     .gte('date', new Date().toISOString())
                     .order('date', { ascending: true })
                     .limit(3);
 
                 // Get registered players count
                 const { count: playersCount } = await supabase
-                    .from('tournament_registrations')
+                    .from('event_registrations')
                     .select('player_id', { count: 'exact', head: true })
-                    .in('tournament_id', upcomingTournaments?.map(t => t.id) || []);
+                    .in('event_id', upcomingTournaments?.map(t => t.id) || []);
 
-                // Get total tournaments hosted
+                // Get total tournaments hosted (past results)
                 const { count: totalTournaments } = await supabase
                     .from('tournaments')
                     .select('*', { count: 'exact', head: true })
-                    .eq('store_id', storeId);
+                    .eq('organizer_id', storeId);
 
                 setStoreData({
                     profile,

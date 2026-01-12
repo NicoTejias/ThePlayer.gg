@@ -44,7 +44,7 @@ const ContentCreatorApplicationPage: React.FC = () => {
             .from('content_creator_applications')
             .select('*')
             .eq('applicant_id', user.id)
-            .single();
+            .maybeSingle();
 
         if (application) {
             setHasApplied(true);
