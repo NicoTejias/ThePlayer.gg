@@ -158,7 +158,7 @@ const RankingsPage: React.FC<RankingsPageProps> = ({ players, teams }) => {
                                                     </Link>
                                                 ) : (
                                                     <span className="px-2 inline-flex text-xs font-semibold rounded-full bg-slate-700 text-slate-300">
-                                                        {player.team || 'Sin Team'}
+                                                        {player.team || '-'}
                                                     </span>
                                                 )}
                                             </td>
@@ -210,7 +210,7 @@ const RankingsPage: React.FC<RankingsPageProps> = ({ players, teams }) => {
                                                     </Link>
                                                 ) : (
                                                     <span className="px-2 inline-flex text-xs font-semibold rounded-full bg-slate-700 text-slate-300">
-                                                        {player.team || 'Sin Team'}
+                                                        {player.team || '-'}
                                                     </span>
                                                 )}
                                             </td>

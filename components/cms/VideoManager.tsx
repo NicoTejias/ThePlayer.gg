@@ -13,7 +13,11 @@ interface Video {
     created_at: string;
 }
 
-const VideoManager: React.FC = () => {
+interface VideoManagerProps {
+    creatorId?: string;
+}
+
+const VideoManager: React.FC<VideoManagerProps> = ({ creatorId }) => {
     const [videos, setVideos] = useState<Video[]>([]);
     const [loading, setLoading] = useState(true);
     const [showForm, setShowForm] = useState(false);
@@ -34,10 +38,15 @@ const VideoManager: React.FC = () => {
 
     const fetchVideos = async () => {
         setLoading(true);
-        const { data, error } = await supabase
+        let query = supabase
             .from('videos')
-            .select('*')
-            .order('created_at', { ascending: false });
+            .select('*');
+
+        if (creatorId) {
+            query = query.eq('creator_id', creatorId);
+        }
+
+        const { data, error } = await query.order('created_at', { ascending: false });
 
         if (error) {
             toast.error('Error al cargar videos');
@@ -65,7 +74,8 @@ const VideoManager: React.FC = () => {
                 description: formData.description,
                 game_type: formData.gameType,
                 is_featured: formData.isFeatured,
-                is_premium: formData.isPremium
+                is_premium: formData.isPremium,
+                creator_id: creatorId || (await supabase.auth.getUser()).data.user?.id
             }]);
 
             if (error) throw error;

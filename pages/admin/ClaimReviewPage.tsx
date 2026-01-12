@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../supabaseClient';
 import { toast } from 'sonner';
+import { Link } from 'react-router-dom';
 
 interface PendingClaim {
     claim_id: string;
@@ -79,9 +80,17 @@ const ClaimReviewPage: React.FC = () => {
     return (
         <div className="space-y-6">
             {/* Header */}
-            <div>
-                <h1 className="text-4xl font-bold text-white tracking-tighter uppercase">Revisión de Reclamos</h1>
-                <p className="text-slate-400 mt-2 text-sm">Aprueba o rechaza reclamos de resultados de torneos</p>
+            <div className="flex justify-between items-center">
+                <div>
+                    <h1 className="text-4xl font-bold text-white tracking-tighter uppercase">Revisión de Reclamos</h1>
+                    <p className="text-slate-400 mt-2 text-sm">Aprueba o rechaza reclamos de resultados de torneos</p>
+                </div>
+                <Link
+                    to="/admin"
+                    className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-lg transition-colors border border-slate-700 flex items-center gap-2"
+                >
+                    ← Volver
+                </Link>
             </div>
 
             {/* Stats */}

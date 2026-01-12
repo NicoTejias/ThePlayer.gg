@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { supabase } from '../supabaseClient';
 import type { PlayerTournamentRecord, MarketplacePost } from '../types';
 import TrophyIcon from '../components/icons/TrophyIcon';
@@ -144,11 +145,22 @@ const PlayerDashboardPage: React.FC<{ profile?: any }> = ({ profile }) => {
                     <div className="flex items-center gap-3">
                         <h1 className="text-4xl sm:text-5xl font-bold text-white tracking-tighter uppercase">Hola, {greetingName}</h1>
                         {profile?.is_pro && <ProBadge size="medium" />}
-                        {profile?.is_content_creator && <ContentCreatorBadge size="medium" />}
+                        {(profile?.is_content_creator || profile?.role === 'content_creator') && <ContentCreatorBadge size="medium" />}
                     </div>
                     <p className="text-lg text-slate-300 mt-2">
                         Bienvenido a tu panel de control Player Latam Series.
                     </p>
+
+                    {(profile?.is_content_creator || profile?.role === 'content_creator') && (
+                        <div className="mt-4">
+                            <Link
+                                to="/dashboard/creador"
+                                className="inline-flex items-center gap-2 px-6 py-2 bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white font-bold rounded-lg shadow-lg shadow-sky-900/40 transition-all hover:scale-105"
+                            >
+                                <span>🎬</span> Panel de Creador
+                            </Link>
+                        </div>
+                    )}
                 </div>
 
                 {/* Team Status in Header */}
@@ -158,8 +170,8 @@ const PlayerDashboardPage: React.FC<{ profile?: any }> = ({ profile }) => {
                             <TrophyIcon className="w-6 h-6 text-sky-400" />}
                     </div>
                     <div>
-                        <p className="text-xs text-slate-500 uppercase font-bold tracking-widest">Tu Comunidad</p>
-                        <p className="text-white font-bold">{teamData?.name || 'Agente Libre'}</p>
+                        <p className="text-xs text-slate-500 uppercase font-bold tracking-widest">TEAM</p>
+                        <p className="text-white font-bold">{teamData?.name || '-'}</p>
                     </div>
                 </div>
             </div>

@@ -8,6 +8,7 @@ interface SidebarProps {
     onClose: () => void;
     isLoggedIn: boolean;
     userRole: 'player' | 'store' | 'admin' | null;
+    isContentCreator?: boolean;
 }
 
 // Navigation structure
@@ -39,7 +40,7 @@ const mtgFormats = [
     { name: 'Premodern', path: '/premodern', icon: '📜' },
 ];
 
-const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, isLoggedIn, userRole }) => {
+const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, isLoggedIn, userRole, isContentCreator }) => {
     const { currentGame, setGame } = useGame();
     const [expandedSection, setExpandedSection] = useState<string | null>(null);
     const sidebarRef = useRef<HTMLDivElement>(null);
@@ -217,6 +218,9 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, isLoggedIn, userRole
                                     )}
                                     {userRole === 'player' && (
                                         <NavItem item={{ name: 'Mi Dashboard', path: '/dashboard/jugador', icon: '🎮' }} />
+                                    )}
+                                    {isContentCreator && (
+                                        <NavItem item={{ name: 'Panel de Creador', path: '/dashboard/creador', icon: '🎬' }} />
                                     )}
                                     <NavItem item={{ name: 'Mis Anuncios', path: '/mis-anuncios', icon: '🏷️' }} />
                                     <NavItem item={{ name: 'Favoritos', path: '/favorites', icon: '❤️' }} />

@@ -190,10 +190,10 @@ const Header: React.FC<HeaderProps> = ({
                     <div className="flex flex-col items-start hidden sm:block">
                       <span className="text-white font-semibold text-sm max-w-[100px] truncate leading-tight">{userName}</span>
                       <div className="flex gap-1">
-                        {userProfile?.is_content_creator && (
+                        {(userProfile?.is_content_creator || userProfile?.role === 'content_creator') && (
                           <span className="text-[9px] bg-sky-500/20 text-sky-400 px-1 rounded-full font-bold uppercase tracking-tighter">Creador</span>
                         )}
-                        {userProfile?.is_judge && (
+                        {(userProfile?.is_judge || userProfile?.role === 'judge') && (
                           <span className="text-[9px] bg-purple-500/20 text-purple-400 px-1 rounded-full font-bold uppercase tracking-tighter">Juez</span>
                         )}
                       </div>
@@ -218,6 +218,12 @@ const Header: React.FC<HeaderProps> = ({
                           <ShieldCheckIcon className="w-5 h-5 text-sky-400" />
                           Mi Panel
                         </Link>
+                        {(userProfile?.is_content_creator || userProfile?.role === 'content_creator') && (
+                          <Link to="/dashboard/creador" className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-200 hover:bg-slate-700/50 transition-colors" role="menuitem">
+                            <span className="text-xl">🎬</span>
+                            Panel de Creador
+                          </Link>
+                        )}
                         <Link to="/favorites" className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-200 hover:bg-slate-700/50 transition-colors" role="menuitem">
                           <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
@@ -271,6 +277,7 @@ const Header: React.FC<HeaderProps> = ({
         onClose={() => setSidebarOpen(false)}
         isLoggedIn={isLoggedIn}
         userRole={userRole}
+        isContentCreator={userProfile?.is_content_creator || userProfile?.role === 'content_creator'}
       />
     </>
   );

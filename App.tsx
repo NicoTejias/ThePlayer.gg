@@ -38,6 +38,7 @@ import NotificationBell from './components/NotificationBell';
 import FavoritesPage from './pages/FavoritesPage';
 import SellerProfilePage from './pages/SellerProfilePage';
 import CalendarPage from './pages/CalendarPage';
+import CreatorDashboardPage from './pages/CreatorDashboardPage';
 import PlayerStatsPage from './pages/PlayerStatsPage';
 import StoreDashboardPage from './pages/StoreDashboardPage';
 import LeagueRankingPage from './pages/LeagueRankingPage';
@@ -127,12 +128,22 @@ const AppContent: React.FC = () => {
       }
 
       const response = await fetch(searchUrl);
+
+      // If 403, it's likely quota or restricted key - handle silently to avoid console spam
+      if (response.status === 403) {
+        setIsLiveSignal(false);
+        return;
+      }
+
       const data = await response.json();
 
       // Check if there are any live streams
       setIsLiveSignal(data.items && data.items.length > 0);
     } catch (error) {
-      console.error('Error checking YouTube live status:', error);
+      // Only log unexpected errors
+      if (!(error instanceof TypeError)) {
+        console.error('Error checking YouTube live status:', error);
+      }
       setIsLiveSignal(false);
     }
   };
@@ -220,8 +231,8 @@ const AppContent: React.FC = () => {
             teamData: teamDetails, // Objeto completo
             isPublic: p.is_public ?? true,
             is_pro: p.is_pro || false,
-            is_content_creator: p.is_content_creator ?? (p.role === 'content_creator'),
-            is_judge: p.is_judge ?? (p.role === 'judge'),
+            is_content_creator: p.is_content_creator || (p.role === 'content_creator'),
+            is_judge: p.is_judge || (p.role === 'judge'),
             tournaments_played: p.tournaments_played || 0
           };
         });
@@ -495,8 +506,18 @@ const AppContent: React.FC = () => {
       try {
         // Get initial session
         const { data: { session }, error } = await supabase.auth.getSession();
+
         if (error) {
-          console.error("Error getting session:", error);
+          console.error("Supabase Auth Error:", error);
+
+          // If refresh token is invalid or not found, sign out to clear local storage
+          if (error.message.includes('refresh_token_not_found') ||
+            error.message.includes('invalid refresh token') ||
+            error.status === 400 || error.status === 401) {
+            console.warn("Invalid session detected, signing out locally...");
+            await supabase.auth.signOut();
+            setIsLoggedIn(false);
+          }
           throw error;
         }
 
@@ -506,6 +527,11 @@ const AppContent: React.FC = () => {
         // Subscribe to auth changes
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
           console.log("Auth state changed:", event, session ? "Session exists" : "No session");
+
+          // Handle special cases and errors in auth state changes
+          if (event === 'INITIAL_SESSION' && !session) {
+            // Optional: already handled by handleSessionState
+          }
 
           // Handle email confirmation specifically
           if (event === 'SIGNED_IN' && session) {
@@ -526,12 +552,16 @@ const AppContent: React.FC = () => {
         });
 
         authSubscription = subscription;
-      } catch (err) {
+      } catch (err: any) {
         console.error("Critical Auth Error:", err);
         setIsLoggedIn(false);
         setUserRole(null);
         setUserProfile(null);
-        toast.error("Error al cargar la sesión. Por favor, recarga la página.");
+
+        // Only show toast for actual errors, not for "no session"
+        if (err && (err.status !== 401 && err.status !== 403)) {
+          toast.error("Error al cargar la sesión. Por favor, inicia sesión de nuevo.");
+        }
       } finally {
         clearTimeout(authTimeout);
         setIsAuthLoading(false);
@@ -831,6 +861,8 @@ const AppContent: React.FC = () => {
           <Route path="/terminos" element={<TermsPage />} />
           <Route path="/premium" element={<SubscriptionPage />} />
           <Route path="/suscripcion" element={<SubscriptionPage />} />
+          <Route path="/settings" element={<SettingsPage />} />
+          <Route path="/creadores" element={<ContentCreatorApplicationPage />} />
 
           {/* Admin Routes */}
           <Route path="/admin" element={<AdminDashboardPage />} />
@@ -842,18 +874,6 @@ const AppContent: React.FC = () => {
           <Route path="/admin/creators" element={<ContentCreatorsAdminPage />} />
           <Route path="/admin/marketplace" element={<MarketplaceAdminPage />} />
           <Route path="/admin/cms" element={<AdminCMSPage />} />
-          <Route path="/pls" element={<PLSPage />} />
-          <Route path="/creadores" element={<ContentCreatorApplicationPage />} />
-          <Route path="/settings" element={<SettingsPage />} />
-          <Route path="/admin" element={<AdminDashboardPage />} />
-          <Route path="/admin/users" element={<UserManagementPage />} />
-          <Route path="/admin/claims" element={<ClaimReviewPage />} />
-          <Route path="/admin/integrity" element={<IntegrityReviewPanel />} />
-          <Route path="/admin/tournaments/edit" element={<TournamentEditPage />} />
-
-          <Route path="/admin/subscriptions" element={<SubscriptionManagementPage />} />
-          <Route path="/admin/creators" element={<ContentCreatorsAdminPage />} />
-          <Route path="/admin/cms" element={<AdminCMSPage />} />
           <Route path="/notifications" element={<NotificationsPage />} />
           <Route path="/favorites" element={<FavoritesPage />} />
           <Route path="/seller/:sellerId" element={<SellerProfilePage />} />
@@ -864,6 +884,7 @@ const AppContent: React.FC = () => {
           <Route path="/ligas" element={<CommunityLeaguesPage />} />
           <Route path="/community-leagues" element={<CommunityLeaguesPage />} />
           <Route path="/dashboard/jugador" element={<PlayerDashboardPage profile={userProfile} />} />
+          <Route path="/dashboard/creador" element={<CreatorDashboardPage profile={userProfile} />} />
 
           <Route path="/subscription/success" element={<SubscriptionSuccessPage />} />
           <Route path="/logout-success" element={<LogoutSuccessPage />} />

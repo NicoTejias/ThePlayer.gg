@@ -18,7 +18,11 @@ interface Article {
     is_premium?: boolean;
 }
 
-const ArticleManager: React.FC = () => {
+interface ArticleManagerProps {
+    authorId?: string;
+}
+
+const ArticleManager: React.FC<ArticleManagerProps> = ({ authorId }) => {
     const [articles, setArticles] = useState<Article[]>([]);
     const [loading, setLoading] = useState(true);
     const [editingId, setEditingId] = useState<string | null>(null);
@@ -43,10 +47,15 @@ const ArticleManager: React.FC = () => {
 
     const fetchArticles = async () => {
         setLoading(true);
-        const { data, error } = await supabase
+        let query = supabase
             .from('articles')
-            .select('*')
-            .order('created_at', { ascending: false });
+            .select('*');
+
+        if (authorId) {
+            query = query.eq('author_id', authorId);
+        }
+
+        const { data, error } = await query.order('created_at', { ascending: false });
 
         if (error) {
             toast.error('Error al cargar artículos');

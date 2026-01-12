@@ -75,7 +75,7 @@ const ContentPage: React.FC = () => {
                 id: v.id,
                 title: v.title,
                 description: v.description,
-                image_url: v.youtube_id ? `https://img.youtube.com/vi/${v.youtube_id}/maxresdefault.jpg` : null,
+                image_url: v.youtube_id ? `https://img.youtube.com/vi/${v.youtube_id}/mqdefault.jpg` : null,
                 type: 'video',
                 creator_name: v.profiles?.username || 'Creador',
                 created_at: v.created_at,

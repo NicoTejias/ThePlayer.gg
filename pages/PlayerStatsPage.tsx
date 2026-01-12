@@ -160,7 +160,7 @@ const PlayerStatsPage: React.FC = () => {
                     <div className="flex items-center gap-3 mb-2">
                         <h1 className="text-4xl font-bold">Estadísticas Avanzadas</h1>
                         {profile?.is_pro && <ProBadge />}
-                        {profile?.role === 'content_creator' && <ContentCreatorBadge />}
+                        {(profile?.is_content_creator || profile?.role === 'content_creator') && <ContentCreatorBadge />}
                     </div>
                     <p className="text-slate-400">Análisis detallado de tu rendimiento en torneos</p>
                 </div>

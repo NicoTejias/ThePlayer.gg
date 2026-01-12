@@ -67,6 +67,17 @@ const SettingsPage: React.FC = () => {
     const [aliasLoading, setAliasLoading] = useState(false);
     const [aliasError, setAliasError] = useState<string | null>(null);
 
+    // Monetization State (for Content Creators)
+    const [isContentCreator, setIsContentCreator] = useState(false);
+    const [isMonetized, setIsMonetized] = useState(false);
+    const [paymentMethod, setPaymentMethod] = useState('transfer');
+    const [paymentRate, setPaymentRate] = useState('');
+    const [paymentFrequency, setPaymentFrequency] = useState('per_content');
+    const [bankName, setBankName] = useState('');
+    const [bankAccountType, setBankAccountType] = useState('cuenta_corriente');
+    const [bankAccountNumber, setBankAccountNumber] = useState('');
+    const [bankRut, setBankRut] = useState('');
+
     // Image Upload State
     const [uploadingImage, setUploadingImage] = useState(false);
 
@@ -277,6 +288,17 @@ const SettingsPage: React.FC = () => {
                 setPreferredGames(data.preferred_games || []);
                 setFavoriteFormat(data.favorite_format || '');
                 setTeam(data.team || '');
+                setIsContentCreator(data.is_content_creator || data.role === 'content_creator');
+
+                // Monetization fields
+                setIsMonetized(data.is_monetized || false);
+                setPaymentMethod(data.payment_method || 'transfer');
+                setPaymentRate(data.payment_rate?.toString() || '');
+                setPaymentFrequency(data.payment_frequency || 'per_content');
+                setBankName(data.bank_name || '');
+                setBankAccountType(data.bank_account_type || 'cuenta_corriente');
+                setBankAccountNumber(data.bank_account_number || '');
+                setBankRut(data.bank_rut || '');
 
                 // Fetch aliases once profile is loaded
                 fetchAliases(user.id);
@@ -314,6 +336,15 @@ const SettingsPage: React.FC = () => {
                 favorite_format: sanitizeText(favoriteFormat),
                 team: sanitizeText(team),
                 avatar_url: avatarUrl ? sanitizeUrl(avatarUrl) : '',
+                // Monetization fields
+                is_monetized: isMonetized,
+                payment_method: paymentMethod,
+                payment_rate: parseFloat(paymentRate) || 0,
+                payment_frequency: paymentFrequency,
+                bank_name: bankName,
+                bank_account_type: bankAccountType,
+                bank_account_number: bankAccountNumber,
+                bank_rut: bankRut,
                 updated_at: new Date().toISOString(),
             };
 
@@ -534,6 +565,121 @@ const SettingsPage: React.FC = () => {
                             </div>
                         </div>
                     </section>
+
+                    {/* Sección: Monetización (Solo para Creadores de Contenido) */}
+                    {(isContentCreator || role === 'content_creator') && (
+                        <section className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+                            <h2 className="text-xl font-bold text-sky-400 mb-4 border-b border-slate-700 pb-2 flex items-center gap-2">
+                                <span className="text-xl">💰</span> Configuración de Monetización
+                            </h2>
+                            <div className="bg-slate-900/50 p-6 rounded-lg border border-slate-700 space-y-6">
+                                <div className="flex items-center justify-between p-4 bg-slate-800 rounded-xl border border-slate-700">
+                                    <div>
+                                        <p className="font-bold text-white">Activar Monetización</p>
+                                        <p className="text-slate-400 text-sm">Habilita esta opción para configurar tus datos de pago y empezar a monetizar tu contenido.</p>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        onClick={() => setIsMonetized(!isMonetized)}
+                                        className={`relative w-14 h-8 rounded-full transition-colors ${isMonetized ? 'bg-sky-600' : 'bg-slate-600'}`}
+                                        title={isMonetized ? 'Desactivar monetización' : 'Activar monetización'}
+                                    >
+                                        <span className={`absolute top-1 left-1 w-6 h-6 bg-white rounded-full transition-transform ${isMonetized ? 'translate-x-6' : 'translate-x-0'}`} />
+                                    </button>
+                                </div>
+
+                                {isMonetized && (
+                                    <div className="space-y-6 animate-in fade-in slide-in-from-top-2">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                            <div>
+                                                <label className={labelClass}>Método de Pago Preferido</label>
+                                                <select
+                                                    value={paymentMethod}
+                                                    onChange={e => setPaymentMethod(e.target.value)}
+                                                    className={commonInputClass}
+                                                    title="Seleccionar método de pago"
+                                                >
+                                                    <option value="transfer">Transferencia Bancaria</option>
+                                                    <option value="paypal">PayPal</option>
+                                                    <option value="other">Otro</option>
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <label className={labelClass}>RUT Beneficiario</label>
+                                                <input
+                                                    type="text"
+                                                    value={bankRut}
+                                                    onChange={e => setBankRut(e.target.value)}
+                                                    placeholder="12.345.678-9"
+                                                    className={commonInputClass}
+                                                />
+                                            </div>
+                                        </div>
+
+                                        {paymentMethod === 'transfer' && (
+                                            <div className="p-5 bg-slate-800 rounded-xl border border-slate-700 space-y-4">
+                                                <h3 className="text-sm font-bold text-slate-300 uppercase tracking-wider">Datos de Transferencia</h3>
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                    <div>
+                                                        <label className={labelClass}>Banco</label>
+                                                        <select
+                                                            value={bankName}
+                                                            onChange={e => setBankName(e.target.value)}
+                                                            className={commonInputClass}
+                                                            title="Seleccionar banco"
+                                                        >
+                                                            <option value="">Seleccionar banco...</option>
+                                                            <option value="Banco Estado">Banco Estado</option>
+                                                            <option value="Banco de Chile">Banco de Chile</option>
+                                                            <option value="Santander">Santander</option>
+                                                            <option value="BCI">BCI</option>
+                                                            <option value="Scotiabank">Scotiabank</option>
+                                                            <option value="Itaú">Itaú</option>
+                                                            <option value="Banco Falabella">Banco Falabella</option>
+                                                            <option value="Mercado Pago">Mercado Pago</option>
+                                                            <option value="MACH">MACH</option>
+                                                            <option value="Tenpo">Tenpo</option>
+                                                            <option value="Otro">Otro</option>
+                                                        </select>
+                                                    </div>
+                                                    <div>
+                                                        <label className={labelClass}>Tipo de Cuenta</label>
+                                                        <select
+                                                            value={bankAccountType}
+                                                            onChange={e => setBankAccountType(e.target.value)}
+                                                            className={commonInputClass}
+                                                            title="Seleccionar tipo de cuenta"
+                                                        >
+                                                            <option value="cuenta_corriente">Cuenta Corriente</option>
+                                                            <option value="cuenta_vista">Cuenta Vista</option>
+                                                            <option value="cuenta_rut">Cuenta RUT</option>
+                                                            <option value="ahorro">Cuenta de Ahorro</option>
+                                                        </select>
+                                                    </div>
+                                                    <div className="md:col-span-2">
+                                                        <label className={labelClass}>Número de Cuenta</label>
+                                                        <input
+                                                            type="text"
+                                                            value={bankAccountNumber}
+                                                            onChange={e => setBankAccountNumber(e.target.value)}
+                                                            placeholder="00000000000"
+                                                            className={commonInputClass}
+                                                        />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        <div className="p-4 bg-sky-900/20 border border-sky-500/30 rounded-lg">
+                                            <p className="text-xs text-sky-300">
+                                                <span className="font-bold">Nota:</span> Estos datos son privados y solo serán utilizados por la administración para procesar tus pagos de monetización. Asegúrate de verificar que el número de cuenta y RUT sean correctos.
+                                            </p>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </section>
+                    )}
 
                     {/* Sección 5: Cuenta */}
                     <section>

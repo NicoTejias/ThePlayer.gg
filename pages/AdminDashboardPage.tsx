@@ -6,9 +6,9 @@ import TrophyIcon from '../components/icons/TrophyIcon';
 import UsersIcon from '../components/icons/UserIcon';
 
 import { supabase } from '../supabaseClient';
-import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-import { isAdminEmail } from '../config/adminConfig';
+import { isAdminProfile } from '../config/adminConfig';
+import { Link, useNavigate } from 'react-router-dom';
 
 const StatCard: React.FC<{ icon: React.ReactNode, title: string, value: string | number, color: string }> = ({ icon, title, value, color }) => (
     <div className={`bg-slate-800 p-6 rounded-lg shadow-lg border border-slate-700 flex items-center space-x-4`}>
@@ -28,9 +28,12 @@ const AdminDashboardPage: React.FC = () => {
     const [stats, setStats] = useState({
         pendingStores: 0,
         tournaments: 0,
-        activeJudges: 0,
-        totalPlayers: 0
+        totalPlayers: 0,
+        pendingCreators: 0,
+        pendingClaims: 0,
+        pendingSubs: 0
     });
+    const [notifications, setNotifications] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [confirmAction, setConfirmAction] = useState<{
         show: boolean;
@@ -74,8 +77,20 @@ const AdminDashboardPage: React.FC = () => {
         try {
             // Verify admin access
             const { data: { user } } = await supabase.auth.getUser();
-            if (!user || !isAdminEmail(user.email)) {
-                console.warn('Unauthorized access attempt to admin panel');
+            if (!user) {
+                navigate('/login');
+                return;
+            }
+
+            const { data: profile } = await supabase
+                .from('profiles')
+                .select('*')
+                .eq('id', user.id)
+                .single();
+
+            if (!profile || !isAdminProfile(profile)) {
+                console.warn('Unauthorized access attempt to admin panel', profile);
+                toast.error("No tienes permisos de administrador");
                 navigate('/');
                 return;
             }
@@ -105,19 +120,36 @@ const AdminDashboardPage: React.FC = () => {
                 playerCount: t.player_count
             })) || []);
 
-            // 3. Stats
+            // 3. Additional Stats
             const { count: playersCount } = await supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'player');
+            const { count: creatorsCount } = await supabase.from('content_creator_applications').select('*', { count: 'exact', head: true }).eq('status', 'pending');
+            const { count: claimsCount } = await supabase.from('result_claims').select('*', { count: 'exact', head: true }).eq('status', 'pending');
+            const { count: subsCount } = await supabase.from('subscription_requests').select('*', { count: 'exact', head: true }).eq('status', 'pending');
+
             setStats({
                 pendingStores: storesData?.length || 0,
                 tournaments: tourneysData?.length || 0,
-                activeJudges: 0,
-                totalPlayers: playersCount || 0
+                totalPlayers: playersCount || 0,
+                pendingCreators: creatorsCount || 0,
+                pendingClaims: claimsCount || 0,
+                pendingSubs: subsCount || 0
             });
 
+            // 4. Fetch Recent Admin Notifications
+            const { data: notifData } = await supabase
+                .from('notifications')
+                .select('*')
+                .eq('user_id', user.id)
+                .order('created_at', { ascending: false })
+                .limit(10);
+
+            if (notifData) setNotifications(notifData);
+
         } catch (error) {
-            console.error("Error loading admin data", error);
-            toast.error("Error cargando datos del panel");
+            console.error("Error loading admin data:", error);
+            // Even if stats fail, we should stop loading if possible
         } finally {
+            console.log("Admin loading finished");
             setLoading(false);
         }
     };
@@ -201,7 +233,8 @@ const AdminDashboardPage: React.FC = () => {
             {/* Key Metrics */}
             <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <StatCard icon={<ShieldCheckIcon className="w-8 h-8" />} title="Tiendas Pendientes" value={stats.pendingStores} color="yellow" />
-                <StatCard icon={<ClipboardListIcon className="w-8 h-8" />} title="Torneos (Recientes)" value={stats.tournaments} color="sky" />
+                <StatCard icon={<ClipboardListIcon className="w-8 h-8" />} title="Reclamos Pendientes" value={stats.pendingClaims} color="red" />
+                <StatCard icon={<span className="text-3xl">🎥</span>} title="Creadores Pendientes" value={stats.pendingCreators} color="purple" />
                 <StatCard icon={<UsersIcon className="w-8 h-8" />} title="Total Jugadores" value={stats.totalPlayers} color="violet" />
             </section>
 
@@ -209,7 +242,7 @@ const AdminDashboardPage: React.FC = () => {
             <section>
                 <h2 className="text-3xl font-bold text-white uppercase tracking-wider mb-6">Herramientas Administrativas</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                    <a href="#/admin/users" className="group bg-slate-800 hover:bg-slate-700 p-6 rounded-lg border border-slate-700 hover:border-sky-500 transition-all shadow-lg">
+                    <Link to="/admin/users" className="group bg-slate-800 hover:bg-slate-700 p-6 rounded-lg border border-slate-700 hover:border-sky-500 transition-all shadow-lg">
                         <div className="flex items-center gap-4 mb-3">
                             <div className="p-3 bg-purple-900/40 rounded-lg group-hover:bg-purple-800/60 transition-colors">
                                 <UsersIcon className="w-6 h-6 text-purple-300" />
@@ -217,9 +250,9 @@ const AdminDashboardPage: React.FC = () => {
                             <h3 className="text-lg font-bold text-white">Gestión de Usuarios</h3>
                         </div>
                         <p className="text-slate-400 text-sm">Administra usuarios, suspensiones y permisos</p>
-                    </a>
+                    </Link>
 
-                    <a href="#/admin/integrity" className="group bg-slate-800 hover:bg-slate-700 p-6 rounded-lg border border-slate-700 hover:border-yellow-500 transition-all shadow-lg">
+                    <Link to="/admin/integrity" className="group bg-slate-800 hover:bg-slate-700 p-6 rounded-lg border border-slate-700 hover:border-yellow-500 transition-all shadow-lg">
                         <div className="flex items-center gap-4 mb-3">
                             <div className="p-3 bg-yellow-900/40 rounded-lg group-hover:bg-yellow-800/60 transition-colors">
                                 <ShieldCheckIcon className="w-6 h-6 text-yellow-300" />
@@ -227,9 +260,14 @@ const AdminDashboardPage: React.FC = () => {
                             <h3 className="text-lg font-bold text-white">Revisión de Integridad</h3>
                         </div>
                         <p className="text-slate-400 text-sm">Aprobar torneos con advertencias</p>
-                    </a>
+                    </Link>
 
-                    <a href="#/admin/claims" className="group bg-slate-800 hover:bg-slate-700 p-6 rounded-lg border border-slate-700 hover:border-sky-500 transition-all shadow-lg">
+                    <Link to="/admin/claims" className="group bg-slate-800 hover:bg-slate-700 p-6 rounded-lg border border-slate-700 hover:border-sky-500 transition-all shadow-lg relative overflow-hidden">
+                        {stats.pendingClaims > 0 && (
+                            <span className="absolute top-0 right-0 bg-red-600 text-white text-[10px] font-bold px-2 py-1 rounded-bl-lg animate-pulse">
+                                {stats.pendingClaims} PENDIENTES
+                            </span>
+                        )}
                         <div className="flex items-center gap-4 mb-3">
                             <div className="p-3 bg-sky-900/40 rounded-lg group-hover:bg-sky-800/60 transition-colors">
                                 <ClipboardListIcon className="w-6 h-6 text-sky-300" />
@@ -237,9 +275,9 @@ const AdminDashboardPage: React.FC = () => {
                             <h3 className="text-lg font-bold text-white">Reclamos Pendientes</h3>
                         </div>
                         <p className="text-slate-400 text-sm">Revisar y aprobar reclamos de resultados</p>
-                    </a>
+                    </Link>
 
-                    <a href="#/admin/tournaments/edit" className="group bg-slate-800 hover:bg-slate-700 p-6 rounded-lg border border-slate-700 hover:border-green-500 transition-all shadow-lg">
+                    <Link to="/admin/tournaments/edit" className="group bg-slate-800 hover:bg-slate-700 p-6 rounded-lg border border-slate-700 hover:border-green-500 transition-all shadow-lg">
                         <div className="flex items-center gap-4 mb-3">
                             <div className="p-3 bg-green-900/40 rounded-lg group-hover:bg-green-800/60 transition-colors">
                                 <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 text-green-300" viewBox="0 0 20 20" fill="currentColor">
@@ -249,9 +287,14 @@ const AdminDashboardPage: React.FC = () => {
                             <h3 className="text-lg font-bold text-white">Editar Torneos</h3>
                         </div>
                         <p className="text-slate-400 text-sm">Modificar y eliminar torneos</p>
-                    </a>
+                    </Link>
 
-                    <a href="#/admin/subscriptions" className="group bg-slate-800 hover:bg-slate-700 p-6 rounded-lg border border-slate-700 hover:border-orange-500 transition-all shadow-lg">
+                    <Link to="/admin/subscriptions" className="group bg-slate-800 hover:bg-slate-700 p-6 rounded-lg border border-slate-700 hover:border-orange-500 transition-all shadow-lg relative overflow-hidden">
+                        {stats.pendingSubs > 0 && (
+                            <span className="absolute top-0 right-0 bg-orange-600 text-white text-[10px] font-bold px-2 py-1 rounded-bl-lg animate-pulse">
+                                {stats.pendingSubs} NUEVAS
+                            </span>
+                        )}
                         <div className="flex items-center gap-4 mb-3">
                             <div className="p-3 bg-orange-900/40 rounded-lg group-hover:bg-orange-800/60 transition-colors">
                                 <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 text-orange-300" viewBox="0 0 20 20" fill="currentColor">
@@ -262,10 +305,15 @@ const AdminDashboardPage: React.FC = () => {
                             <h3 className="text-lg font-bold text-white">Suscripciones</h3>
                         </div>
                         <p className="text-slate-400 text-sm">Gestionar solicitudes de tiendas</p>
-                    </a>
+                    </Link>
 
 
-                    <a href="#/admin/creators" className="group bg-slate-800 hover:bg-slate-700 p-6 rounded-lg border border-slate-700 hover:border-purple-500 transition-all shadow-lg">
+                    <Link to="/admin/creators" className="group bg-slate-800 hover:bg-slate-700 p-6 rounded-lg border border-slate-700 hover:border-purple-500 transition-all shadow-lg relative overflow-hidden">
+                        {stats.pendingCreators > 0 && (
+                            <span className="absolute top-0 right-0 bg-purple-600 text-white text-[10px] font-bold px-2 py-1 rounded-bl-lg animate-pulse">
+                                {stats.pendingCreators} PENDIENTES
+                            </span>
+                        )}
                         <div className="flex items-center gap-4 mb-3">
                             <div className="p-3 bg-purple-900/40 rounded-lg group-hover:bg-purple-800/60 transition-colors">
                                 <span className="text-2xl">🎥</span>
@@ -273,9 +321,9 @@ const AdminDashboardPage: React.FC = () => {
                             <h3 className="text-lg font-bold text-white">Creadores</h3>
                         </div>
                         <p className="text-slate-400 text-sm">Aprobar solicitudes de creadores</p>
-                    </a>
+                    </Link>
 
-                    <a href="#/admin/cms" className="group bg-slate-800 hover:bg-slate-700 p-6 rounded-lg border border-slate-700 hover:border-blue-500 transition-all shadow-lg">
+                    <Link to="/admin/cms" className="group bg-slate-800 hover:bg-slate-700 p-6 rounded-lg border border-slate-700 hover:border-blue-500 transition-all shadow-lg">
                         <div className="flex items-center gap-4 mb-3">
                             <div className="p-3 bg-blue-900/40 rounded-lg group-hover:bg-blue-800/60 transition-colors">
                                 <span className="text-2xl">📰</span>
@@ -283,8 +331,8 @@ const AdminDashboardPage: React.FC = () => {
                             <h3 className="text-lg font-bold text-white">Gestor de Contenidos</h3>
                         </div>
                         <p className="text-slate-400 text-sm">Publicar noticias, guías y videos</p>
-                    </a>
-                    <a href="#/admin/marketplace" className="group bg-slate-800 hover:bg-slate-700 p-6 rounded-lg border border-slate-700 hover:border-pink-500 transition-all shadow-lg">
+                    </Link>
+                    <Link to="/admin/marketplace" className="group bg-slate-800 hover:bg-slate-700 p-6 rounded-lg border border-slate-700 hover:border-pink-500 transition-all shadow-lg">
                         <div className="flex items-center gap-4 mb-3">
                             <div className="p-3 bg-pink-900/40 rounded-lg group-hover:bg-pink-800/60 transition-colors">
                                 <span className="text-2xl">🏪</span>
@@ -292,13 +340,50 @@ const AdminDashboardPage: React.FC = () => {
                             <h3 className="text-lg font-bold text-white">Mercado</h3>
                         </div>
                         <p className="text-slate-400 text-sm">Gestionar publicaciones del mercado</p>
-                    </a>
+                    </Link>
 
                 </div>
             </section>
 
             {/* Main Admin Sections */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+
+                {/* Activity Feed */}
+                <section>
+                    <h2 className="text-3xl font-bold text-white uppercase tracking-wider mb-6 flex items-center gap-3">
+                        <span className="text-2xl">🔔</span> Actividad Reciente
+                    </h2>
+                    <div className="bg-slate-800 rounded-lg shadow-xl border border-slate-700 divide-y divide-slate-700 overflow-hidden">
+                        {notifications.length > 0 ? (
+                            notifications.map(notif => (
+                                <Link
+                                    key={notif.id}
+                                    to={notif.link || '#'}
+                                    className={`block p-4 hover:bg-slate-700/50 transition-colors ${!notif.read ? 'bg-sky-500/5 border-l-4 border-l-sky-500' : ''}`}
+                                >
+                                    <div className="flex justify-between items-start mb-1">
+                                        <h4 className="font-bold text-white text-sm">{notif.title}</h4>
+                                        <span className="text-[10px] text-slate-500 font-mono">
+                                            {new Date(notif.created_at).toLocaleString()}
+                                        </span>
+                                    </div>
+                                    <p className="text-xs text-slate-400 line-clamp-2">{notif.message}</p>
+                                </Link>
+                            ))
+                        ) : (
+                            <div className="p-8 text-center text-slate-500 text-sm">
+                                No hay notificaciones recientes.
+                            </div>
+                        )}
+                        {notifications.length > 0 && (
+                            <div className="p-3 text-center bg-slate-900/30">
+                                <Link to="/notifications" className="text-xs text-sky-400 hover:text-sky-300 font-bold uppercase tracking-widest">
+                                    Ver todas las notificaciones
+                                </Link>
+                            </div>
+                        )}
+                    </div>
+                </section>
 
                 {/* Store Approval Section */}
                 <section>
