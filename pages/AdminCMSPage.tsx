@@ -9,7 +9,7 @@ const AdminCMSPage: React.FC = () => {
         <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white p-6">
             <div className="max-w-7xl mx-auto">
                 <div className="mb-8">
-                    <h1 className="text-4xl font-bold mb-2">Gestión de Contenidos (CMS)</h1>
+                    <h1 className="text-4xl font-bold mb-2">Gestión de Contenidos</h1>
                     <p className="text-slate-400">Publica noticias, guías y videos para la comunidad.</p>
                 </div>
 

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../supabaseClient';
 import { toast } from 'sonner';
+import ImageUpload from './ImageUpload';
 
 interface Article {
     id: string;
@@ -258,14 +259,10 @@ const ArticleManager: React.FC = () => {
                                 <option value="starwars">Star Wars</option>
                             </select>
                         </div>
-                        <div>
-                            <label className="block text-slate-400 mb-2">Imagen URL</label>
-                            <input
-                                type="text"
-                                value={formData.imageUrl}
-                                onChange={e => setFormData({ ...formData, imageUrl: e.target.value })}
-                                className="w-full bg-slate-900 border border-slate-700 rounded p-3 text-white"
-                                placeholder="https://..."
+                        <div className="md:col-span-3">
+                            <ImageUpload
+                                currentImageUrl={formData.imageUrl}
+                                onImageUploaded={(url) => setFormData({ ...formData, imageUrl: url })}
                             />
                         </div>
                     </div>

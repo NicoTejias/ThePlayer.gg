@@ -219,7 +219,8 @@ const AppContent: React.FC = () => {
             teamData: teamDetails, // Objeto completo
             isPublic: p.is_public ?? true,
             is_pro: p.is_pro || false,
-            is_content_creator: p.role === 'content_creator', // Map role to content creator flag
+            is_content_creator: p.is_content_creator ?? (p.role === 'content_creator'),
+            is_judge: p.is_judge ?? (p.role === 'judge'),
             tournaments_played: p.tournaments_played || 0
           };
         });
@@ -769,9 +770,13 @@ const AppContent: React.FC = () => {
       {!isLanding && <ParticlesBackground />}
 
       {!isLanding && (
-        <Header isLoggedIn={isLoggedIn} userRole={userRole} handleLogout={handleLogout}
+        <Header
+          isLoggedIn={isLoggedIn}
+          userRole={userRole}
+          handleLogout={handleLogout}
           isLiveSignal={isLiveSignal}
           userName={userProfile?.username || 'Jugador'}
+          userProfile={userProfile}
         />
       )}
 

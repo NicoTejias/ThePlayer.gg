@@ -74,18 +74,22 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, isLoggedIn, userRole
         setExpandedSection(prev => prev === section ? null : section);
     };
 
-    const NavItem: React.FC<{ item: { name: string; path: string; icon: string } }> = ({ item }) => (
+    const NavItem: React.FC<{ item: { name: string; path: string; icon: string; isSpecial?: boolean } }> = ({ item }) => (
         <NavLink
             to={item.path}
             className={({ isActive }) =>
                 `flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${isActive
                     ? 'bg-sky-600/20 text-sky-300 border-l-4 border-sky-500'
-                    : 'text-slate-300 hover:bg-slate-700/50 hover:text-white border-l-4 border-transparent'
+                    : item.isSpecial
+                        ? 'bg-amber-500/10 text-amber-400 hover:bg-amber-500/20 border-l-4 border-amber-500/50 hover:text-amber-300'
+                        : 'text-slate-300 hover:bg-slate-700/50 hover:text-white border-l-4 border-transparent'
                 }`
             }
         >
             <span className="text-lg">{item.icon}</span>
-            <span className="font-medium">{item.name}</span>
+            <span className="font-medium flex items-center gap-2">
+                {item.name}
+            </span>
         </NavLink>
     );
 
@@ -164,13 +168,13 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, isLoggedIn, userRole
                 </div>
 
                 {/* Navigation */}
-                {/* Navigation */}
                 <div className="overflow-y-auto h-[calc(100%-180px)] custom-scrollbar">
                     {/* Sección Competencia */}
                     <div className="p-2">
                         <SectionHeader title="Competencia" section="competition" icon="🏆" />
                         {expandedSection === 'competition' && (
                             <div className="space-y-1 mt-1">
+                                <NavItem item={{ name: 'PLS', path: '/pls', icon: '🌟', isSpecial: true }} />
                                 <NavItem item={{ name: 'Ranking', path: '/ranking/pwp', icon: '📊' }} />
                                 <NavItem item={{ name: 'Torneos', path: '/torneos', icon: '⚔️' }} />
                                 <NavItem item={{ name: 'Eventos', path: '/eventos', icon: '📅' }} />
@@ -179,7 +183,6 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, isLoggedIn, userRole
                                         <NavItem item={{ name: 'Commander', path: '/commander', icon: '🏰' }} />
                                         <NavItem item={{ name: 'Pauper', path: '/pauper', icon: '💎' }} />
                                         <NavItem item={{ name: 'Premodern', path: '/premodern', icon: '📜' }} />
-                                        <NavItem item={{ name: 'PLS', path: '/pls', icon: '🌟' }} />
                                     </>
                                 )}
                             </div>

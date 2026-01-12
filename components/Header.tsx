@@ -13,6 +13,7 @@ interface HeaderProps {
   isLoggedIn: boolean;
   userRole: 'player' | 'store' | 'admin' | null;
   userName?: string;
+  userProfile?: any;
   handleLogout: () => void;
   isLiveSignal?: boolean;
 }
@@ -21,6 +22,7 @@ const Header: React.FC<HeaderProps> = ({
   isLoggedIn,
   userRole,
   userName = 'Jugador',
+  userProfile,
   handleLogout,
   isLiveSignal = false
 }) => {
@@ -185,7 +187,17 @@ const Header: React.FC<HeaderProps> = ({
                     aria-label="Menú de usuario"
                   >
                     <UserCircleIcon className="w-8 h-8 text-sky-400" />
-                    <span className="text-white font-semibold text-sm hidden sm:block max-w-[100px] truncate">{userName}</span>
+                    <div className="flex flex-col items-start hidden sm:block">
+                      <span className="text-white font-semibold text-sm max-w-[100px] truncate leading-tight">{userName}</span>
+                      <div className="flex gap-1">
+                        {userProfile?.is_content_creator && (
+                          <span className="text-[9px] bg-sky-500/20 text-sky-400 px-1 rounded-full font-bold uppercase tracking-tighter">Creador</span>
+                        )}
+                        {userProfile?.is_judge && (
+                          <span className="text-[9px] bg-purple-500/20 text-purple-400 px-1 rounded-full font-bold uppercase tracking-tighter">Juez</span>
+                        )}
+                      </div>
+                    </div>
                     <svg className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${isProfileMenuOpen ? 'rotate-180' : ''}`} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                       <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
                     </svg>

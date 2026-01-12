@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { supabase } from '../supabaseClient';
 import type { Store } from '../types';
 import MapPinIcon from '../components/icons/MapPinIcon';
 import GlobeAltIcon from '../components/icons/GlobeAltIcon';
@@ -7,17 +8,6 @@ import StoreSubscriptionModal from '../components/StoreSubscriptionModal';
 import SubscriptionBadge from '../components/SubscriptionBadge';
 import { toast } from 'sonner';
 
-const mockStores: Store[] = [
-    { id: 's1', name: 'Magicsur', region: 'Metropolitana', address: 'Av. Providencia 2216, Local 5A', website: '#', logoUrl: 'https://picsum.photos/seed/store1/200/200', status: 'Aprobada', requestDate: '2024-01-10', subscription_tier: 'premium' },
-    { id: 's2', name: 'Guildreams', region: 'Valparaíso', address: 'Calle Valparaíso 568, Local 32, Viña del Mar', website: '#', logoUrl: 'https://picsum.photos/seed/store2/200/200', status: 'Aprobada', requestDate: '2024-01-12', subscription_tier: 'medium' },
-    { id: 's3', name: 'Ouroboros Store', region: 'Metropolitana', address: 'Av. Nueva Providencia 2160, Local 12', website: '#', logoUrl: 'https://picsum.photos/seed/store3/200/200', status: 'Aprobada', requestDate: '2024-02-01', subscription_tier: 'basic' },
-    { id: 's4', name: 'El Reino de los Duelos', region: 'Biobío', address: 'Aníbal Pinto 509, Local 15, Concepción', website: '#', logoUrl: 'https://picsum.photos/seed/store4/200/200', status: 'Aprobada', requestDate: '2024-02-15' },
-    { id: 's5', name: 'La Forja del Sur', region: 'Sur', address: 'Av. Alemania 0987, Temuco', website: '#', logoUrl: 'https://picsum.photos/seed/store5/200/200', status: 'Aprobada', requestDate: '2024-03-05', subscription_tier: 'medium' },
-    { id: 's6', name: 'Goblin Store', region: 'Metropolitana', address: 'Av. Irarrázaval 2891, Local 102, Ñuñoa', website: '#', logoUrl: 'https://picsum.photos/seed/store6/200/200', status: 'Aprobada', requestDate: '2024-03-20' },
-    { id: 's7', name: 'El Templo del Juego', region: 'Norte', address: 'Arturo Prat 452, Antofagasta', website: '#', logoUrl: 'https://picsum.photos/seed/store7/200/200', status: 'Aprobada', requestDate: '2024-04-01', subscription_tier: 'premium' },
-    { id: 's8', name: 'Card Universe', region: 'Valparaíso', address: 'Esmeralda 1087, Valparaíso', website: '#', logoUrl: 'https://picsum.photos/seed/store8/200/200', status: 'Aprobada', requestDate: '2024-04-18', subscription_tier: 'basic' },
-];
-
 const HeartIcon: React.FC<{ className?: string, fill?: boolean }> = ({ className, fill }) => (
     <svg xmlns="http://www.w3.org/2000/svg" className={className} fill={fill ? "currentColor" : "none"} viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
@@ -25,10 +15,38 @@ const HeartIcon: React.FC<{ className?: string, fill?: boolean }> = ({ className
 );
 
 const StoresPage: React.FC = () => {
+    const [stores, setStores] = useState<Store[]>([]);
+    const [loading, setLoading] = useState(true);
     const [followedStores, setFollowedStores] = React.useState<string[]>([]);
     const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
     const [selectedPlan, setSelectedPlan] = useState<'basic' | 'medium' | 'premium'>('medium');
     const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('monthly');
+    const [searchTerm, setSearchTerm] = useState('');
+    const [regionFilter, setRegionFilter] = useState('Todas las Regiones');
+
+    useEffect(() => {
+        const fetchStores = async () => {
+            setLoading(true);
+            try {
+                const { data, error } = await supabase
+                    .from('profiles')
+                    .select('*')
+                    .eq('role', 'store')
+                    .eq('status', 'Aprobada') // Solo tiendas aprobadas
+                    .order('subscription_tier', { ascending: false });
+
+                if (error) throw error;
+                setStores(data || []);
+            } catch (error) {
+                console.error('Error fetching stores:', error);
+                toast.error('Error al cargar las tiendas');
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchStores();
+    }, []);
 
     const toggleFollow = (storeId: string) => {
         setFollowedStores(prev =>
@@ -42,6 +60,13 @@ const StoresPage: React.FC = () => {
         setSelectedPlan(plan);
         setShowSubscriptionModal(true);
     };
+
+    const filteredStores = stores.filter(store => {
+        const matchesSearch = store.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            (store.address || '').toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesRegion = regionFilter === 'Todas las Regiones' || store.region === regionFilter;
+        return matchesSearch && matchesRegion;
+    });
 
     return (
         <div className="space-y-16">
@@ -57,19 +82,25 @@ const StoresPage: React.FC = () => {
                 </div>
 
                 <div className="flex justify-center mb-10 relative z-10">
-                    <div className="bg-slate-800 p-1 rounded-full border border-slate-700 inline-flex relative">
+                    <div className="bg-slate-800 p-1 rounded-full border border-slate-700 inline-flex relative min-w-[280px]">
                         {/* Background slider animation */}
-                        <div className={`absolute top-1 bottom-1 w-1/2 bg-sky-600 rounded-full transition-all duration-300 ease-in-out ${billingCycle === 'annual' ? 'left-1/2 right-1' : 'left-1'}`}></div>
+                        <div
+                            className="absolute top-1 bottom-1 bg-sky-600 rounded-full transition-all duration-300 ease-in-out"
+                            style={{
+                                width: 'calc(50% - 4px)',
+                                left: billingCycle === 'annual' ? 'calc(50% + 2px)' : '4px'
+                            }}
+                        ></div>
 
                         <button
                             onClick={() => setBillingCycle('monthly')}
-                            className={`relative z-10 px-6 py-2 rounded-full text-sm font-bold transition-colors ${billingCycle === 'monthly' ? 'text-white' : 'text-slate-400 hover:text-white'}`}
+                            className={`relative z-10 w-1/2 px-6 py-2 rounded-full text-sm font-bold transition-colors ${billingCycle === 'monthly' ? 'text-white' : 'text-slate-400 hover:text-white'}`}
                         >
                             Mensual
                         </button>
                         <button
                             onClick={() => setBillingCycle('annual')}
-                            className={`relative z-10 px-6 py-2 rounded-full text-sm font-bold transition-colors flex items-center gap-2 ${billingCycle === 'annual' ? 'text-white' : 'text-slate-400 hover:text-white'}`}
+                            className={`relative z-10 w-1/2 px-6 py-2 rounded-full text-sm font-bold transition-colors flex items-center justify-center gap-2 ${billingCycle === 'annual' ? 'text-white' : 'text-slate-400 hover:text-white'}`}
                         >
                             Anual
                             <span className="bg-green-500 text-white text-[10px] px-1.5 py-0.5 rounded-full">Ahorra 17%</span>
@@ -90,7 +121,7 @@ const StoresPage: React.FC = () => {
                             'Gestión de eventos desde dashboard',
                             'Estadísticas básicas de asistencia'
                         ]}
-                        ctaText={billingCycle === 'monthly' ? "Comenzar Mensual" : "Comenzar Anual"}
+                        ctaText="Elegir Plan"
                         onCTAClick={() => handleSubscribe('basic')}
                     />
 
@@ -109,7 +140,7 @@ const StoresPage: React.FC = () => {
                             'Prioridad en búsquedas',
                             'Estadísticas avanzadas'
                         ]}
-                        ctaText={billingCycle === 'monthly' ? "Elegir Plan" : "Elegir Anual"}
+                        ctaText="Elegir Plan"
                         onCTAClick={() => handleSubscribe('medium')}
                     />
 
@@ -128,7 +159,7 @@ const StoresPage: React.FC = () => {
                             'Soporte prioritario',
                             'Co-branding en eventos'
                         ]}
-                        ctaText="Contactar"
+                        ctaText="Elegir Plan"
                         onCTAClick={() => handleSubscribe('premium')}
                     />
                 </div>
@@ -182,6 +213,8 @@ const StoresPage: React.FC = () => {
                         type="search"
                         placeholder="Buscar por nombre o ciudad..."
                         aria-label="Buscar tiendas por nombre o ciudad"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
                         className="bg-slate-900/80 text-white placeholder-slate-400 rounded-md py-2 px-4 w-full focus:outline-none focus:ring-2 focus:ring-sky-500 border border-slate-700"
                     />
                 </div>
@@ -189,6 +222,8 @@ const StoresPage: React.FC = () => {
                     <select
                         title="Filtrar por región"
                         aria-label="Filtrar por región"
+                        value={regionFilter}
+                        onChange={(e) => setRegionFilter(e.target.value)}
                         className="bg-slate-900/80 text-white rounded-md py-2.5 px-4 w-full appearance-none focus:outline-none focus:ring-2 focus:ring-sky-500 border border-slate-700"
                     >
                         <option>Todas las Regiones</option>
@@ -213,72 +248,82 @@ const StoresPage: React.FC = () => {
             </div>
 
             {/* Stores Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-8">
-                {mockStores.map((store) => {
-                    const isFollowing = followedStores.includes(store.id);
-                    const tier = store.subscription_tier || 'free';
+            {loading ? (
+                <div className="flex justify-center items-center py-20">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-sky-500"></div>
+                </div>
+            ) : filteredStores.length === 0 ? (
+                <div className="text-center py-20 bg-slate-800/30 rounded-xl border border-dashed border-slate-700">
+                    <p className="text-slate-400">No se encontraron tiendas que coincidan con tu búsqueda.</p>
+                </div>
+            ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-8">
+                    {filteredStores.map((store) => {
+                        const isFollowing = followedStores.includes(store.id);
+                        const tier = store.subscription_tier || 'free';
 
-                    // Conditional styling based on tier
-                    const borderClass = {
-                        premium: 'border-2 border-yellow-500 shadow-2xl shadow-yellow-900/30',
-                        medium: 'border-2 border-sky-500 shadow-xl shadow-sky-900/20',
-                        basic: 'border border-emerald-500/50 shadow-lg',
-                        free: 'border border-slate-700'
-                    }[tier];
+                        // Conditional styling based on tier
+                        const borderClass = {
+                            premium: 'border-2 border-yellow-500 shadow-2xl shadow-yellow-900/30',
+                            medium: 'border-2 border-sky-500 shadow-xl shadow-sky-900/20',
+                            basic: 'border border-emerald-500/50 shadow-lg',
+                            free: 'border border-slate-700'
+                        }[tier];
 
-                    const bgClass = {
-                        premium: 'bg-gradient-to-br from-slate-800 via-slate-800 to-yellow-900/20',
-                        medium: 'bg-slate-800',
-                        basic: 'bg-slate-800',
-                        free: 'bg-slate-800'
-                    }[tier];
+                        const bgClass = {
+                            premium: 'bg-gradient-to-br from-slate-800 via-slate-800 to-yellow-900/20',
+                            medium: 'bg-slate-800',
+                            basic: 'bg-slate-800',
+                            free: 'bg-slate-800'
+                        }[tier];
 
-                    return (
-                        <div key={store.id} className={`${bgClass} rounded-lg overflow-hidden hover:shadow-sky-500/20 transition-all duration-300 ease-in-out transform hover:-translate-y-1 ${borderClass} flex flex-col text-center relative group`}>
+                        return (
+                            <div key={store.id} className={`${bgClass} rounded-lg overflow-hidden hover:shadow-sky-500/20 transition-all duration-300 ease-in-out transform hover:-translate-y-1 ${borderClass} flex flex-col text-center relative group`}>
 
-                            {/* Follow Button */}
-                            <button
-                                onClick={() => toggleFollow(store.id)}
-                                className="absolute top-3 right-3 z-10 p-2 rounded-full bg-slate-900/50 hover:bg-slate-900/80 transition-colors focus:outline-none"
-                                title={isFollowing ? "Dejar de seguir" : "Seguir tienda"}
-                            >
-                                <HeartIcon className={`w-6 h-6 transition-colors duration-300 ${isFollowing ? 'text-red-500' : 'text-slate-400 group-hover:text-white'}`} fill={isFollowing} />
-                            </button>
+                                {/* Follow Button */}
+                                <button
+                                    onClick={() => toggleFollow(store.id)}
+                                    className="absolute top-3 right-3 z-10 p-2 rounded-full bg-slate-900/50 hover:bg-slate-900/80 transition-colors focus:outline-none"
+                                    title={isFollowing ? "Dejar de seguir" : "Seguir tienda"}
+                                >
+                                    <HeartIcon className={`w-6 h-6 transition-colors duration-300 ${isFollowing ? 'text-red-500' : 'text-slate-400 group-hover:text-white'}`} fill={isFollowing} />
+                                </button>
 
-                            {/* Subscription Badge */}
-                            {tier !== 'free' && (
-                                <div className="absolute top-3 left-3 z-10">
-                                    <SubscriptionBadge tier={tier} size="small" />
+                                {/* Subscription Badge */}
+                                {tier !== 'free' && (
+                                    <div className="absolute top-3 left-3 z-10">
+                                        <SubscriptionBadge tier={tier} size="small" />
+                                    </div>
+                                )}
+
+                                <div className="p-6 bg-slate-700/50 relative">
+                                    <img className={`w-24 h-24 object-contain rounded-full mx-auto border-4 ${tier === 'premium' ? 'border-yellow-500 shadow-lg shadow-yellow-900/50' :
+                                        tier === 'medium' ? 'border-sky-500' :
+                                            tier === 'basic' ? 'border-emerald-500' :
+                                                'border-slate-600'
+                                        }`} src={store.logoUrl} alt={`${store.name} logo`} />
                                 </div>
-                            )}
-
-                            <div className="p-6 bg-slate-700/50 relative">
-                                <img className={`w-24 h-24 object-contain rounded-full mx-auto border-4 ${tier === 'premium' ? 'border-yellow-500 shadow-lg shadow-yellow-900/50' :
-                                    tier === 'medium' ? 'border-sky-500' :
-                                        tier === 'basic' ? 'border-emerald-500' :
-                                            'border-slate-600'
-                                    }`} src={store.logoUrl} alt={`${store.name} logo`} />
-                            </div>
-                            <div className="p-6 flex-grow flex flex-col items-center">
-                                <h3 className="font-bold text-xl mb-2 text-white uppercase">{store.name}</h3>
-                                <span className="inline-block bg-slate-700 rounded-full px-3 py-1 text-sm font-semibold text-slate-300 mb-4">{store.region}</span>
-                                <div className="space-y-2 text-slate-300 text-sm">
-                                    <div className="flex items-center gap-2">
-                                        <MapPinIcon className="w-4 h-4 text-slate-400" />
-                                        <span>{store.address}</span>
+                                <div className="p-6 flex-grow flex flex-col items-center">
+                                    <h3 className="font-bold text-xl mb-2 text-white uppercase">{store.name}</h3>
+                                    <span className="inline-block bg-slate-700 rounded-full px-3 py-1 text-sm font-semibold text-slate-300 mb-4">{store.region}</span>
+                                    <div className="space-y-2 text-slate-300 text-sm">
+                                        <div className="flex items-center gap-2">
+                                            <MapPinIcon className="w-4 h-4 text-slate-400" />
+                                            <span>{store.address}</span>
+                                        </div>
                                     </div>
                                 </div>
+                                <div className="px-6 py-4 bg-slate-800/50 mt-auto border-t border-slate-700">
+                                    <a href={store.website} target="_blank" rel="noopener noreferrer" className="w-full inline-flex items-center justify-center gap-2 bg-sky-600 text-white font-bold py-2 px-4 rounded-md hover:bg-sky-700 transition duration-300">
+                                        <GlobeAltIcon className="w-5 h-5" />
+                                        Visitar Sitio Web
+                                    </a>
+                                </div>
                             </div>
-                            <div className="px-6 py-4 bg-slate-800/50 mt-auto border-t border-slate-700">
-                                <a href={store.website} target="_blank" rel="noopener noreferrer" className="w-full inline-flex items-center justify-center gap-2 bg-sky-600 text-white font-bold py-2 px-4 rounded-md hover:bg-sky-700 transition duration-300">
-                                    <GlobeAltIcon className="w-5 h-5" />
-                                    Visitar Sitio Web
-                                </a>
-                            </div>
-                        </div>
-                    );
-                })}
-            </div>
+                        );
+                    })}
+                </div>
+            )}
 
             {/* Subscription Modal */}
             <StoreSubscriptionModal

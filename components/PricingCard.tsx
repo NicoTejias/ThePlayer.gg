@@ -22,9 +22,9 @@ const PricingCard: React.FC<PricingCardProps> = ({
     onCTAClick
 }) => {
     return (
-        <div className={`relative rounded-2xl p-8 transition-all duration-300 ${highlighted
-                ? 'bg-gradient-to-br from-sky-600 to-blue-700 shadow-2xl shadow-sky-900/50 scale-105 border-2 border-sky-400'
-                : 'bg-slate-800 border border-slate-700 hover:border-sky-500/50 hover:shadow-xl'
+        <div className={`relative rounded-2xl p-8 transition-all duration-300 flex flex-col h-full ${highlighted
+            ? 'bg-gradient-to-br from-sky-600 to-blue-700 shadow-2xl shadow-sky-900/50 scale-105 border-2 border-sky-400 z-10'
+            : 'bg-slate-800 border border-slate-700 hover:border-sky-500/50 hover:shadow-xl'
             }`}>
             {/* Badge */}
             {badge && (
@@ -74,9 +74,9 @@ const PricingCard: React.FC<PricingCardProps> = ({
             {/* CTA Button */}
             <button
                 onClick={onCTAClick}
-                className={`w-full py-3 px-6 rounded-lg font-bold transition-all ${highlighted
-                        ? 'bg-white text-sky-600 hover:bg-sky-50 shadow-lg'
-                        : 'bg-sky-600 text-white hover:bg-sky-500'
+                className={`w-full py-3 px-6 rounded-lg font-bold transition-all mt-auto ${highlighted
+                    ? 'bg-white text-sky-600 hover:bg-sky-50 shadow-lg'
+                    : 'bg-sky-600 text-white hover:bg-sky-500'
                     }`}
             >
                 {ctaText}

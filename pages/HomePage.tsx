@@ -21,6 +21,7 @@ const mockArticles: MediaArticle[] = [];
 const mockEventsData: Record<string, CommunityEvent[]> = {};
 
 const sliderItems = [
+  { id: 5, title: 'Player Latam Series', link: '/pls', imageUrl: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&q=80&w=800', color: 'from-amber-600/80', description: 'Suma puntos solo por jugar tus torneos, escala en el ranking oficial de The Player y viaja jugando tus juegos favoritos' },
   { id: 1, title: 'Últimas Noticias', link: '/media', imageUrl: 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?auto=format&fit=crop&q=80&w=800', color: 'from-blue-600/80' },
   { id: 2, title: 'Videos', link: '/media/videos', imageUrl: 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&q=80&w=800', color: 'from-red-600/80' },
   { id: 3, title: 'Artículos', link: '/media/articulos', imageUrl: 'https://images.unsplash.com/photo-1585241936939-be05368a5bcb?auto=format&fit=crop&q=80&w=800', color: 'from-green-600/80' },
@@ -79,19 +80,41 @@ const HomePage: React.FC<HomePageProps> = ({ players, events, session, userRole,
 
   // Fetch stats, news, videos
   useEffect(() => {
+    let isMounted = true;
+
+    // Safety timeout to avoid getting stuck forever
+    const loadingTimeout = setTimeout(() => {
+      if (isMounted) {
+        setLoading(false);
+      }
+    }, 10000);
+
     const fetchStats = async () => {
       try {
-        const [storesData, playersData, tournamentsData, resultsData] = await Promise.all([
+        // Run all independent queries in parallel for better performance
+        const [
+          storesData,
+          playersData,
+          tournamentsData,
+          resultsData,
+          articlesData,
+          videosData
+        ] = await Promise.all([
           supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'store'),
           supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'player'),
           supabase.from('tournaments').select('*', { count: 'exact', head: true }).eq('game_type', currentGame),
-          supabase.from('tournament_results').select('id, tournaments!inner(game_type)', { count: 'exact', head: true }).eq('tournaments.game_type', currentGame),
+          // Simplified total match count to avoid slow joins on home page
+          supabase.from('tournament_results').select('id', { count: 'exact', head: true }),
+          supabase.from('articles').select('*').eq('is_published', true).order('published_at', { ascending: false }).limit(3),
+          supabase.from('videos').select('*').order('created_at', { ascending: false }).limit(3)
         ]);
-        const { data: articlesData } = await supabase.from('articles').select('*').eq('is_published', true).order('published_at', { ascending: false }).limit(3);
-        if (articlesData) setLatestNews(articlesData);
-        const { data: videosData } = await supabase.from('videos').select('*').order('created_at', { ascending: false }).limit(3);
-        if (videosData) {
-          setFeaturedContent(videosData.map(v => ({
+
+        if (!isMounted) return;
+
+        if (articlesData.data) setLatestNews(articlesData.data);
+
+        if (videosData.data) {
+          setFeaturedContent(videosData.data.map(v => ({
             id: v.id,
             title: v.title,
             link: `https://www.youtube.com/watch?v=${v.youtube_id}`,
@@ -100,21 +123,31 @@ const HomePage: React.FC<HomePageProps> = ({ players, events, session, userRole,
             is_premium: v.is_premium
           })));
         }
+
         setStats({
           registeredStores: storesData.count || 0,
           totalPlayers: playersData.count || 0,
           activeTournaments: tournamentsData.count || 0,
           totalMatches: resultsData.count || 0,
         });
-        setLoading(false);
       } catch (e) {
-        console.error('Error fetching stats', e);
-        setLoading(false);
+        console.error('Error fetching stats:', e);
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+          clearTimeout(loadingTimeout);
+        }
       }
     };
+
     fetchStats();
-    const subscription = supabase.channel('public:profiles').on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, fetchStats).subscribe();
-    return () => { supabase.removeChannel(subscription); };
+
+    // Removed the aggressive profiles channel subscription that was causing excessive re-fetching
+
+    return () => {
+      isMounted = false;
+      clearTimeout(loadingTimeout);
+    };
   }, [currentGame]);
 
   // Fetch user registrations
@@ -202,8 +235,11 @@ const HomePage: React.FC<HomePageProps> = ({ players, events, session, userRole,
             style={{ backgroundImage: `url('${item.imageUrl}')`, backgroundSize: 'cover', backgroundPosition: 'center' }}
           >
             <div className={`absolute inset-0 bg-gradient-to-r ${item.color} to-transparent opacity-95`} />
-            <div className="relative z-10 flex items-center justify-center h-full">
-              <h2 className="text-6xl font-black text-white uppercase tracking-wider drop-shadow-2xl">{item.title}</h2>
+            <div className="relative z-10 flex flex-col items-center justify-center h-full text-center px-4">
+              <h2 className="text-4xl sm:text-6xl font-black text-white uppercase tracking-wider drop-shadow-2xl mb-2">{item.title}</h2>
+              {item.description && (
+                <p className="text-lg sm:text-xl text-white/90 font-medium max-w-2xl drop-shadow-lg">{item.description}</p>
+              )}
             </div>
           </Link>
         ))}
