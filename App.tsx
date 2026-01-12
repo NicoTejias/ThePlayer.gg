@@ -67,6 +67,7 @@ import type { TournamentResult, CommunityEvent, PlayerProfile, TournamentParseRe
 import OnboardingModal from './components/OnboardingModal';
 import ClaimResultsModal from './components/ClaimResultsModal';
 import { GameProvider, useGame } from './context/GameContext';
+import CookieConsent from './components/CookieConsent';
 
 const mockInitialPlayers: PlayerProfile[] = [];
 const mockTournamentResults: TournamentResult[] = [];
@@ -767,6 +768,7 @@ const AppContent: React.FC = () => {
   return (
     <div className={`bg-slate-900 text-slate-200 min-h-screen flex flex-col relative isolate ${themeClass}`}>
       <Toaster position="top-center" richColors theme="dark" />
+      <CookieConsent />
       {!isLanding && <ParticlesBackground />}
 
       {!isLanding && (
