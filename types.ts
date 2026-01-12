@@ -142,19 +142,20 @@ export interface TournamentParseResult {
   pwpEarned: number;
 }
 
-export type GameType = 'mtg' | 'pokemon' | 'one_piece' | 'lorcana' | 'flesh_and_blood' | 'yugioh' | 'star_wars' | 'board_game' | 'rpg' | 'warhammer' | 'other';
+export type GameType = 'mtg' | 'pokemon' | 'one_piece' | 'lorcana' | 'flesh_blood' | 'yugioh' | 'star_wars' | 'board_game' | 'rpg' | 'warhammer' | 'digimon' | 'other';
 
 export const GAME_LABELS: Record<GameType, string> = {
   mtg: 'Magic: The Gathering',
   pokemon: 'Pokémon TCG',
   one_piece: 'One Piece TCG',
   lorcana: 'Disney Lorcana',
-  flesh_and_blood: 'Flesh and Blood',
+  flesh_blood: 'Flesh and Blood',
   yugioh: 'Yu-Gi-Oh!',
   star_wars: 'Star Wars Unlimited',
   board_game: 'Juegos de Mesa',
   rpg: 'Rol (RPG)',
   warhammer: 'Warhammer / Wargames',
+  digimon: 'Digimon Card Game',
   other: 'Otro'
 };
 
@@ -181,7 +182,7 @@ export const GAME_FORMATS: Record<GameType, GameFormat[]> = {
   lorcana: [
     { id: 'competitive', name: 'Competitivo', path: '/ranking/pwp' },
   ],
-  flesh_and_blood: [
+  flesh_blood: [
     { id: 'competitive', name: 'Competitivo', path: '/ranking/pwp' },
   ],
   yugioh: [
@@ -193,6 +194,7 @@ export const GAME_FORMATS: Record<GameType, GameFormat[]> = {
   board_game: [],
   rpg: [],
   warhammer: [],
+  digimon: [],
   other: [],
 };
 
@@ -202,12 +204,13 @@ export const GAME_LOGOS: Record<GameType, { src: string; emoji: string }> = {
   pokemon: { src: '/images/games/pokemon-logo.png', emoji: '⚡' },
   one_piece: { src: '/images/games/onepiece-logo.png', emoji: '🏴‍☠️' },
   lorcana: { src: '/images/games/lorcana-logo.png', emoji: '✨' },
-  flesh_and_blood: { src: '/images/games/fab-logo.png', emoji: '⚔️' },
+  flesh_blood: { src: '/images/games/fab-logo.png', emoji: '⚔️' },
   yugioh: { src: '/images/games/yugioh-logo.png', emoji: '🃏' },
   star_wars: { src: '/images/games/starwars-logo.png', emoji: '⭐' },
   board_game: { src: '', emoji: '🎲' },
   rpg: { src: '', emoji: '🎭' },
   warhammer: { src: '', emoji: '🛡️' },
+  digimon: { src: '/images/games/digimon-logo.png', emoji: '🦖' },
   other: { src: '', emoji: '🎮' },
 };
 

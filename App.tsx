@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Toaster, toast } from 'sonner';
-import { HashRouter, Routes, Route, useNavigate } from 'react-router-dom';
+import { HashRouter, Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from './supabaseClient';
 import type { Database } from './database.types';
 import Header from './components/Header';
@@ -62,6 +62,7 @@ import ResetPasswordPage from './pages/ResetPasswordPage';
 import ContentCreatorApplicationPage from './pages/ContentCreatorApplicationPage';
 import TermsPage from './pages/TermsPage';
 import SubscriptionPage from './pages/SubscriptionPage';
+import UniverseSelectionPage from './pages/UniverseSelectionPage';
 import type { TournamentResult, CommunityEvent, PlayerProfile, TournamentParseResult, Team } from './types';
 import OnboardingModal from './components/OnboardingModal';
 import ClaimResultsModal from './components/ClaimResultsModal';
@@ -759,14 +760,20 @@ const AppContent: React.FC = () => {
     digimon: 'theme-digimon'
   }[currentGame] || 'theme-mtg';
 
+  const location = useLocation();
+  const isLanding = location.pathname === '/';
+
   return (
     <div className={`bg-slate-900 text-slate-200 min-h-screen flex flex-col relative isolate ${themeClass}`}>
       <Toaster position="top-center" richColors theme="dark" />
-      <ParticlesBackground />
-      <Header isLoggedIn={isLoggedIn} userRole={userRole} handleLogout={handleLogout}
-        isLiveSignal={isLiveSignal}
-        userName={userProfile?.username || 'Jugador'}
-      />
+      {!isLanding && <ParticlesBackground />}
+
+      {!isLanding && (
+        <Header isLoggedIn={isLoggedIn} userRole={userRole} handleLogout={handleLogout}
+          isLiveSignal={isLiveSignal}
+          userName={userProfile?.username || 'Jugador'}
+        />
+      )}
 
       {/* Floating Action Button for Stores */}
       <FloatingActionButton userRole={userRole} />
@@ -784,9 +791,10 @@ const AppContent: React.FC = () => {
         onClaimProcessed={handleClaimProcessed}
       />
 
-      <main className="flex-grow container mx-auto px-4 py-8">
+      <main className={`flex-grow ${!isLanding ? 'container mx-auto px-4 py-8' : ''}`}>
         <Routes>
-          <Route path="/" element={<HomePage players={players} events={communityEvents} session={userProfile ? { user: userProfile } : null} userRole={userRole} userId={userProfile?.id} />} />
+          <Route path="/" element={<UniverseSelectionPage />} />
+          <Route path="/home" element={<HomePage players={players} events={communityEvents} session={userProfile ? { user: userProfile } : null} userRole={userRole} userId={userProfile?.id} />} />
           <Route path="/envivo" element={<LiveStreamPage />} />
           <Route path="/pls" element={<PLSPage />} />
           <Route path="/ranking/pwp" element={<RankingsPage players={players} teams={teams} />} />
@@ -855,7 +863,7 @@ const AppContent: React.FC = () => {
           <Route path="/subscription/failure" element={<SubscriptionFailurePage />} />
         </Routes>
       </main>
-      <Footer />
+      {!isLanding && <Footer />}
     </div>
   );
 };

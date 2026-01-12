@@ -28,7 +28,7 @@ const OFFICIAL_RULES: Record<GameType, ExternalRuleLink> = {
         url: 'https://www.yugioh-card.com/lat-am/play/game-play-rules/',
         label: 'Reglamento Oficial Yu-Gi-Oh!'
     },
-    flesh_and_blood: {
+    flesh_blood: {
         url: 'https://fabtcg.com/resources/rules-and-policy-center/',
         label: 'Reglamento Oficial Flesh and Blood'
     },
@@ -40,7 +40,8 @@ const OFFICIAL_RULES: Record<GameType, ExternalRuleLink> = {
     board_game: { url: '#', label: 'Reglamentos Varios' },
     rpg: { url: '#', label: 'Sistemas de Rol' },
     warhammer: { url: 'https://www.warhammer-community.com/en-gb/downloads/', label: 'Reglamentos Warhammer' },
-    other: { url: '#', label: 'Reglamento General' }
+    other: { url: '#', label: 'Reglamento General' },
+    digimon: { url: 'https://world.digimoncard.com/rule/', label: 'Reglamento Oficial Digimon Card Game' }
 };
 
 const ReglamentoPage: React.FC = () => {

@@ -374,7 +374,7 @@ const SettingsPage: React.FC = () => {
                                 <input id="lastName" type="text" value={lastName} onChange={(e) => setLastName(e.target.value)} className={commonInputClass} />
                             </div>
                             <div>
-                                <label htmlFor="username" className={labelClass}>Nombre de Usuario (Nick)</label>
+                                <label htmlFor="username" className={labelClass}>{role === 'store' ? 'Nombre de Tienda' : 'Nombre de Usuario (Nick)'}</label>
                                 <input id="username" type="text" value={username} onChange={(e) => setUsername(e.target.value)} className={commonInputClass} />
                             </div>
                             <div>

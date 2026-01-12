@@ -126,7 +126,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, isLoggedIn, userRole
             >
                 {/* Header */}
                 <div className="flex items-center justify-between p-4 border-b border-slate-700/50">
-                    <Link to="/" className="flex items-center gap-2" onClick={onClose}>
+                    <Link to="/home" className="flex items-center gap-2" onClick={onClose}>
                         <img src="/logotheplayer.png" alt="ThePlayer.gg" className="h-8" />
                     </Link>
                     <button
