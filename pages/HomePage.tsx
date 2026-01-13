@@ -16,8 +16,6 @@ import ContentCreatorBadge from '../components/ContentCreatorBadge';
 import AdminWidget from '../components/widgets/AdminWidget';
 import QuickRegistrationModal from '../components/QuickRegistrationModal';
 
-// Mock data (empty)
-const mockArticles: MediaArticle[] = [];
 const mockEventsData: Record<string, CommunityEvent[]> = {};
 
 const sliderItems = [
@@ -26,6 +24,7 @@ const sliderItems = [
   { id: 2, title: 'Videos', link: '/media/videos', imageUrl: 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&q=80&w=800', color: 'from-red-600/80' },
   { id: 3, title: 'Artículos', link: '/media/articulos', imageUrl: 'https://images.unsplash.com/photo-1585241936939-be05368a5bcb?auto=format&fit=crop&q=80&w=800', color: 'from-green-600/80' },
   { id: 4, title: 'MERCADO TCG', link: '/mercado', imageUrl: 'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?auto=format&fit=crop&q=80&w=800', color: 'from-purple-600/80' },
+  { id: 6, title: 'Salón de la Fama', link: '/hall-of-fame', imageUrl: 'https://images.unsplash.com/photo-1549443105-325b9d3118a6?auto=format&fit=crop&q=80&w=800', color: 'from-yellow-600/80', description: 'Conoce a las leyendas de temporadas pasadas y sus récords históricos.' },
 ];
 
 const SectionHeader: React.FC<{ title: string; linkTo: string }> = ({ title, linkTo }) => (
@@ -350,7 +349,7 @@ const HomePage: React.FC<HomePageProps> = ({ players, events, session, userRole,
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* PLS Ranking */}
             <div>
-              <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3">Top 10 Pts</h3>
+              <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3">Top 10 Player Points</h3>
               <div className="bg-slate-800/50 rounded-xl border border-slate-700 overflow-hidden shadow-xl">
                 {topPwpPlayers.slice(0, 5).map(player => {
                   const isCurrent = session?.user?.id && player.id === session.user.id;
@@ -367,8 +366,8 @@ const HomePage: React.FC<HomePageProps> = ({ players, events, session, userRole,
                         <p className="text-xs text-slate-500">{player.team}</p>
                       </div>
                       <div className="text-right">
-                        <span className={`block font-bold font-mono text-sm ${isCurrent ? 'text-blue-400' : 'text-green-400'}`}>{player.pwp}</span>
-                        <span className="text-[10px] text-slate-500 uppercase">Pts</span>
+                        <span className={`block font-bold font-mono text-sm ${isCurrent ? 'text-blue-400' : 'text-green-400'}`}>{player.pwp.toLocaleString()}</span>
+                        <span className="text-[10px] text-slate-500 uppercase">Points</span>
                       </div>
                     </Link>
                   );

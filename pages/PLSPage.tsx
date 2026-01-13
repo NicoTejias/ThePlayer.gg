@@ -1,7 +1,5 @@
-import React from 'react';
 
-// Reusing the TierCard component logic but inline for simplicity or separated if preferred.
-// For now, I'll keep it in the file as it was, but integrated into the new flow.
+import React from 'react';
 
 const TierCard: React.FC<{
     multiplier: string;
@@ -47,11 +45,11 @@ const PLSPage: React.FC = () => {
         <div className="min-h-screen pb-20 animate-fade-in text-slate-200">
 
             {/* 1. HERO SECTION */}
-            <div className="relative py-24 overflow-hidden">
+            <div className="relative py-24 overflow-hidden text-center">
                 <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1511512578047-dfb367046420?q=80&w=2071&auto=format&fit=crop')] bg-cover bg-center opacity-10"></div>
                 <div className="absolute inset-0 bg-gradient-to-b from-slate-950 via-slate-900/90 to-slate-950"></div>
 
-                <div className="container mx-auto px-4 relative z-10 text-center space-y-8">
+                <div className="container mx-auto px-4 relative z-10 space-y-8">
                     <div className="inline-block px-4 py-1 rounded-full bg-sky-900/50 border border-sky-500/30 text-sky-400 font-bold text-sm tracking-widest uppercase mb-4 animate-bounce-slow">
                         Temporada 2026
                     </div>
@@ -60,12 +58,12 @@ const PLSPage: React.FC = () => {
                     </h1>
                     <p className="text-2xl text-slate-300 max-w-4xl mx-auto leading-relaxed font-light">
                         El circuito competitivo más prestigioso de Latinoamérica. <br />
-                        <span className="text-white font-semibold">Juega. Suma Puntos. Conviértete en Leyenda.</span>
+                        <span className="text-white font-semibold italic text-3xl">Juega. Suma <span className="text-sky-400">Player Points</span>. Conviértete en Leyenda.</span>
                     </p>
                 </div>
             </div>
 
-            <div className="container mx-auto px-4 space-y-32">
+            <div className="container mx-auto px-4 space-y-32 mt-16">
 
                 {/* 2. HOW IT WORKS (BASE POINTS) */}
                 <section id="puntos">
@@ -76,28 +74,28 @@ const PLSPage: React.FC = () => {
                     />
 
                     <div className="bg-gradient-to-b from-slate-800 to-slate-900 border border-slate-700 rounded-3xl p-8 md:p-12 shadow-2xl relative overflow-hidden max-w-5xl mx-auto">
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative z-10">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative z-10 text-center">
                             {/* Win */}
-                            <div className="bg-slate-900/80 p-8 rounded-2xl border border-green-500/30 text-center transform hover:-translate-y-2 transition-all duration-300 group">
+                            <div className="bg-slate-900/80 p-8 rounded-2xl border border-green-500/30 transform hover:-translate-y-2 transition-all duration-300 group">
                                 <div className="text-7xl mb-4 group-hover:scale-110 transition-transform">🥇</div>
                                 <div className="text-6xl font-black text-green-400 mb-2">3</div>
-                                <div className="text-sm font-bold uppercase tracking-wider text-green-200">Puntos por Victoria</div>
+                                <div className="text-sm font-bold uppercase tracking-wider text-green-200">Player Points por Victoria</div>
                                 <p className="text-xs text-slate-500 mt-4">La máxima recompensa por tu habilidad.</p>
                             </div>
 
                             {/* Draw */}
-                            <div className="bg-slate-900/80 p-8 rounded-2xl border border-yellow-500/30 text-center transform hover:-translate-y-2 transition-all duration-300 group">
+                            <div className="bg-slate-900/80 p-8 rounded-2xl border border-yellow-500/30 transform hover:-translate-y-2 transition-all duration-300 group">
                                 <div className="text-7xl mb-4 group-hover:scale-110 transition-transform">🤝</div>
                                 <div className="text-6xl font-black text-yellow-400 mb-2">1</div>
-                                <div className="text-sm font-bold uppercase tracking-wider text-yellow-200">Punto por Empate</div>
+                                <div className="text-sm font-bold uppercase tracking-wider text-yellow-200">Player Point por Empate</div>
                                 <p className="text-xs text-slate-500 mt-4">Cada punto cuenta en la carrera final.</p>
                             </div>
 
                             {/* Participation */}
-                            <div className="bg-slate-900/80 p-8 rounded-2xl border border-red-500/30 text-center transform hover:-translate-y-2 transition-all duration-300 group">
+                            <div className="bg-slate-900/80 p-8 rounded-2xl border border-red-500/30 transform hover:-translate-y-2 transition-all duration-300 group">
                                 <div className="text-7xl mb-4 group-hover:scale-110 transition-transform">⚔️</div>
                                 <div className="text-6xl font-black text-slate-400 mb-2">1</div>
-                                <div className="text-sm font-bold uppercase tracking-wider text-slate-300">Punto por Participar</div>
+                                <div className="text-sm font-bold uppercase tracking-wider text-slate-300">Player Point por Participar</div>
                                 <p className="text-xs text-slate-500 mt-4">La constancia es clave para el éxito.</p>
                             </div>
                         </div>
@@ -133,6 +131,57 @@ const PLSPage: React.FC = () => {
                             color="border-red-500"
                             events={['RCQ', 'Regional Championship', 'National Qualifiers']}
                         />
+                    </div>
+                </section>
+
+                {/* 3.5 SEASON RESET INFORMATION */}
+                <section id="renovacion" className="max-w-5xl mx-auto">
+                    <div className="relative overflow-hidden rounded-3xl bg-slate-900 border border-sky-500/30 p-8 md:p-12 shadow-2xl">
+                        <div className="absolute top-0 right-0 -mt-8 -mr-8 w-64 h-64 bg-sky-500/10 rounded-full blur-3xl"></div>
+                        <div className="absolute bottom-0 left-0 -mb-8 -ml-8 w-64 h-64 bg-violet-500/10 rounded-full blur-3xl"></div>
+
+                        <div className="relative z-10 flex flex-col md:flex-row items-center gap-10">
+                            <div className="flex-1 space-y-6">
+                                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-500/20 text-sky-400 text-xs font-bold uppercase tracking-widest border border-sky-500/30">
+                                    <span className="relative flex h-2 w-2">
+                                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-sky-400 opacity-75"></span>
+                                        <span className="relative inline-flex rounded-full h-2 w-2 bg-sky-500"></span>
+                                    </span>
+                                    Actualización de Sistema
+                                </div>
+                                <h2 className="text-3xl md:text-4xl font-black text-white leading-tight">
+                                    RENOVACIÓN DE TEMPORADA <br />
+                                    <span className="text-sky-400">Y ARRASTRE DE PLAYER POINTS</span>
+                                </h2>
+                                <p className="text-slate-400 text-lg leading-relaxed">
+                                    Para mantener el circuito competitivo dinámico y justo, el sistema PLS implementa una renovación anual de puntos. Esto permite que nuevos talentos tengan la oportunidad de alcanzar la cima cada año, mientras premiamos la constancia de los veteranos.
+                                </p>
+
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-8">
+                                    <div className="bg-slate-800/50 p-6 rounded-2xl border border-slate-700">
+                                        <h4 className="text-white font-bold mb-2 flex items-center gap-2">
+                                            <span className="text-sky-400">🔄</span> Regla del 50%
+                                        </h4>
+                                        <p className="text-slate-400 text-sm">Al finalizar la temporada, conservarás el 50% de tus **Player Points** acumulados para el inicio del siguiente ciclo.</p>
+                                    </div>
+                                    <div className="bg-slate-800/50 p-6 rounded-2xl border border-slate-700">
+                                        <h4 className="text-white font-bold mb-2 flex items-center gap-2">
+                                            <span className="text-sky-400">📅</span> Ciclo Anual
+                                        </h4>
+                                        <p className="text-slate-400 text-sm">Los puntos se archivan al concluir el periodo clasificatorio del National de cada año.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="w-full md:w-72 aspect-square bg-gradient-to-br from-sky-500 to-violet-600 rounded-3xl p-8 flex flex-col items-center justify-center text-center shadow-2xl transform hover:rotate-2 transition-transform">
+                                <span className="text-6xl mb-4">✨</span>
+                                <span className="text-4xl font-black text-white">50%</span>
+                                <span className="text-sm font-bold text-sky-100 uppercase tracking-tighter mt-2">Player Points de Arrastre</span>
+                                <div className="mt-4 pt-4 border-t border-white/20 w-full text-xs text-white/70 italic">
+                                    "Tu esfuerzo de hoy <br /> es tu ventaja de mañana"
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </section>
 
@@ -183,7 +232,7 @@ const PLSPage: React.FC = () => {
                                 <p className="text-red-200 text-lg mb-6">El festival de juego más grande. Abierto para todos.</p>
 
                                 <div className="space-y-3 bg-slate-900/60 p-6 rounded-2xl backdrop-blur-md w-full border border-red-500/30">
-                                    <p className="text-sm leading-relaxed">
+                                    <p className="text-sm leading-relaxed text-slate-200">
                                         Un fin de semana masivo de competencia sin restricciones de entrada.
                                         Enfrenta a cientos de jugadores, gana premios en efectivo y asegura tu lugar en la historia.
                                     </p>
@@ -209,21 +258,21 @@ const PLSPage: React.FC = () => {
                     <div className="max-w-4xl mx-auto bg-slate-800 rounded-3xl p-1 overflow-hidden">
                         <div className="bg-slate-900 p-8 sm:p-12 rounded-[22px] flex flex-col md:flex-row items-center gap-12">
                             <div className="flex-1 space-y-6">
-                                <div className="flex items-start gap-4">
+                                <div className="flex items-start gap-4 text-left">
                                     <div className="text-4xl">✈️</div>
                                     <div>
                                         <h3 className="text-xl font-bold text-white">Viajes Internacionales</h3>
                                         <p className="text-slate-400 text-sm">Los campeones del Nacional recibirán pasajes y estadía para representar a la región en el Pro Tour o Mundial correspondiente.</p>
                                     </div>
                                 </div>
-                                <div className="flex items-start gap-4">
+                                <div className="flex items-start gap-4 text-left">
                                     <div className="text-4xl">💰</div>
                                     <div>
                                         <h3 className="text-xl font-bold text-white">Pozo de Premios en Efectivo</h3>
                                         <p className="text-slate-400 text-sm">Miles de dólares a repartir entre el Top 8 del Nacional y Grand Prix.</p>
                                     </div>
                                 </div>
-                                <div className="flex items-start gap-4">
+                                <div className="flex items-start gap-4 text-left">
                                     <div className="text-4xl">📦</div>
                                     <div>
                                         <h3 className="text-xl font-bold text-white">Producto Sellado Exclusivo</h3>
@@ -248,10 +297,10 @@ const PLSPage: React.FC = () => {
                             <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                             </svg>
-                            <h2 className="text-2xl font-bold text-white">Integridad Competitiva y Sanciones</h2>
+                            <h2 className="text-2xl font-bold text-white text-left">Integridad Competitiva y Sanciones</h2>
                         </div>
 
-                        <div className="space-y-4 text-red-100/80 leading-relaxed text-sm md:text-base">
+                        <div className="space-y-4 text-red-100/80 leading-relaxed text-sm md:text-base text-left">
                             <p>
                                 <strong className="text-red-400">Juego Limpio:</strong> ThePlayer.gg se rige por los más altos estándares de integridad. Todos los participantes deben adherirse a los Términos y Condiciones y al Reglamento de Torneos.
                             </p>
@@ -266,7 +315,7 @@ const PLSPage: React.FC = () => {
                                 <li>Suspensión temporal o permanente de la plataforma ThePlayer.gg.</li>
                                 <li>Reporte a las entidades oficiales del juego correspondiente (Wizards, The Pokémon Company, etc.).</li>
                             </ul>
-                            <div className="mt-6 pt-6 border-t border-red-900/30">
+                            <div className="mt-6 pt-6 border-t border-red-900/30 text-center">
                                 <a href="/#/terminos" className="inline-flex items-center text-red-400 hover:text-red-300 font-bold transition-colors">
                                     Leer Términos y Condiciones Completos <span className="ml-2">→</span>
                                 </a>

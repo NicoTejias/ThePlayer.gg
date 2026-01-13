@@ -15,7 +15,7 @@ interface SidebarProps {
 const mainNavItems = [
     { name: 'Inicio', path: '/', icon: '🏠' },
     { name: 'PLS', path: '/pls', icon: '🏆' },
-    { name: 'Ranking', path: '/ranking/pwp', icon: '📊' },
+    { name: 'Ranking', path: '/ranking', icon: '📊' },
     { name: 'Eventos', path: '/eventos', icon: '📅' },
     { name: 'Torneos', path: '/torneos', icon: '🎮' },
     { name: 'Mercado TCG', path: '/mercado', icon: '🛒' },
@@ -176,7 +176,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, isLoggedIn, userRole
                         {expandedSection === 'competition' && (
                             <div className="space-y-1 mt-1">
                                 <NavItem item={{ name: 'PLS', path: '/pls', icon: '🌟', isSpecial: true }} />
-                                <NavItem item={{ name: 'Ranking', path: '/ranking/pwp', icon: '📊' }} />
+                                <NavItem item={{ name: 'Ranking', path: '/ranking', icon: '📊' }} />
                                 <NavItem item={{ name: 'Torneos', path: '/torneos', icon: '⚔️' }} />
                                 <NavItem item={{ name: 'Eventos', path: '/eventos', icon: '📅' }} />
                                 {currentGame === 'mtg' && (

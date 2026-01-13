@@ -10,6 +10,7 @@ import CheckCircleIcon from '../components/icons/CheckCircleIcon';
 import PlayerProModal from '../components/PlayerProModal';
 import ProBadge from '../components/ProBadge';
 import ContentCreatorBadge from '../components/ContentCreatorBadge';
+import TrophyCase from '../components/TrophyCase';
 
 const StatCard: React.FC<{ icon: React.ReactNode, title: string, value: string | number, rank: string | number, color: string }> = ({ icon, title, value, rank, color }) => (
     <div className={`bg-slate-800 p-6 rounded-lg shadow-lg border border-slate-700`}>
@@ -209,8 +210,8 @@ const PlayerDashboardPage: React.FC<{ profile?: any }> = ({ profile }) => {
             <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <StatCard
                     icon={<TrophyIcon className="w-8 h-8" />}
-                    title="Puntos PLS"
-                    value={`${profile?.pwp || 0} pts`}
+                    title="Player Points"
+                    value={`${(profile?.pwp || 0).toLocaleString()} pts`}
                     rank={ranking.pwpRank || '-'}
                     color="sky"
                 />
@@ -222,6 +223,13 @@ const PlayerDashboardPage: React.FC<{ profile?: any }> = ({ profile }) => {
                     color="violet"
                 />
             </section>
+
+            {/* TROPHY CASE (Phase 3) */}
+            {profile?.id && (
+                <section>
+                    <TrophyCase userId={profile.id} />
+                </section>
+            )}
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* Tournament History (2/3 width) */}

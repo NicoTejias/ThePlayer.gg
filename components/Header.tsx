@@ -163,7 +163,13 @@ const Header: React.FC<HeaderProps> = ({
                 </Link>
               )}
 
-
+              <Link
+                to="/soporte"
+                className="hidden md:flex items-center gap-1 px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-white font-bold rounded-full transition-all text-xs border border-slate-600"
+              >
+                <span>❔</span>
+                AYUDA
+              </Link>
 
               <Link
                 to="/premium"

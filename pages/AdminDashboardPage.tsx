@@ -4,6 +4,7 @@ import ShieldCheckIcon from '../components/icons/ShieldCheckIcon';
 import ClipboardListIcon from '../components/icons/ClipboardListIcon';
 import TrophyIcon from '../components/icons/TrophyIcon';
 import UsersIcon from '../components/icons/UserIcon';
+import RefreshCwIcon from '../components/icons/RefreshCwIcon';
 
 import { supabase } from '../supabaseClient';
 import { toast } from 'sonner';
@@ -307,7 +308,6 @@ const AdminDashboardPage: React.FC = () => {
                         <p className="text-slate-400 text-sm">Gestionar solicitudes de tiendas</p>
                     </Link>
 
-
                     <Link to="/admin/creators" className="group bg-slate-800 hover:bg-slate-700 p-6 rounded-lg border border-slate-700 hover:border-purple-500 transition-all shadow-lg relative overflow-hidden">
                         {stats.pendingCreators > 0 && (
                             <span className="absolute top-0 right-0 bg-purple-600 text-white text-[10px] font-bold px-2 py-1 rounded-bl-lg animate-pulse">
@@ -332,16 +332,96 @@ const AdminDashboardPage: React.FC = () => {
                         </div>
                         <p className="text-slate-400 text-sm">Publicar noticias, guías y videos</p>
                     </Link>
-                    <Link to="/admin/marketplace" className="group bg-slate-800 hover:bg-slate-700 p-6 rounded-lg border border-slate-700 hover:border-pink-500 transition-all shadow-lg">
+
+                    <Link to="/admin/marketplace" className="group bg-slate-800 hover:bg-slate-700 p-6 rounded-lg border border-slate-700 hover:border-amber-500 transition-all shadow-lg">
                         <div className="flex items-center gap-4 mb-3">
-                            <div className="p-3 bg-pink-900/40 rounded-lg group-hover:bg-pink-800/60 transition-colors">
-                                <span className="text-2xl">🏪</span>
+                            <div className="p-3 bg-amber-900/40 rounded-lg group-hover:bg-amber-800/60 transition-colors">
+                                <span className="text-xl">🏪</span>
                             </div>
-                            <h3 className="text-lg font-bold text-white">Mercado</h3>
+                            <h3 className="text-lg font-bold text-white">Marketplace</h3>
                         </div>
-                        <p className="text-slate-400 text-sm">Gestionar publicaciones del mercado</p>
+                        <p className="text-slate-400 text-sm">Gestionar anuncios y categorías</p>
                     </Link>
 
+                    <Link to="/admin/awards" className="group bg-slate-800 hover:bg-slate-700 p-6 rounded-lg border border-slate-700 hover:border-yellow-500 transition-all shadow-lg">
+                        <div className="flex items-center gap-4 mb-3">
+                            <div className="p-3 bg-yellow-900/40 rounded-lg group-hover:bg-yellow-800/60 transition-colors">
+                                <span className="text-xl">🎖️</span>
+                            </div>
+                            <h3 className="text-lg font-bold text-white">Gala y Premios</h3>
+                        </div>
+                        <p className="text-slate-400 text-sm">Gestionar premios y otorgar logros</p>
+                    </Link>
+                </div>
+            </section>
+
+            {/* Maintenance & Dangerous Actions */}
+            <section className="bg-red-950/20 border border-red-900/30 rounded-xl p-8">
+                <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+                    <div className="space-y-2">
+                        <h2 className="text-2xl font-black text-white flex items-center gap-3">
+                            <span className="text-2xl">⚡</span> Operaciones de Sistema
+                        </h2>
+                        <p className="text-slate-400 text-sm max-w-xl">
+                            Acciones críticas para la transición de temporadas. Asegúrate de haber comunicado el reset a los jugadores antes de proceder.
+                        </p>
+                    </div>
+
+                    <button
+                        onClick={async () => {
+                            const seasonName = window.prompt("Ingresa el nombre de la temporada que finaliza (ej: Temporada 2025):");
+                            if (!seasonName) return;
+
+                            const confirm = window.confirm(`¡ATENCIÓN! Vas a resetear el 50% de los puntos de TODOS los jugadores y archivarlos bajo "${seasonName}". Esta acción no se puede deshacer. ¿Continuar?`);
+                            if (!confirm) return;
+
+                            try {
+                                const { data, error } = await supabase.rpc('reset_season_points', { p_season_name: seasonName });
+                                if (error) throw error;
+                                alert(`${data.message}. Se actualizaron ${data.players_updated} jugadores.`);
+                                fetchAdminData();
+                            } catch (err: any) {
+                                alert("Error en el reset: " + err.message);
+                            }
+                        }}
+                        className="px-8 py-4 bg-red-600 hover:bg-red-700 text-white font-black rounded-xl shadow-lg shadow-red-900/40 transition-all transform hover:scale-105 active:scale-95 flex items-center gap-3 border border-red-500"
+                    >
+                        <RefreshCwIcon className="w-5 h-5" />
+                        RESETEAR TEMPORADA (50%)
+                    </button>
+
+                    <button
+                        onClick={async () => {
+                            const playerId = window.prompt("Ingresa el ID del Jugador (UUID):");
+                            if (!playerId) return;
+
+                            // En una versión real, cargaríamos la lista de premios aquí.
+                            // Por ahora, usamos IDs conocidos o pedimos el nombre del premio.
+                            const awardId = window.prompt("Ingresa el ID del Premio (o nombre para búsqueda rápida):");
+                            if (!awardId) return;
+
+                            const season = window.prompt("Temporada (ej: 2025):", "2025");
+                            if (!season) return;
+
+                            try {
+                                const { error } = await supabase
+                                    .from('user_awards')
+                                    .insert({
+                                        user_id: playerId,
+                                        award_id: awardId, // Asumimos que es un UUID válido por ahora
+                                        season: season
+                                    });
+
+                                if (error) throw error;
+                                alert("Premio otorgado con éxito.");
+                            } catch (err: any) {
+                                alert("Error al otorgar premio: " + err.message);
+                            }
+                        }}
+                        className="px-8 py-4 bg-sky-600 hover:bg-sky-700 text-white font-black rounded-xl shadow-lg shadow-sky-900/40 transition-all transform hover:scale-105 active:scale-95 flex items-center gap-3 border border-sky-500"
+                    >
+                        <span>🎖️</span> OTORGAR PREMIO
+                    </button>
                 </div>
             </section>
 

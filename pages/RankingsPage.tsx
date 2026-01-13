@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import type { PlayerProfile, Team } from '../types';
 import TrophyIcon from '../components/icons/TrophyIcon';
 import SparklesIcon from '../components/icons/SparklesIcon';
@@ -19,9 +19,9 @@ const RankingsPage: React.FC<RankingsPageProps> = ({ players, teams }) => {
 
     const getPointsLabel = () => {
         switch (currentGame) {
-            case 'mtg': return 'Pts';
+            case 'mtg': return 'Player Points';
             case 'pokemon': return 'CP';
-            default: return 'Puntos';
+            default: return 'Player Points';
         }
     };
 
@@ -82,8 +82,18 @@ const RankingsPage: React.FC<RankingsPageProps> = ({ players, teams }) => {
             <div className="text-center">
                 <h1 className="text-4xl sm:text-5xl font-bold text-white tracking-tighter uppercase">Clasificaciones Oficiales</h1>
                 <p className="text-lg text-slate-300 mt-2 max-w-4xl mx-auto">
-                    Explora los rankings de la temporada actual. El ciclo competitivo se reinicia cada 1 de Enero.
+                    Explora los rankings de la temporada actual. Al finalizar el ciclo, se conserva el <span className="text-sky-400 font-bold text-xl">50%</span> de los **Player Points** para la siguiente temporada.
                 </p>
+
+                {/* SALON DE LA FAMA LINK */}
+                <div className="mt-6">
+                    <Link
+                        to="/hall-of-fame"
+                        className="inline-flex items-center gap-2 px-6 py-2 rounded-full bg-yellow-500/10 text-yellow-500 text-sm font-black uppercase tracking-widest border border-yellow-500/20 hover:bg-yellow-500 hover:text-slate-950 transition-all transform hover:scale-105"
+                    >
+                        <span>👑</span> Ver Salón de la Fama
+                    </Link>
+                </div>
             </div>
 
             {/* Tab Selector */}
@@ -131,7 +141,7 @@ const RankingsPage: React.FC<RankingsPageProps> = ({ players, teams }) => {
                                         <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Puesto</th>
                                         <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Jugador</th>
                                         <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Team</th>
-                                        <th className="px-6 py-3 text-right text-xs font-medium text-slate-300 uppercase tracking-wider">Puntos</th>
+                                        <th className="px-6 py-3 text-right text-xs font-medium text-slate-300 uppercase tracking-wider">Player Points</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-700">

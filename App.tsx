@@ -60,6 +60,9 @@ import PLSPage from './pages/PLSPage';
 import EmailConfirmationPage from './pages/EmailConfirmationPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
+import HallOfFamePage from './pages/HallOfFamePage';
+import AdminAwardsPage from './pages/AdminAwardsPage';
+import SupportPage from './pages/SupportPage';
 import ContentCreatorApplicationPage from './pages/ContentCreatorApplicationPage';
 import TermsPage from './pages/TermsPage';
 import SubscriptionPage from './pages/SubscriptionPage';
@@ -834,7 +837,9 @@ const AppContent: React.FC = () => {
           <Route path="/home" element={<HomePage players={players} events={communityEvents} session={userProfile ? { user: userProfile } : null} userRole={userRole} userId={userProfile?.id} />} />
           <Route path="/envivo" element={<LiveStreamPage />} />
           <Route path="/pls" element={<PLSPage />} />
-          <Route path="/ranking/pwp" element={<RankingsPage players={players} teams={teams} />} />
+          <Route path="/ranking" element={<RankingsPage players={players} teams={teams} />} />
+          <Route path="/hall-of-fame" element={<HallOfFamePage />} />
+          <Route path="/soporte" element={<SupportPage />} />
           <Route path="/equipo/:teamId" element={<TeamProfilePage />} />
           <Route path="/eventos" element={<EventsPage events={communityEvents} finishedTournaments={tournamentResults} userRole={userRole} userId={userProfile?.id} />} />
           <Route path="/torneos" element={<TournamentsListPage tournaments={tournamentResults} />} />
@@ -844,6 +849,8 @@ const AppContent: React.FC = () => {
           <Route path="/mercado/:id" element={<MarketplaceDetailPage />} />
           <Route path="/mis-anuncios" element={<MyListingsPage />} />
           <Route path="/commander" element={<CommanderPage />} />
+          <Route path="/pauper" element={<PauperPage />} />
+          <Route path="/premodern" element={<PremodernPage />} />
           <Route path="/media" element={<MediaPage />} />
           <Route path="/media/articulos" element={<MediaArticlesPage />} />
           <Route path="/media/articulos/:slug" element={<ArticleDetailPage />} />
@@ -867,6 +874,7 @@ const AppContent: React.FC = () => {
           {/* Admin Routes */}
           <Route path="/admin" element={<AdminDashboardPage />} />
           <Route path="/admin/users" element={<UserManagementPage />} />
+          <Route path="/admin/awards" element={<AdminAwardsPage />} />
           <Route path="/admin/claims" element={<ClaimReviewPage />} />
           <Route path="/admin/integrity" element={<IntegrityReviewPanel />} />
           <Route path="/admin/tournaments/edit" element={<TournamentEditPage />} />

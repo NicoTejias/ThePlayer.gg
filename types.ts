@@ -19,6 +19,9 @@ export interface PlayerProfile {
   matchesLost: number;
   matchesDrew: number;
   winRate?: number;
+  username?: string;
+  first_name?: string;
+  last_name?: string;
   teamId?: string;
   team?: string; // Legacy text field (still used for display if teamId is null)
   teamData?: Team; // Formal team entity
@@ -245,4 +248,24 @@ export interface TournamentStanding {
   playerName: string;
   matchRecord: string; // "W-L-D"
   pwpEarned: number;
+}
+
+export interface Award {
+  id: string;
+  name: string;
+  description: string;
+  icon_url: string;
+  category: 'performance' | 'community' | 'special' | 'judge';
+  rarity: 'common' | 'rare' | 'epic' | 'legendary';
+  created_at?: string;
+}
+
+export interface UserAward {
+  id: string;
+  user_id: string;
+  award_id: string;
+  season: string;
+  obtained_at: string;
+  comment?: string;
+  award?: Award; // Relational data
 }
