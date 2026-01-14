@@ -280,3 +280,56 @@ body {
 .dynamic-width {
   width: var(--width, 0%);
 }
+
+/* Level System Shimmer */
+@keyframes level-shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.animate-level-shimmer {
+  animation: level-shimmer 2s infinite linear;
+}
+
+/* Progress Bar Width Utility */
+.progress-bar-fill {
+  width: var(--progress-width, 0%);
+  transition: width 1s ease-out;
+}
+
+/* Scale-in animation */
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-scale-in {
+  animation: scale-in 0.3s ease-out forwards;
+}
+
+/* Fade-in animation */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.4s ease-out forwards;
+}

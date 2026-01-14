@@ -60,8 +60,10 @@ import PLSPage from './pages/PLSPage';
 import EmailConfirmationPage from './pages/EmailConfirmationPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
+import NotFoundPage from './pages/NotFoundPage';
 import HallOfFamePage from './pages/HallOfFamePage';
 import AdminAwardsPage from './pages/AdminAwardsPage';
+import AdminSeasonPage from './pages/admin/AdminSeasonPage';
 import SupportPage from './pages/SupportPage';
 import ContentCreatorApplicationPage from './pages/ContentCreatorApplicationPage';
 import TermsPage from './pages/TermsPage';
@@ -875,6 +877,7 @@ const AppContent: React.FC = () => {
           <Route path="/admin" element={<AdminDashboardPage />} />
           <Route path="/admin/users" element={<UserManagementPage />} />
           <Route path="/admin/awards" element={<AdminAwardsPage />} />
+          <Route path="/admin/season" element={<AdminSeasonPage />} />
           <Route path="/admin/claims" element={<ClaimReviewPage />} />
           <Route path="/admin/integrity" element={<IntegrityReviewPanel />} />
           <Route path="/admin/tournaments/edit" element={<TournamentEditPage />} />
@@ -897,6 +900,7 @@ const AppContent: React.FC = () => {
           <Route path="/subscription/success" element={<SubscriptionSuccessPage />} />
           <Route path="/logout-success" element={<LogoutSuccessPage />} />
           <Route path="/subscription/failure" element={<SubscriptionFailurePage />} />
+          <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </main>
       {!isLanding && <Footer />}

@@ -150,7 +150,6 @@ const AdminDashboardPage: React.FC = () => {
             console.error("Error loading admin data:", error);
             // Even if stats fail, we should stop loading if possible
         } finally {
-            console.log("Admin loading finished");
             setLoading(false);
         }
     };
@@ -352,6 +351,16 @@ const AdminDashboardPage: React.FC = () => {
                         </div>
                         <p className="text-slate-400 text-sm">Gestionar premios y otorgar logros</p>
                     </Link>
+
+                    <Link to="/admin/season" className="group bg-slate-800 hover:bg-slate-700 p-6 rounded-lg border border-slate-700 hover:border-orange-500 transition-all shadow-lg">
+                        <div className="flex items-center gap-4 mb-3">
+                            <div className="p-3 bg-orange-900/40 rounded-lg group-hover:bg-orange-800/60 transition-colors">
+                                <span className="text-xl">⏳</span>
+                            </div>
+                            <h3 className="text-lg font-bold text-white">Temporadas</h3>
+                        </div>
+                        <p className="text-slate-400 text-sm">Cierre de ciclo y reset de puntos (50%)</p>
+                    </Link>
                 </div>
             </section>
 
@@ -369,7 +378,7 @@ const AdminDashboardPage: React.FC = () => {
 
                     <button
                         onClick={async () => {
-                            const seasonName = window.prompt("Ingresa el nombre de la temporada que finaliza (ej: Temporada 2025):");
+                            const seasonName = window.prompt("Ingresa el nombre de la temporada que finaliza (ej: Temporada 2026):");
                             if (!seasonName) return;
 
                             const confirm = window.confirm(`¡ATENCIÓN! Vas a resetear el 50% de los puntos de TODOS los jugadores y archivarlos bajo "${seasonName}". Esta acción no se puede deshacer. ¿Continuar?`);
@@ -400,7 +409,7 @@ const AdminDashboardPage: React.FC = () => {
                             const awardId = window.prompt("Ingresa el ID del Premio (o nombre para búsqueda rápida):");
                             if (!awardId) return;
 
-                            const season = window.prompt("Temporada (ej: 2025):", "2025");
+                            const season = window.prompt("Temporada (ej: 2026):", "2026");
                             if (!season) return;
 
                             try {

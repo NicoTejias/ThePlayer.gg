@@ -64,6 +64,40 @@ const ReglamentoPage: React.FC = () => {
 
                 <div className="grid gap-12 max-w-2xl mx-auto">
 
+                    {/* Section 1: PWP System */}
+                    <div className="bg-slate-900 border border-slate-800 rounded-3xl p-8 md:p-12 shadow-2xl relative overflow-hidden">
+                        <div className="absolute top-0 right-0 p-8 opacity-5 pointer-events-none">
+                            <span className="text-9xl font-black">PWP</span>
+                        </div>
+
+                        <h2 className="text-3xl font-black text-white mb-6 uppercase italic">
+                            ¿Cómo funcionan los Player Points?
+                        </h2>
+
+                        <div className="space-y-6 text-slate-300">
+                            <p className="leading-relaxed">
+                                Los <span className="text-sky-400 font-bold">Player Points (PWP)</span> son la medida oficial de tu desempeño y constancia en la liga. No solo miden cuánto ganas, sino cuánto participas en la comunidad.
+                            </p>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div className="bg-slate-800/50 p-6 rounded-2xl border border-slate-700">
+                                    <h3 className="text-sky-400 font-bold mb-2 uppercase text-sm tracking-widest">Suma de Puntos</h3>
+                                    <p className="text-sm">Por cada victoria en un torneo oficial sumas puntos fijos. Participar en eventos especiales de "Tiendas Premium" puede otorgar multiplicadores de puntos.</p>
+                                </div>
+                                <div className="bg-slate-800/50 p-6 rounded-2xl border border-slate-700">
+                                    <h3 className="text-yellow-500 font-bold mb-2 uppercase text-sm tracking-widest">Reset de Temporada</h3>
+                                    <p className="text-sm">Al finalizar el año calendario, se realiza el <span className="italic">Season Reset</span>. Conservas el <span className="text-white font-bold text-lg">50%</span> de tus puntos para la nueva temporada.</p>
+                                </div>
+                            </div>
+
+                            <div className="p-6 bg-blue-500/10 border border-blue-500/20 rounded-2xl">
+                                <p className="text-sm italic text-blue-300">
+                                    <strong>Nota:</strong> El reset del 50% asegura que los veteranos mantengan su prestigio, mientras que los nuevos jugadores tienen una oportunidad real de alcanzar el Top 10 cada año.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
                     {/* Section 2: Official Rules */}
                     <div className="bg-gradient-to-br from-slate-900 to-slate-800 border border-slate-700 rounded-3xl p-8 md:p-12 shadow-2xl relative overflow-hidden text-center">
                         <div className="absolute top-0 left-0 p-8 opacity-5 pointer-events-none">

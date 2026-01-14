@@ -294,7 +294,7 @@ const SupportPage: React.FC = () => {
                     <div className="bg-sky-600/10 p-12 flex items-center justify-center border-l border-slate-800">
                         <div className="text-center space-y-4">
                             <div className="text-6xl mb-4">🏆</div>
-                            <p className="text-white font-black uppercase tracking-widest text-sm">Próxima Gala: Diciembre 2025</p>
+                            <p className="text-white font-black uppercase tracking-widest text-sm">Próxima Gala: Diciembre 2026</p>
                         </div>
                     </div>
                 </div>

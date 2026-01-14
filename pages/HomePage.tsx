@@ -15,8 +15,9 @@ import ContentCreatorBadge from '../components/ContentCreatorBadge';
 
 import AdminWidget from '../components/widgets/AdminWidget';
 import QuickRegistrationModal from '../components/QuickRegistrationModal';
+import GalaNominationsBanner from '../components/GalaNominationsBanner';
 
-const mockEventsData: Record<string, CommunityEvent[]> = {};
+
 
 const sliderItems = [
   { id: 5, title: 'Player Latam Series', link: '/pls', imageUrl: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&q=80&w=800', color: 'from-amber-600/80', description: 'Suma puntos solo por jugar tus torneos, escala en el ranking oficial de The Player y viaja jugando tus juegos favoritos' },
@@ -223,21 +224,25 @@ const HomePage: React.FC<HomePageProps> = ({ players, events, session, userRole,
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-slate-200">
+    <div className="min-h-screen bg-slate-900 text-slate-200 animate-fade-in">
       {/* Hero Carousel */}
-      <section className="relative h-[300px] sm:h-[350px] md:h-[400px] overflow-hidden">
+      <section className="relative h-[300px] sm:h-[350px] md:h-[400px] overflow-hidden group">
         {sliderItems.map((item, idx) => (
           <Link
             key={item.id}
             to={item.link}
-            className={`absolute inset-0 transition-opacity duration-1000 ${idx === currentSlide ? 'opacity-100' : 'opacity-0'}`}
+            className={`absolute inset-0 transition-all duration-1000 ease-in-out ${idx === currentSlide ? 'opacity-100 scale-100' : 'opacity-0 scale-105 pointer-events-none'}`}
             style={{ backgroundImage: `url('${item.imageUrl}')`, backgroundSize: 'cover', backgroundPosition: 'center' }}
           >
-            <div className={`absolute inset-0 bg-gradient-to-r ${item.color} to-transparent opacity-95`} />
+            <div className={`absolute inset-0 bg-gradient-to-r ${item.color} to-transparent opacity-90`} />
             <div className="relative z-10 flex flex-col items-center justify-center h-full text-center px-4">
-              <h2 className="text-4xl sm:text-6xl font-black text-white uppercase tracking-wider drop-shadow-2xl mb-2">{item.title}</h2>
+              <h2 className="text-4xl sm:text-6xl font-black text-white uppercase tracking-wider drop-shadow-2xl mb-2 translate-y-0 opacity-100 transition-all duration-700 delay-100 animate-fade-in-up">
+                {item.title}
+              </h2>
               {item.description && (
-                <p className="text-lg sm:text-xl text-white/90 font-medium max-w-2xl drop-shadow-lg">{item.description}</p>
+                <p className="text-lg sm:text-xl text-white/90 font-medium max-w-2xl drop-shadow-lg animate-fade-in-up delay-200">
+                  {item.description}
+                </p>
               )}
             </div>
           </Link>
@@ -248,7 +253,7 @@ const HomePage: React.FC<HomePageProps> = ({ players, events, session, userRole,
               key={idx}
               title={`Slide ${idx + 1}`}
               onClick={() => setCurrentSlide(idx)}
-              className={`w-3 h-3 rounded-full transition-all ${idx === currentSlide ? 'bg-white w-8' : 'bg-white/50'}`}
+              className={`w-3 h-3 rounded-full transition-all duration-300 ${idx === currentSlide ? 'bg-white w-8 shadow-[0_0_10px_rgba(255,255,255,0.5)]' : 'bg-white/30 hover:bg-white/50'}`}
             />
           ))}
         </div>
@@ -305,6 +310,9 @@ const HomePage: React.FC<HomePageProps> = ({ players, events, session, userRole,
 
       {/* Main Content */}
       <div className="container mx-auto px-4 py-12 space-y-16">
+        {/* Gala Banner */}
+        <GalaNominationsBanner />
+
         {/* Próximos Eventos */}
         <section>
           <SectionHeader title="Próximos Eventos" linkTo="/eventos" />

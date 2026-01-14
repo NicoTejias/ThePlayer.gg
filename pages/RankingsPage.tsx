@@ -7,6 +7,7 @@ import UsersIcon from '../components/icons/UserIcon';
 import { useGame } from '../context/GameContext';
 import ProBadge from '../components/ProBadge';
 import ContentCreatorBadge from '../components/ContentCreatorBadge';
+import LevelBadge from '../components/LevelBadge';
 
 interface RankingsPageProps {
     players: PlayerProfile[];
@@ -119,7 +120,8 @@ const RankingsPage: React.FC<RankingsPageProps> = ({ players, teams }) => {
                         aria-label="Seleccionar temporada"
                         className="bg-slate-900/80 text-white rounded-md py-2.5 px-4 w-full sm:w-72 appearance-none focus:outline-none focus:ring-2 focus:ring-sky-500 border border-slate-700 font-bold text-center"
                     >
-                        <option value="2025">Temporada Actual (2025)</option>
+                        <option value="2026">Temporada Actual (2026)</option>
+                        <option value="2025">Temporada 2025</option>
                         <option value="2024">Temporada 2024</option>
                     </select>
                 </div>
@@ -157,6 +159,7 @@ const RankingsPage: React.FC<RankingsPageProps> = ({ players, teams }) => {
                                             <td className="px-6 py-4 whitespace-nowrap">
                                                 <div className="flex items-center gap-2">
                                                     <span className="text-white font-medium">{player.name}</span>
+                                                    <LevelBadge pwp={player.pwp} size="sm" />
                                                     {player.is_pro && <ProBadge size="small" />}
                                                     {player.is_content_creator && <ContentCreatorBadge size="small" />}
                                                 </div>
@@ -209,6 +212,7 @@ const RankingsPage: React.FC<RankingsPageProps> = ({ players, teams }) => {
                                             <td className="px-6 py-4 whitespace-nowrap">
                                                 <div className="flex items-center gap-2">
                                                     <span className="text-white font-medium">{player.name}</span>
+                                                    <LevelBadge pwp={player.pwp} size="sm" />
                                                     {player.is_pro && <ProBadge size="small" />}
                                                     {player.is_content_creator && <ContentCreatorBadge size="small" />}
                                                 </div>

@@ -11,6 +11,9 @@ import PlayerProModal from '../components/PlayerProModal';
 import ProBadge from '../components/ProBadge';
 import ContentCreatorBadge from '../components/ContentCreatorBadge';
 import TrophyCase from '../components/TrophyCase';
+import LevelBadge from '../components/LevelBadge';
+import LevelProgressBar from '../components/LevelProgressBar';
+import { toast } from 'sonner';
 
 const StatCard: React.FC<{ icon: React.ReactNode, title: string, value: string | number, rank: string | number, color: string }> = ({ icon, title, value, rank, color }) => (
     <div className={`bg-slate-800 p-6 rounded-lg shadow-lg border border-slate-700`}>
@@ -36,6 +39,7 @@ const PlayerDashboardPage: React.FC<{ profile?: any }> = ({ profile }) => {
     const [showCreateTeam, setShowCreateTeam] = useState(false);
     const [newTeamName, setNewTeamName] = useState('');
     const [showProModal, setShowProModal] = useState(false);
+    const [isNominated, setIsNominated] = useState(false);
 
     useEffect(() => {
         if (profile?.id) {
@@ -94,6 +98,24 @@ const PlayerDashboardPage: React.FC<{ profile?: any }> = ({ profile }) => {
                 setTeamData(team);
             }
 
+            // 4. Check Gala Nomination
+            const { data: awardData } = await supabase
+                .from('user_awards')
+                .select('id, award:award_id(name)')
+                .eq('user_id', profile.id);
+
+            const nominated = awardData?.some(a => (a.award as any)?.name?.includes('Nominado Gala'));
+            setIsNominated(!!nominated);
+
+            // 5. Check Automatic Achievements
+            const { data: grantedCount } = await supabase.rpc('check_and_grant_awards', { p_user_id: profile.id });
+            if (grantedCount > 0) {
+                toast.success(`🎉 ¡Felicidades! Has desbloqueado ${grantedCount} nuevo(s) logro(s) por tu actividad.`, {
+                    description: 'Revisa tu vitrina de trofeos para ver los detalles.',
+                    duration: 6000,
+                });
+            }
+
         } catch (error) {
             console.error("Error fetching player data:", error);
         } finally {
@@ -145,6 +167,7 @@ const PlayerDashboardPage: React.FC<{ profile?: any }> = ({ profile }) => {
                 <div>
                     <div className="flex items-center gap-3">
                         <h1 className="text-4xl sm:text-5xl font-bold text-white tracking-tighter uppercase">Hola, {greetingName}</h1>
+                        <LevelBadge pwp={profile?.pwp || 0} size="lg" />
                         {profile?.is_pro && <ProBadge size="medium" />}
                         {(profile?.is_content_creator || profile?.role === 'content_creator') && <ContentCreatorBadge size="medium" />}
                     </div>
@@ -206,12 +229,39 @@ const PlayerDashboardPage: React.FC<{ profile?: any }> = ({ profile }) => {
                 </div>
             )}
 
+            {/* Level & XP Progression */}
+            <section>
+                <LevelProgressBar pwp={profile?.pwp || 0} />
+            </section>
+
+            {/* Gala Nomination Card */}
+            {isNominated && (
+                <div className="bg-gradient-to-br from-yellow-500/10 to-slate-900 border border-yellow-500/30 p-8 rounded-3xl relative overflow-hidden group">
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-yellow-500/5 blur-[100px] -mr-32 -mt-32"></div>
+                    <div className="flex flex-col md:flex-row items-center gap-8 relative z-10">
+                        <div className="w-24 h-24 bg-yellow-500 rounded-3xl flex items-center justify-center shadow-2xl shadow-yellow-500/40 rotate-6 group-hover:rotate-12 transition-transform">
+                            <span className="text-5xl">🎖️</span>
+                        </div>
+                        <div className="text-center md:text-left flex-1">
+                            <h3 className="text-3xl font-black text-white italic tracking-tighter uppercase mb-2">¡Felicitaciones, Nominado!</h3>
+                            <p className="text-slate-300 text-lg">
+                                Has sido seleccionado oficialmente para la <span className="text-yellow-500 font-bold">Gala de Premios 2026</span>.
+                                Tu constancia y nivel te han llevado a la cima de la liga.
+                            </p>
+                        </div>
+                        <button className="px-8 py-4 bg-yellow-500 text-slate-950 font-black rounded-xl hover:bg-yellow-400 transition-all shadow-lg active:scale-95">
+                            VER MI INVITACIÓN
+                        </button>
+                    </div>
+                </div>
+            )}
+
             {/* Key Metrics */}
             <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <StatCard
                     icon={<TrophyIcon className="w-8 h-8" />}
-                    title="Player Points"
-                    value={`${(profile?.pwp || 0).toLocaleString()} pts`}
+                    title="Posición Global PWP"
+                    value={`Rango #${ranking.pwpRank || '-'}`}
                     rank={ranking.pwpRank || '-'}
                     color="sky"
                 />

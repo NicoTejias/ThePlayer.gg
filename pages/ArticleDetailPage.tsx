@@ -173,9 +173,8 @@ const ArticleDetailPage: React.FC = () => {
                     <div className="bg-slate-800/50 border border-slate-700 rounded-2xl p-8 text-center space-y-6 backdrop-blur-sm relative overflow-hidden">
                         {/* Fake blurred content background */}
                         <div className="absolute inset-0 opacity-10 pointer-events-none select-none overflow-hidden blur-[2px]" aria-hidden="true">
-                            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam.</p>
-                            <p>Quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
-                            <p>Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+                            <p>Este es un artículo exclusivo que requiere una cuenta activa. Para leer el contenido completo y profundizar en las estrategias de juego, por favor ingresa con tu cuenta o suscríbete a nuestros planes premium.</p>
+                            <p>Sumérgete en el mundo competitivo de los TCG con análisis detallados realizados por expertos jugadores y para los fanáticos más dedicados del circuito regional.</p>
                         </div>
 
                         <div className="relative z-10 flex flex-col items-center">

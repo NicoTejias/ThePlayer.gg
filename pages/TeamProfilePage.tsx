@@ -242,7 +242,7 @@ const TeamProfilePage: React.FC = () => {
                             </div>
                             <div className="flex justify-between py-2 border-b border-slate-700">
                                 <span className="text-slate-500 font-medium">Fundación</span>
-                                <span className="text-white font-bold">Enero 2025</span>
+                                <span className="text-white font-bold">Enero 2026</span>
                             </div>
                             <div className="flex justify-between py-2 border-b border-slate-700">
                                 <span className="text-slate-500 font-medium">Estilo</span>
@@ -267,7 +267,7 @@ const TeamProfilePage: React.FC = () => {
                             <TrophyIcon className="w-8 h-8 text-violet-500" />
                         </div>
                         <h3 className="text-lg font-bold text-white uppercase">Siguiente Reto</h3>
-                        <p className="text-slate-400 text-sm">Próximo torneo de comunidades: <br /><span className="text-white font-bold">Nacional de Equipos 2025</span></p>
+                        <p className="text-slate-400 text-sm">Próximo torneo de comunidades: <br /><span className="text-white font-bold">Nacional de Equipos 2026</span></p>
                     </section>
                 </div>
             </div>
