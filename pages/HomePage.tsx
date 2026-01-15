@@ -422,7 +422,7 @@ const HomePage: React.FC<HomePageProps> = ({ players, events, session, userRole,
               <div className="space-y-4">
                 {latestNews.length > 0 ? (
                   latestNews.slice(0, 3).map(article => (
-                    <Link key={article.id} to={`/media/articulos/${article.id}`} className="group relative block bg-slate-800/50 rounded-xl overflow-hidden border border-slate-700 hover:border-blue-500/50 transition-all duration-300 hover:shadow-2xl hover:shadow-blue-500/20 hover:-translate-y-1">
+                    <Link key={article.id} to={`/media/articulos/${article.slug}`} className="group relative block bg-slate-800/50 rounded-xl overflow-hidden border border-slate-700 hover:border-blue-500/50 transition-all duration-300 hover:shadow-2xl hover:shadow-blue-500/20 hover:-translate-y-1">
                       <div className="flex gap-4 p-4">
                         <div className="relative w-32 h-32 flex-shrink-0 rounded-lg overflow-hidden">
                           <img src={article.image_url || article.imageUrl || '/images/placeholder-article.jpg'} alt={article.title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />

@@ -39,18 +39,19 @@ Este documento rastrea la transición de la plataforma ThePlayer.gg de fase de d
     - [x] Crear componente `TrophyCase` y `LevelProgressBar`.
     - [x] Sistema de nominados para la Gala 2026.
 
-## 🟢 FASE 4: Documentación y Material de Soporte
+## 🟢 FASE 4: Documentación y Material de Soporte (COMPLETADO)
 *Objetivo: Educar y vender la plataforma.*
 
-- [ ] **Manuales de Usuario**
-    - [ ] **Perfil Jugador:** Guía de registro y uso.
-    - [ ] **Perfil Tienda:** Guía de gestión de torneos y subida de datos.
-    - [ ] **Perfil Juez:** Guía de herramientas.
-- [ ] **Material de Marketing (Tiendas)**
-    - [ ] **Presentación (PPT/PDF):** Propuesta de valor para dueños de tienda.
-    - [ ] **Tríptico PLS:** Diseño para imprimir explicando qué es la liga.
+- [x] **Manuales de Usuario**
+    - [x] **Perfil Jugador:** Guía de registro y uso (en SupportPage).
+    - [x] **Perfil Tienda:** Guía de gestión de torneos (en SupportPage).
+    - [x] **Perfil Juez:** Guía de herramientas (en SupportPage).
+- [x] **Material de Marketing (Tiendas)**
+    - [x] **Propuesta de Valor:** Integrada en `/tiendas` y `/soporte`.
 
-## 🔵 FASE 5: Pulido Final y UI/UX
-- [ ] Ajustar textos legales (Términos y Condiciones).
-- [ ] Verificar todos los enlaces rotos.
-- [ ] Optimización de carga (imágenes, scripts).
+## 🟢 FASE 5: Pulido Final y UI/UX (COMPLETADO)
+- [x] Ajustar textos legales (Términos y Condiciones).
+- [x] Verificar todos los enlaces rotos.
+- [x] Optimización de carga (imágenes, scripts, lazy loading).
+- [x] Implementación de Página 404 personalizada.
+- [x] Auditoría SEO (Index, Sitemap, Robots.txt).
