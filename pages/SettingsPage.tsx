@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { sanitizeText, sanitizeUrl } from '../utils/sanitize';
 import { z } from 'zod';
 import { Upload, Image as ImageIcon, X } from 'lucide-react';
+import { GAME_LABELS } from '../types';
 
 const LATAM_COUNTRIES = [
     "Argentina", "Bolivia", "Brasil", "Chile", "Colombia", "Costa Rica", "Cuba", "Ecuador",
@@ -318,11 +319,13 @@ const SettingsPage: React.FC = () => {
         try {
             const { data: { user } } = await supabase.auth.getUser();
 
-            if (!user) throw new Error('No user logged in');
+            // Mapear los labels a las keys internas antes de guardar
+            const internalPreferredGames = preferredGames.map(label => {
+                const entry = Object.entries(GAME_LABELS).find(([key, val]) => val === label);
+                return entry ? entry[0] : label;
+            });
 
-            // Sanitizar todos los campos de texto
-            const updates = {
-                id: user.id,
+            const updates: any = {
                 username: sanitizeText(username),
                 first_name: sanitizeText(firstName),
                 last_name: sanitizeText(lastName),
@@ -332,11 +335,12 @@ const SettingsPage: React.FC = () => {
                 address: sanitizeText(address),
                 country: sanitizeText(country),
                 city: sanitizeText(city),
-                preferred_games: preferredGames, // Array de strings predefinidos, seguro
+                preferred_games: internalPreferredGames,
                 favorite_format: sanitizeText(favoriteFormat),
                 team: sanitizeText(team),
                 avatar_url: avatarUrl ? sanitizeUrl(avatarUrl) : '',
                 // Monetization fields
+                is_content_creator: isContentCreator,
                 is_monetized: isMonetized,
                 payment_method: paymentMethod,
                 payment_rate: parseFloat(paymentRate) || 0,
@@ -357,7 +361,8 @@ const SettingsPage: React.FC = () => {
             setMessage({ type: 'success', text: 'Perfil actualizado correctamente.' });
             window.scrollTo(0, 0);
         } catch (error: any) {
-            setMessage({ type: 'error', text: error.message });
+            console.error("Error updating profile:", error);
+            setMessage({ type: 'error', text: error.message || 'Error desconocido al guardar el perfil.' });
             window.scrollTo(0, 0);
         } finally {
             setUpdating(false);

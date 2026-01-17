@@ -514,8 +514,8 @@ const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [
                         <div className="text-3xl font-bold text-white">{occupancyRate}%</div>
                         <div className="w-full bg-slate-700 h-1.5 rounded-full mt-2 overflow-hidden">
                             <div
-                                className="bg-green-500 h-full rounded-full transition-all duration-500"
-                                style={{ width: `${occupancyRate}%` }}
+                                className="bg-green-500 h-full rounded-full transition-all duration-500 progress-bar-fill"
+                                style={{ '--progress-width': `${occupancyRate}%` } as React.CSSProperties}
                                 role="progressbar"
                                 aria-valuenow={occupancyRate}
                                 aria-valuemin={0}
@@ -549,26 +549,29 @@ const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [
                 <div className="bg-slate-800 p-4 rounded-lg border border-slate-700 shadow-lg">
                     <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">Distribución de Formatos</h3>
                     <div className="space-y-3">
-                        {sortedFormats.slice(0, 4).map(([fmt, count]) => (
-                            <div key={fmt}>
-                                <div className="flex justify-between text-xs mb-1">
-                                    <span className="text-slate-300 font-medium">{fmt}</span>
-                                    <span className="text-slate-500">{count}</span>
+                        {sortedFormats.slice(0, 4).map(([fmt, count]) => {
+                            const fmtPercentage = Math.round(((count as number) / totalEvents) * 100);
+                            return (
+                                <div key={fmt}>
+                                    <div className="flex justify-between text-xs mb-1">
+                                        <span className="text-slate-300 font-medium">{fmt}</span>
+                                        <span className="text-slate-500">{count}</span>
+                                    </div>
+                                    <div className="w-full bg-slate-700 h-2 rounded-full overflow-hidden">
+                                        <div
+                                            className="bg-sky-500 h-full rounded-full transition-all duration-500 progress-bar-fill"
+                                            style={{ '--progress-width': `${fmtPercentage}%` } as React.CSSProperties}
+                                            role="progressbar"
+                                            aria-valuenow={fmtPercentage}
+                                            aria-valuemin={0}
+                                            aria-valuemax={100}
+                                            title={`${fmt}: ${count} eventos (${fmtPercentage}%)`}
+                                            aria-label={`Distribución de formato ${fmt}`}
+                                        ></div>
+                                    </div>
                                 </div>
-                                <div className="w-full bg-slate-700 h-2 rounded-full overflow-hidden">
-                                    <div
-                                        className="bg-sky-500 h-full rounded-full transition-all duration-500"
-                                        style={{ width: `${((count as number) / totalEvents) * 100}%` }}
-                                        role="progressbar"
-                                        aria-valuenow={Math.round(((count as number) / totalEvents) * 100)}
-                                        aria-valuemin={0}
-                                        aria-valuemax={100}
-                                        title={`${fmt}: ${count} eventos (${Math.round(((count as number) / totalEvents) * 100)}%)`}
-                                        aria-label={`Distribución de formato ${fmt}`}
-                                    ></div>
-                                </div>
-                            </div>
-                        ))}
+                            );
+                        })}
                     </div>
                 </div>
             </div>
@@ -746,8 +749,8 @@ const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [
                                                     </span>
                                                     <div className="w-16 h-1.5 bg-slate-700 rounded-full mt-1 overflow-hidden">
                                                         <div
-                                                            className={`h-full ${isFull ? 'bg-red-500' : 'bg-green-500'} transition-all duration-500`}
-                                                            style={{ width: `${Math.min((registered / maxLimit) * 100, 100)}%` }}
+                                                            className={`h-full ${isFull ? 'bg-red-500' : 'bg-green-500'} transition-all duration-500 progress-bar-fill`}
+                                                            style={{ '--progress-width': `${Math.min((registered / maxLimit) * 100, 100)}%` } as React.CSSProperties}
                                                             role="progressbar"
                                                             aria-valuenow={Math.round(Math.min((registered / maxLimit) * 100, 100))}
                                                             aria-valuemin={0}
@@ -1043,8 +1046,8 @@ const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [
                                         <p className="font-semibold">{selectedCalendarEvent.playerCount || 0} / {selectedCalendarEvent.maxPlayers}</p>
                                         <div className="w-full h-2 bg-slate-700 rounded-full mt-1 overflow-hidden">
                                             <div
-                                                className={`h-full ${(selectedCalendarEvent.playerCount || 0) >= selectedCalendarEvent.maxPlayers ? 'bg-red-500' : 'bg-green-500'} transition-all duration-500`}
-                                                style={{ width: `${Math.min(((selectedCalendarEvent.playerCount || 0) / selectedCalendarEvent.maxPlayers) * 100, 100)}%` }}
+                                                className={`h-full ${(selectedCalendarEvent.playerCount || 0) >= selectedCalendarEvent.maxPlayers ? 'bg-red-500' : 'bg-green-500'} transition-all duration-500 progress-bar-fill`}
+                                                style={{ '--progress-width': `${Math.min(((selectedCalendarEvent.playerCount || 0) / selectedCalendarEvent.maxPlayers) * 100, 100)}%` } as React.CSSProperties}
                                                 role="progressbar"
                                                 aria-valuenow={Math.round(Math.min(((selectedCalendarEvent.playerCount || 0) / selectedCalendarEvent.maxPlayers) * 100, 100))}
                                                 aria-valuemin={0}

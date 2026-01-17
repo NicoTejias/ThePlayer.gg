@@ -85,11 +85,7 @@ const StoresPage: React.FC = () => {
                     <div className="bg-slate-800 p-1 rounded-full border border-slate-700 inline-flex relative min-w-[280px]">
                         {/* Background slider animation */}
                         <div
-                            className="absolute top-1 bottom-1 bg-sky-600 rounded-full transition-all duration-300 ease-in-out"
-                            style={{
-                                width: 'calc(50% - 4px)',
-                                left: billingCycle === 'annual' ? 'calc(50% + 2px)' : '4px'
-                            }}
+                            className={`absolute top-1 bottom-1 bg-sky-600 rounded-full transition-all duration-300 ease-in-out w-[calc(50%-4px)] ${billingCycle === 'annual' ? 'left-[calc(50%+2px)]' : 'left-1'}`}
                         ></div>
 
                         <button

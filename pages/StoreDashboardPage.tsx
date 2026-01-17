@@ -427,7 +427,7 @@ const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpl
             </div>
 
             {/* Quick Actions Widget */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {/* Store Stats Card */}
                 <div className="bg-gradient-to-br from-slate-800 to-slate-900 p-6 rounded-xl border border-slate-700 shadow-xl">
                     <div className="flex items-center gap-3 mb-4">
@@ -458,18 +458,18 @@ const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpl
                 </div>
 
                 {/* Quick Actions Card with Buttons */}
-                <div className="bg-gradient-to-br from-sky-600 to-blue-700 p-6 rounded-xl shadow-xl">
+                <div className="bg-gradient-to-br from-indigo-600 to-violet-700 p-6 rounded-xl shadow-xl">
                     <div className="flex items-center gap-3 mb-4">
                         <div className="p-3 bg-white/10 rounded-lg">
                             <Trophy className="w-6 h-6 text-white" />
                         </div>
                         <div>
-                            <h3 className="text-sm font-medium text-sky-100 uppercase tracking-wider">Gestión</h3>
+                            <h3 className="text-sm font-medium text-indigo-100 uppercase tracking-wider">Gestión</h3>
                             <p className="text-xl font-bold text-white">Mis Ligas</p>
                         </div>
                     </div>
 
-                    <p className="text-sky-100/80 mb-6 text-sm">
+                    <p className="text-indigo-100/80 mb-6 text-sm">
                         Crea y administra tus propias ligas personalizadas para tu comunidad.
                     </p>
 
@@ -487,7 +487,7 @@ const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpl
                         ) : (
                             <button
                                 onClick={() => setView('leagues')}
-                                className="w-full py-3 px-4 bg-white text-sky-700 font-bold rounded-lg shadow-lg hover:bg-sky-50 transition-colors flex items-center justify-center gap-2"
+                                className="w-full py-3 px-4 bg-white text-indigo-700 font-bold rounded-lg shadow-lg hover:bg-indigo-50 transition-colors flex items-center justify-center gap-2"
                             >
                                 <Trophy className="w-5 h-5" />
                                 Gestionar Ligas
@@ -505,6 +505,40 @@ const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpl
                                 Crear Nueva Liga
                             </button>
                         )}
+                    </div>
+                </div>
+
+                {/* Help & Guides Card */}
+                <div className="bg-gradient-to-br from-emerald-600 to-teal-700 p-6 rounded-xl shadow-xl">
+                    <div className="flex items-center gap-3 mb-4">
+                        <div className="p-3 bg-white/10 rounded-lg">
+                            <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 className="text-sm font-medium text-emerald-100 uppercase tracking-wider">Recursos</h3>
+                            <p className="text-xl font-bold text-white">Guías y Soporte</p>
+                        </div>
+                    </div>
+
+                    <p className="text-emerald-100/80 mb-6 text-sm">
+                        Accede a manuales de uso, videos tutoriales y contacto directo.
+                    </p>
+
+                    <div className="grid grid-cols-2 gap-3 text-sm">
+                        <button
+                            onClick={() => window.open('/#/soporte', '_blank')}
+                            className="py-3 px-4 bg-white text-emerald-700 font-bold rounded-lg shadow-lg hover:bg-emerald-50 transition-colors flex flex-col items-center justify-center text-center"
+                        >
+                            <span>Manuales</span>
+                        </button>
+                        <a
+                            href="mailto:soporte@theplayer.gg"
+                            className="py-3 px-4 bg-white/10 hover:bg-white/20 text-white font-bold rounded-lg transition-colors border border-white/20 flex flex-col items-center justify-center text-center"
+                        >
+                            <span>Contacto</span>
+                        </a>
                     </div>
                 </div>
             </div>

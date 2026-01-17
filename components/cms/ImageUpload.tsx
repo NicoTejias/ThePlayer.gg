@@ -191,6 +191,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
                 accept="image/jpeg,image/png,image/webp,image/gif"
                 onChange={handleChange}
                 className="hidden"
+                title="Seleccionar imagen"
             />
         </div>
     );

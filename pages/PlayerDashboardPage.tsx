@@ -14,6 +14,7 @@ import TrophyCase from '../components/TrophyCase';
 import LevelBadge from '../components/LevelBadge';
 import LevelProgressBar from '../components/LevelProgressBar';
 import { toast } from 'sonner';
+import { useGame } from '../context/GameContext';
 
 const StatCard: React.FC<{ icon: React.ReactNode, title: string, value: string | number, rank: string | number, color: string }> = ({ icon, title, value, rank, color }) => (
     <div className={`bg-slate-800 p-6 rounded-lg shadow-lg border border-slate-700`}>
@@ -34,6 +35,8 @@ const StatCard: React.FC<{ icon: React.ReactNode, title: string, value: string |
 const PlayerDashboardPage: React.FC<{ profile?: any }> = ({ profile }) => {
     const [tournamentHistory, setTournamentHistory] = useState<any[]>([]);
     const [ranking, setRanking] = useState<{ pwpRank: number; winRateRank: number }>({ pwpRank: 0, winRateRank: 0 });
+    const [editingLeague, setEditingLeague] = useState<any>(null); // State for editing
+    const [gameStats, setGameStats] = useState({ points: 0, wins: 0, losses: 0, draws: 0 });
     const [teamData, setTeamData] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [showCreateTeam, setShowCreateTeam] = useState(false);
@@ -41,52 +44,62 @@ const PlayerDashboardPage: React.FC<{ profile?: any }> = ({ profile }) => {
     const [showProModal, setShowProModal] = useState(false);
     const [isNominated, setIsNominated] = useState(false);
 
+    const { currentGame } = useGame();
+
     useEffect(() => {
         if (profile?.id) {
             fetchPlayerData();
         }
-    }, [profile?.id]);
+    }, [profile?.id, currentGame]);
 
     const fetchPlayerData = async () => {
         setLoading(true);
         try {
-            // 1. Fetch tournament history (Directo de DB - Correcto)
+            // 1. Fetch tournament history filtered by currentGame
             const { data: tournamentResults } = await supabase
                 .from('tournament_results')
                 .select(`
                     *,
-                    tournaments:tournament_id (
+                    tournaments!inner(
                         name,
                         date,
-                        format
+                        format,
+                        game_type
                     )
                 `)
                 .eq('player_id', profile.id)
+                .eq('tournaments.game_type', currentGame)
                 .order('created_at', { ascending: false })
                 .limit(10);
 
             setTournamentHistory(tournamentResults || []);
 
-            // 2. Ranking REAL en DB (Optimizada V2)
-            // Ya no calculamos a mano. Consultamos la posición directo de `profiles` ordenados.
-            // Esto asegura que el dash muestre LO MISMO que el ranking global.
-            const { count, error } = await supabase
-                .from('profiles')
-                .select('id', { count: 'exact', head: true })
-                .gt('pwp', profile.pwp || 0); // Contar cuántos tienen MÁS puntos que yo
+            // 2. Fetch Ranking and Points for this specific game
+            // We use the same RPC used in RankingsPage for consistency
+            const { data: rankingData } = await supabase
+                .rpc('get_game_ranking', { p_game_type: currentGame });
 
-            // Si hay 5 personas con más puntos, yo soy el 6.
-            const pwpRank = (count || 0) + 1;
+            if (rankingData) {
+                const myStats = rankingData.find((r: any) => r.id === profile.id);
+                if (myStats) {
+                    const myIndex = rankingData.findIndex((r: any) => r.id === profile.id);
+                    setRanking({
+                        pwpRank: myIndex + 1,
+                        winRateRank: 0 // Could extract if needed
+                    });
 
-            // WinRate Rank (Logic similar or simplified)
-            const totalMatches = (profile.matches_won || 0) + (profile.matches_lost || 0) + (profile.matches_drew || 0);
-            const myWinRate = totalMatches > 0 ? ((profile.matches_won || 0) / totalMatches) * 100 : 0;
-
-            // Para winrate ranking es más complejo hacerlo solo con SQL sin una columna física de winrate.
-            // Por ahora, para no complicar, lo dejamos en 0 o hacemos un fetch ligero si es crítico.
-            // Dado que el usuario pidió consistencia en PLS, priorizamos PLS.
-
-            setRanking({ pwpRank, winRateRank: 0 });
+                    // Update stats for local display (calculated for this game)
+                    setGameStats({
+                        points: parseInt(myStats.pwp),
+                        wins: parseInt(myStats.matches_won),
+                        losses: parseInt(myStats.matches_lost),
+                        draws: parseInt(myStats.matches_drew)
+                    });
+                } else {
+                    setRanking({ pwpRank: 0, winRateRank: 0 });
+                    setGameStats({ points: 0, wins: 0, losses: 0, draws: 0 });
+                }
+            }
 
             // 3. Team Data
             if (profile.team_id) {
@@ -158,8 +171,8 @@ const PlayerDashboardPage: React.FC<{ profile?: any }> = ({ profile }) => {
     };
 
     const greetingName = profile?.first_name || profile?.username || 'Jugador';
-    const totalMatches = (profile?.matches_won || 0) + (profile?.matches_lost || 0) + (profile?.matches_drew || 0);
-    const winRate = totalMatches > 0 ? ((profile?.matches_won || 0) / totalMatches * 100).toFixed(1) : '0.0';
+    const totalMatches = gameStats.wins + gameStats.losses + gameStats.draws;
+    const winRate = totalMatches > 0 ? ((gameStats.wins / totalMatches) * 100).toFixed(1) : '0.0';
 
     return (
         <div className="space-y-12 animate-fade-in-up">
@@ -167,7 +180,7 @@ const PlayerDashboardPage: React.FC<{ profile?: any }> = ({ profile }) => {
                 <div>
                     <div className="flex items-center gap-3">
                         <h1 className="text-4xl sm:text-5xl font-bold text-white tracking-tighter uppercase">Hola, {greetingName}</h1>
-                        <LevelBadge pwp={profile?.pwp || 0} size="lg" />
+                        <LevelBadge pwp={gameStats.points} size="lg" />
                         {profile?.is_pro && <ProBadge size="medium" />}
                         {(profile?.is_content_creator || profile?.role === 'content_creator') && <ContentCreatorBadge size="medium" />}
                     </div>
@@ -231,7 +244,7 @@ const PlayerDashboardPage: React.FC<{ profile?: any }> = ({ profile }) => {
 
             {/* Level & XP Progression */}
             <section>
-                <LevelProgressBar pwp={profile?.pwp || 0} />
+                <LevelProgressBar pwp={gameStats.points} />
             </section>
 
             {/* Gala Nomination Card */}
@@ -260,7 +273,7 @@ const PlayerDashboardPage: React.FC<{ profile?: any }> = ({ profile }) => {
             <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <StatCard
                     icon={<TrophyIcon className="w-8 h-8" />}
-                    title="Posición Global PWP"
+                    title="Posición de Ranking"
                     value={`Rango #${ranking.pwpRank || '-'}`}
                     rank={ranking.pwpRank || '-'}
                     color="sky"

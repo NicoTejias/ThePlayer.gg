@@ -35,11 +35,27 @@ export const parseEventLinkPdf = async (file: File): Promise<ParserResult> => {
     for (let i = 1; i <= doc.numPages; i++) {
         const page = await doc.getPage(i);
         const textContent = await page.getTextContent();
+        const items = textContent.items as any[];
 
-        // Improve Text extraction: join with proper spacing triggers
-        // Items usually have x/y coords, but for now simple join suffices if PDF is clean
-        const strings = textContent.items.map((item: any) => item.str);
-        fullText += strings.join('  ') + '\n';
+        // Group items by their vertical position (Y coordinate)
+        // items[i].transform[5] is the Y coordinate in PDF.js
+        const lineMap: { [key: number]: any[] } = {};
+
+        items.forEach(item => {
+            const y = Math.round(item.transform[5]);
+            if (!lineMap[y]) lineMap[y] = [];
+            lineMap[y].push(item);
+        });
+
+        // Sort Y coordinates from top to bottom
+        const sortedY = Object.keys(lineMap).map(Number).sort((a, b) => b - a);
+
+        sortedY.forEach(y => {
+            // Sort items in this line by X coordinate (transform[4])
+            const lineItems = lineMap[y].sort((a, b) => a.transform[4] - b.transform[4]);
+            const lineText = lineItems.map(item => item.str).join('  ');
+            fullText += lineText + '\n';
+        });
     }
 
     console.log("PDF Text Content:", fullText);

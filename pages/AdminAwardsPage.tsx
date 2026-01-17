@@ -155,7 +155,7 @@ const AdminAwardsPage: React.FC = () => {
                 user_id: p.id,
                 award_id: nomineeAward.id,
                 season: 'Temporada 2026',
-                comment: 'Nominado por mérito en ranking (PWP)'
+                comment: 'Nominado por mérito en ranking (Player Points)'
             }));
 
             const { error } = await supabase.from('user_awards').insert(nominations);

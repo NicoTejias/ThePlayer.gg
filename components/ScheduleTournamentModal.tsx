@@ -10,6 +10,19 @@ interface ScheduleTournamentModalProps {
 }
 
 const ScheduleTournamentModal: React.FC<ScheduleTournamentModalProps> = ({ isOpen, onClose, onSchedule }) => {
+    // Game options with their formats
+    const GAME_FORMAT_OPTIONS: Record<string, string[]> = {
+        mtg: ['Standard', 'Modern', 'Pioneer', 'Legacy', 'Pauper', 'Premodern', 'Commander', 'Draft', 'Sealed', 'Store Championship', 'RCQ'],
+        pokemon: ['Standard', 'Expanded', 'Unlimited', 'VGC', 'Gym Leader Challenge'],
+        one_piece: ['Standard', 'Sealed', 'Team Battle', 'Flagship'],
+        lorcana: ['Core', 'Draft', 'Sealed'],
+        flesh_blood: ['Classic Constructed', 'Blitz', 'Draft', 'Sealed'],
+        yugioh: ['Advanced', 'Speed Duel', 'Time Wizard'],
+        star_wars: ['Standard', 'Draft', 'Sealed', 'Twin Suns'],
+        digimon: ['Standard', 'Sealed', 'Ultimate Cup'],
+        other: ['Standard', 'Tournament']
+    };
+
     const { currentGame } = useGame();
     const [loading, setLoading] = useState(false);
     const [userProfile, setUserProfile] = useState<any>(null);
@@ -41,7 +54,7 @@ const ScheduleTournamentModal: React.FC<ScheduleTournamentModalProps> = ({ isOpe
                     if (data.role === 'store') {
                         setFormData(prev => ({
                             ...prev,
-                            storeName: data.name || '',
+                            storeName: data.name || data.username || '', // FIXED: Use username if name is missing
                             storeId: data.id
                         }));
                     }
@@ -52,10 +65,20 @@ const ScheduleTournamentModal: React.FC<ScheduleTournamentModalProps> = ({ isOpe
     }, [isOpen]);
 
 
-    // Update game_type when modal opens or context changes
+    // Update game_type when modal opens or context changes (only if it matches the current game)
     useEffect(() => {
-        setFormData(prev => ({ ...prev, game_type: currentGame }));
+        if (isOpen) {
+            setFormData(prev => ({ ...prev, game_type: currentGame }));
+        }
     }, [currentGame, isOpen]);
+
+    // Update format when game_type changes to a valid default for that game
+    useEffect(() => {
+        const formats = GAME_FORMAT_OPTIONS[formData.game_type as string] || GAME_FORMAT_OPTIONS.other;
+        if (!formats.includes(formData.format)) {
+            setFormData(prev => ({ ...prev, format: formats[0] }));
+        }
+    }, [formData.game_type]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -69,7 +92,7 @@ const ScheduleTournamentModal: React.FC<ScheduleTournamentModalProps> = ({ isOpe
                 date: '',
                 time: '19:00',
                 format: 'Standard',
-                storeName: userProfile?.role === 'store' ? userProfile.name : '',
+                storeName: userProfile?.role === 'store' ? (userProfile.name || userProfile.username) : '',
                 storeId: userProfile?.role === 'store' ? userProfile.id : '',
                 maxPlayers: 64,
                 recurring: false,
@@ -123,6 +146,40 @@ const ScheduleTournamentModal: React.FC<ScheduleTournamentModalProps> = ({ isOpe
                         />
                     </div>
 
+                    {/* Juego y Formato */}
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <label htmlFor="gameType" className="block text-sm font-medium text-slate-300 mb-2">
+                                Juego *
+                            </label>
+                            <select
+                                id="gameType"
+                                value={formData.game_type}
+                                onChange={(e) => setFormData({ ...formData, game_type: e.target.value as any })}
+                                className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-green-500"
+                            >
+                                {Object.entries(GAME_LABELS).map(([value, label]) => (
+                                    <option key={value} value={value}>{label}</option>
+                                ))}
+                            </select>
+                        </div>
+                        <div>
+                            <label htmlFor="tournamentFormat" className="block text-sm font-medium text-slate-300 mb-2">
+                                Formato *
+                            </label>
+                            <select
+                                id="tournamentFormat"
+                                value={formData.format}
+                                onChange={(e) => setFormData({ ...formData, format: e.target.value })}
+                                className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-green-500"
+                            >
+                                {(GAME_FORMAT_OPTIONS[formData.game_type as string] || GAME_FORMAT_OPTIONS.other).map(fmt => (
+                                    <option key={fmt} value={fmt}>{fmt}</option>
+                                ))}
+                            </select>
+                        </div>
+                    </div>
+
                     {/* Fecha y Hora */}
                     <div className="grid grid-cols-2 gap-4">
                         <div>
@@ -153,65 +210,20 @@ const ScheduleTournamentModal: React.FC<ScheduleTournamentModalProps> = ({ isOpe
                         </div>
                     </div>
 
-                    {/* Formato y Costo */}
-                    <div className="grid grid-cols-2 gap-4">
-                        <div>
-                            <label htmlFor="tournamentFormat" className="block text-sm font-medium text-slate-300 mb-2">
-                                Formato *
-                            </label>
-                            <select
-                                id="tournamentFormat"
-                                value={formData.format}
-                                onChange={(e) => setFormData({ ...formData, format: e.target.value })}
-                                className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-green-500"
-                            >
-                                {currentGame === 'mtg' && (
-                                    <>
-                                        <option value="Standard">Standard</option>
-                                        <option value="Modern">Modern</option>
-                                        <option value="Pioneer">Pioneer</option>
-                                        <option value="Legacy">Legacy</option>
-                                        <option value="Pauper">Pauper</option>
-                                        <option value="Premodern">Premodern</option>
-                                        <option value="Commander">Commander</option>
-                                        <option value="Draft">Draft</option>
-                                        <option value="Sealed">Sealed</option>
-                                    </>
-                                )}
-                                {currentGame === 'pokemon' && (
-                                    <>
-                                        <option value="Standard">Standard</option>
-                                        <option value="Expanded">Expanded</option>
-                                        <option value="Unlimited">Unlimited</option>
-                                    </>
-                                )}
-                                {currentGame === 'one_piece' && (
-                                    <>
-                                        <option value="Standard">Standard</option>
-                                        <option value="Sealed">Sealed</option>
-                                        <option value="Team Battle">Team Battle</option>
-                                    </>
-                                )}
-                                {/* Fallback for others */}
-                                {!['mtg', 'pokemon', 'one_piece'].includes(currentGame) && (
-                                    <option value="Standard">Standard</option>
-                                )}
-                            </select>
-                        </div>
-                        <div>
-                            <label htmlFor="entryFee" className="block text-sm font-medium text-slate-300 mb-2">
-                                Inscripción (CLP) *
-                            </label>
-                            <input
-                                id="entryFee"
-                                type="text"
-                                required
-                                value={formData.entry_fee}
-                                onChange={(e) => setFormData({ ...formData, entry_fee: e.target.value })}
-                                placeholder="Ej: 5000"
-                                className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-green-500"
-                            />
-                        </div>
+                    {/* Costo */}
+                    <div>
+                        <label htmlFor="entryFee" className="block text-sm font-medium text-slate-300 mb-2">
+                            Inscripción (CLP) *
+                        </label>
+                        <input
+                            id="entryFee"
+                            type="text"
+                            required
+                            value={formData.entry_fee}
+                            onChange={(e) => setFormData({ ...formData, entry_fee: e.target.value })}
+                            placeholder="Ej: 5000"
+                            className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-green-500"
+                        />
                     </div>
 
                     {/* Tienda */}

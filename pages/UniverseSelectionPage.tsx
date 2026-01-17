@@ -42,11 +42,15 @@ const UniverseSelectionPage: React.FC = () => {
                             key={i}
                             className="absolute w-1 h-1 bg-white rounded-full animate-float"
                             style={{
-                                left: `${Math.random() * 100}%`,
-                                top: `${Math.random() * 100}%`,
-                                animationDuration: `${5 + Math.random() * 10}s`,
-                                animationDelay: `${Math.random() * 5}s`
-                            }}
+                                '--left': `${Math.random() * 100}%`,
+                                '--top': `${Math.random() * 100}%`,
+                                '--duration': `${5 + Math.random() * 10}s`,
+                                '--delay': `${Math.random() * 5}s`,
+                                left: 'var(--left)',
+                                top: 'var(--top)',
+                                animationDuration: 'var(--duration)',
+                                animationDelay: 'var(--delay)'
+                            } as React.CSSProperties}
                         />
                     ))}
                 </div>
@@ -77,7 +81,7 @@ const UniverseSelectionPage: React.FC = () => {
                             key={game}
                             onClick={() => handleSelectUniverse(game)}
                             className="group relative flex flex-col items-center gap-6 bg-slate-900/30 backdrop-blur-xl border border-slate-800/50 p-10 rounded-[2.5rem] hover:border-sky-500/50 hover:bg-slate-800/40 transition-all duration-500 cursor-pointer transform hover:-translate-y-3 shadow-2xl hover:shadow-sky-500/20 opacity-0 animate-[fade-in-up_0.6s_ease-out_forwards]"
-                            style={{ animationDelay: `${idx * 0.1}s` }}
+                            style={{ '--animation-delay': `${idx * 0.1}s`, animationDelay: 'var(--animation-delay)' } as React.CSSProperties}
                         >
                             <div className={`w-20 h-20 md:w-28 md:h-28 flex items-center justify-center transform group-hover:scale-115 transition-all duration-500 filter drop-shadow-[0_0_15px_rgba(255,255,255,0.1)] group-hover:drop-shadow-[0_0_20px_var(--color-accent,rgba(59,130,246,0.5))] ${game === 'one_piece' ? 'bg-white/20 shadow-[0_0_40px_rgba(255,255,255,0.2)] rounded-full p-4 backdrop-blur-md' : ''}`}>
                                 {GAME_LOGOS[game]?.src ? (

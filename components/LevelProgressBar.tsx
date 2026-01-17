@@ -23,6 +23,8 @@ const LevelProgressBar: React.FC<LevelProgressBarProps> = ({ pwp, className = ''
     const nextLevelXP = info.xpForNextLevel;
     const currentXP = info.xpForCurrentLevel;
 
+    const progressStyle = { '--progress-width': `${info.progressPercentage}%` } as React.CSSProperties;
+
     return (
         <div className={`bg-slate-900/50 border border-slate-800 rounded-3xl p-6 md:p-8 space-y-4 relative overflow-hidden group ${className}`}>
             {/* Background Accent */}
@@ -52,7 +54,7 @@ const LevelProgressBar: React.FC<LevelProgressBarProps> = ({ pwp, className = ''
             <div className="relative h-4 bg-slate-950 rounded-full border border-slate-800 p-0.5 overflow-hidden shadow-inner">
                 <div
                     className={`h-full rounded-full bg-gradient-to-r ${colorBarClasses[info.color]} progress-bar-fill relative`}
-                    style={{ '--progress-width': `${info.progressPercentage}%` } as React.CSSProperties}
+                    style={progressStyle}
                 >
                     {/* Animated Shine */}
                     <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent w-full animate-level-shimmer"></div>

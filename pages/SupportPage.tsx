@@ -45,7 +45,7 @@ const MANUAL_CONTENT = {
         sections: [
             {
                 subtitle: "1. Certificación",
-                content: "Aplica para ser Juez Certificado. Existen niveles desde Aspirante hasta Head Judge Regional. Cada nivel otorga una insignia diferente en tu perfil."
+                content: "Aplica para ser Juez Certificado. Existen niveles desde Aspirante hasta Head Judge Regional. Cada nivel otorga una insignia diferente en tu perfil. (Nominado por mérito en Ranking / Player Points)"
             },
             {
                 subtitle: "2. Revisión de Integridad",
@@ -146,7 +146,7 @@ const SupportPage: React.FC = () => {
                         </li>
                         <li className="flex items-start gap-3">
                             <span className="text-sky-500 mt-1">✓</span>
-                            <span>Guía para reclamar tus puntos PWP en torneos.</span>
+                            <span>Guía para reclamar tus Player Points en torneos.</span>
                         </li>
                         <li className="flex items-start gap-3">
                             <span className="text-sky-500 mt-1">✓</span>
