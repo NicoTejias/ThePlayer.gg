@@ -9,6 +9,8 @@ interface AwardBadgeProps {
 }
 
 const AwardBadge: React.FC<AwardBadgeProps> = ({ award, size = 'md', showTooltip = true }) => {
+    if (!award) return null;
+
     const rarityColors = {
         common: 'from-slate-400 to-slate-600 border-slate-400/50 text-slate-100',
         rare: 'from-sky-400 to-blue-600 border-sky-400/50 text-sky-100',

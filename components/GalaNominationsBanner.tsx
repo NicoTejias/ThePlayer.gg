@@ -17,7 +17,7 @@ const GalaNominationsBanner: React.FC = () => {
                     .order('obtained_at', { ascending: false })
                     .limit(5);
 
-                setNominations(data || []);
+                setNominations(data?.filter((n: any) => n.award) || []);
             } catch (err) {
                 console.error('Error fetching gala nominations:', err);
             } finally {
