@@ -8,17 +8,12 @@ const TierCard: React.FC<{
     description?: string
 }> = ({ multiplier, color, events }) => (
     <div className={`relative overflow-hidden rounded-xl border-2 ${color} bg-slate-800/80 p-6 flex flex-col items-center text-center transform hover:scale-105 transition-all duration-300 shadow-2xl group h-full`}>
-        <div className={`absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity`}>
-            <span className="text-6xl font-black">{multiplier}</span>
-        </div>
 
         <div className={`w-16 h-16 rounded-full flex items-center justify-center text-2xl font-black mb-4 ${color.replace('border-', 'bg-')} text-slate-900 shadow-lg`}>
             {multiplier}
         </div>
 
-        <h3 className="text-xl font-bold text-white mb-4 uppercase tracking-wider">Nivel {multiplier}</h3>
-
-        <ul className="space-y-2 w-full">
+        <ul className="space-y-2 w-full mt-4">
             {events.map((event, idx) => (
                 <li key={idx} className="bg-slate-700/50 py-2 px-4 rounded-lg text-slate-200 font-medium text-sm border border-slate-600/50">
                     {event}
@@ -114,22 +109,22 @@ const PLSPage: React.FC = () => {
                         <TierCard
                             multiplier="x1"
                             color="border-orange-500"
-                            events={['FNM', 'Torneos Semanales', 'Ligas Locales']}
+                            events={['FNM', 'Torneos Semanales']}
                         />
                         <TierCard
                             multiplier="x2"
                             color="border-slate-400"
-                            events={['Showdown', 'Store Championship', 'Eventos Mensuales']}
+                            events={['Showdown', 'Store Championship']}
                         />
                         <TierCard
                             multiplier="x3"
                             color="border-yellow-400"
-                            events={['Prerelease', 'Open House', 'Eventos Especiales']}
+                            events={['Prerelease', 'Eventos Especiales', 'Draft', 'Sellado']}
                         />
                         <TierCard
                             multiplier="x4"
                             color="border-red-500"
-                            events={['RCQ', 'Regional Championship', 'National Qualifiers']}
+                            events={['RCQ', 'Regional Championship']}
                         />
                     </div>
                 </section>
@@ -154,7 +149,7 @@ const PLSPage: React.FC = () => {
                                     <span className="text-sky-400">Y ARRASTRE DE PLAYER POINTS</span>
                                 </h2>
                                 <p className="text-slate-400 text-lg leading-relaxed">
-                                    Para mantener el circuito competitivo dinámico y justo, el sistema PLS implementa una renovación anual de puntos. Esto permite que nuevos talentos tengan la oportunidad de alcanzar la cima cada año, mientras premiamos la constancia de los veteranos.
+                                    Para mantener el circuito competitivo dinámico y justo, el sistema PLS implementa una renovación anual de puntos cada <strong>1 de enero</strong>. Esto permite que nuevos talentos tengan la oportunidad de alcanzar la cima cada año, mientras premiamos la constancia de los veteranos.
                                 </p>
 
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-8">
@@ -168,7 +163,7 @@ const PLSPage: React.FC = () => {
                                         <h4 className="text-white font-bold mb-2 flex items-center gap-2">
                                             <span className="text-sky-400">📅</span> Ciclo Anual
                                         </h4>
-                                        <p className="text-slate-400 text-sm">Los puntos se archivan al concluir el periodo clasificatorio del National de cada año.</p>
+                                        <p className="text-slate-400 text-sm">Los puntos se archivan al concluir el periodo clasificatorio y se renueva cada 1ero de enero.</p>
                                     </div>
                                 </div>
                             </div>
@@ -189,7 +184,7 @@ const PLSPage: React.FC = () => {
                 <section id="clasificacion">
                     <SectionTitle
                         number="3"
-                        title="El Camino a la Gloria"
+                        title="El Camino del Jugador"
                         subtitle="Tu objetivo final: Clasificar a los eventos más importantes del año."
                     />
 
@@ -201,7 +196,7 @@ const PLSPage: React.FC = () => {
 
                             <div className="relative z-20 p-10 h-full flex flex-col items-start justify-end min-h-[400px]">
                                 <div className="bg-purple-600 text-white px-4 py-1 rounded-full text-xs font-black uppercase tracking-widest mb-4">Evento Invitacional</div>
-                                <h3 className="text-4xl font-black text-white mb-2">THE NATIONAL</h3>
+                                <h3 className="text-4xl font-black text-white mb-2">NACIONAL</h3>
                                 <p className="text-purple-200 text-lg mb-6">La culminación de la temporada. Solo los mejores llegan aquí.</p>
 
                                 <div className="space-y-3 bg-slate-900/60 p-6 rounded-2xl backdrop-blur-md w-full border border-purple-500/30">
@@ -211,10 +206,6 @@ const PLSPage: React.FC = () => {
                                     </div>
                                     <div className="flex items-center gap-3">
                                         <div className="w-8 h-8 rounded-full bg-purple-500 flex items-center justify-center font-bold">2</div>
-                                        <p className="text-sm font-medium">Campeones de Store Championships</p>
-                                    </div>
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-8 h-8 rounded-full bg-purple-500 flex items-center justify-center font-bold">3</div>
                                         <p className="text-sm font-medium">Ganadores de Last Chance Qualifiers</p>
                                     </div>
                                 </div>

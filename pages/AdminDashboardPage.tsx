@@ -342,6 +342,16 @@ const AdminDashboardPage: React.FC = () => {
                         <p className="text-slate-400 text-sm">Gestionar anuncios y categorías</p>
                     </Link>
 
+                    <Link to="/admin/foro" className="group bg-slate-800 hover:bg-slate-700 p-6 rounded-lg border border-slate-700 hover:border-indigo-500 transition-all shadow-lg">
+                        <div className="flex items-center gap-4 mb-3">
+                            <div className="p-3 bg-indigo-900/40 rounded-lg group-hover:bg-indigo-800/60 transition-colors">
+                                <span className="text-xl">💬</span>
+                            </div>
+                            <h3 className="text-lg font-bold text-white">Foros</h3>
+                        </div>
+                        <p className="text-slate-400 text-sm">Gestionar categorías y discusión</p>
+                    </Link>
+
                     <Link to="/admin/awards" className="group bg-slate-800 hover:bg-slate-700 p-6 rounded-lg border border-slate-700 hover:border-yellow-500 transition-all shadow-lg">
                         <div className="flex items-center gap-4 mb-3">
                             <div className="p-3 bg-yellow-900/40 rounded-lg group-hover:bg-yellow-800/60 transition-colors">

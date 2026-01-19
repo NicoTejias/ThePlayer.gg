@@ -1,10 +1,18 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import AlertTriangleIcon from '../components/icons/AlertCircleIcon'; // Using generic alert icon
+
+
+import ReportErrorModal from '../components/ReportErrorModal';
 
 const NotFoundPage: React.FC = () => {
+    const [showReportModal, setShowReportModal] = React.useState(false);
+
     return (
         <div className="min-h-[70vh] flex flex-col items-center justify-center text-center px-4 animate-fade-in">
+            <ReportErrorModal
+                isOpen={showReportModal}
+                onClose={() => setShowReportModal(false)}
+            />
 
             {/* 404 Glitch Effect Container */}
             <div className="relative mb-8">
@@ -31,12 +39,12 @@ const NotFoundPage: React.FC = () => {
                 >
                     Volver al Inicio
                 </Link>
-                <Link
-                    to="/soporte"
+                <button
+                    onClick={() => setShowReportModal(true)}
                     className="px-8 py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold rounded-xl transition-all border border-slate-700 hover:border-slate-600 uppercase tracking-wide"
                 >
                     Reportar Error
-                </Link>
+                </button>
             </div>
         </div>
     );

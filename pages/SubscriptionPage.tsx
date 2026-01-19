@@ -137,64 +137,28 @@ const SubscriptionPage: React.FC = () => {
                         <div className="bg-slate-800/30 border border-slate-700/50 rounded-xl p-6 text-left hover:bg-slate-800/50 transition-colors">
                             <h4 className="font-black text-xl text-white mb-2 uppercase">BLOODMOON GAMES</h4>
                             <div className="h-0.5 w-12 bg-red-600 mb-4"></div>
-                            <ul className="space-y-2 text-sm text-slate-400">
-                                <li className="flex items-start gap-2">
-                                    <Zap className="w-4 h-4 text-yellow-500 shrink-0 mt-0.5" />
-                                    <span>Bebida gratis en torneos semanales</span>
-                                </li>
-                                <li className="flex items-start gap-2">
-                                    <Zap className="w-4 h-4 text-yellow-500 shrink-0 mt-0.5" />
-                                    <span>5% dcto en singles</span>
-                                </li>
-                                <li className="flex items-start gap-2">
-                                    <Zap className="w-4 h-4 text-yellow-500 shrink-0 mt-0.5" />
-                                    <span>Reserva anticipada de producto</span>
-                                </li>
-                            </ul>
+                            <p className="text-sm text-slate-500 italic">Beneficios próximamente...</p>
                         </div>
 
                         {/* Magic Sur */}
                         <div className="bg-slate-800/30 border border-slate-700/50 rounded-xl p-6 text-left hover:bg-slate-800/50 transition-colors">
                             <h4 className="font-black text-xl text-white mb-2 uppercase">MAGIC SUR</h4>
                             <div className="h-0.5 w-12 bg-blue-600 mb-4"></div>
-                            <ul className="space-y-2 text-sm text-slate-400">
-                                <li className="flex items-start gap-2">
-                                    <Zap className="w-4 h-4 text-yellow-500 shrink-0 mt-0.5" />
-                                    <span>5% dcto en accesorios</span>
-                                </li>
-                                <li className="flex items-start gap-2">
-                                    <Zap className="w-4 h-4 text-yellow-500 shrink-0 mt-0.5" />
-                                    <span>Inscripción preferente a torneos</span>
-                                </li>
-                            </ul>
+                            <p className="text-sm text-slate-500 italic">Beneficios próximamente...</p>
                         </div>
 
                         {/* La Comarca */}
                         <div className="bg-slate-800/30 border border-slate-700/50 rounded-xl p-6 text-left hover:bg-slate-800/50 transition-colors">
                             <h4 className="font-black text-xl text-white mb-2 uppercase">LA COMARCA</h4>
                             <div className="h-0.5 w-12 bg-green-600 mb-4"></div>
-                            <ul className="space-y-2 text-sm text-slate-400">
-                                <li className="flex items-start gap-2">
-                                    <Zap className="w-4 h-4 text-yellow-500 shrink-0 mt-0.5" />
-                                    <span>Snack de cortesía</span>
-                                </li>
-                                <li className="flex items-start gap-2">
-                                    <Zap className="w-4 h-4 text-yellow-500 shrink-0 mt-0.5" />
-                                    <span>Descuento en juegos de mesa</span>
-                                </li>
-                            </ul>
+                            <p className="text-sm text-slate-500 italic">Beneficios próximamente...</p>
                         </div>
 
                         {/* Entre Juegos */}
                         <div className="bg-slate-800/30 border border-slate-700/50 rounded-xl p-6 text-left hover:bg-slate-800/50 transition-colors">
                             <h4 className="font-black text-xl text-white mb-2 uppercase">ENTRE JUEGOS</h4>
                             <div className="h-0.5 w-12 bg-purple-600 mb-4"></div>
-                            <ul className="space-y-2 text-sm text-slate-400">
-                                <li className="flex items-start gap-2">
-                                    <Zap className="w-4 h-4 text-yellow-500 shrink-0 mt-0.5" />
-                                    <span>Beneficios por anunciar</span>
-                                </li>
-                            </ul>
+                            <p className="text-sm text-slate-500 italic">Beneficios próximamente...</p>
                         </div>
                     </div>
                 </div>

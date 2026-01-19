@@ -1,9 +1,13 @@
 import React, { useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import ArticleManager from '../components/cms/ArticleManager';
 import VideoManager from '../components/cms/VideoManager';
 
 const AdminCMSPage: React.FC = () => {
-    const [activeTab, setActiveTab] = useState<'articles' | 'videos'>('articles');
+    const location = useLocation();
+    const state = location.state as { openNewArticle?: boolean; openNewVideo?: boolean } | null;
+
+    const [activeTab, setActiveTab] = useState<'articles' | 'videos'>(state?.openNewVideo ? 'videos' : 'articles');
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white p-6">
@@ -34,7 +38,7 @@ const AdminCMSPage: React.FC = () => {
                     </button>
                 </div>
 
-                {activeTab === 'articles' ? <ArticleManager /> : <VideoManager />}
+                {activeTab === 'articles' ? <ArticleManager startOpen={!!state?.openNewArticle} /> : <VideoManager startOpen={!!state?.openNewVideo} />}
             </div>
         </div>
     );

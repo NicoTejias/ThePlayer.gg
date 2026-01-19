@@ -92,9 +92,9 @@ const HallOfFamePage: React.FC = () => {
                 <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-yellow-500/10 text-yellow-500 text-xs font-black uppercase tracking-widest border border-yellow-500/20 mb-4">
                     <span>👑</span> Salón de la Fama
                 </div>
-                <h1 className="text-5xl md:text-7xl font-black text-white tracking-tighter uppercase italic">
+                <h1 className="text-5xl md:text-7xl font-black text-white tracking-tighter uppercase italic leading-tight pb-2">
                     Leyendas de <br />
-                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-orange-500 to-yellow-600">The Player</span>
+                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-orange-500 to-yellow-600 pr-2">The Player</span>
                 </h1>
                 <p className="text-slate-400 text-lg md:text-xl font-medium">
                     Honramos a los guerreros que alcanzaron la cima en temporadas pasadas. Los puntos se archivan, pero la gloria es eterna.

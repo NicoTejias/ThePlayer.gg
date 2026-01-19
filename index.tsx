@@ -21,8 +21,8 @@ const handleOAuthCallback = async () => {
   // Check if the hash contains OAuth tokens (access_token)
   // We use includes checks to be safe before doing heavy parsing
   if (hash && (hash.includes('access_token=') || hash.includes('refresh_token='))) {
-    console.log('🔐 OAuth callback detected, processing tokens...');
-    console.log('Raw hash:', hash);
+    // console.log('🔐 OAuth callback detected, processing tokens...');
+    // console.log('Raw hash:', hash);
 
     try {
       // Robust extraction using Regex to handle various router hash prefix scenarios
@@ -35,26 +35,26 @@ const handleOAuthCallback = async () => {
       const refreshToken = refreshTokenMatch ? refreshTokenMatch[1] : null;
       const type = typeMatch ? typeMatch[1] : null;
 
-      console.log('Extracted structure:', {
-        hasAccessToken: !!accessToken,
-        hasRefreshToken: !!refreshToken,
-        type: type
-      });
+      // console.log('Extracted structure:', {
+      //   hasAccessToken: !!accessToken,
+      //   hasRefreshToken: !!refreshToken,
+      //   type: type
+      // });
 
       if (accessToken) {
         if (refreshToken) {
-          console.log('🔑 Setting session from OAuth tokens (Access + Refresh)...');
+          // console.log('🔑 Setting session from OAuth tokens (Access + Refresh)...');
           const { data, error } = await supabase.auth.setSession({
             access_token: accessToken,
             refresh_token: refreshToken,
           });
 
           if (error) throw error;
-          console.log('✅ Session established successfully with Refresh Token!');
-          console.log('👤 User:', data.user?.email);
+          // console.log('✅ Session established successfully with Refresh Token!');
+          // console.log('👤 User:', data.user?.email);
         } else {
           // Fallback: This is unusual for 'offline' access_type but might happen
-          console.log('⚠️ Warning: No refresh_token found. Setting session with access_token only.');
+          console.warn('⚠️ Warning: No refresh_token found. Setting session with access_token only.');
           // supabase.auth.setSession supports partial sessions in some contexts or we might just rely on the token
           // However, types usually require both. Let's try passing what we have if the library allows it, 
           // otherwise we might need to manually set the cookie or just accept that session might be short lived.

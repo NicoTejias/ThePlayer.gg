@@ -7,14 +7,22 @@ const AdminWidget: React.FC = () => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
+        let isMounted = true;
         const fetchAdminData = async () => {
+            // Safety timeout
+            const timeoutId = setTimeout(() => {
+                if (isMounted && loading) {
+                    console.warn("AdminWidget: Loading timeout reached.");
+                    setLoading(false);
+                }
+            }, 5000);
+
             try {
                 // Get pending articles
                 const { count: pendingArticles } = await supabase
                     .from('articles')
                     .select('*', { count: 'exact', head: true })
                     .eq('is_published', false);
-
 
                 // Get growth metrics (last 7 days)
                 const sevenDaysAgo = new Date();
@@ -31,19 +39,24 @@ const AdminWidget: React.FC = () => {
                     .select('*', { count: 'exact', head: true })
                     .gte('created_at', sevenDaysAgo.toISOString());
 
-                setAdminData({
-                    pendingArticles: pendingArticles || 0,
-                    newPlayers: newPlayers || 0,
-                    newTournaments: newTournaments || 0
-                });
-                setLoading(false);
+                if (isMounted) {
+                    setAdminData({
+                        pendingArticles: pendingArticles || 0,
+                        newPlayers: newPlayers || 0,
+                        newTournaments: newTournaments || 0
+                    });
+                    setLoading(false);
+                }
             } catch (error) {
                 console.error('Error fetching admin data:', error);
-                setLoading(false);
+                if (isMounted) setLoading(false);
+            } finally {
+                clearTimeout(timeoutId);
             }
         };
 
         fetchAdminData();
+        return () => { isMounted = false; };
     }, []);
 
     if (loading) {
@@ -96,7 +109,7 @@ const AdminWidget: React.FC = () => {
                                     {pendingArticles}
                                 </span>
                             </div>
-                            <Link to="/admin/articulos" className="text-sky-400 hover:text-sky-300 text-xs font-bold flex items-center gap-1 pt-1">
+                            <Link to="/admin/cms" className="text-sky-400 hover:text-sky-300 text-xs font-bold flex items-center gap-1 pt-1">
                                 Gestionar →
                             </Link>
                         </div>
@@ -123,19 +136,21 @@ const AdminWidget: React.FC = () => {
                 {/* Quick Actions */}
                 <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4">
                     <Link
-                        to="/admin/articulos/nuevo"
+                        to="/admin/cms"
+                        state={{ openNewArticle: true }}
                         className="px-4 py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold text-center rounded-lg transition-colors"
                     >
                         ✍️ Nuevo Artículo
                     </Link>
                     <Link
-                        to="/admin/videos/nuevo"
+                        to="/admin/cms"
+                        state={{ openNewVideo: true }}
                         className="px-4 py-3 bg-red-600 hover:bg-red-500 text-white font-bold text-center rounded-lg transition-colors"
                     >
                         🎥 Nuevo Video
                     </Link>
                     <Link
-                        to="/admin/usuarios"
+                        to="/admin/users"
                         className="px-4 py-3 bg-purple-600 hover:bg-purple-500 text-white font-bold text-center rounded-lg transition-colors"
                     >
                         👥 Usuarios

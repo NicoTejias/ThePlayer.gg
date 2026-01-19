@@ -20,13 +20,14 @@ interface Article {
 
 interface ArticleManagerProps {
     authorId?: string;
+    startOpen?: boolean;
 }
 
-const ArticleManager: React.FC<ArticleManagerProps> = ({ authorId }) => {
+const ArticleManager: React.FC<ArticleManagerProps> = ({ authorId, startOpen = false }) => {
     const [articles, setArticles] = useState<Article[]>([]);
     const [loading, setLoading] = useState(true);
     const [editingId, setEditingId] = useState<string | null>(null);
-    const [showForm, setShowForm] = useState(false);
+    const [showForm, setShowForm] = useState(startOpen);
 
     // Form State
     const [formData, setFormData] = useState({
@@ -43,7 +44,8 @@ const ArticleManager: React.FC<ArticleManagerProps> = ({ authorId }) => {
 
     useEffect(() => {
         fetchArticles();
-    }, []);
+        if (startOpen) handleCreateNew();
+    }, [startOpen]);
 
     const fetchArticles = async () => {
         setLoading(true);

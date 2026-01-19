@@ -58,6 +58,11 @@ import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
 import NotFoundPage from './pages/NotFoundPage';
 import HallOfFamePage from './pages/HallOfFamePage';
+import ForumIndexPage from './pages/forum/ForumIndexPage';
+import ForumBoardPage from './pages/forum/ForumBoardPage';
+import ForumThreadPage from './pages/forum/ForumThreadPage';
+import CreateThreadPage from './pages/forum/CreateThreadPage';
+import AdminForumPage from './pages/admin/AdminForumPage';
 import AdminAwardsPage from './pages/AdminAwardsPage';
 import AdminSeasonPage from './pages/admin/AdminSeasonPage';
 import SupportPage from './pages/SupportPage';
@@ -386,7 +391,13 @@ const AppContent: React.FC = () => {
           <Route path="/admin/creators" element={<ContentCreatorsAdminPage />} />
           <Route path="/admin/marketplace" element={<MarketplaceAdminPage />} />
           <Route path="/admin/cms" element={<AdminCMSPage />} />
+          <Route path="/admin/foro" element={<AdminForumPage />} />
           <Route path="/notifications" element={<NotificationsPage />} />
+
+          <Route path="/foro" element={<ForumIndexPage />} />
+          <Route path="/foro/:categorySlug/:boardSlug" element={<ForumBoardPage />} />
+          <Route path="/foro/:categorySlug/:boardSlug/nuevo" element={<CreateThreadPage />} />
+          <Route path="/foro/:categorySlug/:boardSlug/:threadSlug" element={<ForumThreadPage />} />
           <Route path="/favorites" element={<FavoritesPage />} />
           <Route path="/seller/:sellerId" element={<SellerProfilePage />} />
           <Route path="/calendario" element={<CalendarPage />} />

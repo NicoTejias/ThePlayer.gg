@@ -58,8 +58,10 @@ export interface CommunityEvent {
   createdBy?: string; // ID del usuario que creó el evento (solo para eventos agendados)
   maxPlayers?: number; // Máximo de jugadores permitidos
   time?: string; // Hora del evento
+  description?: string; // Descripción del evento
   isUserRegistered?: boolean; // Si el usuario actual está inscrito
   gameType?: GameType;
+  entryFee?: string; // Valor de la entrada
 }
 
 export interface MediaArticle {
@@ -268,4 +270,55 @@ export interface UserAward {
   obtained_at: string;
   comment?: string;
   award?: Award; // Relational data
+}
+
+export interface ForumCategory {
+  id: string;
+  name: string;
+  description?: string;
+  slug: string;
+  ordering: number;
+  created_at?: string;
+  boards?: ForumBoard[];
+}
+
+export interface ForumBoard {
+  id: string;
+  category_id: string;
+  name: string;
+  description?: string;
+  slug: string;
+  ordering: number;
+  threads_count?: number; // Count aggregation
+  created_at?: string;
+}
+
+export interface ForumThread {
+  id: string;
+  board_id: string;
+  user_id: string;
+  author_name: string;
+  author_avatar_url?: string;
+  title: string;
+  slug: string;
+  content: string;
+  view_count: number;
+  pinned: boolean;
+  locked: boolean;
+  created_at: string;
+  updated_at: string;
+  posts_count?: number; // Aggregation
+  last_post_at?: string; // Aggregation
+}
+
+export interface ForumPost {
+  id: string;
+  thread_id: string;
+  user_id: string;
+  author_name: string;
+  content: string;
+  created_at: string;
+  updated_at: string;
+  author_avatar_url?: string;
+  author_role?: string;
 }

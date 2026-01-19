@@ -15,12 +15,13 @@ interface Video {
 
 interface VideoManagerProps {
     creatorId?: string;
+    startOpen?: boolean;
 }
 
-const VideoManager: React.FC<VideoManagerProps> = ({ creatorId }) => {
+const VideoManager: React.FC<VideoManagerProps> = ({ creatorId, startOpen = false }) => {
     const [videos, setVideos] = useState<Video[]>([]);
     const [loading, setLoading] = useState(true);
-    const [showForm, setShowForm] = useState(false);
+    const [showForm, setShowForm] = useState(startOpen);
 
     // Form
     const [formData, setFormData] = useState({

@@ -24,45 +24,66 @@ const MediaVideosPage: React.FC = () => {
     const [userId, setUserId] = useState<string | null>(null);
 
     useEffect(() => {
+        let isMounted = true;
         const fetchData = async () => {
             setLoading(true);
 
-            // 1. Fetch User Access
-            const { data: { session } } = await supabase.auth.getSession();
-            let userAccess = false;
+            // Safety timeout
+            const timeoutId = setTimeout(() => {
+                if (isMounted && loading) {
+                    console.warn("MediaVideosPage: Loading timeout reached.");
+                    setLoading(false);
+                }
+            }, 8000);
 
-            if (session) {
-                setUserId(session.user.id);
-                const { data: profile } = await supabase
-                    .from('profiles')
-                    .select('role, subscription_tier')
-                    .eq('id', session.user.id)
-                    .single();
+            try {
+                // 1. Fetch User Access
+                const { data: { session } } = await supabase.auth.getSession();
+                let userAccess = false;
 
-                if (profile) {
-                    const isSubscriber = profile.subscription_tier === 'premium' || profile.subscription_tier === 'vip';
-                    const isAdmin = profile.role === 'admin';
-                    const isStores = profile.role === 'store';
-                    if (isSubscriber || isAdmin || isStores) {
-                        userAccess = true;
+                if (session) {
+                    setUserId(session.user.id);
+                    const { data: profile } = await supabase
+                        .from('profiles')
+                        .select('role, subscription_tier')
+                        .eq('id', session.user.id)
+                        .single();
+
+                    if (profile) {
+                        const isSubscriber = profile.subscription_tier === 'premium' || profile.subscription_tier === 'vip';
+                        const isAdmin = profile.role === 'admin';
+                        const isStores = profile.role === 'store';
+                        if (isSubscriber || isAdmin || isStores) {
+                            userAccess = true;
+                        }
                     }
                 }
-            }
-            setHasAccess(userAccess);
 
-            // 2. Fetch Videos
-            const { data, error } = await supabase
-                .from('videos')
-                .select('*')
-                .order('created_at', { ascending: false });
+                if (isMounted) setHasAccess(userAccess);
 
-            if (!error) {
-                setVideos(data || []);
+                // 2. Fetch Videos
+                const { data, error } = await supabase
+                    .from('videos')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+
+                if (isMounted) {
+                    if (!error) {
+                        setVideos(data || []);
+                    }
+                    setLoading(false);
+                }
+            } catch (err) {
+                console.error("Error fetching videos:", err);
+                if (isMounted) setLoading(false);
+            } finally {
+                clearTimeout(timeoutId);
             }
-            setLoading(false);
         };
 
         fetchData();
+
+        return () => { isMounted = false; };
     }, []);
 
     const handleVideoPlay = (video: Video) => {

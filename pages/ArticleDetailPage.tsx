@@ -43,7 +43,8 @@ const ArticleDetailPage: React.FC = () => {
 
             if (error || !articleData) {
                 console.error("Error fetching article:", error);
-                navigate('/media/articulos');
+                setArticle(null); // Ensure null
+                setLoading(false); // Stop loading
                 return;
             }
 
@@ -109,7 +110,19 @@ const ArticleDetailPage: React.FC = () => {
         </div>
     );
 
-    if (!article) return null;
+    if (!loading && !article) {
+        return (
+            <div className="min-h-screen bg-slate-900 flex flex-col items-center justify-center text-center p-4">
+                <h1 className="text-4xl font-bold text-white mb-4">Artículo no encontrado 😕</h1>
+                <p className="text-slate-400 mb-8 max-w-md">
+                    No pudimos encontrar el artículo que buscas. Puede que haya sido eliminado o la dirección sea incorrecta.
+                </p>
+                <Link to="/media/articulos" className="px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-lg transition-colors">
+                    Volver a Artículos
+                </Link>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-slate-900 text-slate-100 pb-20 animate-fade-in">

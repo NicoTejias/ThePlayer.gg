@@ -198,6 +198,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, isLoggedIn, userRole
                             <div className="space-y-1 mt-1">
                                 <NavItem item={{ name: 'Mercado TCG', path: '/mercado', icon: '🛒' }} />
                                 <NavItem item={{ name: 'Tiendas', path: '/tiendas', icon: '🏪' }} />
+                                <NavItem item={{ name: 'Foro', path: '/foro', icon: '💬' }} />
                                 <NavItem item={{ name: 'Señal Online', path: '/envivo', icon: '📺' }} />
                                 <NavItem item={{ name: 'Contenido', path: '/contenido', icon: '📱' }} />
                             </div>

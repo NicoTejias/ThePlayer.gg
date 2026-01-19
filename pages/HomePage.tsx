@@ -319,26 +319,42 @@ const HomePage: React.FC<HomePageProps> = ({ players, events, session, userRole,
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {displayEvents.length > 0 ? (
               displayEvents.map(event => (
-                <SimpleCard key={event.id} className="bg-slate-800/50 hover:bg-slate-800/70 transition-all border border-slate-700">
-                  <div className="p-4">
-                    <h3 className="text-lg font-bold text-white mb-2 line-clamp-1">{event.title}</h3>
+                <SimpleCard key={event.id} className="group relative overflow-hidden bg-slate-800/50 hover:bg-slate-800/70 transition-all border border-slate-700 h-full">
+                  {/* Hover Overlay with Details */}
+                  <div className="absolute inset-0 bg-slate-900/95 p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-center items-center text-center z-20">
+                    <h4 className="font-bold text-white mb-2">{event.title}</h4>
+                    <p className="text-sm text-slate-300 mb-1"><span className="text-slate-500">Formato:</span> {event.format}</p>
+                    <p className="text-sm text-slate-300 mb-1"><span className="text-slate-500">Tienda:</span> {event.storeName}</p>
+                    <p className="text-sm text-slate-300 mb-2"><span className="text-slate-500">Cupos:</span> {event.playerCount || 0} / {event.maxPlayers || 64}</p>
+                    {event.description && <p className="text-xs text-slate-400 line-clamp-3 italic">"{event.description}"</p>}
+                    <Link to="/eventos" className="mt-3 text-xs text-blue-400 hover:text-blue-300 font-bold underline">Ver Calendario Completo</Link>
+                  </div>
+
+                  <div className="p-4 relative z-10">
+                    <h3 className="text-lg font-bold text-white mb-2 line-clamp-1 group-hover:text-blue-400 transition-colors">{event.title}</h3>
                     <p className="text-sm text-slate-400 mb-1">📍 {event.storeName}</p>
-                    <p className="text-sm text-slate-400 mb-1">📅 {new Date(event.date).toLocaleDateString()}</p>
+                    <div className="flex items-center gap-2 text-sm text-slate-400 mb-1">
+                      <span>📅 {event.date}</span>
+                      <span>⏰ {event.time ? event.time.substring(0, 5) : '19:00'}</span>
+                    </div>
+                    {event.entryFee && (
+                      <p className="text-sm text-yellow-500 font-bold mb-1">🎟️ {event.entryFee}</p>
+                    )}
                     <div className="flex items-center justify-between mt-3 pt-3 border-t border-slate-700">
                       <span className="text-xs bg-blue-500/20 text-blue-300 px-2 py-1 rounded">{event.format}</span>
                       <div className="flex items-center gap-2">
                         {userRole === 'player' && userId && !registrations.has(event.id) && (
                           <button
-                            onClick={() => { setSelectedEvent(event); setShowRegModal(true); }}
-                            className="text-xs bg-green-600 hover:bg-green-500 text-white px-4 py-2 rounded font-bold transition-colors min-h-[44px] flex items-center justify-center"
+                            onClick={(e) => { e.preventDefault(); e.stopPropagation(); setSelectedEvent(event); setShowRegModal(true); }}
+                            className="text-xs bg-green-600 hover:bg-green-500 text-white px-4 py-2 rounded font-bold transition-colors min-h-[44px] flex items-center justify-center shadow-lg shadow-green-900/20"
                           >Inscribirse</button>
                         )}
                         {userRole === 'player' && registrations.has(event.id) && (
-                          <span className="text-xs text-green-400 font-bold flex items-center gap-1">
+                          <span className="text-xs text-green-400 font-bold flex items-center gap-1 bg-green-900/30 px-2 py-1 rounded border border-green-500/30">
                             <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" /></svg>Inscrito</span>
                         )}
                         {!userRole && (
-                          <span className="text-xs text-slate-500">{event.playerCount} jugadores</span>
+                          <span className="text-xs text-slate-500">{event.playerCount || 0} jugadores</span>
                         )}
                       </div>
                     </div>
