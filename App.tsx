@@ -128,6 +128,7 @@ const AppContent: React.FC = () => {
         if (rankingRes.data) {
           setPlayers(rankingRes.data.map((p: any) => ({
             ...p,
+            isPublic: p.is_public ?? (!!p.username), // Ensure users with accounts (username) are public by default if flag is missing
             team_internal: p.team_id ? tMap[p.team_id]?.name || p.team : p.team,
             pwp_claimed: p.pwp,
             is_active: true
@@ -367,6 +368,9 @@ const AppContent: React.FC = () => {
           <Route path="/reset-password" element={<ResetPasswordPage />} />
           <Route path="/content" element={<ContentPage />} />
           <Route path="/reglamento" element={<ReglamentoPage />} />
+          <Route path="/quienes-somos" element={<AboutPage />} />
+          <Route path="/contenido" element={<ContentPage />} />
+          <Route path="/ligas" element={<CommunityLeaguesPage />} />
           <Route path="/terminos" element={<TermsPage />} />
           <Route path="/premium" element={<SubscriptionPage />} />
           <Route path="/settings" element={<SettingsPage />} />

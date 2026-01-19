@@ -171,28 +171,28 @@ export interface GameFormat {
 
 export const GAME_FORMATS: Record<GameType, GameFormat[]> = {
   mtg: [
-    { id: 'competitive', name: 'Competitivo', path: '/ranking/pwp' },
+    { id: 'competitive', name: 'Competitivo', path: '/ranking' },
     { id: 'commander', name: 'Commander', path: '/commander' },
     { id: 'pauper', name: 'Pauper', path: '/pauper' },
     { id: 'premodern', name: 'Premodern', path: '/premodern' },
   ],
   pokemon: [
-    { id: 'competitive', name: 'Competitivo', path: '/ranking/pwp' },
+    { id: 'competitive', name: 'Competitivo', path: '/ranking' },
   ],
   one_piece: [
-    { id: 'competitive', name: 'Competitivo', path: '/ranking/pwp' },
+    { id: 'competitive', name: 'Competitivo', path: '/ranking' },
   ],
   lorcana: [
-    { id: 'competitive', name: 'Competitivo', path: '/ranking/pwp' },
+    { id: 'competitive', name: 'Competitivo', path: '/ranking' },
   ],
   flesh_blood: [
-    { id: 'competitive', name: 'Competitivo', path: '/ranking/pwp' },
+    { id: 'competitive', name: 'Competitivo', path: '/ranking' },
   ],
   yugioh: [
-    { id: 'competitive', name: 'Competitivo', path: '/ranking/pwp' },
+    { id: 'competitive', name: 'Competitivo', path: '/ranking' },
   ],
   star_wars: [
-    { id: 'competitive', name: 'Competitivo', path: '/ranking/pwp' },
+    { id: 'competitive', name: 'Competitivo', path: '/ranking' },
   ],
   board_game: [],
   rpg: [],
