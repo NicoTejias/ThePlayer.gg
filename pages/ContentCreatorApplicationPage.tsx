@@ -72,40 +72,47 @@ const ContentCreatorApplicationPage: React.FC = () => {
 
         setSubmitting(true);
 
-        const sampleWorkUrls = [
-            formData.sampleWork1,
-            formData.sampleWork2,
-            formData.sampleWork3
-        ].filter(url => url.trim() !== '');
+        try {
+            const sampleWorkUrls = [
+                formData.sampleWork1,
+                formData.sampleWork2,
+                formData.sampleWork3
+            ].filter(url => url.trim() !== '');
 
-        const socialMediaLinks = {
-            youtube: formData.youtube,
-            instagram: formData.instagram,
-            twitter: formData.twitter,
-            twitch: formData.twitch
-        };
+            const socialMediaLinks = {
+                youtube: formData.youtube,
+                instagram: formData.instagram,
+                twitter: formData.twitter,
+                twitch: formData.twitch
+            };
 
-        const { error } = await supabase
-            .from('content_creator_applications')
-            .insert({
-                applicant_id: user.id,
-                portfolio_url: formData.portfolioUrl || null,
-                social_media_links: socialMediaLinks,
-                content_type: formData.contentType,
-                sample_work_urls: sampleWorkUrls,
-                motivation: formData.motivation,
-                experience: formData.experience
-            });
+            const { error } = await supabase
+                .from('content_creator_applications')
+                .insert({
+                    applicant_id: user.id,
+                    portfolio_url: formData.portfolioUrl || null,
+                    social_media_links: socialMediaLinks,
+                    content_type: formData.contentType,
+                    sample_work_urls: sampleWorkUrls,
+                    motivation: formData.motivation,
+                    experience: formData.experience
+                });
 
-        if (error) {
-            console.error('Error submitting application:', error);
-            toast.error('Error al enviar solicitud');
-        } else {
+            if (error) {
+                throw error;
+            }
+
             toast.success('¡Solicitud enviada! Te contactaremos pronto.');
             setHasApplied(true);
-        }
 
-        setSubmitting(false);
+        } catch (error: any) {
+            console.error('Error submitting application:', error);
+            toast.error('Error al enviar solicitud', {
+                description: error.message || 'Intenta nuevamente más tarde.'
+            });
+        } finally {
+            setSubmitting(false);
+        }
     };
 
     if (loading) {
