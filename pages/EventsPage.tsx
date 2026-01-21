@@ -857,7 +857,7 @@ const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [
 
                 <div className="flex bg-slate-700 rounded-lg overflow-hidden shadow-2xl border border-slate-700">
                     {/* Week Numbers Sidebar */}
-                    <div className="flex flex-col gap-px w-10 bg-slate-700 border-r border-slate-700 z-10">
+                    <div className="hidden sm:flex flex-col gap-px w-10 bg-slate-700 border-r border-slate-700 z-10">
                         {/* Header Spacer */}
                         <div className="bg-slate-800 p-2 text-center text-xs font-bold text-slate-500 uppercase tracking-wider h-[33px] flex items-center justify-center">
                             #
@@ -871,10 +871,10 @@ const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [
                     </div>
 
                     {/* Main Grid */}
-                    <div className="grid grid-cols-7 flex-1 gap-px bg-slate-700">
+                    <div className="grid grid-cols-7 flex-1 gap-px bg-slate-700 overflow-x-auto min-w-[300px]">
                         {/* Headers */}
-                        {['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'].map(day => (
-                            <div key={day} className="bg-slate-800 p-2 text-center text-xs font-bold text-slate-400 uppercase tracking-wider">
+                        {['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'].map(day => (
+                            <div key={day} className="bg-slate-800 p-2 text-center text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider">
                                 {day}
                             </div>
                         ))}
@@ -896,12 +896,12 @@ const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [
                     <table className="min-w-full divide-y divide-slate-800">
                         <thead className="bg-slate-800/50">
                             <tr>
-                                <th className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider sticky left-0 bg-slate-900 z-20 border-r border-slate-800">Fecha</th>
-                                <th className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Evento</th>
-                                <th className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Formato</th>
-                                <th className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Tienda</th>
-                                <th className="px-6 py-4 text-center text-xs font-bold text-slate-500 uppercase tracking-wider">Jugadores</th>
-                                <th className="px-6 py-4 text-center text-xs font-bold text-slate-500 uppercase tracking-wider">Estado</th>
+                                <th className="px-3 sm:px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider sticky left-0 bg-slate-900 z-20 border-r border-slate-800">Fecha</th>
+                                <th className="px-3 sm:px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Evento</th>
+                                <th className="px-3 sm:px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Formato</th>
+                                <th className="px-3 sm:px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Tienda</th>
+                                <th className="px-3 sm:px-6 py-4 text-center text-xs font-bold text-slate-500 uppercase tracking-wider">Jugadores</th>
+                                <th className="px-3 sm:px-6 py-4 text-center text-xs font-bold text-slate-500 uppercase tracking-wider">Estado</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-800">

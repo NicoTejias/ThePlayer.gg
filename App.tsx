@@ -133,7 +133,10 @@ const AppContent: React.FC = () => {
         if (rankingRes.data) {
           setPlayers(rankingRes.data.map((p: any) => ({
             ...p,
-            isPublic: p.is_public ?? (!!p.username), // Ensure users with accounts (username) are public by default if flag is missing
+            // Construct name if missing (RPC returns username/first_name but not 'name')
+            name: p.username || (p.first_name ? `${p.first_name} ${p.last_name || ''}`.trim() : 'Jugador Sin Nombre'),
+            // Ensure public visibility for registered users with usernames
+            isPublic: true, // Force public visibility as per user request to see all names
             team_internal: p.team_id ? tMap[p.team_id]?.name || p.team : p.team,
             pwp_claimed: p.pwp,
             is_active: true

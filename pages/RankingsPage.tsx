@@ -20,9 +20,9 @@ const RankingsPage: React.FC<RankingsPageProps> = ({ players, teams }) => {
 
     const getPointsLabel = () => {
         switch (currentGame) {
-            case 'mtg': return 'Player Points';
+            case 'mtg': return 'Pts';
             case 'pokemon': return 'CP';
-            default: return 'Player Points';
+            default: return 'Pts';
         }
     };
 
@@ -49,7 +49,8 @@ const RankingsPage: React.FC<RankingsPageProps> = ({ players, teams }) => {
                 return {
                     ...player,
                     rank: index + 1,
-                    name: player.isPublic ? player.name : `Jugador #${anonymousNumber}`
+                    // name: player.isPublic ? player.name : `Jugador #${anonymousNumber}`
+                    name: player.name // Always show name as per user request
                 };
             });
     }, [players]);
@@ -73,7 +74,8 @@ const RankingsPage: React.FC<RankingsPageProps> = ({ players, teams }) => {
                 return {
                     ...player,
                     rank: index + 1,
-                    name: player.isPublic ? player.name : `Jugador #${anonymousNumber}`
+                    // name: player.isPublic ? player.name : `Jugador #${anonymousNumber}`
+                    name: player.name
                 };
             });
     }, [players]);
@@ -140,10 +142,10 @@ const RankingsPage: React.FC<RankingsPageProps> = ({ players, teams }) => {
                             <table className="min-w-full divide-y divide-slate-700">
                                 <thead className="bg-slate-700/50">
                                     <tr>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Puesto</th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Jugador</th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Team</th>
-                                        <th className="px-6 py-3 text-right text-xs font-medium text-slate-300 uppercase tracking-wider">Player Points</th>
+                                        <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Puesto</th>
+                                        <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Jugador</th>
+                                        <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Team</th>
+                                        <th className="px-3 sm:px-6 py-3 text-right text-xs font-medium text-slate-300 uppercase tracking-wider">Pts</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-700">
@@ -155,16 +157,16 @@ const RankingsPage: React.FC<RankingsPageProps> = ({ players, teams }) => {
                                                 : 'hover:bg-slate-700/40'
                                                 }`}
                                         >
-                                            <td className="px-6 py-4 whitespace-nowrap font-bold text-slate-400">{index + 1}</td>
-                                            <td className="px-6 py-4 whitespace-nowrap">
+                                            <td className="px-3 sm:px-6 py-4 whitespace-nowrap font-bold text-slate-400">{index + 1}</td>
+                                            <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
                                                 <div className="flex items-center gap-2">
-                                                    <span className="text-white font-medium">{player.name}</span>
+                                                    <span className="text-white font-medium text-sm sm:text-base">{player.name}</span>
                                                     <LevelBadge pwp={player.pwp} size="sm" />
                                                     {player.is_pro && <ProBadge size="small" />}
                                                     {player.is_content_creator && <ContentCreatorBadge size="small" />}
                                                 </div>
                                             </td>
-                                            <td className="px-6 py-4 whitespace-nowrap">
+                                            <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
                                                 {player.teamId ? (
                                                     <Link to={`/equipo/${player.teamId}`} className="px-2 inline-flex text-xs font-semibold rounded-full bg-sky-500/10 text-sky-400 hover:bg-sky-500/20 transition-colors">
                                                         {player.teamData?.name || player.team}
@@ -175,7 +177,7 @@ const RankingsPage: React.FC<RankingsPageProps> = ({ players, teams }) => {
                                                     </span>
                                                 )}
                                             </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-right text-sky-400 font-bold">{player.pwp} {getPointsLabel()}</td>
+                                            <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-right text-sky-400 font-bold">{player.pwp}</td>
                                         </tr>
                                     ))}
                                 </tbody>
@@ -193,10 +195,10 @@ const RankingsPage: React.FC<RankingsPageProps> = ({ players, teams }) => {
                             <table className="min-w-full divide-y divide-slate-700">
                                 <thead className="bg-slate-700/50">
                                     <tr>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Puesto</th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Jugador</th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Team</th>
-                                        <th className="px-6 py-3 text-right text-xs font-medium text-slate-300 uppercase tracking-wider">Win Rate</th>
+                                        <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Puesto</th>
+                                        <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Jugador</th>
+                                        <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Team</th>
+                                        <th className="px-3 sm:px-6 py-3 text-right text-xs font-medium text-slate-300 uppercase tracking-wider">WR</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-700">
@@ -208,16 +210,16 @@ const RankingsPage: React.FC<RankingsPageProps> = ({ players, teams }) => {
                                                 : 'hover:bg-slate-700/40'
                                                 }`}
                                         >
-                                            <td className="px-6 py-4 whitespace-nowrap font-bold text-slate-400">{index + 1}</td>
-                                            <td className="px-6 py-4 whitespace-nowrap">
+                                            <td className="px-3 sm:px-6 py-4 whitespace-nowrap font-bold text-slate-400">{index + 1}</td>
+                                            <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
                                                 <div className="flex items-center gap-2">
-                                                    <span className="text-white font-medium">{player.name}</span>
+                                                    <span className="text-white font-medium text-sm sm:text-base">{player.name}</span>
                                                     <LevelBadge pwp={player.pwp} size="sm" />
                                                     {player.is_pro && <ProBadge size="small" />}
                                                     {player.is_content_creator && <ContentCreatorBadge size="small" />}
                                                 </div>
                                             </td>
-                                            <td className="px-6 py-4 whitespace-nowrap">
+                                            <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
                                                 {player.teamId ? (
                                                     <Link to={`/equipo/${player.teamId}`} className="px-2 inline-flex text-xs font-semibold rounded-full bg-sky-500/10 text-sky-400 hover:bg-sky-500/20 transition-colors">
                                                         {player.teamData?.name || player.team}
@@ -228,7 +230,7 @@ const RankingsPage: React.FC<RankingsPageProps> = ({ players, teams }) => {
                                                     </span>
                                                 )}
                                             </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-right text-violet-400 font-bold">{player.winRate?.toFixed(2)}%</td>
+                                            <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-right text-violet-400 font-bold">{player.winRate?.toFixed(1)}%</td>
                                         </tr>
                                     ))}
                                 </tbody>
@@ -247,17 +249,17 @@ const RankingsPage: React.FC<RankingsPageProps> = ({ players, teams }) => {
                         <table className="min-w-full divide-y divide-slate-700">
                             <thead className="bg-slate-700/50">
                                 <tr>
-                                    <th className="px-8 py-4 text-left text-xs font-bold text-slate-300 uppercase tracking-widest">Pos</th>
-                                    <th className="px-8 py-4 text-left text-xs font-bold text-slate-300 uppercase tracking-widest">Comunidad</th>
-                                    <th className="px-8 py-4 text-center text-xs font-bold text-slate-300 uppercase tracking-widest">Miembros</th>
-                                    <th className="px-8 py-4 text-right text-xs font-bold text-slate-300 uppercase tracking-widest">Puntos Totales</th>
+                                    <th className="px-3 sm:px-8 py-3 sm:py-4 text-left text-xs font-bold text-slate-300 uppercase tracking-widest">Pos</th>
+                                    <th className="px-3 sm:px-8 py-3 sm:py-4 text-left text-xs font-bold text-slate-300 uppercase tracking-widest">Comunidad</th>
+                                    <th className="px-3 sm:px-8 py-3 sm:py-4 text-center text-xs font-bold text-slate-300 uppercase tracking-widest">Miembros</th>
+                                    <th className="px-3 sm:px-8 py-3 sm:py-4 text-right text-xs font-bold text-slate-300 uppercase tracking-widest">Puntos</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-700">
                                 {teams.map((team, index) => (
                                     <tr key={team.id} className="hover:bg-slate-700/40 transition-all duration-200 group h-20">
-                                        <td className="px-8 py-4 whitespace-nowrap">
-                                            <div className={`flex items-center justify-center w-10 h-10 rounded-full font-black text-lg ${index === 0 ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30' :
+                                        <td className="px-3 sm:px-8 py-4 whitespace-nowrap">
+                                            <div className={`flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-full font-black text-sm sm:text-lg ${index === 0 ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30' :
                                                 index === 1 ? 'bg-slate-300/20 text-slate-200 border border-slate-300/30' :
                                                     index === 2 ? 'bg-orange-900/40 text-orange-400 border border-orange-800/30' :
                                                         'bg-slate-900/50 text-slate-500 border border-slate-700'
@@ -265,32 +267,32 @@ const RankingsPage: React.FC<RankingsPageProps> = ({ players, teams }) => {
                                                 {index + 1}
                                             </div>
                                         </td>
-                                        <td className="px-8 py-4 whitespace-nowrap">
-                                            <Link to={`/equipo/${team.id}`} className="flex items-center gap-4 group/item">
-                                                <div className="w-12 h-12 bg-slate-900 rounded-lg flex items-center justify-center border border-slate-700 group-hover/item:border-violet-500/50 transition-colors">
+                                        <td className="px-3 sm:px-8 py-4 whitespace-nowrap">
+                                            <Link to={`/equipo/${team.id}`} className="flex items-center gap-2 sm:gap-4 group/item">
+                                                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-slate-900 rounded-lg flex items-center justify-center border border-slate-700 group-hover/item:border-violet-500/50 transition-colors">
                                                     {team.logoUrl ? (
                                                         <img src={team.logoUrl} alt={team.name} className="w-full h-full object-contain rounded-lg" />
                                                     ) : (
-                                                        <UsersIcon className="w-6 h-6 text-slate-600 group-hover/item:text-violet-400" />
+                                                        <UsersIcon className="w-5 h-5 sm:w-6 sm:h-6 text-slate-600 group-hover/item:text-violet-400" />
                                                     )}
                                                 </div>
                                                 <div>
-                                                    <span className="text-xl font-bold text-white group-hover/item:text-violet-400 transition-colors">{team.name}</span>
-                                                    <p className="text-xs text-slate-500 mt-0.5 max-w-xs truncate">{team.description || 'Sin descripción'}</p>
+                                                    <span className="text-sm sm:text-xl font-bold text-white group-hover/item:text-violet-400 transition-colors">{team.name}</span>
+                                                    <p className="text-[10px] sm:text-xs text-slate-500 mt-0.5 max-w-[100px] sm:max-w-xs truncate">{team.description || 'Sin descripción'}</p>
                                                 </div>
                                             </Link>
                                         </td>
-                                        <td className="px-8 py-4 whitespace-nowrap text-center">
-                                            <span className="px-3 py-1 bg-slate-900/80 rounded-full text-slate-300 font-mono text-sm border border-slate-700">
-                                                {team.memberCount} Activos
+                                        <td className="px-3 sm:px-8 py-4 whitespace-nowrap text-center">
+                                            <span className="px-2 sm:px-3 py-1 bg-slate-900/80 rounded-full text-slate-300 font-mono text-xs sm:text-sm border border-slate-700">
+                                                {team.memberCount} M
                                             </span>
                                         </td>
-                                        <td className="px-8 py-4 whitespace-nowrap text-right">
+                                        <td className="px-3 sm:px-8 py-4 whitespace-nowrap text-right">
                                             <div className="flex flex-col items-end">
-                                                <span className="text-2xl font-black text-violet-400 tabular-nums tracking-tighter">
+                                                <span className="text-lg sm:text-2xl font-black text-violet-400 tabular-nums tracking-tighter">
                                                     {team.totalPwp?.toLocaleString()}
                                                 </span>
-                                                <span className="text-[10px] text-slate-500 uppercase tracking-widest font-bold">Puntos de Temporada</span>
+                                                <span className="text-[9px] sm:text-[10px] text-slate-500 uppercase tracking-widest font-bold">Pts</span>
                                             </div>
                                         </td>
                                     </tr>

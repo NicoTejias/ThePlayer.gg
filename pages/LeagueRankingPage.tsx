@@ -184,35 +184,35 @@ const LeagueRankingPage = () => {
                             <table className="w-full text-left text-sm">
                                 <thead className="bg-slate-800 text-slate-400 font-medium uppercase text-xs">
                                     <tr>
-                                        <th className="p-4 w-16 text-center">#</th>
-                                        <th className="p-4">Jugador</th>
-                                        <th className="p-4 text-center">Torneos</th>
-                                        <th className="p-4 text-center">W-L-D</th>
-                                        <th className="p-4 text-right">Pts Ranking</th>
-                                        <th className="p-4 text-right">Puntos Liga</th>
+                                        <th className="px-3 sm:px-4 py-4 w-16 text-center">#</th>
+                                        <th className="px-3 sm:px-4 py-4">Jugador</th>
+                                        <th className="px-3 sm:px-4 py-4 text-center">Torneos</th>
+                                        <th className="px-3 sm:px-4 py-4 text-center">W-L-D</th>
+                                        <th className="px-3 sm:px-4 py-4 text-right">Pts Ranking</th>
+                                        <th className="px-3 sm:px-4 py-4 text-right">Puntos Liga</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-800">
                                     {ranking.map((player, index) => (
                                         <tr key={player.player_name} className="hover:bg-slate-800/50 transition-colors">
-                                            <td className="p-4 text-center font-bold text-slate-500">
+                                            <td className="px-3 sm:px-4 py-4 text-center font-bold text-slate-500">
                                                 {index + 1}
                                             </td>
-                                            <td className="p-4 font-semibold text-white">
+                                            <td className="px-3 sm:px-4 py-4 font-semibold text-white">
                                                 {player.player_name}
                                             </td>
-                                            <td className="p-4 text-center text-slate-300">
+                                            <td className="px-3 sm:px-4 py-4 text-center text-slate-300">
                                                 {player.tournaments_played}
                                             </td>
-                                            <td className="p-4 text-center text-slate-400 font-mono">
+                                            <td className="px-3 sm:px-4 py-4 text-center text-slate-400 font-mono">
                                                 <span className="text-green-400">{player.wins}</span>-
                                                 <span className="text-red-400">{player.losses}</span>-
                                                 <span className="text-yellow-400">{player.draws}</span>
                                             </td>
-                                            <td className="p-4 text-right font-medium text-slate-400">
+                                            <td className="px-3 sm:px-4 py-4 text-right font-medium text-slate-400">
                                                 {Math.round(player.total_pwp)}
                                             </td>
-                                            <td className="p-4 text-right font-bold text-sky-400 text-lg">
+                                            <td className="px-3 sm:px-4 py-4 text-right font-bold text-sky-400 text-lg">
                                                 {player.total_points}
                                             </td>
                                         </tr>

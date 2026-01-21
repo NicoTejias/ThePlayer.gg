@@ -49,7 +49,14 @@ const TournamentStandingsPage: React.FC = () => {
                 // 2. Fetch Results/Standings
                 const { data: resultsData, error: resultsError } = await supabase
                     .from('tournament_results')
-                    .select('*')
+                    .select(`
+                        *,
+                        profile:player_id (
+                            username,
+                            first_name,
+                            last_name
+                        )
+                    `)
                     .eq('tournament_id', tournamentId)
                     .order('rank', { ascending: true });
 
@@ -64,13 +71,24 @@ const TournamentStandingsPage: React.FC = () => {
                     return Math.abs(hash % 9000) + 1000;
                 };
 
-                const mappedStandings: TournamentStanding[] = (resultsData || []).map((r, index) => ({
-                    rank: r.rank || index + 1,
-                    // Si no tiene player_id, es porque no está registrado en la base de datos como usuario
-                    playerName: r.player_id ? r.player_name : `Player ${getAnonymousId(r.player_name + tournamentId)}`,
-                    matchRecord: `${r.wins}-${r.losses}-${r.draws}`,
-                    pwpEarned: r.pwp_earned
-                }));
+                const mappedStandings: TournamentStanding[] = (resultsData || []).map((r: any, index: number) => {
+                    // Determine name from profile (if registered) or raw field (if manual)
+                    let finalName = r.player_name;
+                    if (r.profile) {
+                        // Prefer username, then first+last, then just "Jugador"
+                        finalName = r.profile.username ||
+                            (r.profile.first_name ? `${r.profile.first_name} ${r.profile.last_name || ''}`.trim() : null) ||
+                            finalName;
+                    }
+                    if (!finalName) finalName = `Player ${getAnonymousId(tournamentId + index)}`;
+
+                    return {
+                        rank: r.rank || index + 1,
+                        playerName: finalName,
+                        matchRecord: `${r.wins}-${r.losses}-${r.draws}`,
+                        pwpEarned: r.pwp_earned
+                    };
+                });
 
                 setStandings(mappedStandings);
 
@@ -131,33 +149,33 @@ const TournamentStandingsPage: React.FC = () => {
             <div className="overflow-x-auto bg-slate-800 rounded-lg shadow-xl border border-slate-700">
                 <table className="min-w-full divide-y divide-slate-700">
                     <thead className="bg-slate-700/50">
-                        <tr>
-                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Puesto</th>
-                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Jugador</th>
-                            <th scope="col" className="px-6 py-3 text-center text-xs font-medium text-slate-300 uppercase tracking-wider">Resultado (V-D-E)</th>
-                            <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-slate-300 uppercase tracking-wider">Puntos PLS</th>
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-700">
-                        {standings.length > 0 ? (
-                            standings.map((player, index) => (
-                                <tr key={index} className={`transition-colors duration-150 ${index < 8 ? 'bg-sky-900/20 hover:bg-sky-800/30' : 'hover:bg-slate-700/40'}`}>
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        <span className={`text-lg font-bold w-8 text-center inline-block ${player.rank === 1 ? 'text-yellow-400' :
-                                            player.rank === 2 ? 'text-gray-300' :
-                                                player.rank === 3 ? 'text-yellow-600' : 'text-slate-400'
-                                            }`}>{player.rank}</span>
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">{player.playerName}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-center text-sm text-slate-300 font-mono">{player.matchRecord}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-bold text-sky-400">
-                                        <div className="flex items-center justify-end space-x-2">
-                                            <span>{player.pwpEarned} pts</span>
-                                            <TrophyIcon className="w-5 h-5 text-sky-500/70" />
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))
+                            <tr>
+                                <th scope="col" className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Puesto</th>
+                                <th scope="col" className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Jugador</th>
+                                <th scope="col" className="px-3 sm:px-6 py-3 text-center text-xs font-medium text-slate-300 uppercase tracking-wider">Resultado (V-D-E)</th>
+                                <th scope="col" className="px-3 sm:px-6 py-3 text-right text-xs font-medium text-slate-300 uppercase tracking-wider">Pts PLS</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-700">
+                            {standings.length > 0 ? (
+                                standings.map((player, index) => (
+                                    <tr key={index} className={`transition-colors duration-150 ${index < 8 ? 'bg-sky-900/20 hover:bg-sky-800/30' : 'hover:bg-slate-700/40'}`}>
+                                        <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
+                                            <span className={`text-sm sm:text-lg font-bold w-8 text-center inline-block ${player.rank === 1 ? 'text-yellow-400' :
+                                                player.rank === 2 ? 'text-gray-300' :
+                                                    player.rank === 3 ? 'text-yellow-600' : 'text-slate-400'
+                                                }`}>{player.rank}</span>
+                                        </td>
+                                        <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-sm font-medium text-white">{player.playerName}</td>
+                                        <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-center text-xs sm:text-sm text-slate-300 font-mono">{player.matchRecord}</td>
+                                        <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-right text-sm font-bold text-sky-400">
+                                            <div className="flex items-center justify-end space-x-2">
+                                                <span>{player.pwpEarned}</span>
+                                                <TrophyIcon className="w-4 h-4 sm:w-5 sm:h-5 text-sky-500/70" />
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))
                         ) : (
                             <tr>
                                 <td colSpan={4} className="px-6 py-12 text-center text-slate-400">

@@ -302,25 +302,25 @@ const PlayerDashboardPage: React.FC<{ profile?: any }> = ({ profile }) => {
                         <table className="min-w-full divide-y divide-slate-700">
                             <thead className="bg-slate-700/50">
                                 <tr>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Torneo</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Resultado</th>
-                                    <th className="px-6 py-3 text-right text-xs font-medium text-slate-300 uppercase tracking-wider">Puntos</th>
+                                    <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Torneo</th>
+                                    <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Resultado</th>
+                                    <th className="px-3 sm:px-6 py-3 text-right text-xs font-medium text-slate-300 uppercase tracking-wider">Pts</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-700">
                                 {loading ? (
-                                    <tr><td colSpan={3} className="px-6 py-8 text-center text-slate-500">Cargando historial...</td></tr>
+                                    <tr><td colSpan={3} className="px-3 sm:px-6 py-8 text-center text-slate-500">Cargando historial...</td></tr>
                                 ) : tournamentHistory.length > 0 ? (
                                     tournamentHistory.map(t => (
                                         <tr key={t.id} className="hover:bg-slate-700/40">
-                                            <td className="px-6 py-4">
+                                            <td className="px-3 sm:px-6 py-4">
                                                 <p className="text-sm font-bold text-white">{t.tournaments?.name}</p>
                                                 <p className="text-xs text-slate-400">{t.tournaments?.date}</p>
                                             </td>
-                                            <td className="px-6 py-4 text-sm text-slate-300 font-mono">
+                                            <td className="px-3 sm:px-6 py-4 text-xs sm:text-sm text-slate-300 font-mono">
                                                 {t.wins}V - {t.losses}D - {t.draws}E
                                             </td>
-                                            <td className="px-6 py-4 text-right text-sm font-bold text-sky-400">+{t.pwp_earned}</td>
+                                            <td className="px-3 sm:px-6 py-4 text-right text-sm font-bold text-sky-400">+{t.pwp_earned}</td>
                                         </tr>
                                     ))
                                 ) : (
