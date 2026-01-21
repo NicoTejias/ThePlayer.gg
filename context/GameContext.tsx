@@ -14,12 +14,13 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         return (saved as GameType) || 'mtg';
     });
 
-    useEffect(() => {
-        localStorage.setItem('selectedGame', currentGame);
-        // Optional: Trigger a global event or analytics here
-    }, [currentGame]);
+    // Remove the automatic useEffect sync which causes default 'mtg' to be written to empty storage on boot
+    // useEffect(() => {
+    //     localStorage.setItem('selectedGame', currentGame);
+    // }, [currentGame]);
 
     const setGame = (game: GameType) => {
+        localStorage.setItem('selectedGame', game);
         setCurrentGame(game);
     };
 

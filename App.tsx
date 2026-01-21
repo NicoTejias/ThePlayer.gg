@@ -101,6 +101,9 @@ const AppContent: React.FC = () => {
   const YOUTUBE_API_KEY = 'AIzaSyD-EGf2uQdBNFhT2FZ_m_DXR4P3kIR_LN8';
 
   const checkYouTubeLiveStatus = async () => {
+    // Disabled to save API quota
+    setIsLiveSignal(false);
+    /*
     try {
       if (!YOUTUBE_API_KEY || YOUTUBE_API_KEY.includes('YourAPIKey')) return;
       const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=${YOUTUBE_CHANNEL_ID}&eventType=live&type=video&key=${YOUTUBE_API_KEY}`;
@@ -111,6 +114,7 @@ const AppContent: React.FC = () => {
     } catch (e) {
       setIsLiveSignal(false);
     }
+    */
   };
 
   // Data Fetching Logic (Parallelized)
