@@ -29,10 +29,11 @@ const ContentCreatorApplicationPage: React.FC = () => {
     }, []);
 
     const checkUser = async () => {
-        const { data: { user } } = await supabase.auth.getUser();
+        const { data: { user }, error } = await supabase.auth.getUser();
 
-        if (!user) {
-            toast.error('Debes iniciar sesión para aplicar');
+        if (error || !user) {
+            console.error("Auth error:", error);
+            toast.error('Sesión inválida o expirada. Por favor inicia sesión nuevamente.');
             navigate('/auth');
             return;
         }
@@ -107,6 +108,15 @@ const ContentCreatorApplicationPage: React.FC = () => {
 
         } catch (error: any) {
             console.error('Error submitting application:', error);
+
+            // Handle session expiry specifically
+            if (error.title === 'AuthApiError' || error.message?.includes('Refresh token') || error.message?.includes('JWT') || error.code === '400') {
+                toast.error('Tu sesión ha expirado. Redirigiendo al login...', { duration: 4000 });
+                await supabase.auth.signOut();
+                navigate('/auth');
+                return;
+            }
+
             toast.error('Error al enviar solicitud', {
                 description: error.message || 'Intenta nuevamente más tarde.'
             });
@@ -244,6 +254,8 @@ const ContentCreatorApplicationPage: React.FC = () => {
                             value={formData.portfolioUrl}
                             onChange={(e) => setFormData({ ...formData, portfolioUrl: e.target.value })}
                             placeholder="https://tu-portfolio.com"
+                            name="portfolioUrl"
+                            id="portfolioUrl"
                             className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
                     </div>
@@ -259,6 +271,8 @@ const ContentCreatorApplicationPage: React.FC = () => {
                                 value={formData.youtube}
                                 onChange={(e) => setFormData({ ...formData, youtube: e.target.value })}
                                 placeholder="YouTube Channel URL"
+                                name="youtube"
+                                id="youtube"
                                 className="px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
                             />
                             <input
@@ -266,6 +280,8 @@ const ContentCreatorApplicationPage: React.FC = () => {
                                 value={formData.instagram}
                                 onChange={(e) => setFormData({ ...formData, instagram: e.target.value })}
                                 placeholder="Instagram URL"
+                                name="instagram"
+                                id="instagram"
                                 className="px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
                             />
                             <input
@@ -273,6 +289,8 @@ const ContentCreatorApplicationPage: React.FC = () => {
                                 value={formData.twitter}
                                 onChange={(e) => setFormData({ ...formData, twitter: e.target.value })}
                                 placeholder="Twitter/X URL"
+                                name="twitter"
+                                id="twitter"
                                 className="px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
                             />
                             <input
@@ -280,6 +298,8 @@ const ContentCreatorApplicationPage: React.FC = () => {
                                 value={formData.twitch}
                                 onChange={(e) => setFormData({ ...formData, twitch: e.target.value })}
                                 placeholder="Twitch URL"
+                                name="twitch"
+                                id="twitch"
                                 className="px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
                             />
                         </div>
@@ -296,6 +316,8 @@ const ContentCreatorApplicationPage: React.FC = () => {
                                     type="checkbox"
                                     checked={formData.contentType.includes('articles')}
                                     onChange={() => handleContentTypeChange('articles')}
+                                    name="contentType_articles"
+                                    id="contentType_articles"
                                     className="w-5 h-5 rounded border-slate-600 bg-slate-700 text-blue-600 focus:ring-blue-500"
                                 />
                                 <span className="text-slate-300">Artículos</span>
@@ -305,6 +327,8 @@ const ContentCreatorApplicationPage: React.FC = () => {
                                     type="checkbox"
                                     checked={formData.contentType.includes('videos')}
                                     onChange={() => handleContentTypeChange('videos')}
+                                    name="contentType_videos"
+                                    id="contentType_videos"
                                     className="w-5 h-5 rounded border-slate-600 bg-slate-700 text-blue-600 focus:ring-blue-500"
                                 />
                                 <span className="text-slate-300">Videos</span>
@@ -324,6 +348,8 @@ const ContentCreatorApplicationPage: React.FC = () => {
                                 onChange={(e) => setFormData({ ...formData, sampleWork1: e.target.value })}
                                 placeholder="Muestra 1 (requerida)"
                                 required
+                                name="sampleWork1"
+                                id="sampleWork1"
                                 className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
                             />
                             <input
@@ -331,6 +357,8 @@ const ContentCreatorApplicationPage: React.FC = () => {
                                 value={formData.sampleWork2}
                                 onChange={(e) => setFormData({ ...formData, sampleWork2: e.target.value })}
                                 placeholder="Muestra 2 (opcional)"
+                                name="sampleWork2"
+                                id="sampleWork2"
                                 className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
                             />
                             <input
@@ -338,6 +366,8 @@ const ContentCreatorApplicationPage: React.FC = () => {
                                 value={formData.sampleWork3}
                                 onChange={(e) => setFormData({ ...formData, sampleWork3: e.target.value })}
                                 placeholder="Muestra 3 (opcional)"
+                                name="sampleWork3"
+                                id="sampleWork3"
                                 className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
                             />
                         </div>
@@ -354,6 +384,8 @@ const ContentCreatorApplicationPage: React.FC = () => {
                             rows={4}
                             required
                             placeholder="Cuéntanos tu motivación..."
+                            name="motivation"
+                            id="motivation"
                             className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
                     </div>
@@ -369,6 +401,8 @@ const ContentCreatorApplicationPage: React.FC = () => {
                             rows={4}
                             required
                             placeholder="Describe tu experiencia..."
+                            name="experience"
+                            id="experience"
                             className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
                     </div>

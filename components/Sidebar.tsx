@@ -42,7 +42,7 @@ const mtgFormats = [
 
 const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, isLoggedIn, userRole, isContentCreator }) => {
     const { currentGame, setGame } = useGame();
-    const [expandedSection, setExpandedSection] = useState<string | null>(null);
+    const [expandedSection, setExpandedSection] = useState<string | null>('community');
     const sidebarRef = useRef<HTMLDivElement>(null);
     const location = useLocation();
 

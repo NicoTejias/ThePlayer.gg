@@ -99,26 +99,14 @@ const ContentCreatorsAdminPage: React.FC = () => {
         if (!confirm(`¿Estás seguro de aprobar a ${app.profiles?.username} como creador de contenido?`)) return;
 
         try {
-            const { id, applicant_id } = app;
+            const { id } = app;
 
-            // 1. Update Application Status
-            const { error: appError } = await supabase
-                .from('content_creator_applications')
-                .update({ status: 'approved' })
-                .eq('id', id);
+            // Use secure RPC to update both Application and Profile in one transaction
+            const { error } = await supabase.rpc('approve_content_creator', {
+                application_id: id
+            });
 
-            if (appError) throw appError;
-
-            // 2. Update user profile
-            // We set is_content_creator to true, keeping their base role
-            const { error: roleError } = await supabase
-                .from('profiles')
-                .update({
-                    is_content_creator: true
-                })
-                .eq('id', applicant_id);
-
-            if (roleError) throw roleError;
+            if (error) throw error;
 
             toast.success('Creador aprobado correctamente. Ahora puede configurar su monetización desde su perfil.');
             fetchApplications();
@@ -213,8 +201,8 @@ const ContentCreatorsAdminPage: React.FC = () => {
                                                     <h3 className="font-bold text-white truncate">{app.profiles?.username || 'Usuario Desconocido'}</h3>
                                                     <div className="flex items-center gap-2 mt-0.5">
                                                         <span className={`text-[10px] px-2 py-0.5 rounded font-black uppercase ${app.status === 'pending' ? 'bg-yellow-500/10 text-yellow-500 border border-yellow-500/20' :
-                                                                app.status === 'approved' ? 'bg-green-500/10 text-green-500 border border-green-500/20' :
-                                                                    'bg-red-500/10 text-red-500 border border-red-500/20'
+                                                            app.status === 'approved' ? 'bg-green-500/10 text-green-500 border border-green-500/20' :
+                                                                'bg-red-500/10 text-red-500 border border-red-500/20'
                                                             }`}>
                                                             {app.status === 'pending' ? 'Pendiente' : app.status === 'approved' ? 'Aprobado' : 'Rechazado'}
                                                         </span>

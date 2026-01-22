@@ -62,8 +62,8 @@ const RankingsPage: React.FC<RankingsPageProps> = ({ players, teams }) => {
                 const winRate = totalMatches > 0 ? (player.matchesWon / totalMatches) * 100 : 0;
                 return { ...player, winRate, totalMatches };
             })
-            // FILTRO: Solo jugadores con al menos 15 partidas (aproximadamente 5 torneos)
-            .filter(player => player.totalMatches >= 15)
+            // FILTRO: Solo jugadores con al menos 10 torneos jugados
+            .filter(player => (player.tournaments_played || 0) >= 10)
             .sort((a, b) => b.winRate - a.winRate)
             .map((player, index) => {
                 const hashCode = player.id.split('').reduce((acc, char) => {
@@ -189,7 +189,7 @@ const RankingsPage: React.FC<RankingsPageProps> = ({ players, teams }) => {
                     <div className="space-y-4 animate-fade-in-up animate-delay-100">
                         <div className="text-center md:text-left h-28 flex flex-col justify-center">
                             <h2 className="text-3xl font-bold text-white uppercase tracking-wider">PLS Winrate</h2>
-                            <p className="text-md text-slate-400 mt-1">Premia la efectividad en el campo de batalla.</p>
+                            <p className="text-md text-slate-400 mt-1">Premia la efectividad en el campo de batalla <span className="text-slate-500">(mínimo 10 torneos jugados)</span>.</p>
                         </div>
                         <div className="overflow-x-auto bg-slate-800 rounded-lg shadow-xl border border-slate-700">
                             <table className="min-w-full divide-y divide-slate-700">

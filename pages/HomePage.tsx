@@ -186,6 +186,7 @@ const HomePage: React.FC<HomePageProps> = ({ players, events, session, userRole,
       const winRate = total > 0 ? ((p.matchesWon || 0) / total) * 100 : 0;
       return { ...p, winRate };
     })
+    .filter(p => (p.tournaments_played || 0) >= 10) // Minimo 10 torneos
     .sort((a, b) => b.winRate - a.winRate)
     .slice(0, 10)
     .map((p, i) => ({
@@ -400,7 +401,10 @@ const HomePage: React.FC<HomePageProps> = ({ players, events, session, userRole,
             </div>
             {/* Win Rate Ranking */}
             <div>
-              <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3">Top 10 Win Rate</h3>
+              <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3 flex items-center justify-between">
+                <span>Top 10 Win Rate</span>
+                <span className="text-[10px] bg-slate-700 px-2 py-1 rounded text-slate-300">Min. 10 Torneos</span>
+              </h3>
               <div className="bg-slate-800/50 rounded-xl border border-slate-700 overflow-hidden shadow-xl">
                 {topWinRatePlayers.slice(0, 5).map(player => {
                   const isCurrent = session?.user?.id && player.id === session.user.id;
