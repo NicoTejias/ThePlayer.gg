@@ -87,7 +87,8 @@ const ContentCreatorApplicationPage: React.FC = () => {
                 twitch: formData.twitch
             };
 
-            const { error } = await supabase
+            // Wrap Supabase call with a timeout to prevent hanging UI
+            const insertPromise = supabase
                 .from('content_creator_applications')
                 .insert({
                     applicant_id: user.id,
@@ -98,6 +99,12 @@ const ContentCreatorApplicationPage: React.FC = () => {
                     motivation: formData.motivation,
                     experience: formData.experience
                 });
+
+            const timeoutPromise = new Promise<{ error: any }>((_, reject) =>
+                setTimeout(() => reject(new Error('La solicitud tardó demasiado. Verifica tu conexión.')), 15000)
+            );
+
+            const { error } = await Promise.race([insertPromise, timeoutPromise]);
 
             if (error) {
                 throw error;

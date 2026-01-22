@@ -149,7 +149,26 @@ const AppContent: React.FC = () => {
       }
 
       if (tourneysRes.data) setTournamentResults(tourneysRes.data);
-      if (eventsRes.data) setCommunityEvents(eventsRes.data);
+      if (eventsRes.data) {
+        // Map RPC result (snake_case) to CommunityEvent interface (camelCase)
+        const mappedEvents: CommunityEvent[] = eventsRes.data.map((e: any) => ({
+          id: e.id,
+          title: e.title,
+          date: e.date,
+          storeName: e.store_name,
+          format: e.format,
+          playerCount: e.player_count || e.registration_count || 0, // Handle different alias if any
+          imageUrl: e.image_url, // If exists
+          createdBy: e.created_by,
+          maxPlayers: e.max_players,
+          time: e.event_time,
+          description: e.description,
+          isUserRegistered: e.is_user_registered,
+          entryFee: e.entry_fee,
+          gameType: e.game_type
+        }));
+        setCommunityEvents(mappedEvents);
+      }
     } catch (error) {
       console.error("Data Fetch Error:", error);
     } finally {
