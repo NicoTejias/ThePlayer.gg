@@ -35,31 +35,58 @@ const CalendarPage: React.FC = () => {
     const fetchEventsForMonth = async () => {
         setLoading(true);
         try {
-            const { data, error } = await supabase.rpc('get_scheduled_events_with_registrations', {
+            console.log("Calendar: Fetching events for", currentGame);
+            const { data, error: rpcError } = await supabase.rpc('get_scheduled_events_with_registrations', {
                 p_game_type: currentGame
             });
 
-            if (error) throw error;
+            let rawEvents = data;
+            if (rpcError) {
+                console.warn("Calendar RPC failed, fetching from table + counts manually:", rpcError);
+
+                const [tableRes, countsRes] = await Promise.all([
+                    supabase.from('scheduled_events').select('*').eq('game_type', currentGame),
+                    supabase.from('event_registrations').select('event_id')
+                ]);
+
+                if (tableRes.error) throw tableRes.error;
+
+                const countMap: Record<string, number> = {};
+                countsRes.data?.forEach((r: any) => {
+                    countMap[r.event_id] = (countMap[r.event_id] || 0) + 1;
+                });
+
+                rawEvents = (tableRes.data || []).map(e => ({
+                    ...e,
+                    registration_count: countMap[e.id] || 0,
+                    event_time: e.time
+                }));
+            }
 
             // Filter events for current month
             const year = currentDate.getFullYear();
             const month = currentDate.getMonth();
-            const filteredEvents = (data || []).filter((event: any) => {
-                const eventDate = new Date(event.date);
-                return eventDate.getFullYear() === year && eventDate.getMonth() === month;
-            });
 
-            setEvents(filteredEvents.map((e: any) => ({
+            const mappedEvents: CalendarEvent[] = (rawEvents || []).filter((event: any) => {
+                // Robust date parsing
+                const parts = event.date.split('-');
+                if (parts.length !== 3) return false;
+                const eventDate = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+                return eventDate.getFullYear() === year && eventDate.getMonth() === month;
+            }).map((e: any) => ({
                 id: e.id,
                 title: e.title,
                 date: e.date,
-                event_time: e.event_time,
-                store_name: e.store_name,
+                event_time: e.event_time || e.time || '19:00',
+                store_name: e.store_name || e.storeName,
                 format: e.format,
-                registration_count: e.registration_count,
-                max_players: e.max_players,
-                is_user_registered: e.is_user_registered
-            })));
+                registration_count: e.registration_count || e.playerCount || 0,
+                max_players: e.max_players || e.maxPlayers || 64,
+                is_user_registered: e.is_user_registered || false
+            }));
+
+            console.log(`Calendar: Loaded ${mappedEvents.length} events for current month`);
+            setEvents(mappedEvents);
         } catch (error) {
             console.error('Error fetching events:', error);
             toast.error('Error al cargar eventos');
@@ -77,18 +104,30 @@ const CalendarPage: React.FC = () => {
             }
 
             // Get all upcoming events for current game
-            const { data, error } = await supabase.rpc('get_scheduled_events_with_registrations', {
+            const { data, error: rpcError } = await supabase.rpc('get_scheduled_events_with_registrations', {
                 p_game_type: currentGame
             });
 
-            if (error) throw error;
+            let rawEvents = data;
+            if (rpcError) {
+                console.warn("Calendar recommendations RPC failed, falling back to direct table fetch:", rpcError);
+                const { data: fallbackData, error: tableError } = await supabase
+                    .from('scheduled_events')
+                    .select('*')
+                    .eq('game_type', currentGame);
+
+                if (tableError) throw tableError;
+                rawEvents = fallbackData;
+            }
 
             // Filter to upcoming events only and limit to 10
             const today = new Date();
             today.setHours(0, 0, 0, 0);
 
-            const upcoming = (data || []).filter((event: any) => {
-                const eventDate = new Date(event.date);
+            const upcoming = (rawEvents || []).filter((event: any) => {
+                const parts = event.date.split('-');
+                if (parts.length !== 3) return false;
+                const eventDate = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
                 return eventDate >= today;
             }).slice(0, 10);
 
@@ -96,12 +135,12 @@ const CalendarPage: React.FC = () => {
                 id: e.id,
                 title: e.title,
                 date: e.date,
-                event_time: e.event_time,
-                store_name: e.store_name,
+                event_time: e.event_time || e.time || '19:00',
+                store_name: e.store_name || e.storeName,
                 format: e.format,
-                registration_count: e.registration_count,
-                max_players: e.max_players,
-                is_user_registered: e.is_user_registered
+                registration_count: e.registration_count || e.playerCount || 0,
+                max_players: e.max_players || e.maxPlayers || 64,
+                is_user_registered: e.is_user_registered || false
             })));
         } catch (error) {
             console.error('Error fetching recommended events:', error);

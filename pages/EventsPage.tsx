@@ -359,7 +359,16 @@ const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [
             return;
         }
 
+        setProcessingEventId(eventId);
+
         try {
+            // 1. Eliminar primero las inscripciones para evitar errores de llave foránea
+            await supabase
+                .from('event_registrations')
+                .delete()
+                .eq('event_id', eventId);
+
+            // 2. Eliminar el evento
             const { error } = await supabase
                 .from('scheduled_events')
                 .delete()
@@ -385,6 +394,8 @@ const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [
             toast.error('Error inesperado', {
                 description: error.message || 'No se pudo eliminar el evento'
             });
+        } finally {
+            setProcessingEventId(null);
         }
     };
 
@@ -412,8 +423,14 @@ const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [
 
             if (error) {
                 console.error('Error al inscribirse:', error);
+
+                // Mensaje amigable si la función no existe
+                const errorMsg = error.message?.includes('function')
+                    ? 'Error técnico: Falta configurar la base de datos (RPC).'
+                    : error.message;
+
                 toast.error('Error al inscribirse', {
-                    description: error.message
+                    description: errorMsg
                 });
                 setProcessingEventId(null);
                 return;
@@ -429,12 +446,12 @@ const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [
             // Recargar para actualizar el contador
             setTimeout(() => {
                 window.location.reload();
-            }, 500); // Pequeño delay para que se vea el toast
+            }, 500);
 
         } catch (error: any) {
             console.error('Error al inscribirse:', error);
             toast.error('Error inesperado', {
-                description: error.message || 'No se pudo completar la inscripción'
+                description: error.message || 'No se pudo completar la inscripción. Verifica tu conexión.'
             });
             setProcessingEventId(null);
         }
@@ -455,7 +472,7 @@ const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [
             if (error) {
                 console.error('Error al cancelar inscripción:', error);
                 toast.error('Error al cancelar', {
-                    description: error.message
+                    description: error.message || 'Hubo un error en la base de datos.'
                 });
                 setProcessingEventId(null);
                 return;
@@ -465,16 +482,18 @@ const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [
                 description: `Tu inscripción a "${event.title}" fue cancelada`
             });
 
-            // Recargar para actualizar con un pequeño delay
             setTimeout(() => {
                 window.location.reload();
-            }, 500); // Pequeño delay para que se vea el toast
+            }, 500);
 
         } catch (error: any) {
             console.error('Error al cancelar inscripción:', error);
             toast.error('Error inesperado', {
                 description: error.message || 'No se pudo cancelar la inscripción'
             });
+            setProcessingEventId(null);
+        } finally {
+            // Un segundo seguro por si fallan los returns anteriores
             setProcessingEventId(null);
         }
     };
@@ -699,6 +718,7 @@ const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [
                                 <th scope="col" className="px-6 py-4 text-left text-xs font-bold text-slate-300 uppercase tracking-wider">Evento</th>
                                 <th scope="col" className="px-6 py-4 text-left text-xs font-bold text-slate-300 uppercase tracking-wider">Formato</th>
                                 <th scope="col" className="px-6 py-4 text-left text-xs font-bold text-slate-300 uppercase tracking-wider">Lugar</th>
+                                <th scope="col" className="px-6 py-4 text-center text-xs font-bold text-slate-300 uppercase tracking-wider">Valor</th>
                                 <th scope="col" className="px-6 py-4 text-center text-xs font-bold text-slate-300 uppercase tracking-wider">Multi</th>
                                 <th scope="col" className="px-6 py-4 text-center text-xs font-bold text-slate-300 uppercase tracking-wider">Inscritos</th>
                                 <th scope="col" className="px-6 py-4"></th>
@@ -735,7 +755,19 @@ const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [
                                                 <span className="text-sm text-sky-400 font-medium">{event.format}</span>
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-300">
-                                                {event.storeName}
+                                                <div className="flex items-center gap-2">
+                                                    <div className="w-6 h-6 rounded-full overflow-hidden border border-slate-700 bg-slate-900 flex-shrink-0">
+                                                        {event.imageUrl ? (
+                                                            <img src={event.imageUrl} alt={event.storeName} className="w-full h-full object-cover" />
+                                                        ) : (
+                                                            <div className="w-full h-full flex items-center justify-center text-[8px]">🏪</div>
+                                                        )}
+                                                    </div>
+                                                    {event.storeName}
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-bold text-yellow-500">
+                                                {event.entryFee ? (event.entryFee.includes('$') ? event.entryFee : `$${event.entryFee}`) : 'Gratis'}
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-center">
                                                 <span className={`inline-flex items-center justify-center w-8 h-8 rounded-full font-bold text-sm ${details.multiplier === 'x4' ? 'bg-red-600 text-white shadow-lg shadow-red-900/50' :
@@ -768,7 +800,7 @@ const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [
                                             <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                                 <div className="flex items-center justify-end gap-2">
                                                     {/* Botón de eliminar - solo para creador o admin */}
-                                                    {(event.createdBy && (event.createdBy === userId || userRole === 'admin')) && (
+                                                    {(userRole === 'admin' || (event.createdBy && event.createdBy === userId)) && (
                                                         <button
                                                             onClick={() => handleDeleteEvent(event.id, event.title)}
                                                             className="text-red-400 hover:text-red-300 font-bold border border-red-600/50 hover:border-red-500 px-3 py-2 rounded-md hover:bg-red-900/20 transition-all"

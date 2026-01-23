@@ -118,7 +118,7 @@ const AppContent: React.FC = () => {
   };
 
   // Data Fetching Logic (Parallelized)
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     setIsDataLoading(true);
     try {
       console.log("Fetching global data for:", currentGame);
@@ -148,24 +148,84 @@ const AppContent: React.FC = () => {
         }
       }
 
+      // Fetch store profiles to get avatars
+      const storesProfilesRes = await supabase.from('profiles').select('id, avatar_url').eq('role', 'store');
+      const storeAvatars: Record<string, string> = {};
+      if (storesProfilesRes.data) {
+        storesProfilesRes.data.forEach(p => {
+          if (p.avatar_url) storeAvatars[p.id] = p.avatar_url;
+        });
+      }
+
       if (tourneysRes.data) setTournamentResults(tourneysRes.data);
-      if (eventsRes.data) {
-        // Map RPC result (snake_case) to CommunityEvent interface (camelCase)
-        const mappedEvents: CommunityEvent[] = eventsRes.data.map((e: any) => ({
+
+      // Fetch current user registrations for syncing status across all pages
+      const myRegistrations = new Set<string>();
+      if (userProfile?.id) {
+        console.log("App: Fetching registrations for user:", userProfile.id);
+        const { data: regData, error: regError } = await supabase.from('event_registrations').select('event_id').eq('player_id', userProfile.id);
+        if (regError) console.error("App: Error fetching registrations:", regError);
+        if (regData) {
+          regData.forEach(r => myRegistrations.add(r.event_id));
+          console.log(`App: Found ${regData.length} registrations for user`);
+        }
+      } else {
+        console.log("App: No userProfile.id available for registrations fetch");
+      }
+
+      // Manejo de eventos con fallback inteligente por si falla el RPC
+      let rawEvents = eventsRes.data;
+      if (eventsRes.error) {
+        console.warn("RPC failed, fetching events from table + counts manually:", eventsRes.error);
+
+        // Fetch events and counts separately
+        const [tableRes, countsRes] = await Promise.all([
+          supabase.from('scheduled_events').select('*').eq('game_type', currentGame),
+          supabase.from('event_registrations').select('event_id')
+        ]);
+
+        if (tableRes.data) {
+          // Manual count matching
+          const countMap: Record<string, number> = {};
+          countsRes.data?.forEach((r: any) => {
+            countMap[r.event_id] = (countMap[r.event_id] || 0) + 1;
+          });
+
+          rawEvents = tableRes.data.map(e => ({
+            ...e,
+            registration_count: countMap[e.id] || 0,
+            event_time: e.time,
+            is_user_registered: myRegistrations.has(e.id) // Sync status here too
+          }));
+        }
+      } else if (rawEvents) {
+        // Even if RPC worked, let's double check myRegistrations for safety
+        rawEvents = rawEvents.map((e: any) => ({
+          ...e,
+          is_user_registered: e.is_user_registered || myRegistrations.has(e.id)
+        }));
+      }
+
+      if (rawEvents && rawEvents.length > 0) {
+        console.log(`Found ${rawEvents.length} events for ${currentGame}`);
+        console.log("First event sample data:", rawEvents[0]);
+
+        // Map RPC result (snake_case) or Table result to CommunityEvent interface (camelCase)
+        const mappedEvents: CommunityEvent[] = rawEvents.map((e: any) => ({
           id: e.id,
           title: e.title,
           date: e.date,
-          storeName: e.store_name,
+          storeName: e.store_name || e.storeName,
           format: e.format,
-          playerCount: e.player_count || e.registration_count || 0, // Handle different alias if any
-          imageUrl: e.image_url, // If exists
-          createdBy: e.created_by,
-          maxPlayers: e.max_players,
-          time: e.event_time,
+          playerCount: e.player_count || e.registration_count || e.playerCount || 0,
+          imageUrl: e.image_url || e.imageUrl || storeAvatars[e.created_by || e.createdBy],
+          createdBy: e.created_by || e.createdBy,
+          maxPlayers: e.max_players || e.maxPlayers,
+          time: e.event_time || e.time,
           description: e.description,
-          isUserRegistered: e.is_user_registered,
-          entryFee: e.entry_fee,
-          gameType: e.game_type
+          isUserRegistered: Boolean(e.is_user_registered || e.isUserRegistered),
+          entryFee: e.entry_fee || e.entryFee,
+          gameType: e.game_type || e.gameType
         }));
         setCommunityEvents(mappedEvents);
       }
@@ -174,7 +234,7 @@ const AppContent: React.FC = () => {
     } finally {
       setIsDataLoading(false);
     }
-  };
+  }, [currentGame, userProfile?.id]);
 
   // Session Handler
   const handleSessionState = useCallback(async (session: any) => {
@@ -215,15 +275,14 @@ const AppContent: React.FC = () => {
     }
   }, [userProfile]);
 
-  // Lifecycle
+  // Lifecycle - Run once on mount
   useEffect(() => {
-    fetchData();
-    checkYouTubeLiveStatus();
-    const ytInterval = setInterval(checkYouTubeLiveStatus, 5 * 60 * 1000);
-
+    // Check session on mount
     const initAuth = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       await handleSessionState(session);
+
+      // Listen for auth changes
       supabase.auth.onAuthStateChange(async (evt, ses) => {
         if (evt === 'SIGNED_OUT') {
           setIsLoggedIn(false);
@@ -231,12 +290,15 @@ const AppContent: React.FC = () => {
           setUserProfile(null);
           setIsAuthLoading(false);
           navigate('/');
-        } else {
+        } else if (evt === 'SIGNED_IN' || evt === 'TOKEN_REFRESHED') {
           await handleSessionState(ses);
         }
       });
     };
     initAuth();
+
+    checkYouTubeLiveStatus();
+    const ytInterval = setInterval(checkYouTubeLiveStatus, 5 * 60 * 1000);
 
     // Safety timeout for loading screen
     const timeout = setTimeout(() => setIsAuthLoading(false), 8000);
@@ -245,13 +307,14 @@ const AppContent: React.FC = () => {
       clearInterval(ytInterval);
       clearTimeout(timeout);
     };
-  }, []);
+  }, []); // Only on mount
 
+  // Data Fetching - Run on game change OR user login/logout
   useEffect(() => {
-    if (players.length > 0 || communityEvents.length > 0) {
-      fetchData();
-    }
-  }, [currentGame]);
+    fetchData();
+  }, [currentGame, userProfile?.id, fetchData]);
+
+
 
   // Auth/Loading UI
   const isLanding = location.pathname === '/';

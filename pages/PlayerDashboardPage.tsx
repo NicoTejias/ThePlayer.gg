@@ -34,8 +34,8 @@ const StatCard: React.FC<{ icon: React.ReactNode, title: string, value: string |
 
 const PlayerDashboardPage: React.FC<{ profile?: any }> = ({ profile }) => {
     const [tournamentHistory, setTournamentHistory] = useState<any[]>([]);
+    const [registeredEvents, setRegisteredEvents] = useState<any[]>([]);
     const [ranking, setRanking] = useState<{ pwpRank: number; winRateRank: number }>({ pwpRank: 0, winRateRank: 0 });
-    const [editingLeague, setEditingLeague] = useState<any>(null); // State for editing
     const [gameStats, setGameStats] = useState({ points: 0, wins: 0, losses: 0, draws: 0 });
     const [teamData, setTeamData] = useState<any>(null);
     const [loading, setLoading] = useState(true);
@@ -74,61 +74,90 @@ const PlayerDashboardPage: React.FC<{ profile?: any }> = ({ profile }) => {
 
             setTournamentHistory(tournamentResults || []);
 
-            // 2. Fetch Ranking and Points for this specific game
-            // We use the same RPC used in RankingsPage for consistency
-            const { data: rankingData } = await supabase
-                .rpc('get_game_ranking', { p_game_type: currentGame });
+            if (profile?.id) {
+                console.log("Dashboard: Fetching registrations for user:", profile.id);
+                const { data: userRegs, error: rError } = await supabase
+                    .from('event_registrations')
+                    .select(`
+                        event_id,
+                        scheduled_events!inner(*)
+                    `)
+                    .eq('player_id', profile.id)
+                    .eq('status', 'confirmed');
 
-            if (rankingData) {
-                const myStats = rankingData.find((r: any) => r.id === profile.id);
-                if (myStats) {
-                    const myIndex = rankingData.findIndex((r: any) => r.id === profile.id);
-                    setRanking({
-                        pwpRank: myIndex + 1,
-                        winRateRank: 0 // Could extract if needed
-                    });
+                if (rError) console.error("Dashboard: Error fetching registrations:", rError);
 
-                    // Update stats for local display (calculated for this game)
-                    setGameStats({
-                        points: parseInt(myStats.pwp),
-                        wins: parseInt(myStats.matches_won),
-                        losses: parseInt(myStats.matches_lost),
-                        draws: parseInt(myStats.matches_drew)
+                if (userRegs) {
+                    console.log(`Dashboard: Found ${userRegs.length} total registrations`);
+                    const upcoming = userRegs
+                        .map((r: any) => r.scheduled_events)
+                        .filter(e => e.game_type === currentGame) // Filter by current game
+                        .filter(e => {
+                            const parts = e.date.split('-');
+                            const eventDate = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+                            const today = new Date();
+                            today.setHours(0, 0, 0, 0);
+                            return eventDate >= today;
+                        })
+                        .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+                    setRegisteredEvents(upcoming);
+                }
+
+                // 3. Fetch Ranking and Points for this specific game
+                // We use the same RPC used in RankingsPage for consistency
+                const { data: rankingData } = await supabase
+                    .rpc('get_game_ranking', { p_game_type: currentGame });
+
+                if (rankingData) {
+                    const myStats = rankingData.find((r: any) => r.id === profile.id);
+                    if (myStats) {
+                        const myIndex = rankingData.findIndex((r: any) => r.id === profile.id);
+                        setRanking({
+                            pwpRank: myIndex + 1,
+                            winRateRank: 0
+                        });
+
+                        setGameStats({
+                            points: parseInt(myStats.pwp),
+                            wins: parseInt(myStats.matches_won),
+                            losses: parseInt(myStats.matches_lost),
+                            draws: parseInt(myStats.matches_drew)
+                        });
+                    } else {
+                        setRanking({ pwpRank: 0, winRateRank: 0 });
+                        setGameStats({ points: 0, wins: 0, losses: 0, draws: 0 });
+                    }
+                }
+
+                // 4. Team Data
+                if (profile.team_id) {
+                    const { data: team } = await supabase
+                        .from('teams')
+                        .select('*')
+                        .eq('id', profile.team_id)
+                        .single();
+                    setTeamData(team);
+                }
+
+                // 5. Check Gala Nomination
+                const { data: awardData } = await supabase
+                    .from('user_awards')
+                    .select('id, award:award_id(name)')
+                    .eq('user_id', profile.id);
+
+                const nominated = awardData?.some(a => (a.award as any)?.name?.includes('Nominado Gala'));
+                setIsNominated(!!nominated);
+
+                // 6. Check Automatic Achievements
+                const { data: grantedCount } = await supabase.rpc('check_and_grant_awards', { p_user_id: profile.id });
+                if (grantedCount > 0) {
+                    toast.success(`🎉 ¡Felicidades! Has desbloqueado ${grantedCount} nuevo(s) logro(s) por tu actividad.`, {
+                        description: 'Revisa tu vitrina de trofeos para ver los detalles.',
+                        duration: 6000,
                     });
-                } else {
-                    setRanking({ pwpRank: 0, winRateRank: 0 });
-                    setGameStats({ points: 0, wins: 0, losses: 0, draws: 0 });
                 }
             }
-
-            // 3. Team Data
-            if (profile.team_id) {
-                const { data: team } = await supabase
-                    .from('teams')
-                    .select('*')
-                    .eq('id', profile.team_id)
-                    .single();
-                setTeamData(team);
-            }
-
-            // 4. Check Gala Nomination
-            const { data: awardData } = await supabase
-                .from('user_awards')
-                .select('id, award:award_id(name)')
-                .eq('user_id', profile.id);
-
-            const nominated = awardData?.some(a => (a.award as any)?.name?.includes('Nominado Gala'));
-            setIsNominated(!!nominated);
-
-            // 5. Check Automatic Achievements
-            const { data: grantedCount } = await supabase.rpc('check_and_grant_awards', { p_user_id: profile.id });
-            if (grantedCount > 0) {
-                toast.success(`🎉 ¡Felicidades! Has desbloqueado ${grantedCount} nuevo(s) logro(s) por tu actividad.`, {
-                    description: 'Revisa tu vitrina de trofeos para ver los detalles.',
-                    duration: 6000,
-                });
-            }
-
         } catch (error) {
             console.error("Error fetching player data:", error);
         } finally {
@@ -247,29 +276,76 @@ const PlayerDashboardPage: React.FC<{ profile?: any }> = ({ profile }) => {
                 <LevelProgressBar pwp={gameStats.points} />
             </section>
 
-            {/* Gala Nomination Card */}
-            {isNominated && (
-                <div className="bg-gradient-to-br from-yellow-500/10 to-slate-900 border border-yellow-500/30 p-8 rounded-3xl relative overflow-hidden group">
-                    <div className="absolute top-0 right-0 w-64 h-64 bg-yellow-500/5 blur-[100px] -mr-32 -mt-32"></div>
-                    <div className="flex flex-col md:flex-row items-center gap-8 relative z-10">
-                        <div className="w-24 h-24 bg-yellow-500 rounded-3xl flex items-center justify-center shadow-2xl shadow-yellow-500/40 rotate-6 group-hover:rotate-12 transition-transform">
-                            <span className="text-5xl">🎖️</span>
-                        </div>
-                        <div className="text-center md:text-left flex-1">
-                            <h3 className="text-3xl font-black text-white italic tracking-tighter uppercase mb-2">¡Felicitaciones, Nominado!</h3>
-                            <p className="text-slate-300 text-lg">
-                                Has sido seleccionado oficialmente para la <span className="text-yellow-500 font-bold">Gala de Premios 2026</span>.
-                                Tu constancia y nivel te han llevado a la cima de la liga.
-                            </p>
-                        </div>
-                        <button className="px-8 py-4 bg-yellow-500 text-slate-950 font-black rounded-xl hover:bg-yellow-400 transition-all shadow-lg active:scale-95">
-                            VER MI INVITACIÓN
-                        </button>
+            {/* Event Reminders & Upcoming Events */}
+            {registeredEvents.length > 0 && (
+                <section className="space-y-6">
+                    <h2 className="text-3xl font-bold text-white uppercase tracking-wider flex items-center gap-3">
+                        📅 Mis Próximos Eventos
+                    </h2>
+
+                    {/* Dynamic Reminders */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {registeredEvents.map(event => {
+                            const parts = event.date.split('-');
+                            const eventDate = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+                            const today = new Date();
+                            today.setHours(0, 0, 0, 0);
+
+                            const diffDays = Math.ceil((eventDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+
+                            if (diffDays <= 1) {
+                                return (
+                                    <div key={`rem-${event.id}`} className={`p-6 rounded-2xl border-2 animate-pulse-slow ${diffDays === 0
+                                        ? 'bg-red-950/40 border-red-500 shadow-lg shadow-red-900/20'
+                                        : 'bg-orange-950/40 border-orange-500 shadow-lg shadow-orange-900/20'}`}>
+                                        <div className="flex items-start gap-4">
+                                            <div className="text-4xl">
+                                                {diffDays === 0 ? '🔥' : '⏰'}
+                                            </div>
+                                            <div>
+                                                <h3 className="text-xl font-bold text-white">
+                                                    {diffDays === 0 ? '¡HOY TIENES TORNEO!' : 'Recordatorio: Torneo Mañana'}
+                                                </h3>
+                                                <p className="text-slate-200 mt-1 font-medium">
+                                                    {event.title} - {event.event_time || event.time} en {event.store_name}
+                                                </p>
+                                                <p className="text-sm text-slate-400 mt-3 flex items-center gap-2">
+                                                    <span>🎒</span>
+                                                    No olvides tus cartas, accesorios, playmat y protectores.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                );
+                            }
+                            return null;
+                        })}
                     </div>
-                </div>
+
+                    {/* All Registered Events List */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 font-bold">
+                        {registeredEvents.map(event => (
+                            <Link
+                                to="/eventos"
+                                key={event.id}
+                                className="bg-slate-800/50 border border-slate-700 p-5 rounded-xl hover:border-sky-500 transition-all hover:bg-slate-800 group"
+                            >
+                                <div className="flex justify-between items-start mb-3">
+                                    <span className="text-sky-400 text-xs uppercase tracking-widest">{event.format}</span>
+                                    <span className="text-slate-500 text-xs">{event.date}</span>
+                                </div>
+                                <h4 className="text-white group-hover:text-sky-400 transition-colors">{event.title}</h4>
+                                <div className="mt-4 flex items-center justify-between text-xs text-slate-500">
+                                    <span className="flex items-center gap-1">📍 {event.store_name}</span>
+                                    <span className="flex items-center gap-1">🕒 {event.event_time || event.time}</span>
+                                </div>
+                            </Link>
+                        ))}
+                    </div>
+                </section>
             )}
 
-            {/* Key Metrics */}
+            {/* Metrics and Rest of the dashboard */}
             <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <StatCard
                     icon={<TrophyIcon className="w-8 h-8" />}

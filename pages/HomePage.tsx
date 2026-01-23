@@ -206,10 +206,10 @@ const HomePage: React.FC<HomePageProps> = ({ players, events, session, userRole,
 
   const upcomingEvents = (events || [])
     .filter(event => {
-      // Asumimos que event.date viene en formato YYYY-MM-DD
-      // Agregamos T00:00:00 para asegurar que se interprete como local time al inicio del día
-      // o usamos una comparación de strings directa si el formato es consistente ISO
-      const eventDate = new Date(`${event.date}T00:00:00`);
+      // Robust date parsing (YYYY-MM-DD)
+      const parts = event.date.split('-');
+      if (parts.length !== 3) return false;
+      const eventDate = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
       return eventDate >= today;
     })
     .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
@@ -331,33 +331,78 @@ const HomePage: React.FC<HomePageProps> = ({ players, events, session, userRole,
                     <Link to="/eventos" className="mt-3 text-xs text-blue-400 hover:text-blue-300 font-bold underline">Ver Calendario Completo</Link>
                   </div>
 
-                  <div className="p-4 relative z-10">
-                    <h3 className="text-lg font-bold text-white mb-2 line-clamp-1 group-hover:text-blue-400 transition-colors">{event.title}</h3>
-                    <p className="text-sm text-slate-400 mb-1">📍 {event.storeName}</p>
-                    <div className="flex items-center gap-2 text-sm text-slate-400 mb-1">
-                      <span>📅 {event.date}</span>
-                      <span>⏰ {event.time ? event.time.substring(0, 5) : '19:00'}</span>
-                    </div>
-                    {event.entryFee && (
-                      <p className="text-sm text-yellow-500 font-bold mb-1">🎟️ {event.entryFee}</p>
-                    )}
-                    <div className="flex items-center justify-between mt-3 pt-3 border-t border-slate-700">
-                      <span className="text-xs bg-blue-500/20 text-blue-300 px-2 py-1 rounded">{event.format}</span>
-                      <div className="flex items-center gap-2">
-                        {userRole === 'player' && userId && !registrations.has(event.id) && (
-                          <button
-                            onClick={(e) => { e.preventDefault(); e.stopPropagation(); setSelectedEvent(event); setShowRegModal(true); }}
-                            className="text-xs bg-green-600 hover:bg-green-500 text-white px-4 py-2 rounded font-bold transition-colors min-h-[44px] flex items-center justify-center shadow-lg shadow-green-900/20"
-                          >Inscribirse</button>
-                        )}
-                        {userRole === 'player' && registrations.has(event.id) && (
-                          <span className="text-xs text-green-400 font-bold flex items-center gap-1 bg-green-900/30 px-2 py-1 rounded border border-green-500/30">
-                            <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" /></svg>Inscrito</span>
-                        )}
-                        {!userRole && (
-                          <span className="text-xs text-slate-500">{event.playerCount || 0} jugadores</span>
-                        )}
+                  <div className="p-4 relative z-10 flex flex-col h-full">
+                    <div className="flex items-start justify-between gap-3 mb-4">
+                      <div className="flex flex-col flex-1 min-w-0">
+                        <h3 className="text-xl font-bold text-white line-clamp-1 group-hover:text-blue-400 transition-colors leading-tight" title={event.title}>{event.title}</h3>
+                        <p className="text-sm text-slate-400 truncate mt-1">📍 {event.storeName}</p>
                       </div>
+                      <div className="flex flex-col items-end flex-shrink-0">
+                        <span className={`text-[10px] font-black px-2 py-1 rounded shadow-sm border border-white/10 uppercase tracking-tighter ${event.format.toLowerCase() === 'commander' ? 'bg-purple-600 text-white' :
+                          event.format.toLowerCase().includes('rcq') ? 'bg-red-600 text-white' :
+                            'bg-blue-600 text-white'
+                          }`}>
+                          {event.format}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="space-y-3 mb-5">
+                      <div className="flex items-center gap-3 text-sm text-slate-300 bg-slate-900/40 p-2 rounded-lg border border-slate-700/50">
+                        <span className="flex items-center gap-1.5 font-bold whitespace-nowrap"><span className="text-slate-500">📅</span> {event.date}</span>
+                        <div className="w-px h-3 bg-slate-700"></div>
+                        <span className="flex items-center gap-1.5 font-bold whitespace-nowrap"><span className="text-slate-500">⏰</span> {event.time ? event.time.substring(0, 5) : '19:00'}</span>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-2">
+                        <div className="bg-slate-900/30 p-2 rounded-lg border border-slate-700/30 flex flex-col justify-center">
+                          <span className="text-[9px] uppercase font-black text-slate-500 tracking-tighter mb-0.5">Inscripción</span>
+                          <span className="text-base text-yellow-500 font-black leading-none">{event.entryFee ? (event.entryFee.includes('$') ? event.entryFee : `$${event.entryFee}`) : 'Gratis'}</span>
+                        </div>
+
+                        <div className="bg-slate-900/30 p-2 rounded-lg border border-slate-700/30 flex flex-col items-end justify-center relative group/logo">
+                          <div className="flex flex-col items-end">
+                            <span className="text-[9px] uppercase font-black text-slate-500 tracking-tighter mb-1">Cupos</span>
+                            <span className={`text-base font-black leading-none ${(event.playerCount || 0) >= (event.maxPlayers || 32) ? 'text-red-400' : 'text-green-400'}`}>
+                              {event.playerCount || 0} / {event.maxPlayers || 64}
+                            </span>
+                          </div>
+
+                          {/* Store Logo positioned above Cupos */}
+                          <div className="absolute -top-11 right-0 w-11 h-11 rounded-full overflow-hidden border-2 border-slate-700 bg-slate-800 shadow-xl transform group-hover/logo:scale-110 transition-transform duration-300">
+                            {event.imageUrl ? (
+                              <img src={event.imageUrl} alt={event.storeName} className="w-full h-full object-cover" onError={(e) => (e.currentTarget.src = '🏪')} />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center text-xl">🏪</div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="mt-auto pt-3 border-t border-slate-700/50">
+                      {userId && !event.isUserRegistered && (
+                        <button
+                          onClick={(e) => { e.preventDefault(); e.stopPropagation(); setSelectedEvent(event); setShowRegModal(true); }}
+                          className="w-full h-11 bg-green-600 hover:bg-green-500 text-white rounded-xl font-black transition-all shadow-lg shadow-green-900/40 active:scale-95 flex items-center justify-center gap-2 uppercase tracking-wider text-xs"
+                        >
+                          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                          </svg>
+                          Inscribirse Ahora
+                        </button>
+                      )}
+                      {userId && event.isUserRegistered && (
+                        <div className="w-full h-11 bg-green-900/30 text-green-400 rounded-xl font-black border border-green-500/30 flex items-center justify-center gap-2 uppercase text-xs">
+                          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" /></svg>
+                          Confirmado
+                        </div>
+                      )}
+                      {!userRole && (
+                        <Link to="/login" className="w-full h-11 bg-slate-700 hover:bg-slate-600 text-white rounded-xl font-black flex items-center justify-center gap-2 transition-all uppercase text-xs">
+                          Identificarse para Ir
+                        </Link>
+                      )}
                     </div>
                   </div>
                 </SimpleCard>
