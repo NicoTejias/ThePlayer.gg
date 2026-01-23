@@ -10,12 +10,6 @@ const UniverseSelectionPage: React.FC = () => {
     const [stores, setStores] = useState<any[]>([]);
 
     useEffect(() => {
-        const savedGame = localStorage.getItem('selectedGame');
-        if (savedGame) {
-            navigate('/home');
-            return;
-        }
-
         const fetchStores = async () => {
             const { data } = await supabase
                 .from('profiles')

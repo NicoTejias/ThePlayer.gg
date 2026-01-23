@@ -194,7 +194,11 @@ const ArticleManager: React.FC<ArticleManagerProps> = ({ authorId, startOpen = f
             fetchArticles();
         } catch (error: any) {
             console.error('Error saving article:', error);
-            toast.error('Ocurrió un error: ' + (error.message || 'Error desconocido'));
+            if (error.code === '23505') {
+                toast.error('La URL (Slug) ya está en uso. Por favor, cambia un poco el título o modifica el Slug manualmente para que sea único.');
+            } else {
+                toast.error('Ocurrió un error: ' + (error.message || 'Error desconocido'));
+            }
         } finally {
             setIsSaving(false);
         }

@@ -329,7 +329,14 @@ const AppContent: React.FC = () => {
   const handleLogin = (role: any) => {
     setIsLoggedIn(true);
     setUserRole(role);
-    navigate(role === 'admin' ? '/admin' : role === 'store' ? '/dashboard/tienda' : '/dashboard/jugador');
+
+    // Si es un jugador y tiene un juego seleccionado, ir directo al Home del universo
+    const savedGame = localStorage.getItem('selectedGame');
+    if (role === 'player' && savedGame) {
+      navigate('/home');
+    } else {
+      navigate(role === 'admin' ? '/admin' : role === 'store' ? '/dashboard/tienda' : '/dashboard/jugador');
+    }
   };
 
   const handleLogout = async () => {

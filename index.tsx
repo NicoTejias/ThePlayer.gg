@@ -67,9 +67,11 @@ const handleOAuthCallback = async () => {
         console.error('❌ OAuth detected but could not extract access_token.');
       }
 
-      // Clean the URL by removing OAuth params and redirect to home
+      // Clean the URL by removing OAuth params and redirect to home if a game is selected
       // We explicitly clear the hash to a clean state
-      window.history.replaceState(null, '', window.location.pathname + '#/');
+      const savedGame = localStorage.getItem('selectedGame');
+      const targetHash = savedGame ? '#/home' : '#/';
+      window.history.replaceState(null, '', window.location.pathname + targetHash);
 
     } catch (err) {
       console.error('❌ OAuth callback handling error:', err);
