@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '../../supabaseClient';
 import { toast } from 'sonner';
 import ImageUpload from './ImageUpload';
+import ReactMarkdown from 'react-markdown';
 
 interface Article {
     id: string;
@@ -26,8 +27,10 @@ interface ArticleManagerProps {
 const ArticleManager: React.FC<ArticleManagerProps> = ({ authorId, startOpen = false }) => {
     const [articles, setArticles] = useState<Article[]>([]);
     const [loading, setLoading] = useState(true);
+    const [isSaving, setIsSaving] = useState(false);
     const [editingId, setEditingId] = useState<string | null>(null);
     const [showForm, setShowForm] = useState(startOpen);
+    const [showPreview, setShowPreview] = useState(false);
 
     // Form State
     const [formData, setFormData] = useState({
@@ -45,27 +48,29 @@ const ArticleManager: React.FC<ArticleManagerProps> = ({ authorId, startOpen = f
     useEffect(() => {
         fetchArticles();
         if (startOpen) handleCreateNew();
-    }, [startOpen]);
+    }, [startOpen, authorId]);
 
     const fetchArticles = async () => {
         setLoading(true);
-        let query = supabase
-            .from('articles')
-            .select('*');
+        try {
+            let query = supabase
+                .from('articles')
+                .select('*');
 
-        if (authorId) {
-            query = query.eq('author_id', authorId);
-        }
+            if (authorId) {
+                query = query.eq('author_id', authorId);
+            }
 
-        const { data, error } = await query.order('created_at', { ascending: false });
+            const { data, error } = await query.order('created_at', { ascending: false });
 
-        if (error) {
+            if (error) throw error;
+            setArticles(data || []);
+        } catch (error: any) {
             toast.error('Error al cargar artículos');
             console.error(error);
-        } else {
-            setArticles(data || []);
+        } finally {
+            setLoading(false);
         }
-        setLoading(false);
     };
 
     const handleCreateNew = () => {
@@ -82,6 +87,7 @@ const ArticleManager: React.FC<ArticleManagerProps> = ({ authorId, startOpen = f
         });
         setEditingId(null);
         setShowForm(true);
+        setShowPreview(false);
     };
 
     const handleEdit = (article: Article) => {
@@ -98,17 +104,21 @@ const ArticleManager: React.FC<ArticleManagerProps> = ({ authorId, startOpen = f
         });
         setEditingId(article.id);
         setShowForm(true);
+        setShowPreview(false);
     };
 
     const handleDelete = async (id: string) => {
-        if (!confirm('¿Estás seguro de eliminar este artículo?')) return;
+        const article = articles.find(a => a.id === id);
+        if (!confirm(`¿Estás seguro de eliminar el artículo "${article?.title}"?`)) return;
 
-        const { error } = await supabase.from('articles').delete().eq('id', id);
-        if (error) {
-            toast.error('Error al eliminar');
-        } else {
+        try {
+            const { error } = await supabase.from('articles').delete().eq('id', id);
+            if (error) throw error;
+
             toast.success('Artículo eliminado');
             fetchArticles();
+        } catch (error: any) {
+            toast.error('Error al eliminar: ' + error.message);
         }
     };
 
@@ -130,12 +140,22 @@ const ArticleManager: React.FC<ArticleManagerProps> = ({ authorId, startOpen = f
         }));
     };
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
+    const handleSubmit = async (e?: React.FormEvent) => {
+        // Safe preventDefault
+        if (e && typeof e.preventDefault === 'function') {
+            e.preventDefault();
+        }
 
+        // Final validation
+        if (!formData.title || !formData.content || !formData.slug) {
+            toast.error('Por favor completa los campos obligatorios (Título, Contenido y Slug)');
+            return;
+        }
+
+        setIsSaving(true);
         try {
             const { data: { user } } = await supabase.auth.getUser();
-            if (!user) throw new Error('No usuario');
+            if (!user) throw new Error('No se encontró una sesión activa. Por favor reingresa.');
 
             const payload = {
                 title: formData.title,
@@ -168,13 +188,72 @@ const ArticleManager: React.FC<ArticleManagerProps> = ({ authorId, startOpen = f
 
             if (error) throw error;
 
-            toast.success(editingId ? 'Artículo actualizado' : 'Artículo creado');
+            toast.success(editingId ? 'Artículo actualizado correctamente' : '¡Artículo publicado con éxito!');
             setShowForm(false);
+            setShowPreview(false);
             fetchArticles();
         } catch (error: any) {
-            toast.error('Error al guardar: ' + error.message);
+            console.error('Error saving article:', error);
+            toast.error('Ocurrió un error: ' + (error.message || 'Error desconocido'));
+        } finally {
+            setIsSaving(false);
         }
     };
+
+    if (showForm && showPreview) {
+        return (
+            <div className="bg-slate-800 p-8 rounded-xl border border-slate-700 animate-in fade-in zoom-in-95 duration-200">
+                <div className="flex justify-between items-center mb-8 pb-4 border-b border-slate-700">
+                    <div>
+                        <h2 className="text-3xl font-bold text-white">Previsualización</h2>
+                        <p className="text-slate-400 text-sm">Revisa cómo se verá tu artículo antes de publicar.</p>
+                    </div>
+                    <div className="flex gap-4">
+                        <button
+                            onClick={() => setShowPreview(false)}
+                            className="bg-slate-700 hover:bg-slate-600 text-white font-bold px-6 py-2 rounded-lg transition-colors"
+                        >
+                            ← Volver a Editar
+                        </button>
+                        <button
+                            onClick={() => handleSubmit()}
+                            disabled={isSaving}
+                            className={`bg-blue-600 hover:bg-blue-500 text-white font-bold px-8 py-2 rounded-lg transition-all shadow-lg shadow-blue-900/40 ${isSaving ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        >
+                            {isSaving ? 'Publicando...' : 'Publicar Ahora'}
+                        </button>
+                    </div>
+                </div>
+
+                <div className="bg-slate-900/50 p-6 sm:p-10 rounded-xl overflow-hidden shadow-inner max-w-4xl mx-auto">
+                    {formData.imageUrl && (
+                        <div className="aspect-video w-full overflow-hidden rounded-xl mb-8 shadow-2xl border border-slate-700">
+                            <img src={formData.imageUrl} alt="Cover" className="w-full h-full object-cover" />
+                        </div>
+                    )}
+
+                    <div className="flex items-center gap-2 mb-4">
+                        <span className="px-3 py-1 bg-blue-500/20 text-blue-400 rounded-full text-xs font-bold uppercase tracking-wider">{formData.category}</span>
+                        <span className="text-slate-500">•</span>
+                        <span className="text-slate-400 text-xs font-medium uppercase tracking-wider">{formData.gameType}</span>
+                        {formData.isPremium && <span className="ml-2 px-2 py-0.5 bg-yellow-500/20 text-yellow-500 rounded text-[10px] font-black uppercase border border-yellow-500/30">👑 Premium</span>}
+                    </div>
+
+                    <h1 className="text-4xl sm:text-5xl font-black text-white mb-6 tracking-tight leading-tight">{formData.title}</h1>
+
+                    {formData.excerpt && (
+                        <p className="text-xl text-slate-400 italic mb-8 border-l-4 border-blue-500 pl-6 py-2 leading-relaxed">
+                            {formData.excerpt}
+                        </p>
+                    )}
+
+                    <div className="prose prose-invert prose-blue max-w-none text-slate-200 leading-relaxed text-lg">
+                        <ReactMarkdown>{formData.content}</ReactMarkdown>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     if (showForm) {
         return (
@@ -191,7 +270,7 @@ const ArticleManager: React.FC<ArticleManagerProps> = ({ authorId, startOpen = f
                     </button>
                 </div>
 
-                <form onSubmit={handleSubmit} className="space-y-6">
+                <form onSubmit={(e) => { e.preventDefault(); setShowPreview(true); }} className="space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                             <label htmlFor="article-title" className="block text-slate-400 mb-2">Título</label>
@@ -316,7 +395,7 @@ const ArticleManager: React.FC<ArticleManagerProps> = ({ authorId, startOpen = f
                             type="submit"
                             className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-500 font-bold"
                         >
-                            Guardar Artículo
+                            Previsualizar Artículo
                         </button>
                     </div>
                 </form>
@@ -337,7 +416,7 @@ const ArticleManager: React.FC<ArticleManagerProps> = ({ authorId, startOpen = f
             </div>
 
             {loading ? (
-                <div className="text-center text-slate-500">Cargando...</div>
+                <div className="text-center text-slate-500 py-12">Cargando...</div>
             ) : articles.length > 0 ? (
                 <div className="grid gap-4">
                     {articles.map(article => (

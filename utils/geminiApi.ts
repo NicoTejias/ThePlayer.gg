@@ -62,7 +62,7 @@ INSTRUCCIONES:
 }
 
 export async function sendMessageToGemini(history: ChatMessage[], userInput: string) {
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-exp" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
     const systemPrompt = await getPlatformContext();
 

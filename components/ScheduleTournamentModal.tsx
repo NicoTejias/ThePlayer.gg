@@ -236,14 +236,14 @@ const ScheduleTournamentModal: React.FC<ScheduleTournamentModalProps> = ({ isOpe
                             type="text"
                             required
                             value={formData.storeName}
-                            onChange={(e) => setFormData({ ...formData, storeName: e.target.value })}
+                            readOnly={userProfile?.role === 'store'}
+                            onChange={(e) => userProfile?.role !== 'store' && setFormData({ ...formData, storeName: e.target.value })}
                             placeholder="Nombre de tu tienda"
-                            disabled={userProfile?.role === 'store'} // Disable if user is a store
-                            className={`w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-green-500 ${userProfile?.role === 'store' ? 'opacity-50 cursor-not-allowed' : ''}`}
+                            className={`w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-green-500 ${userProfile?.role === 'store' ? 'opacity-70 bg-slate-800' : ''}`}
                         />
                         {userProfile?.role === 'store' && (
-                            <p className="text-xs text-slate-500 mt-1">
-                                La tienda se asigna automáticamente a tu usuario.
+                            <p className="text-xs text-sky-400 mt-1">
+                                El nombre se asigna automáticamente según tu perfil registrado.
                             </p>
                         )}
                     </div>
