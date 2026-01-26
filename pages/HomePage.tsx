@@ -16,6 +16,7 @@ import ContentCreatorBadge from '../components/ContentCreatorBadge';
 import AdminWidget from '../components/widgets/AdminWidget';
 import QuickRegistrationModal from '../components/QuickRegistrationModal';
 import GalaNominationsBanner from '../components/GalaNominationsBanner';
+import AliasReminderBanner from '../components/AliasReminderBanner';
 
 
 
@@ -43,6 +44,7 @@ interface HomePageProps {
   session?: any;
   userRole?: 'player' | 'store' | 'admin' | null;
   userId?: string;
+  showAliasReminder?: boolean;
 }
 
 const CountUp: React.FC<{ end: number; duration?: number }> = ({ end, duration = 2000 }) => {
@@ -61,7 +63,7 @@ const CountUp: React.FC<{ end: number; duration?: number }> = ({ end, duration =
   return <span>{count.toLocaleString()}</span>;
 };
 
-const HomePage: React.FC<HomePageProps> = ({ players, events, session, userRole, userId }) => {
+const HomePage: React.FC<HomePageProps> = ({ players, events, session, userRole, userId, showAliasReminder = false }) => {
   const { currentGame } = useGame();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [latestNews, setLatestNews] = useState<MediaArticle[]>([]);
@@ -180,25 +182,7 @@ const HomePage: React.FC<HomePageProps> = ({ players, events, session, userRole,
       is_content_creator: p.is_content_creator || false,
     }));
 
-  const topWinRatePlayers = [...players]
-    .map(p => {
-      const total = (p.matchesWon || 0) + (p.matchesLost || 0) + (p.matchesDrew || 0);
-      const winRate = total > 0 ? ((p.matchesWon || 0) / total) * 100 : 0;
-      return { ...p, winRate };
-    })
-    .filter(p => (p.tournaments_played || 0) >= 10) // Minimo 10 torneos
-    .sort((a, b) => b.winRate - a.winRate)
-    .slice(0, 10)
-    .map((p, i) => ({
-      id: p.id,
-      rank: i + 1,
-      playerName: p.name || `Jugador #${Math.abs(p.id.split('').reduce((acc, c) => c.charCodeAt(0) + ((acc << 5) - acc), 0) % 9000 + 1000)}`,
-      winRate: `${p.winRate.toFixed(1)}%`,
-      region: p.region || 'Unknown',
-      team: p.team || '-',
-      is_pro: p.is_pro || false,
-      is_content_creator: p.is_content_creator || false,
-    }));
+
 
   // Filtrar eventos pasados y mostrar solo los próximos (incluyendo hoy)
   const today = new Date();
@@ -311,6 +295,9 @@ const HomePage: React.FC<HomePageProps> = ({ players, events, session, userRole,
 
       {/* Main Content */}
       <div className="container mx-auto px-4 py-12 space-y-16">
+        {/* Alias Reminder for Players */}
+        <AliasReminderBanner show={showAliasReminder} />
+
         {/* Gala Banner */}
         <GalaNominationsBanner />
 
@@ -416,12 +403,12 @@ const HomePage: React.FC<HomePageProps> = ({ players, events, session, userRole,
         {/* Rankings */}
         <section>
           <SectionHeader title="Rankings" linkTo="/ranking" />
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="flex justify-center">
             {/* PLS Ranking */}
-            <div>
+            <div className="w-full max-w-4xl">
               <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3">Top 10 Player Points</h3>
               <div className="bg-slate-800/50 rounded-xl border border-slate-700 overflow-hidden shadow-xl">
-                {topPwpPlayers.slice(0, 5).map(player => {
+                {topPwpPlayers.slice(0, 10).map(player => {
                   const isCurrent = session?.user?.id && player.id === session.user.id;
                   return (
                     <Link key={player.id} to="/ranking" className={`flex items-center gap-3 p-3 hover:bg-slate-700/50 transition-colors border-b border-slate-700/50 last:border-0 ${isCurrent ? 'bg-blue-500/10 border-l-4 border-l-blue-500' : ''}`}>
@@ -438,36 +425,6 @@ const HomePage: React.FC<HomePageProps> = ({ players, events, session, userRole,
                       <div className="text-right">
                         <span className={`block font-bold font-mono text-sm ${isCurrent ? 'text-blue-400' : 'text-green-400'}`}>{player.pwp.toLocaleString()}</span>
                         <span className="text-[10px] text-slate-500 uppercase">Points</span>
-                      </div>
-                    </Link>
-                  );
-                })}
-              </div>
-            </div>
-            {/* Win Rate Ranking */}
-            <div>
-              <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3 flex items-center justify-between">
-                <span>Top 10 Win Rate</span>
-                <span className="text-[10px] bg-slate-700 px-2 py-1 rounded text-slate-300">Min. 10 Torneos</span>
-              </h3>
-              <div className="bg-slate-800/50 rounded-xl border border-slate-700 overflow-hidden shadow-xl">
-                {topWinRatePlayers.slice(0, 5).map(player => {
-                  const isCurrent = session?.user?.id && player.id === session.user.id;
-                  return (
-                    <Link key={player.id} to="/ranking" className={`flex items-center gap-2 sm:gap-3 p-2 sm:p-3 hover:bg-slate-700/50 transition-colors border-b border-slate-700/50 last:border-0 ${isCurrent ? 'bg-purple-500/10 border-l-4 border-l-purple-500' : ''}`}>
-                      <span className={`text-lg font-black w-6 ${isCurrent ? 'text-purple-400' : 'text-slate-600'}`}>{player.rank}</span>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2">
-                          <p className="text-white font-bold truncate text-sm">{player.playerName}</p>
-                          {player.is_pro && <ProBadge size="small" />}
-                          {player.is_content_creator && <ContentCreatorBadge size="small" />}
-                          {isCurrent && <span className="px-2 py-0.5 bg-purple-500 text-white text-xs font-bold rounded-full">Tú</span>}
-                        </div>
-                        <p className="text-xs text-slate-500">{player.team}</p>
-                      </div>
-                      <div className="text-right">
-                        <span className={`block font-bold font-mono text-sm ${isCurrent ? 'text-purple-400' : 'text-blue-400'}`}>{player.winRate}</span>
-                        <span className="text-[10px] text-slate-500 uppercase">WinRate</span>
                       </div>
                     </Link>
                   );

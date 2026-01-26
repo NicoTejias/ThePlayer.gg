@@ -16,19 +16,41 @@ interface EventsPageProps {
     userId?: string; // ID del usuario actual
 }
 
+const EVENT_TYPES_CONFIG = [
+    {
+        keywords: ['rcq', 'premier', 'regional'],
+        type: 'Premier / RCQ',
+        color: 'bg-red-600',
+        multiplier: 'x4'
+    },
+    {
+        keywords: ['prerelease', 'sellado'],
+        formats: ['sealed', 'draft'],
+        type: 'Limited / Prerelease',
+        color: 'bg-yellow-500 text-slate-900',
+        multiplier: 'x3'
+    },
+    {
+        keywords: ['showdown'],
+        type: 'Showdown',
+        color: 'bg-slate-400 text-slate-900',
+        multiplier: 'x2'
+    }
+];
+
 const getTournamentTypeDetails = (event: CommunityEvent) => {
     const titleLower = event.title.toLowerCase();
     const formatLower = event.format.toLowerCase();
 
-    if (titleLower.includes('rcq') || titleLower.includes('premier') || titleLower.includes('regional')) {
-        return { type: 'Premier / RCQ', color: 'bg-red-600', multiplier: 'x4' };
+    for (const config of EVENT_TYPES_CONFIG) {
+        const matchesKeyword = config.keywords.some(kw => titleLower.includes(kw));
+        const matchesFormat = config.formats?.some(fmt => formatLower === fmt);
+
+        if (matchesKeyword || matchesFormat) {
+            return { type: config.type, color: config.color, multiplier: config.multiplier };
+        }
     }
-    if (titleLower.includes('prerelease') || titleLower.includes('sellado') || formatLower === 'sealed' || formatLower === 'draft') {
-        return { type: 'Limited / Prerelease', color: 'bg-yellow-500 text-slate-900', multiplier: 'x3' };
-    }
-    if (titleLower.includes('showdown')) {
-        return { type: 'Showdown', color: 'bg-slate-400 text-slate-900', multiplier: 'x2' };
-    }
+
     // Default to Semanal/FNM
     return { type: 'Semanal / FNM', color: 'bg-orange-500', multiplier: 'x1' };
 };

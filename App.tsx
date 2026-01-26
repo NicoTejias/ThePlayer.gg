@@ -2,7 +2,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Toaster, toast } from 'sonner';
 import { HashRouter, Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from './supabaseClient';
-import type { Database } from './database.types';
+import { useAuth } from './hooks/useAuth';
+import { useAppData } from './hooks/useAppData';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import FloatingActionButton from './components/FloatingActionButton';
@@ -82,237 +83,44 @@ const AppContent: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const [isAuthLoading, setIsAuthLoading] = useState(true);
-  const [isDataLoading, setIsDataLoading] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [userRole, setUserRole] = useState<'player' | 'store' | 'admin' | null>(null);
-  const [userProfile, setUserProfile] = useState<any>(null);
-  const [tournamentResults, setTournamentResults] = useState<TournamentResult[]>([]);
-  const [communityEvents, setCommunityEvents] = useState<CommunityEvent[]>([]);
-  const [players, setPlayers] = useState<PlayerProfile[]>([]);
-  const [teams, setTeams] = useState<Team[]>([]);
-  const [showOnboarding, setShowOnboarding] = useState(false);
+  const {
+    isAuthLoading,
+    isLoggedIn,
+    userRole,
+    userProfile,
+    showOnboarding,
+    setShowOnboarding,
+    hasAlias,
+    handleLogin,
+    handleLogout,
+  } = useAuth();
+
+  const {
+    isDataLoading,
+    tournamentResults,
+    communityEvents,
+    players,
+    teams,
+    refreshData: fetchData
+  } = useAppData(currentGame, userProfile?.id);
+
   const [unclaimedResults, setUnclaimedResults] = useState<any[]>([]);
   const [showClaimModal, setShowClaimModal] = useState(false);
   const [isLiveSignal, setIsLiveSignal] = useState(false);
 
   // YouTube Live Detection
   const YOUTUBE_CHANNEL_ID = 'UC-ymLrXBUoNFhku0d8tWCVA';
-  const YOUTUBE_API_KEY = 'AIzaSyD-EGf2uQdBNFhT2FZ_m_DXR4P3kIR_LN8';
+  const YOUTUBE_API_KEY = import.meta.env.VITE_YOUTUBE_API_KEY;
 
   const checkYouTubeLiveStatus = async () => {
-    // Disabled to save API quota
     setIsLiveSignal(false);
-    /*
-    try {
-      if (!YOUTUBE_API_KEY || YOUTUBE_API_KEY.includes('YourAPIKey')) return;
-      const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=${YOUTUBE_CHANNEL_ID}&eventType=live&type=video&key=${YOUTUBE_API_KEY}`;
-      const response = await fetch(url);
-      if (response.status === 403) return;
-      const data = await response.json();
-      setIsLiveSignal(data.items && data.items.length > 0);
-    } catch (e) {
-      setIsLiveSignal(false);
-    }
-    */
   };
 
-  // Data Fetching Logic (Parallelized)
-  const fetchData = useCallback(async () => {
-    setIsDataLoading(true);
-    try {
-      console.log("Fetching global data for:", currentGame);
-      const [teamsRes, rankingRes, tourneysRes, eventsRes] = await Promise.all([
-        supabase.from('teams').select('*'),
-        supabase.rpc('get_game_ranking', { p_game_type: currentGame }),
-        supabase.from('tournaments').select('*').eq('game_type', currentGame).order('date', { ascending: false }).limit(20),
-        supabase.rpc('get_scheduled_events_with_registrations', { p_game_type: currentGame })
-      ]);
-
-      if (teamsRes.data) {
-        const tMap: Record<string, Team> = {};
-        teamsRes.data.forEach((t: any) => tMap[t.id] = t);
-        setTeams(teamsRes.data);
-
-        if (rankingRes.data) {
-          setPlayers(rankingRes.data.map((p: any) => ({
-            ...p,
-            // Construct name if missing (RPC returns username/first_name but not 'name')
-            name: p.username || (p.first_name ? `${p.first_name} ${p.last_name || ''}`.trim() : 'Jugador Sin Nombre'),
-            // Ensure public visibility for registered users with usernames
-            isPublic: true, // Force public visibility as per user request to see all names
-            team_internal: p.team_id ? tMap[p.team_id]?.name || p.team : p.team,
-            pwp_claimed: p.pwp,
-            is_active: true
-          })));
-        }
-      }
-
-      // Fetch store profiles to get avatars
-      const storesProfilesRes = await supabase.from('profiles').select('id, avatar_url').eq('role', 'store');
-      const storeAvatars: Record<string, string> = {};
-      if (storesProfilesRes.data) {
-        storesProfilesRes.data.forEach(p => {
-          if (p.avatar_url) storeAvatars[p.id] = p.avatar_url;
-        });
-      }
-
-      if (tourneysRes.data) setTournamentResults(tourneysRes.data);
-
-      // Fetch current user registrations for syncing status across all pages
-      const myRegistrations = new Set<string>();
-      if (userProfile?.id) {
-        console.log("App: Fetching registrations for user:", userProfile.id);
-        const { data: regData, error: regError } = await supabase.from('event_registrations').select('event_id').eq('player_id', userProfile.id);
-        if (regError) console.error("App: Error fetching registrations:", regError);
-        if (regData) {
-          regData.forEach(r => myRegistrations.add(r.event_id));
-          console.log(`App: Found ${regData.length} registrations for user`);
-        }
-      } else {
-        console.log("App: No userProfile.id available for registrations fetch");
-      }
-
-      // Manejo de eventos con fallback inteligente por si falla el RPC
-      let rawEvents = eventsRes.data;
-      if (eventsRes.error) {
-        console.warn("RPC failed, fetching events from table + counts manually:", eventsRes.error);
-
-        // Fetch events and counts separately
-        const [tableRes, countsRes] = await Promise.all([
-          supabase.from('scheduled_events').select('*').eq('game_type', currentGame),
-          supabase.from('event_registrations').select('event_id')
-        ]);
-
-        if (tableRes.data) {
-          // Manual count matching
-          const countMap: Record<string, number> = {};
-          countsRes.data?.forEach((r: any) => {
-            countMap[r.event_id] = (countMap[r.event_id] || 0) + 1;
-          });
-
-          rawEvents = tableRes.data.map(e => ({
-            ...e,
-            registration_count: countMap[e.id] || 0,
-            event_time: e.time,
-            is_user_registered: myRegistrations.has(e.id) // Sync status here too
-          }));
-        }
-      } else if (rawEvents) {
-        // Even if RPC worked, let's double check myRegistrations for safety
-        rawEvents = rawEvents.map((e: any) => ({
-          ...e,
-          is_user_registered: e.is_user_registered || myRegistrations.has(e.id)
-        }));
-      }
-
-      if (rawEvents && rawEvents.length > 0) {
-        console.log(`Found ${rawEvents.length} events for ${currentGame}`);
-        console.log("First event sample data:", rawEvents[0]);
-
-        // Map RPC result (snake_case) or Table result to CommunityEvent interface (camelCase)
-        const mappedEvents: CommunityEvent[] = rawEvents.map((e: any) => ({
-          id: e.id,
-          title: e.title,
-          date: e.date,
-          storeName: e.store_name || e.storeName,
-          format: e.format,
-          playerCount: e.player_count || e.registration_count || e.playerCount || 0,
-          imageUrl: e.image_url || e.imageUrl || storeAvatars[e.created_by || e.createdBy],
-          createdBy: e.created_by || e.createdBy,
-          maxPlayers: e.max_players || e.maxPlayers,
-          time: e.event_time || e.time,
-          description: e.description,
-          isUserRegistered: Boolean(e.is_user_registered || e.isUserRegistered),
-          entryFee: e.entry_fee || e.entryFee,
-          gameType: e.game_type || e.gameType
-        }));
-        setCommunityEvents(mappedEvents);
-      }
-    } catch (error) {
-      console.error("Data Fetch Error:", error);
-    } finally {
-      setIsDataLoading(false);
-    }
-  }, [currentGame, userProfile?.id]);
-
-  // Session Handler
-  const handleSessionState = useCallback(async (session: any) => {
-    if (!session?.user) {
-      setIsLoggedIn(false);
-      setUserRole(null);
-      setUserProfile(null);
-      setIsAuthLoading(false);
-      return;
-    }
-
-    if (userProfile?.id === session.user.id) {
-      setIsLoggedIn(true);
-      setIsAuthLoading(false);
-      return;
-    }
-
-    try {
-      setIsLoggedIn(true);
-      const { data: profile } = await supabase.from('profiles').select('*').eq('id', session.user.id).single();
-
-      if (profile) {
-        setUserRole(profile.role);
-        setUserProfile(profile);
-        if (profile.role === 'player') {
-          const { count } = await supabase.from('player_aliases').select('*', { count: 'exact', head: true }).eq('player_id', session.user.id);
-          if (count === 0) setShowOnboarding(true);
-          // detect_unclaimed_results call could go here
-        }
-      } else {
-        // Fallback for missing profile
-        console.warn("Profile not found for session user");
-      }
-    } catch (e) {
-      console.error("Session State Error:", e);
-    } finally {
-      setIsAuthLoading(false);
-    }
-  }, [userProfile]);
-
-  // Lifecycle - Run once on mount
   useEffect(() => {
-    // Check session on mount
-    const initAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      await handleSessionState(session);
-
-      // Listen for auth changes
-      supabase.auth.onAuthStateChange(async (evt, ses) => {
-        if (evt === 'SIGNED_OUT') {
-          setIsLoggedIn(false);
-          setUserRole(null);
-          setUserProfile(null);
-          setIsAuthLoading(false);
-          navigate('/');
-        } else if (evt === 'SIGNED_IN' || evt === 'TOKEN_REFRESHED') {
-          await handleSessionState(ses);
-        }
-      });
-    };
-    initAuth();
-
     checkYouTubeLiveStatus();
     const ytInterval = setInterval(checkYouTubeLiveStatus, 5 * 60 * 1000);
-
-    // Safety timeout for loading screen
-    const timeout = setTimeout(() => setIsAuthLoading(false), 8000);
-
-    return () => {
-      clearInterval(ytInterval);
-      clearTimeout(timeout);
-    };
-  }, []); // Only on mount
-
-  // Data Fetching - Run on game change OR user login/logout
-  useEffect(() => {
-    fetchData();
-  }, [currentGame, userProfile?.id, fetchData]);
+    return () => clearInterval(ytInterval);
+  }, []);
 
 
 
@@ -357,7 +165,7 @@ const AppContent: React.FC = () => {
         losses: result.losses,
         draws: result.draws,
         pwp_earned: result.pwpEarned,
-        rank: index + 1
+        rank: result.rank || index + 1
       }));
 
       const { error: rpcError } = await supabase.rpc('process_tournament_results_bulk', {
@@ -389,26 +197,6 @@ const AppContent: React.FC = () => {
     }
   };
 
-  const handleLogin = (role: any) => {
-    setIsLoggedIn(true);
-    setUserRole(role);
-
-    // Si es un jugador y tiene un juego seleccionado, ir directo al Home del universo
-    const savedGame = localStorage.getItem('selectedGame');
-    if (role === 'player' && savedGame) {
-      navigate('/home');
-    } else {
-      navigate(role === 'admin' ? '/admin' : role === 'store' ? '/dashboard/tienda' : '/dashboard/jugador');
-    }
-  };
-
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-    setIsLoggedIn(false);
-    setUserRole(null);
-    setUserProfile(null);
-    window.location.href = '/#/logout-success';
-  };
 
   const themeClass = {
     mtg: 'theme-mtg', pokemon: 'theme-pokemon', one_piece: 'theme-one_piece',
@@ -441,7 +229,7 @@ const AppContent: React.FC = () => {
       <main className={`flex-grow ${!isLanding ? 'container mx-auto px-4 py-8' : ''}`}>
         <Routes>
           <Route path="/" element={<UniverseSelectionPage />} />
-          <Route path="/home" element={<HomePage players={players} events={communityEvents} session={userProfile ? { user: userProfile } : null} userRole={userRole} userId={userProfile?.id} />} />
+          <Route path="/home" element={<HomePage players={players} events={communityEvents} session={userProfile ? { user: userProfile } : null} userRole={userRole} userId={userProfile?.id} showAliasReminder={isLoggedIn && userRole === 'player' && !hasAlias} />} />
           <Route path="/envivo" element={<LiveStreamPage />} />
           <Route path="/pls" element={<PLSPage />} />
           <Route path="/ranking" element={<RankingsPage players={players} teams={teams} />} />
@@ -499,7 +287,7 @@ const AppContent: React.FC = () => {
           <Route path="/calendario" element={<CalendarPage />} />
           <Route path="/stats" element={<PlayerStatsPage />} />
           <Route path="/dashboard/tienda" element={<StoreDashboardPage onTournamentUpload={handleTournamentUpload} onDeleteTournament={handleDeleteTournament} userRole={userRole} tournaments={tournamentResults} storeStatus={userProfile?.status} storeName={userProfile?.username} storeLogo={userProfile?.avatar_url} />} />
-          <Route path="/dashboard/jugador" element={<PlayerDashboardPage profile={userProfile} />} />
+          <Route path="/dashboard/jugador" element={<PlayerDashboardPage profile={userProfile} showAliasReminder={isLoggedIn && userRole === 'player' && !hasAlias} />} />
           <Route path="/dashboard/creador" element={<CreatorDashboardPage profile={userProfile} />} />
           <Route path="*" element={<NotFoundPage />} />
         </Routes>

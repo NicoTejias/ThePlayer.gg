@@ -264,7 +264,7 @@ const UserManagementPage: React.FC = () => {
                                     <th className="text-left px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Usuario</th>
                                     <th className="text-left px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Rol</th>
                                     <th className="text-left px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Estado</th>
-                                    <th className="text-left px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">PLS</th>
+                                    <th className="text-left px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Points</th>
                                     <th className="text-left px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Torneos</th>
                                     <th className="text-left px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Listings</th>
                                     <th className="text-right px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Acciones</th>

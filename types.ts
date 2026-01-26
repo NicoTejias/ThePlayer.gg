@@ -15,9 +15,9 @@ export interface PlayerProfile {
   name: string;
   region: string;
   pwp: number;
-  matchesWon: number;
-  matchesLost: number;
-  matchesDrew: number;
+  matchesWon?: number;
+  matchesLost?: number;
+  matchesDrew?: number;
   winRate?: number;
   username?: string;
   first_name?: string;
@@ -28,22 +28,15 @@ export interface PlayerProfile {
   isPublic?: boolean;
   is_pro?: boolean;
   is_content_creator?: boolean; // Content creator status
-  game_type?: GameType; // Primary game the player participates in
+  game_type?: GameType;
   tournaments_played?: number; // Number of tournaments the player has participated in
 }
 
-// FIX: Add RankingEntry and WinRateRankingEntry types used in HomePage.tsx
+// FIX: Add RankingEntry type used in HomePage.tsx
 export interface RankingEntry {
   rank: number;
   playerName: string;
   pwp: number;
-  region: string;
-}
-
-export interface WinRateRankingEntry {
-  rank: number;
-  playerName: string;
-  winRate: string;
   region: string;
 }
 
@@ -129,21 +122,14 @@ export interface Store {
 }
 
 
-export interface PlayerTournamentRecord {
-  id: string;
-  tournamentName: string;
-  date: string;
-  format: string;
-  result: string; // e.g., "3-1-0"
-  pointsEarned: number;
-}
 
 export interface TournamentParseResult {
+  rank?: number;
   playerName: string;
-  matchRecord: string; // "W-L-D"
-  wins: number;
-  losses: number;
-  draws: number;
+  matchRecord?: string; // "W-L-D"
+  wins?: number;
+  losses?: number;
+  draws?: number;
   pwpEarned: number;
 }
 
@@ -248,7 +234,7 @@ export type TournamentFormat =
 export interface TournamentStanding {
   rank: number;
   playerName: string;
-  matchRecord: string; // "W-L-D"
+  matchRecord?: string; // "W-L-D"
   pwpEarned: number;
 }
 

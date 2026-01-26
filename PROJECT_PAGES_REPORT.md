@@ -11,7 +11,7 @@ Es la puerta de entrada a la plataforma. Diseñada para dar una visión rápida 
     *   Widgets personalizados según el rol (Jugador ve sus stats rápidas, Tienda ve sus próximos eventos, Admin ve alertas).
     *   Resumen estadístico de la comunidad (total jugadores, tiendas, torneos).
     *   Sección de "Próximos Eventos" con tarjetas de inscripción rápida.
-    *   Vista previa de los Top 10 del Ranking (PWP y WinRate).
+    *   Vista previa de los Top 10 del Ranking (Player Points).
     *   Feed de últimas noticias y videos destacados.
 *   **Funcionalidades:**
     *   Inscripción rápida a torneos futuros.
@@ -32,8 +32,7 @@ Página dedicada al circuito competitivo principal.
 El corazón competitivo de la plataforma.
 *   **Contenido:**
     *   **Tablas de Clasificación:** Filtrables por temporada (2024, 2025, 2026).
-    *   **Ranking Individual (PWP):** Lista completa de jugadores ordenada por puntos acumulados.
-    *   **Ranking de Efectividad (WinRate):** Top de jugadores ordenados por % de victorias (requiere min. 10 torneos).
+    *   **Ranking Individual (Player Points):** Lista completa de jugadores ordenada por puntos acumulados.
     *   **Copa de Comunidades:** Ranking de equipos/tiendas sumando los puntos de sus miembros.
 *   **Funcionalidades:**
     *   Visualización de medallas (Pro, Creador, Nivel).
@@ -101,7 +100,7 @@ Espacio de discusión (en desarrollo/beta).
 ## 10. Perfil de Jugador (PlayerDashboardPage)
 El espacio personal de cada usuario.
 *   **Contenido:**
-    *   **Resumen:** Nivel actual, PWP, WinRate, Rango.
+    *   **Resumen:** Nivel actual, Player Points, Rango.
     *   **Billetera Digital:** ThePlayer Card visual.
     *   **Historial:** Lista de todos los torneos jugados y sus resultados.
     *   **Medallas:** Logros desbloqueados (Trofeos).

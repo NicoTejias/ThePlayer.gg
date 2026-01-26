@@ -362,7 +362,7 @@ const AdminAwardsPage: React.FC = () => {
                                             <span className="font-black text-slate-600">#{i + 1}</span>
                                             <span className="text-white font-bold">{p.username}</span>
                                         </div>
-                                        <span className="text-yellow-500 font-black text-xs">{p.pwp} pts</span>
+                                        <span className="text-yellow-500 font-black text-xs">{p.pwp} Pts</span>
                                     </div>
                                 ))}
                             </div>

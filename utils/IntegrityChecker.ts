@@ -104,12 +104,13 @@ export const checkTournamentIntegrity = (
     }
 
     // 5. Jugadores con puntajes sospechosos (Win rates perfectos)
+    // Reducimos la alerta a récords extremadamente inusuales (ej: más de 6 victorias perfectas)
     results.forEach(player => {
         const totalMatches = player.wins + player.losses + player.draws;
-        if (totalMatches >= 4 && player.wins === totalMatches) {
+        if (totalMatches >= 7 && player.wins === totalMatches) {
             warnings.push({
                 type: 'suspicious_win_rate',
-                message: `El jugador "${player.playerName}" tiene un record perfecto (${player.wins}-0-0).`,
+                message: `El jugador "${player.playerName}" tiene un record perfecto de ${player.wins} rondas.`,
                 severity: 'low'
             });
         }

@@ -67,7 +67,7 @@ const LevelProgressBar: React.FC<LevelProgressBarProps> = ({ pwp, className = ''
 
             <div className="flex justify-between text-[10px] font-black text-slate-600 uppercase tracking-widest">
                 <span>Rango Actual: {info.title}</span>
-                <span>Objetivo: {info.nextThreshold} PWP totales</span>
+                <span>Objetivo: {info.nextThreshold} XP totales</span>
             </div>
         </div>
     );

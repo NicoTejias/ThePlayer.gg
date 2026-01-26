@@ -17,7 +17,7 @@ const MANUAL_CONTENT = {
             },
             {
                 subtitle: "3. Perfil Competitivo",
-                content: "En tu perfil puedes ver tu Winrate, torneos jugados y tu Vitrina de Premios. Si ganas un torneo importante, recibirás una insignia única."
+                content: "En tu perfil puedes ver tus torneos jugados y tu Vitrina de Premios. Si ganas un torneo importante, recibirás una insignia única."
             }
         ]
     },

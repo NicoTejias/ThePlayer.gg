@@ -31,6 +31,7 @@ const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpl
     const [isTextLocked, setIsTextLocked] = useState(false);
     const [tournamentType, setTournamentType] = useState('');
     const [tournamentDate, setTournamentDate] = useState(new Date().toISOString().split('T')[0]);
+    const [totalRounds, setTotalRounds] = useState<number>(3); // Default rounds
     const [isProcessing, setIsProcessing] = useState(false);
     const [parsedData, setParsedData] = useState<TournamentParseResult[]>([]);
     const [error, setError] = useState<string | null>(null);
@@ -309,10 +310,17 @@ const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpl
                 const finalResults: TournamentParseResult[] = parsedRows.map((row: any) => {
                     const estimatedWins = row.wins ?? Math.floor(row.points / 3);
                     const estimatedDraws = row.draws ?? (row.points % 3);
-                    const estimatedLosses = row.losses ?? 0;
+                    // Estimate losses if total rounds is provided and we are inferring from points
+                    let estimatedLosses = row.losses ?? 0;
+                    if (row.losses === undefined && totalRounds > 0) {
+                        const played = estimatedWins + estimatedDraws;
+                        estimatedLosses = Math.max(0, totalRounds - played);
+                    }
+
                     const pwpEarned = ((estimatedWins * 3) + (estimatedDraws * 1) + participationPoints) * multiplier;
 
                     return {
+                        rank: row.rank,
                         playerName: row.name,
                         matchRecord: `${estimatedWins}-${estimatedLosses}-${estimatedDraws}`,
                         wins: estimatedWins,
@@ -777,9 +785,23 @@ const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpl
                                     </div>
                                 )}
 
-                                <div>
+                                <div> {/* This div was missing */}
                                     <label htmlFor="tournament-date" className="block text-sm font-medium text-slate-300 mb-2">Fecha del Torneo</label>
-                                    <input id="tournament-date" type="date" value={tournamentDate} onChange={e => setTournamentDate(e.target.value)} className="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 text-white" />
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <input id="tournament-date" type="date" value={tournamentDate} onChange={e => setTournamentDate(e.target.value)} className="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 text-white" />
+                                        <div>
+                                            <input
+                                                type="number"
+                                                min="1"
+                                                max="15"
+                                                value={totalRounds}
+                                                onChange={e => setTotalRounds(parseInt(e.target.value))}
+                                                className="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 text-white"
+                                                placeholder="Rondas"
+                                            />
+                                            <p className="text-xs text-slate-500 mt-1">Rondas (para estimar derrotas)</p>
+                                        </div>
+                                    </div>
                                 </div>
 
                                 <div>
@@ -906,7 +928,7 @@ const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpl
                                             <tr>
                                                 <th className="px-4 py-2 text-left text-xs font-medium text-slate-300 uppercase">Jugador</th>
                                                 <th className="px-4 py-2 text-center text-xs font-medium text-slate-300 uppercase">Record</th>
-                                                <th className="px-4 py-2 text-right text-xs font-medium text-slate-300 uppercase">{currentGame === 'mtg' ? 'PLS' : 'Puntos'}</th>
+                                                <th className="px-4 py-2 text-right text-xs font-medium text-slate-300 uppercase">{currentGame === 'mtg' ? 'Player Points' : 'Puntos'}</th>
                                             </tr>
                                         </thead>
                                         <tbody className="divide-y divide-slate-700">
@@ -999,8 +1021,8 @@ const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpl
                         </table>
                     </div>
                 </section>
-            </div>
-        </div>
+            </div >
+        </div >
     );
 };
 

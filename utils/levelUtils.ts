@@ -11,13 +11,13 @@ export interface LevelInfo {
 }
 
 /**
- * Calculates level and progress based on PWP (Player Points).
+ * Calculates level and progress based on Player Points.
  * Progression: 
- * Level 1: 0 PWP
- * Level 2: 50 PWP (+50)
- * Level 3: 150 PWP (+100)
- * Level 4: 300 PWP (+150)
- * Level 5: 500 PWP (+200)
+ * Level 1: 0 Puntos
+ * Level 2: 50 Puntos (+50)
+ * Level 3: 150 Puntos (+100)
+ * Level 4: 300 Puntos (+150)
+ * Level 5: 500 Puntos (+200)
  * ...
  * Threshold to next level increases by 50 each time.
  */

@@ -3,8 +3,8 @@
 import * as pdfjsLib from 'pdfjs-dist';
 
 // Configure worker (mandatory for pdfjs-dist)
-// Use CDN for worker to avoid build issues
-pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+// Using CDN for reliability across different environments
+pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.js`;
 
 export interface ParsedRow {
     rank: number;
@@ -58,51 +58,76 @@ export const parseEventLinkPdf = async (file: File): Promise<ParserResult> => {
         });
     }
 
-    console.log("PDF Text Content:", fullText);
-
+    let detectedDate = '';
     const rows: ParsedRow[] = [];
+    const lines = fullText.split('\n');
 
-    // Regex Strategy:
-    // 1. Rank (Number)
-    // 2. Name (Text, potentially with spaces)
-    // 3. Points (Number)
-    // 4. OMW% (Decimal/Number)
-    // 5. GW% (Decimal/Number)
-    // 6. OGW% (Decimal/Number)
-    // Note: Sometimes the record (W-L-D) is present, sometimes not directly in the simple line view.
-    // If we only have points, we can ESTIMATE record (3pts = 1 win), but ideally the PDF has the record column.
-    // Assuming standard "Standings" PDF from EventLink which has: Rank, Name, Points, OMW%, GW%, OGW%
-    // IF it doesn't have Record, we calculate wins ~ points/3.
+    for (const line of lines) {
+        // 1. Try to detect date: "Fecha del evento: 24-01-2026"
+        if (!detectedDate && line.includes('Fecha del evento:')) {
+            const dateMatch = line.match(/(\d{2}[-/]\d{2}[-/]\d{4})/);
+            if (dateMatch) {
+                detectedDate = dateMatch[1];
+            }
+        }
 
-    // Updated Regex for "Rank Name Points OMW% ..."
-    const regex = /(\d+)\s+([a-zA-Z0-9\u00C0-\u00FF\s\.\-']{2,})\s+(\d+)\s+[\d\.,]+\s+[\d\.,]+\s+[\d\.,]+/g;
+        // 2. Process result rows
+        // Format: Rank Name Points TB1 TB2 TB3
+        const parts = line.trim().split(/\s+/);
+        if (parts.length >= 5) { // Rank, Name (at least 1 part), Points, and at least 2 TBs
+            const rank = parseInt(parts[0]);
+            if (!isNaN(rank)) {
+                // Find where the numbers end. We expect at least Points and some tie-breakers.
+                // In EventLink, we usually have: Points, OMW%, GW%, OGW% (4 numbers)
+                // We'll look back from the end of the parts.
+                let numbersAtEnd: string[] = [];
+                let j = parts.length - 1;
 
-    let match;
-    while ((match = regex.exec(fullText)) !== null) {
-        const rank = parseInt(match[1]);
-        const name = match[2].trim();
-        const points = parseInt(match[3]);
+                while (j > 0 && numbersAtEnd.length < 5) { // Max 5 numbers: Pts + up to 4 TBs
+                    const val = parts[j].replace('%', '').replace(',', '.');
+                    if (!isNaN(parseFloat(val))) {
+                        numbersAtEnd.push(val);
+                        j--;
+                    } else {
+                        break;
+                    }
+                }
 
-        if (!isNaN(rank) && name.length > 1 && !isNaN(points) && !name.includes("Rank") && !name.includes("Name")) {
-            // Logic to approximate W-L-D since PDF Standings often lack explicit W-L-D column
-            // We assume 3 pts = 1 Win, 1 pt = 1 Draw.
-            // This is an estimation. For exact W-L-D, users should use HTML export.
+                if (numbersAtEnd.length >= 2) { // At least Points and 1 tie-breaker
+                    // The "Points" column is the last of the numbers we care about if we read backwards.
+                    // If we have 4 numbers (Pts, TB1, TB2, TB3), then Points is at j+1
+                    // Wait, if numbersAtEnd = [TB3, TB2, TB1, Pts], then its length is 4.
+                    // points is at index 3 in numbersAtEnd.
 
-            const wins = Math.floor(points / 3);
-            const remainder = points % 3;
-            const draws = remainder; // Usually 1 pt per draw
-            const losses = 0; // Cannot determine losses from points alone without total rounds
+                    const points = parseInt(numbersAtEnd[numbersAtEnd.length - 1]);
+                    const name = parts.slice(1, j + 1).join(' ').trim();
 
-            rows.push({
-                rank,
-                name,
-                points,
-                wins,
-                losses,
-                draws
-            });
+                    if (name &&
+                        !name.toLowerCase().includes("nombre") &&
+                        !name.toLowerCase().includes("reportar") &&
+                        !name.toLowerCase().includes("puesto")) {
+
+                        // Estimation of record
+                        const wins = Math.floor(points / 3);
+                        const draws = points % 3;
+                        const losses = 0; // Estimation
+
+                        rows.push({
+                            rank,
+                            name,
+                            points,
+                            wins,
+                            draws,
+                            losses
+                        });
+                    }
+                }
+            }
         }
     }
 
-    return { results: rows };
+    return {
+        results: rows,
+        detectedDate: detectedDate || undefined
+    };
 };

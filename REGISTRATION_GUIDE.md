@@ -28,7 +28,7 @@ Una vez creada la cuenta, el sistema te pedirá configurar tu identidad competit
 
 ### Paso 4: ¡Listo!
 Ya tienes acceso a tu **Player Dashboard**. Desde aquí podrás:
-*   Ver tus estadísticas (PWP, WinRate).
+*   Ver tus estadísticas (Player Points, Nivel).
 *   Inscribirte a torneos en la sección de **Eventos**.
 *   Unirte a una **Comunidad/Equipo** para sumar puntos grupales.
 

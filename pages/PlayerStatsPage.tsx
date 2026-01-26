@@ -271,7 +271,7 @@ const PlayerStatsPage: React.FC = () => {
                                         ? ((metrics.average_pwp_per_tournament / 10) * 100).toFixed(0)
                                         : 0}%
                                 </p>
-                                <p className="text-xs text-purple-400/70">Basado en Pts promedio</p>
+                                <p className="text-xs text-purple-400/70">Basado en puntos promedio</p>
                             </div>
 
                             {/* Tournament Participation Rate */}
@@ -331,7 +331,7 @@ const PlayerStatsPage: React.FC = () => {
                                 <div className="flex items-start gap-3">
                                     <div className="w-2 h-2 bg-purple-400 rounded-full mt-2"></div>
                                     <p className="text-sm text-slate-300">
-                                        Promedio de <span className="font-bold text-purple-300">{metrics.average_pwp_per_tournament.toFixed(1)} Pts</span> por torneo.
+                                        Promedio de <span className="font-bold text-purple-300">{metrics.average_pwp_per_tournament.toFixed(1)} Player Points</span> por torneo.
                                         {metrics.average_pwp_per_tournament >= 5
                                             ? ' ¡Excelente rendimiento!'
                                             : ' Sigue mejorando para aumentar tu ranking.'}
@@ -459,7 +459,7 @@ const PlayerStatsPage: React.FC = () => {
                                         <th className="text-center py-3 px-4 text-slate-400 font-semibold">Partidas</th>
                                         <th className="text-center py-3 px-4 text-slate-400 font-semibold">W-L-D</th>
                                         <th className="text-center py-3 px-4 text-slate-400 font-semibold">Win Rate</th>
-                                        <th className="text-center py-3 px-4 text-slate-400 font-semibold">PLS</th>
+                                        <th className="text-center py-3 px-4 text-slate-400 font-semibold">Points</th>
                                     </tr>
                                 </thead>
                                 <tbody>

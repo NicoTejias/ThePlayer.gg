@@ -24,7 +24,7 @@
 
 **ThePlayer.gg** es la plataforma líder de Trading Card Games (TCG) en Chile, ofreciendo:
 
-- 🏆 **Rankings Oficiales** - Sistema de puntos PWP y Win Rate
+- 🏆 **Rankings Oficiales** - Sistema de Player Points y estadísticas avanzadas
 - 📅 **Gestión de Torneos** - Creación y administración de eventos
 - 🏪 **Directorio de Tiendas** - Encuentra tiendas TCG cerca de ti
 - ⚖️ **Sistema de Jueces** - Certificación y asignación de jueces
@@ -246,7 +246,7 @@ theplayer.gg/
 
 - **Header.tsx** - Navegación principal
 - **HomePage.tsx** - Página de inicio con widgets por rol
-- **RankingPage.tsx** - Rankings PWP y Win Rate
+- **RankingsPage.tsx** - Sistema de Player Points por temporada
 - **EventsPage.tsx** - Listado de torneos
 - **StoresPage.tsx** - Directorio de tiendas
 - **JudgesPage.tsx** - Sistema de jueces

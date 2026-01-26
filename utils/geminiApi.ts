@@ -42,7 +42,7 @@ ${storesCtx}
 PRÓXIMOS TORNEOS:
 ${tournamentsCtx}
 
-REGLAS DEL RANKING PWP:
+REGLAS DEL RANKING (Player Points):
 - Los puntos se ganan jugando y ganando en tiendas oficiales.
 - El ranking clasifica al Nacional Invitacional (Top 64 o 128).
 - Da "Byes" (rondas libres) para los Grand Prix (torneos abiertos).

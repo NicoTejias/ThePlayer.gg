@@ -76,7 +76,7 @@ const ReglamentoPage: React.FC = () => {
 
                         <div className="space-y-6 text-slate-300">
                             <p className="leading-relaxed">
-                                Los <span className="text-sky-400 font-bold">Player Points (PWP)</span> son la medida oficial de tu desempeño y constancia en la liga. No solo miden cuánto ganas, sino cuánto participas en la comunidad.
+                                Los <span className="text-sky-400 font-bold">Player Points</span> son la medida oficial de tu desempeño y constancia en la liga. No solo miden cuánto ganas, sino cuánto participas en la comunidad.
                             </p>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../supabaseClient';
-import type { PlayerTournamentRecord, MarketplacePost } from '../types';
+import type { MarketplacePost } from '../types';
 import TrophyIcon from '../components/icons/TrophyIcon';
 import SparklesIcon from '../components/icons/SparklesIcon';
 import PencilIcon from '../components/icons/PencilIcon';
@@ -15,8 +15,9 @@ import LevelBadge from '../components/LevelBadge';
 import LevelProgressBar from '../components/LevelProgressBar';
 import { toast } from 'sonner';
 import { useGame } from '../context/GameContext';
+import AliasReminderBanner from '../components/AliasReminderBanner';
 
-const StatCard: React.FC<{ icon: React.ReactNode, title: string, value: string | number, rank: string | number, color: string }> = ({ icon, title, value, rank, color }) => (
+const StatCard: React.FC<{ icon: React.ReactNode, title: string, value: string | number, rank?: string | number, color: string }> = ({ icon, title, value, rank, color }) => (
     <div className={`bg-slate-800 p-6 rounded-lg shadow-lg border border-slate-700`}>
         <div className="flex justify-between items-start">
             <div>
@@ -27,16 +28,18 @@ const StatCard: React.FC<{ icon: React.ReactNode, title: string, value: string |
                 {icon}
             </div>
         </div>
-        <p className="text-2xl font-bold text-white mt-2">Puesto #{rank}</p>
+        {rank !== undefined && rank !== 0 && rank !== '-' && (
+            <p className="text-2xl font-bold text-white mt-2">Puesto #{rank}</p>
+        )}
     </div>
 );
 
 
-const PlayerDashboardPage: React.FC<{ profile?: any }> = ({ profile }) => {
+const PlayerDashboardPage: React.FC<{ profile?: any, showAliasReminder?: boolean }> = ({ profile, showAliasReminder = false }) => {
     const [tournamentHistory, setTournamentHistory] = useState<any[]>([]);
     const [registeredEvents, setRegisteredEvents] = useState<any[]>([]);
-    const [ranking, setRanking] = useState<{ pwpRank: number; winRateRank: number }>({ pwpRank: 0, winRateRank: 0 });
-    const [gameStats, setGameStats] = useState({ points: 0, wins: 0, losses: 0, draws: 0 });
+    const [ranking, setRanking] = useState<{ pwpRank: number }>({ pwpRank: 0 });
+    const [gameStats, setGameStats] = useState({ points: 0 });
     const [teamData, setTeamData] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [showCreateTeam, setShowCreateTeam] = useState(false);
@@ -114,19 +117,15 @@ const PlayerDashboardPage: React.FC<{ profile?: any }> = ({ profile }) => {
                     if (myStats) {
                         const myIndex = rankingData.findIndex((r: any) => r.id === profile.id);
                         setRanking({
-                            pwpRank: myIndex + 1,
-                            winRateRank: 0
+                            pwpRank: myIndex + 1
                         });
 
                         setGameStats({
-                            points: parseInt(myStats.pwp),
-                            wins: parseInt(myStats.matches_won),
-                            losses: parseInt(myStats.matches_lost),
-                            draws: parseInt(myStats.matches_drew)
+                            points: parseInt(myStats.pwp)
                         });
                     } else {
-                        setRanking({ pwpRank: 0, winRateRank: 0 });
-                        setGameStats({ points: 0, wins: 0, losses: 0, draws: 0 });
+                        setRanking({ pwpRank: 0 });
+                        setGameStats({ points: 0 });
                     }
                 }
 
@@ -200,11 +199,12 @@ const PlayerDashboardPage: React.FC<{ profile?: any }> = ({ profile }) => {
     };
 
     const greetingName = profile?.first_name || profile?.username || 'Jugador';
-    const totalMatches = gameStats.wins + gameStats.losses + gameStats.draws;
-    const winRate = totalMatches > 0 ? ((gameStats.wins / totalMatches) * 100).toFixed(1) : '0.0';
 
     return (
         <div className="space-y-12 animate-fade-in-up">
+            {/* Alias Reminder for Players */}
+            <AliasReminderBanner show={showAliasReminder} />
+
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                 <div>
                     <div className="flex items-center gap-3">
@@ -354,13 +354,6 @@ const PlayerDashboardPage: React.FC<{ profile?: any }> = ({ profile }) => {
                     rank={ranking.pwpRank || '-'}
                     color="sky"
                 />
-                <StatCard
-                    icon={<SparklesIcon className="w-8 h-8" />}
-                    title="Win Rate Global"
-                    value={`${winRate}%`}
-                    rank={ranking.winRateRank || '-'}
-                    color="violet"
-                />
             </section>
 
             {/* TROPHY CASE (Phase 3) */}
@@ -379,13 +372,12 @@ const PlayerDashboardPage: React.FC<{ profile?: any }> = ({ profile }) => {
                             <thead className="bg-slate-700/50">
                                 <tr>
                                     <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Torneo</th>
-                                    <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Resultado</th>
                                     <th className="px-3 sm:px-6 py-3 text-right text-xs font-medium text-slate-300 uppercase tracking-wider">Pts</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-700">
                                 {loading ? (
-                                    <tr><td colSpan={3} className="px-3 sm:px-6 py-8 text-center text-slate-500">Cargando historial...</td></tr>
+                                    <tr><td colSpan={2} className="px-3 sm:px-6 py-8 text-center text-slate-500">Cargando historial...</td></tr>
                                 ) : tournamentHistory.length > 0 ? (
                                     tournamentHistory.map(t => (
                                         <tr key={t.id} className="hover:bg-slate-700/40">
@@ -393,14 +385,11 @@ const PlayerDashboardPage: React.FC<{ profile?: any }> = ({ profile }) => {
                                                 <p className="text-sm font-bold text-white">{t.tournaments?.name}</p>
                                                 <p className="text-xs text-slate-400">{t.tournaments?.date}</p>
                                             </td>
-                                            <td className="px-3 sm:px-6 py-4 text-xs sm:text-sm text-slate-300 font-mono">
-                                                {t.wins}V - {t.losses}D - {t.draws}E
-                                            </td>
                                             <td className="px-3 sm:px-6 py-4 text-right text-sm font-bold text-sky-400">+{t.pwp_earned}</td>
                                         </tr>
                                     ))
                                 ) : (
-                                    <tr><td colSpan={3} className="px-6 py-8 text-center text-slate-500">Sin torneos registrados.</td></tr>
+                                    <tr><td colSpan={2} className="px-6 py-8 text-center text-slate-500">Sin torneos registrados.</td></tr>
                                 )}
                             </tbody>
                         </table>

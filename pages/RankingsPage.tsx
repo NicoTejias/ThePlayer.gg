@@ -55,30 +55,6 @@ const RankingsPage: React.FC<RankingsPageProps> = ({ players, teams }) => {
             });
     }, [players]);
 
-    const winRateRanking = useMemo(() => {
-        return [...players]
-            .map(player => {
-                const totalMatches = player.matchesWon + player.matchesLost + player.matchesDrew;
-                const winRate = totalMatches > 0 ? (player.matchesWon / totalMatches) * 100 : 0;
-                return { ...player, winRate, totalMatches };
-            })
-            // FILTRO: Solo jugadores con al menos 10 torneos jugados
-            .filter(player => (player.tournaments_played || 0) >= 10)
-            .sort((a, b) => b.winRate - a.winRate)
-            .map((player, index) => {
-                const hashCode = player.id.split('').reduce((acc, char) => {
-                    return char.charCodeAt(0) + ((acc << 5) - acc);
-                }, 0);
-                const anonymousNumber = Math.abs(hashCode % 9000) + 1000;
-
-                return {
-                    ...player,
-                    rank: index + 1,
-                    // name: player.isPublic ? player.name : `Jugador #${anonymousNumber}`
-                    name: player.name
-                };
-            });
-    }, [players]);
 
     return (
         <div className="space-y-12">
@@ -130,10 +106,10 @@ const RankingsPage: React.FC<RankingsPageProps> = ({ players, teams }) => {
             </div>
 
             {activeTab === 'individual' ? (
-                <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 items-start">
+                <div className="max-w-5xl mx-auto space-y-8 animate-fade-in-up">
                     {/* Ranking Pts */}
-                    <div className="space-y-4 animate-fade-in-up">
-                        <div className="text-center md:text-left h-28 flex flex-col justify-center">
+                    <div className="space-y-4">
+                        <div className="text-center h-28 flex flex-col justify-center">
                             <h2 className="text-3xl font-bold text-white uppercase tracking-wider">{getRankingTitle()}</h2>
                             <p className="text-md text-slate-400 mt-1">Suma de {getPointsLabel()} obtenidos en torneos oficiales.</p>
                         </div>
@@ -178,59 +154,6 @@ const RankingsPage: React.FC<RankingsPageProps> = ({ players, teams }) => {
                                                 )}
                                             </td>
                                             <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-right text-sky-400 font-bold">{player.pwp}</td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    {/* Ranking Winrate */}
-                    <div className="space-y-4 animate-fade-in-up animate-delay-100">
-                        <div className="text-center md:text-left h-28 flex flex-col justify-center">
-                            <h2 className="text-3xl font-bold text-white uppercase tracking-wider">PLS Winrate</h2>
-                            <p className="text-md text-slate-400 mt-1">Premia la efectividad en el campo de batalla <span className="text-slate-500">(mínimo 10 torneos jugados)</span>.</p>
-                        </div>
-                        <div className="overflow-x-auto bg-slate-800 rounded-lg shadow-xl border border-slate-700">
-                            <table className="min-w-full divide-y divide-slate-700">
-                                <thead className="bg-slate-700/50">
-                                    <tr>
-                                        <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Puesto</th>
-                                        <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Jugador</th>
-                                        <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Team</th>
-                                        <th className="px-3 sm:px-6 py-3 text-right text-xs font-medium text-slate-300 uppercase tracking-wider">WR</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-slate-700">
-                                    {winRateRanking.map((player, index) => (
-                                        <tr
-                                            key={`${player.id}-wr`}
-                                            className={`transition-colors ${player.is_pro
-                                                ? 'bg-gradient-to-r from-purple-900/20 to-transparent border-l-4 border-purple-500 hover:from-purple-900/30'
-                                                : 'hover:bg-slate-700/40'
-                                                }`}
-                                        >
-                                            <td className="px-3 sm:px-6 py-4 whitespace-nowrap font-bold text-slate-400">{index + 1}</td>
-                                            <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
-                                                <div className="flex items-center gap-2">
-                                                    <span className="text-white font-medium text-sm sm:text-base">{player.name}</span>
-                                                    <LevelBadge pwp={player.pwp} size="sm" />
-                                                    {player.is_pro && <ProBadge size="small" />}
-                                                    {player.is_content_creator && <ContentCreatorBadge size="small" />}
-                                                </div>
-                                            </td>
-                                            <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
-                                                {player.teamId ? (
-                                                    <Link to={`/equipo/${player.teamId}`} className="px-2 inline-flex text-xs font-semibold rounded-full bg-sky-500/10 text-sky-400 hover:bg-sky-500/20 transition-colors">
-                                                        {player.teamData?.name || player.team}
-                                                    </Link>
-                                                ) : (
-                                                    <span className="px-2 inline-flex text-xs font-semibold rounded-full bg-slate-700 text-slate-300">
-                                                        {player.team || '-'}
-                                                    </span>
-                                                )}
-                                            </td>
-                                            <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-right text-violet-400 font-bold">{player.winRate?.toFixed(1)}%</td>
                                         </tr>
                                     ))}
                                 </tbody>

@@ -117,7 +117,7 @@ const ChatAssistant: React.FC = () => {
                                     {[
                                         '¿Dónde puedo jugar Magic?',
                                         '¿Cuándo son los próximos torneos?',
-                                        '¿Cómo funciona el ranking PWP?'
+                                        '¿Cómo funciona el ranking Player Points?'
                                     ].map((sug) => (
                                         <button
                                             key={sug}

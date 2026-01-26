@@ -79,14 +79,6 @@ const PlayerWidget: React.FC<PlayerWidgetProps> = ({ userId }) => {
                                 <span className="text-slate-400 text-sm">Player Points</span>
                                 <span className="text-2xl font-black text-green-400 font-mono">{profile?.pwp || 0}</span>
                             </div>
-                            <div className="flex justify-between items-center">
-                                <span className="text-slate-400 text-sm">Win Rate</span>
-                                <span className="text-xl font-bold text-blue-400">
-                                    {profile?.matchesWon && (profile.matchesWon + profile.matchesLost + profile.matchesDrew) > 0
-                                        ? `${((profile.matchesWon / (profile.matchesWon + profile.matchesLost + profile.matchesDrew)) * 100).toFixed(1)}%`
-                                        : '0%'}
-                                </span>
-                            </div>
                             <div className="pt-3 border-t border-slate-700">
                                 <Link to="/perfil" className="text-sky-400 hover:text-sky-300 text-sm font-bold flex items-center gap-1">
                                     Ver Perfil Completo →

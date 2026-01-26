@@ -65,7 +65,7 @@ const GalaNominationsBanner: React.FC = () => {
                                     {nom.profile?.username}
                                 </p>
                                 <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-1">
-                                    {nom.profile?.pwp} PWP
+                                    {nom.profile?.pwp} Player Points
                                 </p>
                             </div>
                         </div>
