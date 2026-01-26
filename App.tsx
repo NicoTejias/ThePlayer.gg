@@ -238,7 +238,7 @@ const AppContent: React.FC = () => {
           <Route path="/equipo/:teamId" element={<TeamProfilePage />} />
           <Route path="/eventos" element={<EventsPage events={communityEvents} finishedTournaments={tournamentResults} userRole={userRole} userId={userProfile?.id} />} />
           <Route path="/torneos" element={<TournamentsListPage tournaments={tournamentResults} />} />
-          <Route path="/torneos/:tournamentId" element={<TournamentStandingsPage />} />
+          <Route path="/torneos/:tournamentId" element={<TournamentStandingsPage userRole={userRole} userId={userProfile?.id} />} />
           <Route path="/mercado" element={<MarketplacePage />} />
           <Route path="/mercado/:id" element={<MarketplaceDetailPage />} />
           <Route path="/mis-anuncios" element={<MyListingsPage />} />

@@ -239,21 +239,28 @@ const SettingsPage: React.FC = () => {
     };
 
     useEffect(() => {
-        // Force loading to false after 10 seconds just in case
+        let isMounted = true;
+
+        // Force loading to false after 30 seconds just in case (Chilean mobile connections can be slow)
         const timer = setTimeout(() => {
-            setLoading((current) => {
-                if (current) {
-                    console.warn("Forcing loading to false due to timeout");
-                    setMessage({ type: 'error', text: 'La carga del perfil tardó demasiado. Por favor recarga la página.' });
-                    return false;
-                }
-                return current;
-            });
-        }, 10000);
+            if (isMounted) {
+                setLoading((current) => {
+                    if (current) {
+                        console.warn("Forcing loading to false due to timeout");
+                        setMessage({ type: 'error', text: 'La conexión está lenta. El perfil sigue cargando en segundo plano, por favor espera un momento o intenta recargar.' });
+                        return false;
+                    }
+                    return current;
+                });
+            }
+        }, 30000);
 
         getProfile();
 
-        return () => clearTimeout(timer);
+        return () => {
+            isMounted = false;
+            clearTimeout(timer);
+        };
     }, []);
 
     const getProfile = async () => {
@@ -275,6 +282,9 @@ const SettingsPage: React.FC = () => {
             if (error) {
                 console.warn(error);
             } else if (data) {
+                // If we were showing a timeout message, clear it as we finally got the data
+                setMessage((prev) => (prev?.text.includes('La conexión está lenta') ? null : prev));
+
                 setUsername(data.username || '');
                 setFirstName(data.first_name || '');
                 setLastName(data.last_name || '');
@@ -390,8 +400,16 @@ const SettingsPage: React.FC = () => {
                 <h1 className="text-3xl font-bold mb-8 text-center uppercase tracking-wide text-sky-400">Configuración de Perfil</h1>
 
                 {message && (
-                    <div className={`mb-6 p-4 rounded-lg text-center ${message.type === 'success' ? 'bg-emerald-900/50 text-emerald-400 border border-emerald-500/50' : 'bg-red-900/50 text-red-400 border border-red-500/50'}`}>
-                        {message.text}
+                    <div className={`mb-6 p-4 rounded-lg text-center flex flex-col items-center gap-3 ${message.type === 'success' ? 'bg-emerald-900/50 text-emerald-400 border border-emerald-500/50' : 'bg-red-900/50 text-red-400 border border-red-500/50'}`}>
+                        <span>{message.text}</span>
+                        {message.text.includes('La conexión está lenta') && (
+                            <button
+                                onClick={() => window.location.reload()}
+                                className="px-4 py-1.5 bg-red-600 hover:bg-red-500 text-white text-xs font-bold rounded-full transition-colors"
+                            >
+                                Recargar ahora
+                            </button>
+                        )}
                     </div>
                 )}
 

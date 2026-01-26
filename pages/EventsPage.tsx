@@ -540,53 +540,59 @@ const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
                 {/* KPI Cards */}
                 <div className="lg:col-span-3 grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div className="bg-slate-800 p-4 rounded-lg border border-slate-700 shadow-lg flex flex-col justify-between">
-                        <div className="flex items-center gap-3 mb-2">
-                            <div className="p-2 bg-sky-900/30 rounded-lg text-sky-400"><CalendarIcon className="w-5 h-5" /></div>
-                            <span className="text-slate-400 text-xs uppercase font-bold tracking-wider">Eventos Activos</span>
-                        </div>
-                        <div className="text-3xl font-bold text-white">{totalEvents}</div>
-                        <div className="text-xs text-sky-400 mt-1 font-medium">+2 esta semana</div>
-                    </div>
-
-                    <div className="bg-slate-800 p-4 rounded-lg border border-slate-700 shadow-lg flex flex-col justify-between">
-                        <div className="flex items-center gap-3 mb-2">
-                            <div className="p-2 bg-green-900/30 rounded-lg text-green-400">
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z" /></svg>
+                    <div className="bg-gradient-to-br from-slate-800 to-slate-900 p-6 rounded-2xl border border-slate-700 shadow-xl relative overflow-hidden group">
+                        <div className="absolute inset-0 bg-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                        <div className="flex items-center gap-4 mb-4">
+                            <div className="p-3 bg-blue-500/10 rounded-xl text-blue-400 group-hover:scale-110 transition-transform">
+                                <CalendarIcon className="w-6 h-6" />
                             </div>
-                            <span className="text-slate-400 text-xs uppercase font-bold tracking-wider">Ocupación</span>
-                        </div>
-                        <div className="text-3xl font-bold text-white">{occupancyRate}%</div>
-                        <div className="w-full bg-slate-700 h-1.5 rounded-full mt-2 overflow-hidden">
-                            <div
-                                className="bg-green-500 h-full rounded-full transition-all duration-500 progress-bar-fill"
-                                style={{ '--progress-width': `${occupancyRate}%` } as React.CSSProperties}
-                                role="progressbar"
-                                aria-valuenow={occupancyRate}
-                                aria-valuemin={0}
-                                aria-valuemax={100}
-                                title={`Ocupación: ${occupancyRate}%`}
-                                aria-label="Tasa de ocupación de eventos"
-                            ></div>
+                            <div className="min-w-0">
+                                <span className="text-slate-500 text-[10px] uppercase font-black tracking-widest block mb-0.5">Total Eventos</span>
+                                <div className="text-3xl font-black text-white">{totalEvents}</div>
+                            </div>
                         </div>
                     </div>
 
-                    <div className="bg-slate-800 p-4 rounded-lg border border-slate-700 shadow-lg flex flex-col justify-between">
-                        <div className="flex items-center gap-3 mb-2">
-                            <div className="p-2 bg-purple-900/30 rounded-lg text-purple-400"><TagIcon className="w-5 h-5" /></div>
-                            <span className="text-slate-400 text-xs uppercase font-bold tracking-wider">Formato Top</span>
+                    <div className="bg-gradient-to-br from-slate-800 to-slate-900 p-6 rounded-2xl border border-slate-700 shadow-xl relative overflow-hidden group">
+                        <div className="absolute inset-0 bg-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                        <div className="flex items-center gap-4 mb-4">
+                            <div className="p-3 bg-emerald-500/10 rounded-xl text-emerald-400 group-hover:scale-110 transition-transform">
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 20 20" fill="currentColor"><path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z" /></svg>
+                            </div>
+                            <div className="min-w-0">
+                                <span className="text-slate-500 text-[10px] uppercase font-black tracking-widest block mb-0.5">Ocupación</span>
+                                <div className="text-3xl font-black text-white">{occupancyRate}%</div>
+                            </div>
                         </div>
-                        <div className="text-xl font-bold text-white truncate" title={topFormat}>{topFormat}</div>
-                        <div className="text-xs text-slate-500 mt-1 font-medium">Más jugado</div>
+                        <div className="w-full bg-slate-900 h-1 rounded-full mt-2 overflow-hidden border border-slate-700/30">
+                            <div className="bg-gradient-to-r from-emerald-600 to-emerald-400 h-full rounded-full transition-all duration-1000" style={{ width: `${occupancyRate}%` }}></div>
+                        </div>
                     </div>
 
-                    <div className="bg-slate-800 p-4 rounded-lg border border-slate-700 shadow-lg flex flex-col justify-between">
-                        <div className="flex items-center gap-3 mb-2">
-                            <div className="p-2 bg-orange-900/30 rounded-lg text-orange-400"><MapPinIcon className="w-5 h-5" /></div>
-                            <span className="text-slate-400 text-xs uppercase font-bold tracking-wider">Tienda Top</span>
+                    <div className="bg-gradient-to-br from-slate-800 to-slate-900 p-6 rounded-2xl border border-slate-700 shadow-xl relative overflow-hidden group">
+                        <div className="absolute inset-0 bg-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                        <div className="flex items-center gap-4 mb-4">
+                            <div className="p-3 bg-purple-500/10 rounded-xl text-purple-400 group-hover:scale-110 transition-transform">
+                                <TagIcon className="w-6 h-6" />
+                            </div>
+                            <div className="min-w-0 flex-1">
+                                <span className="text-slate-500 text-[10px] uppercase font-black tracking-widest block mb-0.5">Formato Top</span>
+                                <div className="text-xl font-black text-white truncate" title={topFormat}>{topFormat}</div>
+                            </div>
                         </div>
-                        <div className="text-xl font-bold text-white truncate" title={topStore}>{topStore}</div>
-                        <div className="text-xs text-slate-500 mt-1 font-medium">Más activa</div>
+                    </div>
+
+                    <div className="bg-gradient-to-br from-slate-800 to-slate-900 p-6 rounded-2xl border border-slate-700 shadow-xl relative overflow-hidden group">
+                        <div className="absolute inset-0 bg-orange-500/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                        <div className="flex items-center gap-4 mb-4">
+                            <div className="p-3 bg-orange-500/10 rounded-xl text-orange-400 group-hover:scale-110 transition-transform">
+                                <MapPinIcon className="w-6 h-6" />
+                            </div>
+                            <div className="min-w-0 flex-1">
+                                <span className="text-slate-500 text-[10px] uppercase font-black tracking-widest block mb-0.5">Tienda Top</span>
+                                <div className="text-xl font-black text-white truncate" title={topStore}>{topStore}</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -731,141 +737,112 @@ const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [
                         </button>
                     )}
                 </div>
-                <div className="overflow-x-auto bg-slate-800 rounded-lg shadow-xl border border-slate-700">
-                    <table className="min-w-full divide-y divide-slate-700">
-                        <thead className="bg-slate-700/50">
-                            <tr>
-                                <th scope="col" className="px-6 py-4 text-left text-xs font-bold text-slate-300 uppercase tracking-wider sticky left-0 bg-slate-800 z-20 border-r border-slate-700/50">Fecha</th>
-                                <th scope="col" className="px-6 py-4 text-left text-xs font-bold text-slate-300 uppercase tracking-wider">Hora</th>
-                                <th scope="col" className="px-6 py-4 text-left text-xs font-bold text-slate-300 uppercase tracking-wider">Evento</th>
-                                <th scope="col" className="px-6 py-4 text-left text-xs font-bold text-slate-300 uppercase tracking-wider">Formato</th>
-                                <th scope="col" className="px-6 py-4 text-left text-xs font-bold text-slate-300 uppercase tracking-wider">Lugar</th>
-                                <th scope="col" className="px-6 py-4 text-center text-xs font-bold text-slate-300 uppercase tracking-wider">Valor</th>
-                                <th scope="col" className="px-6 py-4 text-center text-xs font-bold text-slate-300 uppercase tracking-wider">Multi</th>
-                                <th scope="col" className="px-6 py-4 text-center text-xs font-bold text-slate-300 uppercase tracking-wider">Inscritos</th>
-                                <th scope="col" className="px-6 py-4"></th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-700">
-                            {upcomingEvents.length === 0 ? (
-                                <tr><td colSpan={8} className="px-6 py-8 text-center text-slate-500">No hay torneos próximos agendados.</td></tr>
-                            ) : (
-                                upcomingEvents.map((event) => {
-                                    const details = getTournamentTypeDetails(event);
-                                    const eventTime = event.time || "19:00"; // Usar hora real o default
-                                    const maxLimit = event.maxPlayers || 64; // Usar límite real o default
-                                    const registered = event.playerCount || 0;
-                                    const isFull = registered >= maxLimit;
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                    {upcomingEvents.length === 0 ? (
+                        <div className="col-span-full py-20 bg-slate-800/50 rounded-2xl border border-slate-700 border-dashed text-center">
+                            <p className="text-slate-500 text-lg">No hay torneos próximos agendados.</p>
+                        </div>
+                    ) : (
+                        upcomingEvents.map((event) => {
+                            const details = getTournamentTypeDetails(event);
+                            const eventTime = event.time || "19:00";
+                            const maxLimit = event.maxPlayers || 64;
+                            const registered = event.playerCount || 0;
+                            const isFull = registered >= maxLimit;
 
-                                    return (
-                                        <tr key={event.id} className="group hover:bg-slate-700/30 transition-colors">
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-300 font-medium sticky left-0 bg-slate-800 group-hover:bg-slate-700 transition-colors z-10 border-r border-slate-700/50">
-                                                {event.date}
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-400">
-                                                {eventTime}
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap">
-                                                <div className="flex flex-col">
-                                                    <span className="text-white font-bold text-base">{event.title}</span>
-                                                    <span className={`text-[10px] inline-block px-1.5 py-0.5 rounded w-fit mt-1 font-bold ${details.color} ${details.color.includes('text-slate-900') ? '' : 'text-white'}`}>
-                                                        {details.type}
-                                                    </span>
-                                                </div>
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap">
-                                                <span className="text-sm text-sky-400 font-medium">{event.format}</span>
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-300">
-                                                <div className="flex items-center gap-2">
-                                                    <div className="w-6 h-6 rounded-full overflow-hidden border border-slate-700 bg-slate-900 flex-shrink-0">
-                                                        {event.imageUrl ? (
-                                                            <img src={event.imageUrl} alt={event.storeName} className="w-full h-full object-cover" />
-                                                        ) : (
-                                                            <div className="w-full h-full flex items-center justify-center text-[8px]">🏪</div>
-                                                        )}
-                                                    </div>
-                                                    {event.storeName}
-                                                </div>
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-bold text-yellow-500">
-                                                {event.entryFee ? (event.entryFee.includes('$') ? event.entryFee : `$${event.entryFee}`) : 'Gratis'}
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-center">
-                                                <span className={`inline-flex items-center justify-center w-8 h-8 rounded-full font-bold text-sm ${details.multiplier === 'x4' ? 'bg-red-600 text-white shadow-lg shadow-red-900/50' :
-                                                    details.multiplier === 'x3' ? 'bg-yellow-500 text-slate-900 shadow-lg shadow-yellow-900/50' :
-                                                        details.multiplier === 'x2' ? 'bg-slate-400 text-slate-900' :
-                                                            'bg-orange-500 text-white'
-                                                    }`}>
-                                                    {details.multiplier}
-                                                </span>
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-center">
-                                                <div className="flex flex-col items-center">
-                                                    <span className={`text-sm font-bold ${isFull ? 'text-red-400' : 'text-green-400'}`}>
-                                                        {registered}/{maxLimit}
-                                                    </span>
-                                                    <div className="w-16 h-1.5 bg-slate-700 rounded-full mt-1 overflow-hidden">
-                                                        <div
-                                                            className={`h-full ${isFull ? 'bg-red-500' : 'bg-green-500'} transition-all duration-500 progress-bar-fill`}
-                                                            style={{ '--progress-width': `${Math.min((registered / maxLimit) * 100, 100)}%` } as React.CSSProperties}
-                                                            role="progressbar"
-                                                            aria-valuenow={Math.round(Math.min((registered / maxLimit) * 100, 100))}
-                                                            aria-valuemin={0}
-                                                            aria-valuemax={100}
-                                                            title={`Cupos: ${registered}/${maxLimit}`}
-                                                            aria-label={`Progreso de inscripción: ${registered} de ${maxLimit} jugadores`}
-                                                        ></div>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                                <div className="flex items-center justify-end gap-2">
-                                                    {/* Botón de eliminar - solo para creador o admin */}
-                                                    {(userRole === 'admin' || (event.createdBy && event.createdBy === userId)) && (
-                                                        <button
-                                                            onClick={() => handleDeleteEvent(event.id, event.title)}
-                                                            className="text-red-400 hover:text-red-300 font-bold border border-red-600/50 hover:border-red-500 px-3 py-2 rounded-md hover:bg-red-900/20 transition-all"
-                                                            title="Eliminar evento"
-                                                        >
-                                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                                            </svg>
-                                                        </button>
-                                                    )}
+                            return (
+                                <div key={event.id} className="bg-slate-800 rounded-2xl border border-slate-700 overflow-hidden hover:border-sky-500/50 transition-all duration-300 group flex flex-col relative">
+                                    {/* Multiplier Badge Overlay */}
+                                    <div className={`absolute top-4 right-4 z-10 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-[0.2em] shadow-lg ${details.multiplier === 'x4' ? 'bg-red-500 text-white shadow-red-500/20' :
+                                        details.multiplier === 'x3' ? 'bg-yellow-500 text-slate-950 shadow-yellow-500/20' :
+                                            details.multiplier === 'x2' ? 'bg-blue-500 text-white shadow-blue-500/20' :
+                                                'bg-emerald-500 text-white shadow-emerald-500/20'
+                                        }`}>
+                                        Points {details.multiplier}
+                                    </div>
 
-                                                    {/* Botón de inscribirse/cancelar - para todos */}
-                                                    {event.isUserRegistered ? (
-                                                        <button
-                                                            onClick={() => handleCancelRegistration(event)}
-                                                            disabled={processingEventId === event.id}
-                                                            className={`font-bold border px-4 py-2 rounded-md transition-all ${processingEventId === event.id
-                                                                ? 'text-slate-500 border-slate-600 cursor-not-allowed'
-                                                                : 'text-orange-400 hover:text-orange-300 border-orange-600/50 hover:border-orange-500 hover:bg-orange-900/20'
-                                                                }`}
-                                                        >
-                                                            {processingEventId === event.id ? 'Procesando...' : 'Cancelar Inscripción'}
-                                                        </button>
-                                                    ) : (
-                                                        <button
-                                                            onClick={() => handleRegisterClick(event)}
-                                                            disabled={processingEventId === event.id}
-                                                            className={`font-bold border px-4 py-2 rounded-md transition-all ${processingEventId === event.id
-                                                                ? 'text-slate-500 border-slate-600 cursor-not-allowed'
-                                                                : 'text-sky-400 hover:text-sky-300 border-sky-600/50 hover:border-sky-500 hover:bg-sky-900/20'
-                                                                }`}
-                                                        >
-                                                            {processingEventId === event.id ? 'Procesando...' : 'Inscribirse'}
-                                                        </button>
-                                                    )}
+                                    <div className="p-6 flex flex-col h-full space-y-4">
+                                        <div className="flex items-start justify-between gap-4">
+                                            <div className="flex-1 min-w-0">
+                                                <div className="flex items-center gap-2 mb-1">
+                                                    <span className="text-[10px] text-sky-400 font-black uppercase tracking-widest">{event.format}</span>
+                                                    <span className="w-1 h-1 rounded-full bg-slate-600"></span>
+                                                    <span className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">{details.type}</span>
                                                 </div>
-                                            </td>
-                                        </tr>
-                                    );
-                                })
-                            )}
-                        </tbody>
-                    </table>
+                                                <h3 className="text-xl font-bold text-white group-hover:text-sky-400 transition-colors leading-tight truncate">{event.title}</h3>
+                                            </div>
+                                        </div>
+
+                                        <div className="bg-slate-900/50 rounded-xl p-3 border border-slate-700/50 space-y-2">
+                                            <div className="flex items-center justify-between">
+                                                <div className="flex items-center gap-2 text-slate-300">
+                                                    <CalendarIcon className="w-4 h-4 text-slate-500" />
+                                                    <span className="text-sm font-bold">{event.date}</span>
+                                                </div>
+                                                <div className="text-sm text-slate-400 font-medium">{eventTime}</div>
+                                            </div>
+                                            <div className="flex items-center gap-2 text-slate-300">
+                                                <MapPinIcon className="w-4 h-4 text-slate-500" />
+                                                <span className="text-sm truncate">{event.storeName}</span>
+                                            </div>
+                                        </div>
+
+                                        <div className="grid grid-cols-2 gap-3">
+                                            <div className="bg-slate-900/30 p-2.5 rounded-xl border border-slate-700/30">
+                                                <div className="text-[9px] text-slate-500 uppercase font-black tracking-widest mb-1">Inscripción</div>
+                                                <div className="text-base text-yellow-500 font-black">
+                                                    {event.entryFee ? (event.entryFee.includes('$') ? event.entryFee : `$${event.entryFee}`) : 'Gratis'}
+                                                </div>
+                                            </div>
+                                            <div className="bg-slate-900/30 p-2.5 rounded-xl border border-slate-700/30">
+                                                <div className="text-[9px] text-slate-500 uppercase font-black tracking-widest mb-1">Cupos</div>
+                                                <div className={`text-base font-black ${isFull ? 'text-red-400' : 'text-emerald-400'}`}>
+                                                    {registered}/{maxLimit}
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div className="pt-4 mt-auto border-t border-slate-700/50 flex items-center justify-between">
+                                            <div className="flex gap-2">
+                                                {(userRole === 'admin' || (event.createdBy && event.createdBy === userId)) && (
+                                                    <button
+                                                        onClick={() => handleDeleteEvent(event.id, event.title)}
+                                                        className="p-2.5 text-slate-500 hover:text-red-400 hover:bg-red-500/10 rounded-xl transition-all border border-transparent hover:border-red-500/20"
+                                                        title="Eliminar"
+                                                    >
+                                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                        </svg>
+                                                    </button>
+                                                )}
+                                            </div>
+
+                                            {event.isUserRegistered ? (
+                                                <button
+                                                    onClick={() => handleCancelRegistration(event)}
+                                                    disabled={processingEventId === event.id}
+                                                    className="px-6 py-2.5 bg-slate-700 hover:bg-orange-600 text-white text-xs font-black uppercase tracking-widest rounded-xl transition-all disabled:opacity-50"
+                                                >
+                                                    {processingEventId === event.id ? '...' : 'Cancelar'}
+                                                </button>
+                                            ) : (
+                                                <button
+                                                    onClick={() => handleRegisterClick(event)}
+                                                    disabled={processingEventId === event.id || isFull}
+                                                    className={`px-6 py-2.5 text-xs font-black uppercase tracking-widest rounded-xl transition-all shadow-lg ${isFull
+                                                        ? 'bg-slate-700 text-slate-500 cursor-not-allowed'
+                                                        : 'bg-sky-600 hover:bg-sky-500 text-white shadow-sky-900/40 hover:scale-105 active:scale-95'
+                                                        }`}
+                                                >
+                                                    {processingEventId === event.id ? '...' : isFull ? 'Completo' : 'Inscribirse'}
+                                                </button>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                            );
+                        })
+                    )}
                 </div>
             </div>
 

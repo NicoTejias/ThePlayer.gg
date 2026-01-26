@@ -26,22 +26,37 @@ const TournamentsListPage: React.FC<TournamentsListPageProps> = ({ tournaments }
         return Array.from(new Set(formats)).sort();
     }, [tournaments]);
 
-    // Helper to get tournament tier/type details (Semanal, RCQ, etc.)
     const getTournamentTier = (t: TournamentResult) => {
         const titleLower = t.name.toLowerCase();
         const formatLower = (t.format || '').toLowerCase();
 
         if (titleLower.includes('rcq') || titleLower.includes('premier') || titleLower.includes('regional')) {
-            return { type: 'Premier / RCQ', color: 'bg-red-600', textColor: 'text-red-100' };
+            return {
+                type: 'Premier / RCQ',
+                color: 'bg-red-500/20 text-red-400 border-red-500/30',
+                glow: 'shadow-[0_0_10px_rgba(239,68,68,0.2)]'
+            };
         }
         if (titleLower.includes('prerelease') || titleLower.includes('sellado') || formatLower === 'sealed' || formatLower === 'draft') {
-            return { type: 'Limited / Prerelease', color: 'bg-yellow-500', textColor: 'text-slate-900' };
+            return {
+                type: 'Limited / Prerelease',
+                color: 'bg-yellow-500/20 text-yellow-500 border-yellow-500/30',
+                glow: 'shadow-[0_0_10px_rgba(234,179,8,0.2)]'
+            };
         }
         if (titleLower.includes('showdown')) {
-            return { type: 'Showdown', color: 'bg-slate-400', textColor: 'text-slate-900' };
+            return {
+                type: 'Showdown',
+                color: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
+                glow: 'shadow-[0_0_10px_rgba(59,130,246,0.2)]'
+            };
         }
         // Default
-        return { type: 'Semanal / FNM', color: 'bg-orange-500', textColor: 'text-white' };
+        return {
+            type: 'Semanal / FNM',
+            color: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
+            glow: ''
+        };
     };
 
     // Filter logic
@@ -140,15 +155,20 @@ const TournamentsListPage: React.FC<TournamentsListPageProps> = ({ tournaments }
                             filteredTournaments.map((t) => {
                                 const tier = getTournamentTier(t);
                                 return (
-                                    <tr key={t.id} className="hover:bg-slate-700/40 transition-colors">
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-400">{t.date}</td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">
-                                            <div>{t.name}</div>
-                                            <div className={`text-[10px] inline-block px-1.5 py-0.5 rounded mt-1 font-bold ${tier.color} ${tier.textColor}`}>
+                                    <tr key={t.id} className="hover:bg-slate-700/40 transition-all duration-300 group">
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-400 font-mono">{t.date}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <div className="text-sm font-bold text-white group-hover:text-sky-400 transition-colors">{t.name}</div>
+                                            <div className={`text-[9px] inline-block px-2 py-0.5 rounded border mt-1.5 font-black uppercase tracking-widest ${tier.color} ${tier.glow}`}>
                                                 {tier.type}
                                             </div>
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-300">{t.storeName}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-300">
+                                            <div className="flex items-center gap-2">
+                                                <span className="w-1.5 h-1.5 rounded-full bg-slate-600 group-hover:bg-sky-500 transition-colors"></span>
+                                                {t.storeName}
+                                            </div>
+                                        </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-sky-800 text-sky-200">{t.format}</span>
                                         </td>

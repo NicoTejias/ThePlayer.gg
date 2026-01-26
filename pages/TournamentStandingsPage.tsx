@@ -4,9 +4,14 @@ import { supabase } from '../supabaseClient';
 import type { TournamentResult, TournamentStanding } from '../types';
 import TrophyIcon from '../components/icons/TrophyIcon';
 
-const TournamentStandingsPage: React.FC = () => {
+interface TournamentStandingsProps {
+    userRole?: 'player' | 'store' | 'admin' | null;
+    userId?: string;
+}
+
+const TournamentStandingsPage: React.FC<TournamentStandingsProps> = ({ userRole, userId }) => {
     const { tournamentId } = useParams<{ tournamentId: string }>();
-    const [tournament, setTournament] = useState<TournamentResult | null>(null);
+    const [tournament, setTournament] = useState<any | null>(null);
     const [standings, setStandings] = useState<TournamentStanding[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -27,7 +32,6 @@ const TournamentStandingsPage: React.FC = () => {
                     .single();
 
                 if (tournamentError) {
-                    // Check specifically for PGRST116 (0 rows) which means not found
                     if (tournamentError.code === 'PGRST116') {
                         throw new Error("No se encontró el torneo.");
                     }
@@ -36,13 +40,16 @@ const TournamentStandingsPage: React.FC = () => {
 
                 if (!tournamentData) throw new Error("Torneo no encontrado");
 
-                const mappedTournament: TournamentResult = {
+                // Map to TournamentResult but keep original data for permission checks
+                const mappedTournament: TournamentResult & { organizer_id?: string, created_by?: string } = {
                     id: tournamentData.id,
                     name: tournamentData.name,
                     date: tournamentData.date,
                     storeName: tournamentData.store_name || 'Desconocido',
                     format: tournamentData.format || 'Otro',
-                    playerCount: tournamentData.player_count || 0
+                    playerCount: tournamentData.player_count || 0,
+                    organizer_id: tournamentData.organizer_id,
+                    created_by: tournamentData.created_by
                 };
                 setTournament(mappedTournament);
 
@@ -52,6 +59,7 @@ const TournamentStandingsPage: React.FC = () => {
                     .select(`
                         *,
                         profile:player_id (
+                            id,
                             username,
                             first_name,
                             last_name
@@ -71,16 +79,36 @@ const TournamentStandingsPage: React.FC = () => {
                     return Math.abs(hash % 9000) + 1000;
                 };
 
+                // Permission check variable (it needs to be updated after tournament fetch)
+                const isAuthorized = userRole === 'admin' ||
+                    (userRole === 'store' && tournamentData.organizer_id === userId) ||
+                    (userRole === 'store' && tournamentData.created_by === userId);
+
                 const mappedStandings: TournamentStanding[] = (resultsData || []).map((r: any, index: number) => {
                     // Determine name from profile (if registered) or raw field (if manual)
                     let finalName = r.player_name;
                     if (r.profile) {
-                        // Prefer username, then first+last, then just "Jugador"
                         finalName = r.profile.username ||
                             (r.profile.first_name ? `${r.profile.first_name} ${r.profile.last_name || ''}`.trim() : null) ||
                             finalName;
                     }
-                    if (!finalName) finalName = `Player ${getAnonymousId(tournamentId + index)}`;
+
+                    // Privacy Logic:
+                    // 1. If the player has a profile (registered), show the name to everyone (accepted terms)
+                    // 2. If no profile, mask the name UNLESS:
+                    //    - Viewer is Admin
+                    //    - Viewer is the Tournament Organizer
+                    //    - Viewer IS the player (even if no profile, though unlikely to have player_id without profile)
+
+                    const isRegistered = !!r.profile;
+                    const isOwnResult = r.player_id && r.player_id === userId;
+
+                    if (!isRegistered && !isAuthorized && !isOwnResult) {
+                        const anonId = r.player_id ? getAnonymousId(r.player_id) : getAnonymousId(tournamentId + index);
+                        finalName = `Jugador #${anonId}`;
+                    }
+
+                    if (!finalName) finalName = `Jugador ${getAnonymousId(tournamentId + index)}`;
 
                     return {
                         rank: r.rank || index + 1,
@@ -100,7 +128,7 @@ const TournamentStandingsPage: React.FC = () => {
         };
 
         fetchData();
-    }, [tournamentId]);
+    }, [tournamentId, userId, userRole]);
 
     if (loading) {
         return (
@@ -164,7 +192,26 @@ const TournamentStandingsPage: React.FC = () => {
                                                 player.rank === 3 ? 'text-yellow-600' : 'text-slate-400'
                                             }`}>{player.rank}</span>
                                     </td>
-                                    <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-sm font-medium text-white">{player.playerName}</td>
+                                    <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                        {player.playerName.startsWith('Jugador #') ? (
+                                            <div className="flex items-center gap-2 group/anon">
+                                                <span className="text-slate-500 font-mono italic bg-slate-900/50 px-2 py-0.5 rounded border border-slate-700/30">
+                                                    {player.playerName}
+                                                </span>
+                                                <div className="relative">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 text-slate-600 group-hover/anon:text-sky-500 transition-colors" viewBox="0 0 20 20" fill="currentColor">
+                                                        <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
+                                                    </svg>
+                                                    {/* Tooltip on hover */}
+                                                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-slate-900 text-[10px] text-slate-300 rounded opacity-0 group-hover/anon:opacity-100 transition-opacity whitespace-nowrap pointer-events-none border border-slate-700 z-30">
+                                                        Regístrate para ver tu nombre
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <span className="text-white">{player.playerName}</span>
+                                        )}
+                                    </td>
                                     <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-right text-sm font-bold text-sky-400">
                                         <div className="flex items-center justify-end space-x-2">
                                             <span>{player.pwpEarned}</span>

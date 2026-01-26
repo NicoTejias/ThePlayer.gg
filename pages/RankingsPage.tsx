@@ -114,48 +114,78 @@ const RankingsPage: React.FC<RankingsPageProps> = ({ players, teams }) => {
                             <p className="text-md text-slate-400 mt-1">Suma de {getPointsLabel()} obtenidos en torneos oficiales.</p>
                         </div>
                         {/* Tab Content here (Individual Table) */}
-                        <div className="overflow-x-auto bg-slate-800 rounded-lg shadow-xl border border-slate-700">
-                            <table className="min-w-full divide-y divide-slate-700">
-                                <thead className="bg-slate-700/50">
+                        <div className="overflow-x-auto bg-slate-800 rounded-2xl shadow-2xl border border-slate-700/50">
+                            <table className="min-w-full">
+                                <thead className="bg-slate-900/50 border-b border-slate-700">
                                     <tr>
-                                        <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Puesto</th>
-                                        <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Jugador</th>
-                                        <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Team</th>
-                                        <th className="px-3 sm:px-6 py-3 text-right text-xs font-medium text-slate-300 uppercase tracking-wider">Pts</th>
+                                        <th className="px-4 py-4 text-left text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] sticky left-0 bg-slate-900 z-10 border-r border-slate-800/50 w-16 text-center">Pos</th>
+                                        <th className="px-4 py-4 text-left text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Jugador</th>
+                                        <th className="hidden sm:table-cell px-4 py-4 text-left text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Team</th>
+                                        <th className="px-4 py-4 text-right text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">{getPointsLabel()}</th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-slate-700">
-                                    {pwpRanking.map((player, index) => (
-                                        <tr
-                                            key={player.id}
-                                            className={`transition-colors ${player.is_pro
-                                                ? 'bg-gradient-to-r from-purple-900/20 to-transparent border-l-4 border-purple-500 hover:from-purple-900/30'
-                                                : 'hover:bg-slate-700/40'
-                                                }`}
-                                        >
-                                            <td className="px-3 sm:px-6 py-4 whitespace-nowrap font-bold text-slate-400">{index + 1}</td>
-                                            <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
-                                                <div className="flex items-center gap-2">
-                                                    <span className="text-white font-medium text-sm sm:text-base">{player.name}</span>
-                                                    <LevelBadge pwp={player.pwp} size="sm" />
-                                                    {player.is_pro && <ProBadge size="small" />}
-                                                    {player.is_content_creator && <ContentCreatorBadge size="small" />}
-                                                </div>
-                                            </td>
-                                            <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
-                                                {player.teamId ? (
-                                                    <Link to={`/equipo/${player.teamId}`} className="px-2 inline-flex text-xs font-semibold rounded-full bg-sky-500/10 text-sky-400 hover:bg-sky-500/20 transition-colors">
-                                                        {player.teamData?.name || player.team}
-                                                    </Link>
-                                                ) : (
-                                                    <span className="px-2 inline-flex text-xs font-semibold rounded-full bg-slate-700 text-slate-300">
-                                                        {player.team || '-'}
-                                                    </span>
-                                                )}
-                                            </td>
-                                            <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-right text-sky-400 font-bold">{player.pwp}</td>
-                                        </tr>
-                                    ))}
+                                <tbody className="divide-y divide-slate-700/30">
+                                    {pwpRanking.map((player, index) => {
+                                        const isTop3 = index < 3;
+                                        return (
+                                            <tr
+                                                key={player.id}
+                                                className={`transition-all duration-300 group ${player.is_pro
+                                                    ? 'bg-gradient-to-r from-purple-900/10 to-transparent hover:from-purple-900/20'
+                                                    : 'hover:bg-slate-700/30'
+                                                    }`}
+                                            >
+                                                <td className={`px-4 py-5 text-center sticky left-0 z-10 border-r border-slate-800/50 transition-colors ${player.is_pro ? 'bg-slate-900/90' : 'bg-slate-800 group-hover:bg-slate-700/30'
+                                                    }`}>
+                                                    <span className={`text-lg font-black ${index === 0 ? 'text-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.4)]' :
+                                                            index === 1 ? 'text-slate-300' :
+                                                                index === 2 ? 'text-orange-400' :
+                                                                    'text-slate-600'
+                                                        }`}>{index + 1}</span>
+                                                </td>
+                                                <td className="px-4 py-5">
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="flex flex-col min-w-0">
+                                                            <div className="flex items-center gap-2">
+                                                                <span className="text-white font-bold text-sm sm:text-base truncate">{player.name}</span>
+                                                                {player.is_pro && <ProBadge size="small" />}
+                                                            </div>
+                                                            <div className="flex items-center gap-1.5 mt-1 sm:hidden">
+                                                                <span className="text-[10px] text-slate-500 uppercase font-bold truncate">
+                                                                    {player.team || '-'}
+                                                                </span>
+                                                                <span className="w-1 h-1 rounded-full bg-slate-700"></span>
+                                                                <LevelBadge pwp={player.pwp} size="xs" />
+                                                            </div>
+                                                        </div>
+                                                        <div className="hidden sm:block">
+                                                            <LevelBadge pwp={player.pwp} size="sm" />
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td className="hidden sm:table-cell px-4 py-5 whitespace-nowrap">
+                                                    {player.teamId ? (
+                                                        <Link to={`/equipo/${player.teamId}`} className="px-3 py-1 inline-flex text-[10px] font-black uppercase tracking-widest rounded-full bg-sky-500/10 text-sky-400 hover:bg-sky-500/20 border border-sky-500/20 transition-all">
+                                                            {player.teamData?.name || player.team}
+                                                        </Link>
+                                                    ) : (
+                                                        <span className="px-3 py-1 inline-flex text-[10px] font-black uppercase tracking-widest rounded-full bg-slate-700 text-slate-400 border border-slate-600/30">
+                                                            {player.team || '-'}
+                                                        </span>
+                                                    )}
+                                                </td>
+                                                <td className="px-4 py-5 text-right">
+                                                    <div className="flex flex-col items-end">
+                                                        <span className={`text-lg font-black tracking-tighter ${isTop3 ? 'text-sky-400 drop-shadow-[0_0_8px_rgba(56,189,248,0.3)]' : 'text-slate-200'
+                                                            }`}>
+                                                            {player.pwp.toLocaleString()}
+                                                        </span>
+                                                        <span className="text-[8px] text-slate-500 uppercase font-black tracking-widest">Points</span>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        );
+                                    })}
                                 </tbody>
                             </table>
                         </div>

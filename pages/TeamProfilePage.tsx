@@ -59,9 +59,6 @@ const TeamProfilePage: React.FC = () => {
                         name: `${m.first_name || ''} ${m.last_name || ''}`.trim() || m.username,
                         region: m.region,
                         pwp: m.pwp,
-                        matchesWon: m.matches_won,
-                        matchesLost: m.matches_lost,
-                        matchesDrew: m.matches_drew,
                         teamId: teamData.id,
                         isPublic: m.is_public
                     }));
@@ -207,21 +204,7 @@ const TeamProfilePage: React.FC = () => {
                                     </div>
                                 </div>
 
-                                <div className="mt-4 pt-4 border-t border-slate-700/50 flex items-center justify-between">
-                                    <div className="flex gap-4">
-                                        <div className="text-center">
-                                            <p className="text-[10px] text-slate-500 uppercase font-bold">V</p>
-                                            <p className="text-slate-300 font-bold">{member.matchesWon}</p>
-                                        </div>
-                                        <div className="text-center">
-                                            <p className="text-[10px] text-slate-500 uppercase font-bold">D</p>
-                                            <p className="text-slate-300 font-bold">{member.matchesLost}</p>
-                                        </div>
-                                        <div className="text-center">
-                                            <p className="text-[10px] text-slate-500 uppercase font-bold">E</p>
-                                            <p className="text-slate-300 font-bold">{member.matchesDrew}</p>
-                                        </div>
-                                    </div>
+                                <div className="mt-4 pt-4 border-t border-slate-700/50 flex items-center justify-end">
                                     <button className="text-xs text-sky-500 font-bold uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity">
                                         Ver Perfil
                                     </button>

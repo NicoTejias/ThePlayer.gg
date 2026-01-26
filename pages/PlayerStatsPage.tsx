@@ -9,10 +9,6 @@ import TrophyCase from '../components/TrophyCase';
 interface StatsByFormat {
     format: string;
     total_matches: number;
-    wins: number;
-    losses: number;
-    draws: number;
-    win_rate: number;
     total_pwp: number;
 }
 
@@ -30,10 +26,6 @@ interface PerformanceMetrics {
     average_pwp_per_tournament: number;
     best_format: string | null;
     worst_format: string | null;
-    total_wins: number;
-    total_losses: number;
-    total_draws: number;
-    overall_win_rate: number;
 }
 
 const PlayerStatsPage: React.FC = () => {
@@ -111,13 +103,6 @@ const PlayerStatsPage: React.FC = () => {
         purple: '#a855f7',
     };
 
-    const PIE_COLORS = [COLORS.success, COLORS.danger, COLORS.warning];
-
-    const getWinRateColor = (winRate: number) => {
-        if (winRate >= 60) return COLORS.success;
-        if (winRate >= 40) return COLORS.warning;
-        return COLORS.danger;
-    };
 
     if (loading) {
         return (
@@ -175,7 +160,7 @@ const PlayerStatsPage: React.FC = () => {
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                                 </svg>
                             </div>
-                            <span className="text-slate-400 text-sm">Torneos</span>
+                            <span className="text-slate-400 text-sm">Torneos Participados</span>
                         </div>
                         <p className="text-3xl font-bold">{metrics.total_tournaments}</p>
                     </div>
@@ -187,31 +172,19 @@ const PlayerStatsPage: React.FC = () => {
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
                                 </svg>
                             </div>
-                            <span className="text-slate-400 text-sm">Player Points Totales</span>
+                            <span className="text-slate-400 text-sm">Puntos Acumulados</span>
                         </div>
                         <p className="text-3xl font-bold">{(metrics.total_pwp || 0).toLocaleString()}</p>
                     </div>
 
-                    <div className="bg-slate-800 border border-slate-700 rounded-lg p-6">
-                        <div className="flex items-center gap-3 mb-2">
-                            <div className="w-10 h-10 bg-green-900/50 rounded-lg flex items-center justify-center">
-                                <svg className="w-6 h-6 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                            </div>
-                            <span className="text-slate-400 text-sm">Win Rate</span>
-                        </div>
-                        <p className="text-3xl font-bold">{metrics.overall_win_rate.toFixed(1)}%</p>
-                    </div>
-
-                    <div className="bg-slate-800 border border-slate-700 rounded-lg p-6">
+                    <div className="bg-slate-800 border border-slate-700 rounded-lg p-6 md:col-span-2">
                         <div className="flex items-center gap-3 mb-2">
                             <div className="w-10 h-10 bg-amber-900/50 rounded-lg flex items-center justify-center">
                                 <svg className="w-6 h-6 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
                                 </svg>
                             </div>
-                            <span className="text-slate-400 text-sm">Promedio Player Points</span>
+                            <span className="text-slate-400 text-sm">Promedio de Puntos por Torneo</span>
                         </div>
                         <p className="text-3xl font-bold">{(metrics.average_pwp_per_tournament || 0).toFixed(1)}</p>
                     </div>
@@ -290,16 +263,12 @@ const PlayerStatsPage: React.FC = () => {
                             <div className="bg-slate-800/50 rounded-lg p-6 border border-purple-500/30">
                                 <div className="flex items-center gap-2 mb-3">
                                     <svg className="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                     </svg>
-                                    <span className="text-sm text-purple-300 font-semibold">Tendencia</span>
+                                    <span className="text-sm text-purple-300 font-semibold">Status PWP</span>
                                 </div>
-                                <p className="text-3xl font-bold text-white mb-1">
-                                    {metrics.overall_win_rate >= 50 ? '📈' : '📊'}
-                                </p>
-                                <p className="text-xs text-purple-400/70">
-                                    {metrics.overall_win_rate >= 50 ? 'Positiva' : 'En desarrollo'}
-                                </p>
+                                <p className="text-3xl font-bold text-white mb-1">Activo</p>
+                                <p className="text-xs text-purple-400/70">Sumando puntos esta temporada</p>
                             </div>
                         </div>
 
@@ -315,8 +284,7 @@ const PlayerStatsPage: React.FC = () => {
                                 <div className="flex items-start gap-3">
                                     <div className="w-2 h-2 bg-purple-400 rounded-full mt-2"></div>
                                     <p className="text-sm text-slate-300">
-                                        Tu win rate de <span className="font-bold text-purple-300">{metrics.overall_win_rate.toFixed(1)}%</span> está
-                                        {metrics.overall_win_rate >= 50 ? ' por encima' : ' por debajo'} del promedio competitivo (50%).
+                                        Tu promedio de <span className="font-bold text-purple-300">{metrics.average_pwp_per_tournament.toFixed(1)} Pts</span> te posiciona bien entre los jugadores activos.
                                     </p>
                                 </div>
                                 {metrics.best_format && (
@@ -395,57 +363,8 @@ const PlayerStatsPage: React.FC = () => {
                         </div>
                     )}
 
-                    {/* Results Distribution */}
-                    {pieData.length > 0 && (
-                        <div className="bg-slate-800 border border-slate-700 rounded-lg p-6">
-                            <h2 className="text-2xl font-bold mb-4">Distribución de Resultados</h2>
-                            <ResponsiveContainer width="100%" height={300}>
-                                <PieChart>
-                                    <Pie
-                                        data={pieData}
-                                        cx="50%"
-                                        cy="50%"
-                                        labelLine={false}
-                                        label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                                        outerRadius={80}
-                                        fill="#8884d8"
-                                        dataKey="value"
-                                    >
-                                        {pieData.map((entry, index) => (
-                                            <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
-                                        ))}
-                                    </Pie>
-                                    <Tooltip
-                                        contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #475569', borderRadius: '8px' }}
-                                    />
-                                </PieChart>
-                            </ResponsiveContainer>
-                        </div>
-                    )}
                 </div>
 
-                {/* Win Rate by Format */}
-                {statsByFormat.length > 0 && (
-                    <div className="bg-slate-800 border border-slate-700 rounded-lg p-6 mb-8">
-                        <h2 className="text-2xl font-bold mb-4">Win Rate por Formato</h2>
-                        <ResponsiveContainer width="100%" height={300}>
-                            <BarChart data={statsByFormat} layout="vertical">
-                                <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
-                                <XAxis type="number" stroke="#94a3b8" tick={{ fill: '#94a3b8' }} />
-                                <YAxis dataKey="format" type="category" stroke="#94a3b8" tick={{ fill: '#94a3b8' }} />
-                                <Tooltip
-                                    contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #475569', borderRadius: '8px' }}
-                                    labelStyle={{ color: '#e2e8f0' }}
-                                />
-                                <Bar dataKey="win_rate" name="Win Rate (%)" radius={[0, 8, 8, 0]}>
-                                    {statsByFormat.map((entry, index) => (
-                                        <Cell key={`cell-${index}`} fill={getWinRateColor(entry.win_rate)} />
-                                    ))}
-                                </Bar>
-                            </BarChart>
-                        </ResponsiveContainer>
-                    </div>
-                )}
 
                 {/* Stats Table */}
                 {statsByFormat.length > 0 && (
@@ -456,10 +375,8 @@ const PlayerStatsPage: React.FC = () => {
                                 <thead>
                                     <tr className="border-b border-slate-700">
                                         <th className="text-left py-3 px-4 text-slate-400 font-semibold">Formato</th>
-                                        <th className="text-center py-3 px-4 text-slate-400 font-semibold">Partidas</th>
-                                        <th className="text-center py-3 px-4 text-slate-400 font-semibold">W-L-D</th>
-                                        <th className="text-center py-3 px-4 text-slate-400 font-semibold">Win Rate</th>
-                                        <th className="text-center py-3 px-4 text-slate-400 font-semibold">Points</th>
+                                        <th className="text-center py-3 px-4 text-slate-400 font-semibold">Torneos</th>
+                                        <th className="text-center py-3 px-4 text-slate-400 font-semibold">Player Points</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -467,22 +384,7 @@ const PlayerStatsPage: React.FC = () => {
                                         <tr key={index} className="border-b border-slate-700/50 hover:bg-slate-700/30 transition-colors">
                                             <td className="py-3 px-4 font-semibold">{stat.format}</td>
                                             <td className="py-3 px-4 text-center">{stat.total_matches}</td>
-                                            <td className="py-3 px-4 text-center">
-                                                <span className="text-green-400">{stat.wins}</span>-
-                                                <span className="text-red-400">{stat.losses}</span>-
-                                                <span className="text-yellow-400">{stat.draws}</span>
-                                            </td>
-                                            <td className="py-3 px-4 text-center">
-                                                <span
-                                                    className={`px-3 py-1 rounded-full font-semibold ${stat.win_rate >= 60 ? 'bg-emerald-500/20 text-emerald-500' :
-                                                        stat.win_rate >= 40 ? 'bg-amber-500/20 text-amber-500' :
-                                                            'bg-red-500/20 text-red-500'
-                                                        }`}
-                                                >
-                                                    {stat.win_rate.toFixed(1)}%
-                                                </span>
-                                            </td>
-                                            <td className="py-3 px-4 text-center font-bold text-purple-400">{stat.total_pwp}</td>
+                                            <td className="py-3 px-4 text-center font-bold text-sky-400">{stat.total_pwp}</td>
                                         </tr>
                                     ))}
                                 </tbody>
@@ -491,7 +393,7 @@ const PlayerStatsPage: React.FC = () => {
                     </div>
                 )}
             </div>
-        </div>
+        </div >
     );
 };
 
