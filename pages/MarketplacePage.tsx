@@ -48,10 +48,21 @@ const MarketplacePage: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [showCreateModal, setShowCreateModal] = useState(false);
 
-    // Filters
     const [searchQuery, setSearchQuery] = useState('');
     const [filterType, setFilterType] = useState('');
     const [sortBy, setSortBy] = useState('recent');
+    const [priceRange, setPriceRange] = useState<[number, number]>([0, 1000000]);
+    const [selectedConditions, setSelectedConditions] = useState<string[]>([]);
+    const [favorites, setFavorites] = useState<Set<string>>(new Set());
+
+    const toggleFavorite = (id: string, e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const newFavs = new Set(favorites);
+        if (newFavs.has(id)) newFavs.delete(id);
+        else newFavs.add(id);
+        setFavorites(newFavs);
+    };
 
     useEffect(() => {
         fetchListings();
@@ -97,128 +108,192 @@ const MarketplacePage: React.FC = () => {
                 </div>
             </div>
 
-            {/* Toolbar */}
-            <div className="flex flex-col md:flex-row gap-4 bg-slate-800/50 p-3 rounded-lg border border-slate-700">
-                <input
-                    type="search"
-                    placeholder="Buscar cartas..."
-                    aria-label="Buscar cartas"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="bg-slate-900/60 text-white placeholder-slate-500 rounded px-3 py-2 w-full md:w-64 focus:outline-none focus:ring-1 focus:ring-sky-500 border border-slate-700 text-sm"
-                />
-                <select
-                    value={filterType}
-                    onChange={(e) => setFilterType(e.target.value)}
-                    title="Filtrar por tipo"
-                    aria-label="Filtrar por tipo"
-                    className="bg-slate-900/60 text-white rounded px-3 py-2 focus:outline-none border border-slate-700 text-sm"
-                >
-                    <option value="">Todos los Tipos</option>
-                    <option value="sale">Venta</option>
-                    <option value="buy">Compra</option>
-                    <option value="trade">Cambio</option>
-                </select>
-                {/* Game Filter removed - controlled globally */}
-                <select
-                    value={sortBy}
-                    onChange={(e) => setSortBy(e.target.value)}
-                    title="Ordenar por"
-                    aria-label="Ordenar por"
-                    className="bg-slate-900/60 text-white rounded px-3 py-2 focus:outline-none border border-slate-700 text-sm"
-                >
-                    <option value="recent">Más Recientes</option>
-                    <option value="price_asc">Precio: Menor a Mayor</option>
-                    <option value="price_desc">Precio: Mayor a Menor</option>
-                </select>
-            </div>
+            <div className="flex flex-col lg:flex-row gap-8">
+                {/* Sidebar Filters */}
+                <aside className="w-full lg:w-64 space-y-6 shrink-0">
+                    <div className="bg-slate-800/80 backdrop-blur-md rounded-2xl border border-slate-700/50 p-6 sticky top-24 shadow-xl">
+                        <h2 className="text-xs font-black text-slate-500 uppercase tracking-[0.2em] mb-6">Filtros</h2>
 
-            {/* Loading State */}
-            {loading && (
-                <div className="text-center py-12">
-                    <div className="w-12 h-12 border-4 border-sky-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
-                    <p className="text-slate-400 mt-4">Cargando anuncios...</p>
-                </div>
-            )}
+                        <div className="space-y-6">
+                            {/* Search */}
+                            <div>
+                                <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Buscar</label>
+                                <input
+                                    type="search"
+                                    placeholder="Carta o vendedor..."
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:ring-2 focus:ring-sky-500 transition-all outline-none"
+                                />
+                            </div>
 
-            {/* Empty State */}
-            {!loading && listings.length === 0 && (
-                <div className="text-center py-12 bg-slate-800/50 rounded-lg border border-slate-700">
-                    <p className="text-slate-400 text-lg">No se encontraron anuncios</p>
-                    <p className="text-slate-500 text-sm mt-2">Intenta ajustar los filtros o crea el primer anuncio</p>
-                </div>
-            )}
+                            {/* Type */}
+                            <div>
+                                <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Tipo</label>
+                                <div className="space-y-2">
+                                    {['sale', 'buy', 'trade'].map(type => (
+                                        <button
+                                            key={type}
+                                            onClick={() => setFilterType(filterType === type ? '' : type)}
+                                            className={`w-full flex items-center justify-between px-4 py-2 rounded-xl text-sm font-bold transition-all ${filterType === type ? 'bg-sky-600 text-white shadow-lg shadow-sky-900/40' : 'bg-slate-900/50 text-slate-400 hover:text-white border border-slate-700/50'}`}
+                                        >
+                                            {getTypeLabel(type)}
+                                            {filterType === type && <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" /></svg>}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
 
-            {/* Marketplace Grid */}
-            {!loading && listings.length > 0 && (
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-                    {listings.map((listing) => {
-                        const images = listing.images?.slice(0, 4) || [];
-                        const hasMore = (listing.images?.length || 0) > 4;
+                            {/* Conditions */}
+                            <div>
+                                <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Estado</label>
+                                <div className="flex flex-wrap gap-2">
+                                    {['NM', 'LP', 'MP', 'HP', 'DMG'].map(cond => (
+                                        <button
+                                            key={cond}
+                                            onClick={() => {
+                                                const newConds = selectedConditions.includes(cond) ? selectedConditions.filter(c => c !== cond) : [...selectedConditions, cond];
+                                                setSelectedConditions(newConds);
+                                            }}
+                                            className={`px-3 py-1.5 rounded-lg text-[10px] font-black transition-all border ${selectedConditions.includes(cond) ? 'bg-sky-500/20 border-sky-500 text-sky-400' : 'bg-slate-900 border-slate-700 text-slate-500 hover:border-slate-500'}`}
+                                        >
+                                            {cond}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
 
-                        return (
-                            <Link to={`/mercado/${listing.id}`} key={listing.id} className="group bg-slate-800 rounded-lg overflow-hidden shadow-lg border border-slate-700 hover:border-slate-500 transition-all hover:translate-y-[-2px] flex flex-col">
-                                {/* Image Gallery Grid */}
-                                <div className="aspect-[4/3] bg-slate-900 relative p-1 grid grid-cols-2 gap-0.5">
-                                    {images.length === 0 ? (
-                                        <div className="col-span-2 row-span-2 w-full h-full flex items-center justify-center text-slate-600">
-                                            <svg xmlns="http://www.w3.org/2000/svg" className="w-16 h-16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                            </svg>
-                                        </div>
-                                    ) : images.length === 1 ? (
-                                        <img src={images[0]} alt={listing.title} className="col-span-2 row-span-2 w-full h-full object-cover rounded-sm" />
-                                    ) : (
-                                        images.map((img, idx) => (
-                                            <div key={idx} className="relative w-full h-full overflow-hidden rounded-sm">
-                                                <img src={img} alt="card" className="w-full h-full object-cover" />
-                                                {idx === 3 && hasMore && (
-                                                    <div className="absolute inset-0 bg-black/60 flex items-center justify-center text-white font-bold text-xs">
-                                                        +{listing.images!.length - 4}
+                            {/* Sort */}
+                            <div>
+                                <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Ordenar por</label>
+                                <select
+                                    value={sortBy}
+                                    onChange={(e) => setSortBy(e.target.value)}
+                                    title="Selecciona el orden de los anuncios"
+                                    className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white outline-none appearance-none cursor-pointer"
+                                >
+                                    <option value="recent">Más Recientes</option>
+                                    <option value="price_asc">Precio: Bajo a Alto</option>
+                                    <option value="price_desc">Precio: Alto a Bajo</option>
+                                </select>
+                            </div>
+
+                            <button
+                                onClick={() => {
+                                    setSearchQuery('');
+                                    setFilterType('');
+                                    setSortBy('recent');
+                                    setSelectedConditions([]);
+                                }}
+                                className="w-full py-2 text-xs font-bold text-slate-500 hover:text-white transition-colors uppercase tracking-widest"
+                            >
+                                Limpiar Filtros
+                            </button>
+                        </div>
+                    </div>
+                </aside>
+
+                {/* Main Content */}
+                <div className="flex-1">
+                    {/* Loading State */}
+                    {loading && (
+                        <div className="flex flex-col items-center justify-center py-32 space-y-4">
+                            <div className="w-12 h-12 border-4 border-sky-500 border-t-transparent rounded-full animate-spin"></div>
+                            <span className="text-slate-500 font-bold uppercase tracking-widest text-[10px]">Cargando Mercado...</span>
+                        </div>
+                    )}
+
+                    {/* Empty State */}
+                    {!loading && listings.length === 0 && (
+                        <div className="text-center py-24 bg-slate-800/30 rounded-3xl border border-slate-700/50 border-dashed">
+                            <svg className="w-16 h-16 text-slate-700 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
+                            <h3 className="text-xl font-bold text-slate-400 mb-2">No se encontraron anuncios</h3>
+                            <p className="text-slate-500 max-w-xs mx-auto text-sm">Prueba ajustando los filtros o busca algo diferente.</p>
+                        </div>
+                    )}
+
+                    {!loading && listings.length > 0 && (
+                        <div className="grid grid-cols-2 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
+                            {listings.map((listing) => {
+                                const images = listing.images?.slice(0, 1) || [];
+                                const isFavorite = favorites.has(listing.id);
+
+                                return (
+                                    <Link to={`/mercado/${listing.id}`} key={listing.id} className="group bg-slate-800/50 backdrop-blur-sm rounded-2xl overflow-hidden border border-slate-700/50 hover:border-sky-500/50 transition-all duration-500 hover:-translate-y-2 flex flex-col shadow-lg hover:shadow-sky-900/20">
+                                        {/* Thumbnail Area */}
+                                        <div className="aspect-[4/5] bg-slate-900 relative overflow-hidden">
+                                            {images.length === 0 ? (
+                                                <div className="w-full h-full flex items-center justify-center text-slate-800">
+                                                    <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                                                </div>
+                                            ) : (
+                                                <img
+                                                    src={images[0]}
+                                                    alt={listing.title}
+                                                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                                                />
+                                            )}
+
+                                            {/* Overlays */}
+                                            <div className="absolute top-3 left-3 flex flex-col gap-2">
+                                                <span className={`text-[9px] font-black px-2.5 py-1 rounded-lg uppercase tracking-widest backdrop-blur-md shadow-xl ${getTypeStyles(listing.listing_type)}`}>
+                                                    {getTypeLabel(listing.listing_type)}
+                                                </span>
+                                                {listing.condition && (
+                                                    <span className="bg-black/60 backdrop-blur-md text-white text-[9px] font-black px-2.5 py-1 rounded-lg uppercase tracking-widest shadow-xl border border-white/10">
+                                                        {listing.condition}
+                                                    </span>
+                                                )}
+                                            </div>
+
+                                            <button
+                                                onClick={(e) => toggleFavorite(listing.id, e)}
+                                                title={isFavorite ? "Quitar de favoritos" : "Agregar a favoritos"}
+                                                className={`absolute top-3 right-3 p-2 rounded-xl backdrop-blur-md transition-all duration-300 ${isFavorite ? 'bg-red-500 text-white shadow-lg shadow-red-500/40 scale-110' : 'bg-black/40 text-white/70 hover:text-white hover:bg-black/60'}`}
+                                            >
+                                                <svg className={`w-4 h-4 ${isFavorite ? 'fill-current' : 'fill-none'}`} stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                                                </svg>
+                                            </button>
+
+                                            <div className="absolute inset-x-0 bottom-0 p-4 bg-gradient-to-t from-slate-900 to-transparent translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
+                                                {listing.price && (
+                                                    <div className="text-xl font-black text-white dropshadow-md">
+                                                        {listing.price.toLocaleString('es-CL', { style: 'currency', currency: 'CLP' })}
                                                     </div>
                                                 )}
                                             </div>
-                                        ))
-                                    )}
-                                    {/* Type Tag Overlay */}
-                                    <div className="absolute top-2 right-2">
-                                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider backdrop-blur-md shadow-sm ${getTypeStyles(listing.listing_type)}`}>
-                                            {getTypeLabel(listing.listing_type)}
-                                        </span>
-                                    </div>
-                                </div>
-
-                                <div className="p-3 flex flex-col flex-grow">
-                                    <h3 className="font-bold text-sm text-white leading-tight mb-2 line-clamp-2 group-hover:text-sky-400 transition-colors">
-                                        {listing.title}
-                                    </h3>
-
-                                    <div className="mt-auto space-y-1.5">
-                                        <div className="flex items-center justify-between">
-                                            <div className="flex items-center gap-1.5 text-slate-400 text-xs">
-                                                <UserIcon className="w-3 h-3" />
-                                                <span className="truncate max-w-[80px]">{listing.seller_name}</span>
-                                            </div>
-                                            {listing.seller_region && (
-                                                <div className="flex items-center gap-1 text-slate-500 text-[10px]">
-                                                    <MapPinIcon className="w-3 h-3" />
-                                                    <span>{listing.seller_region}</span>
-                                                </div>
-                                            )}
                                         </div>
 
-                                        {listing.price && (
-                                            <div className="font-bold text-green-400 text-sm">
-                                                {listing.price.toLocaleString('es-CL', { style: 'currency', currency: 'CLP' })}
+                                        {/* Info Area */}
+                                        <div className="p-5 flex flex-col flex-grow bg-gradient-to-b from-slate-800/50 to-slate-900/50 group-hover:from-slate-700/50 transition-colors">
+                                            <h3 className="font-bold text-sm text-slate-100 leading-tight mb-4 line-clamp-2 h-10 group-hover:text-sky-400 transition-colors">
+                                                {listing.title}
+                                            </h3>
+
+                                            <div className="mt-auto flex items-center justify-between border-t border-slate-700/50 pt-4">
+                                                <div className="flex items-center gap-2 group/user overflow-hidden">
+                                                    <div className="w-7 h-7 rounded-lg bg-sky-500/10 flex items-center justify-center text-sky-400 flex-shrink-0 group-hover/user:bg-sky-500 group-hover/user:text-white transition-all">
+                                                        <UserIcon className="w-3.5 h-3.5" />
+                                                    </div>
+                                                    <span className="text-xs font-bold text-slate-400 truncate">{listing.seller_name}</span>
+                                                </div>
+
+                                                <div className="flex items-center gap-1 text-slate-500 text-[10px] font-bold uppercase tracking-widest bg-slate-900/50 px-2 py-1 rounded-md">
+                                                    <MapPinIcon className="w-3 h-3 text-sky-500" />
+                                                    {listing.seller_region || 'Sgo'}
+                                                </div>
                                             </div>
-                                        )}
-                                    </div>
-                                </div>
-                            </Link>
-                        );
-                    })}
+                                        </div>
+                                    </Link>
+                                );
+                            })}
+                        </div>
+                    )}
                 </div>
-            )}
+            </div>
 
             {/* Create Listing Modal */}
             <CreateListingModal

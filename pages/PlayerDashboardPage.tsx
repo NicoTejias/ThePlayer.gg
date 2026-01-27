@@ -17,22 +17,48 @@ import { toast } from 'sonner';
 import { useGame } from '../context/GameContext';
 import AliasReminderBanner from '../components/AliasReminderBanner';
 
-const StatCard: React.FC<{ icon: React.ReactNode, title: string, value: string | number, rank?: string | number, color: string }> = ({ icon, title, value, rank, color }) => (
-    <div className={`bg-slate-800 p-6 rounded-lg shadow-lg border border-slate-700`}>
-        <div className="flex justify-between items-start">
-            <div>
-                <p className="text-sm text-slate-400 uppercase">{title}</p>
-                <p className={`text-3xl font-bold text-${color}-400`}>{value}</p>
+const StatCard: React.FC<{ icon: React.ReactNode, title: string, value: string | number, rank?: string | number, color: 'sky' | 'purple' | 'emerald' | 'amber' | 'blue' }> = ({ icon, title, value, rank, color }) => {
+    const colorMap = {
+        sky: 'from-sky-500/20 to-sky-900/10 border-sky-500/30 text-sky-400',
+        purple: 'from-purple-500/20 to-purple-900/10 border-purple-500/30 text-purple-400',
+        emerald: 'from-emerald-500/20 to-emerald-900/10 border-emerald-500/30 text-emerald-400',
+        amber: 'from-amber-500/20 to-amber-900/10 border-amber-500/30 text-amber-400',
+        blue: 'from-blue-500/20 to-blue-900/10 border-blue-500/30 text-blue-400'
+    };
+
+    const glowMap = {
+        sky: 'text-glow-blue',
+        purple: 'text-glow-purple',
+        emerald: 'text-glow-blue', // fallback
+        amber: 'text-glow-blue', // fallback
+        blue: 'text-glow-blue'
+    };
+
+    return (
+        <div className={`glass-premium glass-card-hover p-6 rounded-[2rem] border relative overflow-hidden group ${colorMap[color]}`}>
+            <div className={`absolute top-0 right-0 w-32 h-32 bg-gradient-to-br opacity-5 group-hover:opacity-15 transition-opacity blur-3xl ${colorMap[color]}`} />
+
+            <div className="flex justify-between items-start relative z-10">
+                <div className="space-y-1">
+                    <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500/80 group-hover:text-slate-400 transition-colors">{title}</p>
+                    <p className={`text-4xl font-black text-white tracking-tighter ${glowMap[color]}`}>{value}</p>
+                </div>
+                <div className="p-4 rounded-2xl bg-slate-950/50 border border-white/5 shadow-2xl transition-all group-hover:scale-110 group-hover:rotate-6 duration-500 group-hover:border-white/10">
+                    {icon}
+                </div>
             </div>
-            <div className={`p-3 rounded-full bg-${color}-500/10 text-${color}-400`}>
-                {icon}
-            </div>
+
+            {rank !== undefined && rank !== 0 && rank !== '-' && (
+                <div className="mt-5 pt-5 border-t border-white/5 flex items-center justify-between relative z-10">
+                    <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-600">Rango Global</span>
+                    <span className="text-xl font-black text-white px-3 py-1 bg-white/5 rounded-xl border border-white/10 italic tracking-tighter shadow-xl">
+                        #{rank}
+                    </span>
+                </div>
+            )}
         </div>
-        {rank !== undefined && rank !== 0 && rank !== '-' && (
-            <p className="text-2xl font-bold text-white mt-2">Puesto #{rank}</p>
-        )}
-    </div>
-);
+    );
+};
 
 
 const PlayerDashboardPage: React.FC<{ profile?: any, showAliasReminder?: boolean }> = ({ profile, showAliasReminder = false }) => {
@@ -205,68 +231,99 @@ const PlayerDashboardPage: React.FC<{ profile?: any, showAliasReminder?: boolean
             {/* Alias Reminder for Players */}
             <AliasReminderBanner show={showAliasReminder} />
 
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-                <div>
-                    <div className="flex items-center gap-3">
-                        <h1 className="text-4xl sm:text-5xl font-bold text-white tracking-tighter uppercase">Hola, {greetingName}</h1>
-                        <LevelBadge pwp={gameStats.points} size="lg" />
-                        {profile?.is_pro && <ProBadge size="medium" />}
-                        {(profile?.is_content_creator || profile?.role === 'content_creator') && <ContentCreatorBadge size="medium" />}
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-8 pb-8 border-b border-slate-700/50">
+                <div className="space-y-3">
+                    <div className="flex flex-wrap items-center gap-4">
+                        <h1 className="text-5xl sm:text-7xl font-black text-white tracking-tighter uppercase leading-[0.85]">
+                            {greetingName}
+                        </h1>
+                        <div className="flex gap-2">
+                            {profile?.is_pro && <ProBadge size="medium" />}
+                            {(profile?.is_content_creator || profile?.role === 'content_creator') && <ContentCreatorBadge size="medium" />}
+                            {isNominated && (
+                                <div className="px-4 py-1.5 bg-amber-500/10 border border-amber-500/30 rounded-xl flex items-center gap-2 animate-float shadow-[0_0_20px_rgba(245,158,11,0.15)] group cursor-help" title="Nominado a la Gala The Player 2025">
+                                    <SparklesIcon className="w-4 h-4 text-amber-400 group-hover:scale-125 transition-transform" />
+                                    <span className="text-[10px] font-black text-amber-400 uppercase tracking-widest">Gala 25</span>
+                                </div>
+                            )}
+                        </div>
                     </div>
-                    <p className="text-lg text-slate-300 mt-2">
-                        Bienvenido a tu panel de control Player Latam Series.
-                    </p>
+                    <div className="flex flex-wrap items-center gap-4 text-slate-500 font-black uppercase tracking-[0.2em] text-[10px]">
+                        <span className="flex items-center gap-2 px-3 py-1 bg-white/5 rounded-lg border border-white/5">
+                            ID: {profile?.id?.substring(0, 8).toUpperCase()}
+                        </span>
+                        <span className="flex items-center gap-2 px-3 py-1 bg-white/5 rounded-lg border border-white/5">
+                            REGION: {profile?.region || 'Sudamérica'}
+                        </span>
+                        <LevelBadge pwp={gameStats.points} size="sm" />
+                    </div>
 
                     {(profile?.is_content_creator || profile?.role === 'content_creator') && (
-                        <div className="mt-4">
+                        <div className="pt-4">
                             <Link
                                 to="/dashboard/creador"
-                                className="inline-flex items-center gap-2 px-6 py-2 bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white font-bold rounded-lg shadow-lg shadow-sky-900/40 transition-all hover:scale-105"
+                                className="inline-flex items-center gap-2 px-6 py-2.5 bg-sky-600 hover:bg-sky-500 text-white font-black rounded-xl shadow-lg shadow-sky-900/20 transition-all hover:-translate-y-1 text-xs uppercase tracking-widest group"
                             >
-                                <span>🎬</span> Panel de Creador
+                                <span className="group-hover:animate-pulse">🎬</span> Panel de Creador
                             </Link>
                         </div>
                     )}
                 </div>
 
-                {/* Team Status in Header */}
-                <div className="bg-slate-800/80 p-4 rounded-xl border border-slate-700 flex items-center gap-4">
-                    <div className="w-12 h-12 bg-sky-500/10 rounded-full flex items-center justify-center border border-sky-500/20">
-                        {teamData?.logo_url ? <img src={teamData.logo_url} alt={teamData.name || 'Team Logo'} className="w-full h-full rounded-full" /> :
-                            <TrophyIcon className="w-6 h-6 text-sky-400" />}
-                    </div>
-                    <div>
-                        <p className="text-xs text-slate-500 uppercase font-bold tracking-widest">TEAM</p>
-                        <p className="text-white font-bold">{teamData?.name || '-'}</p>
+                <div className="flex items-center gap-6">
+                    {/* Team Preview Widget */}
+                    <div className="glass-premium glass-card-hover p-5 rounded-3xl border border-white/5 flex items-center gap-4 min-w-[240px] shadow-2xl relative overflow-hidden">
+                        <div className="absolute inset-0 bg-gradient-to-r from-sky-500/10 to-transparent"></div>
+                        <div className="w-14 h-14 bg-slate-950 rounded-2xl flex items-center justify-center border border-white/10 shadow-inner p-1">
+                            {teamData?.logo_url ? (
+                                <img src={teamData.logo_url} alt={teamData.name} className="w-full h-full object-contain rounded-xl" />
+                            ) : (
+                                <TrophyIcon className="w-7 h-7 text-sky-400" />
+                            )}
+                        </div>
+                        <div className="relative z-10">
+                            <p className="text-[9px] text-slate-500 uppercase font-black tracking-[0.2em] mb-1">TEAM</p>
+                            <p className="text-white font-black text-lg leading-none tracking-tight">{teamData?.name || '-'}</p>
+                            {teamData && (
+                                <div className="mt-1.5 flex items-center gap-1.5">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.5)]"></span>
+                                    <span className="text-[9px] text-slate-400 font-black uppercase tracking-wider">Comunidad Activa</span>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>
 
             {/* PRO Upgrade Banner */}
             {!profile?.is_pro && (
-                <div className="bg-gradient-to-r from-purple-900 via-pink-900 to-purple-900 p-6 rounded-xl border-2 border-purple-500/50 shadow-2xl shadow-purple-900/50">
-                    <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-                        <div className="flex items-center gap-4">
-                            <div className="p-3 bg-white/10 rounded-full">
-                                <svg className="w-8 h-8 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                                </svg>
+                <div className="relative group">
+                    <div className="absolute -inset-1 bg-gradient-to-r from-purple-600 to-pink-600 rounded-3xl blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
+                    <div className="relative bg-slate-900 border border-purple-500/30 p-8 rounded-3xl overflow-hidden shadow-2xl">
+                        <div className="absolute top-0 right-0 w-64 h-64 bg-purple-600/10 blur-[100px] -translate-y-1/2 translate-x-1/3"></div>
+                        <div className="flex flex-col md:flex-row items-center justify-between gap-8 relative z-10">
+                            <div className="flex items-center gap-6">
+                                <div className="p-5 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl shadow-lg rotate-3 group-hover:rotate-0 transition-transform duration-500">
+                                    <svg className="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h3 className="text-3xl font-black text-white uppercase tracking-tighter flex items-center gap-3">
+                                        Eleva tu Juego <ProBadge size="medium" />
+                                    </h3>
+                                    <p className="text-slate-400 font-medium mt-1 text-lg">
+                                        Estadísticas exclusivas, perfil PRO y soporte prioritario.
+                                    </p>
+                                </div>
                             </div>
-                            <div>
-                                <h3 className="text-xl font-bold text-white flex items-center gap-2">
-                                    Mejora a <ProBadge size="small" />
-                                </h3>
-                                <p className="text-purple-200 text-sm mt-1">
-                                    Desbloquea estadísticas avanzadas, perfil personalizado y beneficios exclusivos
-                                </p>
-                            </div>
+                            <button
+                                onClick={() => setShowProModal(true)}
+                                className="px-10 py-4 bg-white text-purple-950 font-black rounded-2xl hover:scale-105 active:scale-95 transition-all shadow-xl shadow-purple-900/20 uppercase tracking-widest text-sm"
+                            >
+                                Ver Planes
+                            </button>
                         </div>
-                        <button
-                            onClick={() => setShowProModal(true)}
-                            className="px-6 py-3 bg-white text-purple-900 font-bold rounded-lg hover:bg-purple-50 transition-colors shadow-lg whitespace-nowrap"
-                        >
-                            Ver Planes
-                        </button>
                     </div>
                 </div>
             )}
@@ -346,13 +403,31 @@ const PlayerDashboardPage: React.FC<{ profile?: any, showAliasReminder?: boolean
             )}
 
             {/* Metrics and Rest of the dashboard */}
-            <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
                 <StatCard
                     icon={<TrophyIcon className="w-8 h-8" />}
-                    title="Posición de Ranking"
-                    value={`Rango #${ranking.pwpRank || '-'}`}
+                    title="Ranking PWP"
+                    value={`#${ranking.pwpRank || '-'}`}
                     rank={ranking.pwpRank || '-'}
                     color="sky"
+                />
+                <StatCard
+                    icon={<SparklesIcon className="w-8 h-8" />}
+                    title="Player Points"
+                    value={gameStats.points.toLocaleString()}
+                    color="amber"
+                />
+                <StatCard
+                    icon={<CheckCircleIcon className="w-8 h-8" />}
+                    title="Torneos Jugados"
+                    value={tournamentHistory.length}
+                    color="emerald"
+                />
+                <StatCard
+                    icon={<PencilIcon className="w-8 h-8" />}
+                    title="Tasa de Victoria"
+                    value="64%"
+                    color="purple"
                 />
             </section>
 
@@ -365,84 +440,99 @@ const PlayerDashboardPage: React.FC<{ profile?: any, showAliasReminder?: boolean
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* Tournament History (2/3 width) */}
-                <section className="lg:col-span-2">
-                    <h2 className="text-3xl font-bold text-white uppercase tracking-wider mb-6">Historial de Torneos</h2>
-                    <div className="overflow-x-auto bg-slate-800 rounded-lg shadow-xl border border-slate-700">
-                        <table className="min-w-full divide-y divide-slate-700">
-                            <thead className="bg-slate-700/50">
-                                <tr>
-                                    <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Torneo</th>
-                                    <th className="px-3 sm:px-6 py-3 text-right text-xs font-medium text-slate-300 uppercase tracking-wider">Pts</th>
+                <section className="lg:col-span-2 space-y-6">
+                    <h2 className="text-xs font-black text-slate-500 uppercase tracking-[0.3em]">Historial Reciente</h2>
+                    <div className="glass-premium rounded-3xl overflow-hidden border border-white/5 shadow-2xl">
+                        <table className="min-w-full">
+                            <thead>
+                                <tr className="bg-slate-900/50">
+                                    <th className="px-6 py-5 text-left text-[10px] font-black text-slate-500 uppercase tracking-widest">Torneo</th>
+                                    <th className="px-6 py-5 text-center text-[10px] font-black text-slate-500 uppercase tracking-widest hidden sm:table-cell">Pos</th>
+                                    <th className="px-6 py-5 text-right text-[10px] font-black text-sky-500 uppercase tracking-widest">Puntos</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-slate-700">
+                            <tbody className="divide-y divide-white/5">
                                 {loading ? (
-                                    <tr><td colSpan={2} className="px-3 sm:px-6 py-8 text-center text-slate-500">Cargando historial...</td></tr>
+                                    <tr><td colSpan={3} className="px-6 py-12 text-center text-slate-500 font-bold italic uppercase tracking-widest text-xs">Sincronizando datos...</td></tr>
                                 ) : tournamentHistory.length > 0 ? (
                                     tournamentHistory.map(t => (
-                                        <tr key={t.id} className="hover:bg-slate-700/40">
-                                            <td className="px-3 sm:px-6 py-4">
-                                                <p className="text-sm font-bold text-white">{t.tournaments?.name}</p>
-                                                <p className="text-xs text-slate-400">{t.tournaments?.date}</p>
+                                        <tr key={t.id} className="hover:bg-white/5 transition-colors cursor-default group">
+                                            <td className="px-6 py-5">
+                                                <p className="text-sm font-black text-white group-hover:text-sky-400 transition-colors">{t.tournaments?.name}</p>
+                                                <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-0.5">{t.tournaments?.date} • {t.tournaments?.format}</p>
                                             </td>
-                                            <td className="px-3 sm:px-6 py-4 text-right text-sm font-bold text-sky-400">+{t.pwp_earned}</td>
+                                            <td className="px-6 py-5 text-center hidden sm:table-cell">
+                                                <span className="px-3 py-1 bg-slate-900/50 rounded-lg border border-white/5 text-xs font-black text-slate-400">#4</span>
+                                            </td>
+                                            <td className="px-6 py-5 text-right">
+                                                <span className="text-lg font-black text-sky-400 tabular-nums">+{t.pwp_earned}</span>
+                                            </td>
                                         </tr>
                                     ))
                                 ) : (
-                                    <tr><td colSpan={2} className="px-6 py-8 text-center text-slate-500">Sin torneos registrados.</td></tr>
+                                    <tr><td colSpan={3} className="px-6 py-12 text-center text-slate-500">Sin historial registrado para esta temporada.</td></tr>
                                 )}
                             </tbody>
                         </table>
                     </div>
                 </section>
 
-                {/* Team Management (1/3 width) */}
-                <section>
-                    <h2 className="text-3xl font-bold text-white uppercase tracking-wider mb-6">Comunidad</h2>
-                    <div className="bg-slate-800 p-6 rounded-lg border border-slate-700 shadow-xl flex flex-col items-center text-center">
+                {/* TEAM Section (1/3 width) */}
+                <section className="space-y-6">
+                    <h2 className="text-xs font-black text-slate-500 uppercase tracking-[0.3em]">TEAM</h2>
+                    <div className="glass-premium p-8 rounded-3xl border border-white/5 shadow-2xl relative overflow-hidden group">
+                        <div className="absolute inset-0 bg-gradient-to-br from-violet-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-1000"></div>
                         {teamData ? (
-                            <div className="space-y-6 w-full">
-                                <div className="w-24 h-24 mx-auto bg-slate-900 rounded-2xl flex items-center justify-center border-2 border-sky-500/30">
-                                    {teamData.logo_url ? <img src={teamData.logo_url} alt={teamData.name || 'Team Logo'} className="w-full h-full rounded-2xl" /> :
-                                        <TrophyIcon className="w-10 h-10 text-sky-400" />}
+                            <div className="space-y-8 relative z-10 text-center">
+                                <div className="relative inline-block">
+                                    <div className="w-28 h-28 mx-auto bg-slate-900 rounded-[2rem] flex items-center justify-center border border-white/10 shadow-inner group-hover:scale-105 transition-transform duration-500">
+                                        {teamData.logo_url ? <img src={teamData.logo_url} alt={teamData.name} className="w-full h-full object-contain p-2" /> :
+                                            <TrophyIcon className="w-12 h-12 text-violet-400" />}
+                                    </div>
+                                    <div className="absolute -bottom-2 -right-2 bg-violet-600 text-white p-2 rounded-xl shadow-lg border border-violet-400">
+                                        <TrophyIcon className="w-4 h-4" />
+                                    </div>
                                 </div>
+
                                 <div>
-                                    <h3 className="text-2xl font-black text-white">{teamData.name}</h3>
-                                    <p className="text-slate-400 text-sm mt-2">{teamData.description || 'Sin descripción del equipo.'}</p>
+                                    <h3 className="text-3xl font-black text-white tracking-tighter">{teamData.name}</h3>
+                                    <p className="text-slate-400 text-sm mt-3 font-medium leading-relaxed italic">"{teamData.description || 'Nuestra comunidad de guerreros.'}"</p>
                                 </div>
-                                <div className="pt-6 border-t border-slate-700 grid grid-cols-2 gap-4">
-                                    <div className="text-center">
-                                        <p className="text-xs text-slate-500 uppercase font-bold">Rango</p>
-                                        <p className="text-white font-bold">#1</p>
+
+                                <div className="grid grid-cols-2 gap-4 pb-4">
+                                    <div className="bg-slate-900/50 p-4 rounded-2xl border border-white/5">
+                                        <p className="text-[10px] text-slate-500 uppercase font-black tracking-widest mb-1 group-hover:text-violet-400 transition-colors">Rango</p>
+                                        <p className="text-2xl font-black text-white">#1</p>
                                     </div>
-                                    <div className="text-center">
-                                        <p className="text-xs text-slate-500 uppercase font-bold">Puntos</p>
-                                        <p className="text-sky-400 font-bold">1,240</p>
+                                    <div className="bg-slate-900/50 p-4 rounded-2xl border border-white/5">
+                                        <p className="text-[10px] text-slate-500 uppercase font-black tracking-widest mb-1 group-hover:text-sky-400 transition-colors">Puntos</p>
+                                        <p className="text-2xl font-black text-sky-400">1.2K</p>
                                     </div>
                                 </div>
-                                <button className="w-full py-3 bg-slate-700 hover:bg-slate-600 text-white font-bold rounded-lg transition-colors mt-4">
-                                    Ver Perfil de Equipo
+
+                                <button className="w-full py-4 bg-white/5 hover:bg-white/10 text-white font-black text-xs uppercase tracking-[0.2em] rounded-2xl border border-white/10 transition-all active:scale-95">
+                                    Ver Perfil Completo
                                 </button>
                             </div>
                         ) : (
-                            <div className="space-y-6 py-4">
-                                <div className="p-4 bg-sky-500/10 rounded-full inline-block">
-                                    <TrophyIcon className="w-12 h-12 text-sky-500" />
+                            <div className="space-y-8 py-4 relative z-10 text-center">
+                                <div className="w-24 h-24 mx-auto bg-sky-500/10 rounded-full flex items-center justify-center border border-sky-500/30 animate-pulse">
+                                    <TrophyIcon className="w-10 h-10 text-sky-500" />
                                 </div>
-                                <div>
-                                    <h3 className="text-xl font-bold text-white">¿No tienes equipo?</h3>
-                                    <p className="text-slate-400 text-sm px-4 mt-2">
-                                        Crea tu propia comunidad o únete a una existente para sumar puntos en conjunto.
+                                <div className="space-y-3">
+                                    <h3 className="text-2xl font-black text-white tracking-tighter uppercase">¿Sin Equipo?</h3>
+                                    <p className="text-slate-400 text-sm px-6 font-medium">
+                                        Funda tu propia comunidad o únete a una existente para dominar el ranking global.
                                     </p>
                                 </div>
                                 <div className="space-y-3 pt-4">
                                     <button
                                         onClick={() => setShowCreateTeam(true)}
-                                        className="w-full py-3 bg-sky-500 hover:bg-sky-400 text-white font-bold rounded-lg shadow-lg shadow-sky-500/25 transition-all"
+                                        className="w-full py-4 bg-sky-600 hover:bg-sky-500 text-white font-black rounded-2xl shadow-xl shadow-sky-900/30 transition-all hover:scale-105 active:scale-95 text-xs uppercase tracking-widest"
                                     >
                                         Fundar Equipo
                                     </button>
-                                    <button className="w-full py-3 bg-slate-700 hover:bg-slate-600 text-slate-300 font-bold rounded-lg transition-all">
+                                    <button className="w-full py-4 text-sky-400 hover:text-white font-black text-xs uppercase tracking-widest border border-sky-500/30 rounded-2xl transition-all">
                                         Buscar Comunidad
                                     </button>
                                 </div>

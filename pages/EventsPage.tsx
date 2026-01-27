@@ -82,6 +82,26 @@ const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [
 
     // State for filtering
     const [selectedFormat, setSelectedFormat] = React.useState('Todos los Formatos');
+    const [viewMode, setViewMode] = React.useState<'list' | 'calendar'>('list');
+
+    const addToGoogleCalendar = (event: CommunityEvent) => {
+        const title = encodeURIComponent(event.title);
+        const details = encodeURIComponent(`Torneo de ${event.format} en ${event.storeName}. Organizado via ThePlayer.gg`);
+        const location = encodeURIComponent(event.storeName);
+
+        // Ensure date is properly formatted for Google Calendar (YYYYMMDDTHHMMSSZ)
+        const dateParts = event.date.split('-');
+        const year = dateParts[0];
+        const month = dateParts[1];
+        const day = dateParts[2];
+        const time = (event.time || "19:00").replace(':', '');
+
+        const startDate = `${year}${month}${day}T${time}00`;
+        const endDate = `${year}${month}${day}T${(parseInt(time.substring(0, 2)) + 4).toString().padStart(2, '0')}${time.substring(2, 4)}00`; // Default 4h duration
+
+        const url = `https://www.google.com/calendar/render?action=TEMPLATE&text=${title}&details=${details}&location=${location}&dates=${startDate}/${endDate}`;
+        window.open(url, '_blank');
+    };
 
     // Derived filtered events
     const filteredEvents = React.useMemo(() => {
@@ -617,7 +637,6 @@ const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [
                                             aria-valuemin={0}
                                             aria-valuemax={100}
                                             title={`${fmt}: ${count} eventos (${fmtPercentage}%)`}
-                                            aria-label={`Distribución de formato ${fmt}`}
                                         ></div>
                                     </div>
                                 </div>
@@ -627,340 +646,240 @@ const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [
                 </div>
             </div>
 
-            {/* Toolbar */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 bg-slate-800/50 p-4 rounded-lg border border-slate-700">
-                <div className="relative flex-grow">
-                    <input
-                        type="search"
-                        placeholder="Buscar por nombre o tienda..."
-                        aria-label="Buscar eventos por nombre o tienda"
-                        className="bg-slate-900/80 text-white placeholder-slate-400 rounded-md py-2 px-4 w-full focus:outline-none focus:ring-2 focus:ring-sky-500 border border-slate-700"
-                    />
-                </div>
-                <div className="relative">
-                    <input
-                        type="date"
-                        aria-label="Filtrar por fecha"
-                        className="bg-slate-900/80 text-white rounded-md py-2 px-4 w-full appearance-none focus:outline-none focus:ring-2 focus:ring-sky-500 border border-slate-700"
-                    />
-                </div>
-                <div className="relative">
-                    <select
-                        aria-label="Filtrar por formato"
-                        value={selectedFormat}
-                        onChange={(e) => {
-                            setSelectedFormat(e.target.value);
-                            setUpcomingPage(0); // Reset pagination on filter change
-                        }}
-                        className="bg-slate-900/80 text-white rounded-md py-2.5 px-4 w-full appearance-none focus:outline-none focus:ring-2 focus:ring-sky-500 border border-slate-700"
+            {/* View Switcher */}
+            <div className="flex justify-center mb-8">
+                <div className="bg-slate-800 p-1 rounded-xl border border-slate-700 flex w-full max-w-sm">
+                    <button
+                        onClick={() => setViewMode('list')}
+                        className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-bold transition-all ${viewMode === 'list' ? 'bg-sky-600 text-white shadow-lg' : 'text-slate-400 hover:text-white hover:bg-slate-700/50'}`}
                     >
-                        <option>Todos los Formatos</option>
-                        <option>Competitivo</option>
-                        <option>Commander</option>
-                        <option>Pauper</option>
-                        <option>Premodern</option>
-                        <option>Legacy</option>
-                    </select>
-                </div>
-                <div className="relative">
-                    <select
-                        aria-label="Filtrar por región"
-                        className="bg-slate-900/80 text-white rounded-md py-2.5 px-4 w-full appearance-none focus:outline-none focus:ring-2 focus:ring-sky-500 border border-slate-700"
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                        </svg>
+                        Lista
+                    </button>
+                    <button
+                        onClick={() => setViewMode('calendar')}
+                        className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-bold transition-all ${viewMode === 'calendar' ? 'bg-sky-600 text-white shadow-lg' : 'text-slate-400 hover:text-white hover:bg-slate-700/50'}`}
                     >
-                        <option>Todas las Regiones</option>
-                        <option>Arica y Parinacota</option>
-                        <option>Tarapacá</option>
-                        <option>Antofagasta</option>
-                        <option>Atacama</option>
-                        <option>Coquimbo</option>
-                        <option>Valparaíso</option>
-                        <option>Metropolitana</option>
-                        <option>O'Higgins</option>
-                        <option>Maule</option>
-                        <option>Ñuble</option>
-                        <option>Biobío</option>
-                        <option>La Araucanía</option>
-                        <option>Los Ríos</option>
-                        <option>Los Lagos</option>
-                        <option>Aysén</option>
-                        <option>Magallanes</option>
-                    </select>
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        Calendario
+                    </button>
                 </div>
             </div>
 
-            {/* Upcoming Tournaments Table */}
-            <div>
-                <div className="flex justify-between items-center mb-6">
-                    <div className="flex items-center gap-4">
-                        <h2 className="text-2xl font-bold text-white uppercase tracking-wide">Próximos Torneos</h2>
-
-                        {/* Navigation for upcoming events */}
-                        {allUpcomingEvents.length > EVENTS_PER_PAGE && (
-                            <div className="flex items-center gap-2">
-                                <button
-                                    onClick={goToPreviousEvents}
-                                    disabled={upcomingPage === 0}
-                                    className="p-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                                    title="Eventos anteriores"
-                                >
-                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                                    </svg>
-                                </button>
-                                <span className="text-sm text-slate-400 font-medium">
-                                    {upcomingPage + 1} / {totalUpcomingPages}
-                                </span>
-                                <button
-                                    onClick={goToNextEvents}
-                                    disabled={upcomingPage >= totalUpcomingPages - 1}
-                                    className="p-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                                    title="Eventos siguientes"
-                                >
-                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                                    </svg>
-                                </button>
-                            </div>
-                        )}
+            {viewMode === 'list' ? (
+                <div className="space-y-8 animate-fade-in">
+                    {/* Toolbar */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 bg-slate-800/50 p-4 rounded-lg border border-slate-700">
+                        <div className="relative flex-grow">
+                            <input
+                                type="search"
+                                placeholder="Buscar por nombre o tienda..."
+                                aria-label="Buscar eventos por nombre o tienda"
+                                className="bg-slate-900/80 text-white placeholder-slate-400 rounded-md py-2 px-4 w-full focus:outline-none focus:ring-2 focus:ring-sky-500 border border-slate-700"
+                            />
+                        </div>
+                        <div className="relative">
+                            <input
+                                type="date"
+                                aria-label="Filtrar por fecha"
+                                className="bg-slate-900/80 text-white rounded-md py-2 px-4 w-full appearance-none focus:outline-none focus:ring-2 focus:ring-sky-500 border border-slate-700"
+                            />
+                        </div>
+                        <div className="relative">
+                            <select
+                                aria-label="Filtrar por formato"
+                                value={selectedFormat}
+                                onChange={(e) => {
+                                    setSelectedFormat(e.target.value);
+                                    setUpcomingPage(0); // Reset pagination on filter change
+                                }}
+                                className="bg-slate-900/80 text-white rounded-md py-2.5 px-4 w-full appearance-none focus:outline-none focus:ring-2 focus:ring-sky-500 border border-slate-700"
+                            >
+                                <option>Todos los Formatos</option>
+                                <option>Competitivo</option>
+                                <option>Commander</option>
+                                <option>Pauper</option>
+                                <option>Premodern</option>
+                                <option>Legacy</option>
+                            </select>
+                        </div>
+                        <div className="relative">
+                            <select
+                                aria-label="Filtrar por región"
+                                className="bg-slate-900/80 text-white rounded-md py-2.5 px-4 w-full appearance-none focus:outline-none focus:ring-2 focus:ring-sky-500 border border-slate-700"
+                            >
+                                <option>Todas las Regiones</option>
+                                <option>Metropolitana</option>
+                                <option>Valparaíso</option>
+                                <option>Biobío</option>
+                                <option>La Araucanía</option>
+                            </select>
+                        </div>
                     </div>
 
-                    {/* Botón para agendar evento - solo visible para tiendas y admins */}
-                    {(userRole === 'store' || userRole === 'admin') && (
-                        <button
-                            onClick={() => setShowScheduleModal(true)}
-                            className="flex items-center gap-2 bg-green-600 hover:bg-green-500 text-white font-bold px-4 py-2 rounded-lg transition-colors shadow-lg"
-                        >
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
-                            </svg>
-                            Agendar Torneo
-                        </button>
-                    )}
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                    {upcomingEvents.length === 0 ? (
-                        <div className="col-span-full py-20 bg-slate-800/50 rounded-2xl border border-slate-700 border-dashed text-center">
-                            <p className="text-slate-500 text-lg">No hay torneos próximos agendados.</p>
+                    {/* Upcoming Tournaments Grid */}
+                    <div>
+                        <div className="flex justify-between items-center mb-6">
+                            <div className="flex items-center gap-4">
+                                <h2 className="text-2xl font-bold text-white uppercase tracking-wide">Próximos Torneos</h2>
+                                {allUpcomingEvents.length > EVENTS_PER_PAGE && (
+                                    <div className="flex items-center gap-2">
+                                        <button
+                                            onClick={goToPreviousEvents}
+                                            disabled={upcomingPage === 0}
+                                            className="p-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                        >
+                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                                            </svg>
+                                        </button>
+                                        <span className="text-sm text-slate-400 font-medium">{upcomingPage + 1} / {totalUpcomingPages}</span>
+                                        <button
+                                            onClick={goToNextEvents}
+                                            disabled={upcomingPage >= totalUpcomingPages - 1}
+                                            className="p-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                        >
+                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+                            {(userRole === 'store' || userRole === 'admin') && (
+                                <button
+                                    onClick={() => setShowScheduleModal(true)}
+                                    className="flex items-center gap-2 bg-green-600 hover:bg-green-500 text-white font-bold px-4 py-2 rounded-lg transition-colors shadow-lg"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
+                                    </svg>
+                                    Agendar Torneo
+                                </button>
+                            )}
                         </div>
-                    ) : (
-                        upcomingEvents.map((event) => {
-                            const details = getTournamentTypeDetails(event);
-                            const eventTime = event.time || "19:00";
-                            const maxLimit = event.maxPlayers || 64;
-                            const registered = event.playerCount || 0;
-                            const isFull = registered >= maxLimit;
-
-                            return (
-                                <div key={event.id} className="bg-slate-800 rounded-2xl border border-slate-700 overflow-hidden hover:border-sky-500/50 transition-all duration-300 group flex flex-col relative">
-                                    {/* Multiplier Badge Overlay */}
-                                    <div className={`absolute top-4 right-4 z-10 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-[0.2em] shadow-lg ${details.multiplier === 'x4' ? 'bg-red-500 text-white shadow-red-500/20' :
-                                        details.multiplier === 'x3' ? 'bg-yellow-500 text-slate-950 shadow-yellow-500/20' :
-                                            details.multiplier === 'x2' ? 'bg-blue-500 text-white shadow-blue-500/20' :
-                                                'bg-emerald-500 text-white shadow-emerald-500/20'
-                                        }`}>
-                                        Points {details.multiplier}
-                                    </div>
-
-                                    <div className="p-6 flex flex-col h-full space-y-4">
-                                        <div className="flex items-start justify-between gap-4">
-                                            <div className="flex-1 min-w-0">
-                                                <div className="flex items-center gap-2 mb-1">
-                                                    <span className="text-[10px] text-sky-400 font-black uppercase tracking-widest">{event.format}</span>
-                                                    <span className="w-1 h-1 rounded-full bg-slate-600"></span>
-                                                    <span className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">{details.type}</span>
-                                                </div>
-                                                <h3 className="text-xl font-bold text-white group-hover:text-sky-400 transition-colors leading-tight truncate">{event.title}</h3>
-                                            </div>
-                                        </div>
-
-                                        <div className="bg-slate-900/50 rounded-xl p-3 border border-slate-700/50 space-y-2">
-                                            <div className="flex items-center justify-between">
-                                                <div className="flex items-center gap-2 text-slate-300">
-                                                    <CalendarIcon className="w-4 h-4 text-slate-500" />
-                                                    <span className="text-sm font-bold">{event.date}</span>
-                                                </div>
-                                                <div className="text-sm text-slate-400 font-medium">{eventTime}</div>
-                                            </div>
-                                            <div className="flex items-center gap-2 text-slate-300">
-                                                <MapPinIcon className="w-4 h-4 text-slate-500" />
-                                                <span className="text-sm truncate">{event.storeName}</span>
-                                            </div>
-                                        </div>
-
-                                        <div className="grid grid-cols-2 gap-3">
-                                            <div className="bg-slate-900/30 p-2.5 rounded-xl border border-slate-700/30">
-                                                <div className="text-[9px] text-slate-500 uppercase font-black tracking-widest mb-1">Inscripción</div>
-                                                <div className="text-base text-yellow-500 font-black">
-                                                    {event.entryFee ? (event.entryFee.includes('$') ? event.entryFee : `$${event.entryFee}`) : 'Gratis'}
-                                                </div>
-                                            </div>
-                                            <div className="bg-slate-900/30 p-2.5 rounded-xl border border-slate-700/30">
-                                                <div className="text-[9px] text-slate-500 uppercase font-black tracking-widest mb-1">Cupos</div>
-                                                <div className={`text-base font-black ${isFull ? 'text-red-400' : 'text-emerald-400'}`}>
-                                                    {registered}/{maxLimit}
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div className="pt-4 mt-auto border-t border-slate-700/50 flex items-center justify-between">
-                                            <div className="flex gap-2">
-                                                {(userRole === 'admin' || (event.createdBy && event.createdBy === userId)) && (
-                                                    <button
-                                                        onClick={() => handleDeleteEvent(event.id, event.title)}
-                                                        className="p-2.5 text-slate-500 hover:text-red-400 hover:bg-red-500/10 rounded-xl transition-all border border-transparent hover:border-red-500/20"
-                                                        title="Eliminar"
-                                                    >
-                                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                                        </svg>
-                                                    </button>
-                                                )}
-                                            </div>
-
-                                            {event.isUserRegistered ? (
-                                                <button
-                                                    onClick={() => handleCancelRegistration(event)}
-                                                    disabled={processingEventId === event.id}
-                                                    className="px-6 py-2.5 bg-slate-700 hover:bg-orange-600 text-white text-xs font-black uppercase tracking-widest rounded-xl transition-all disabled:opacity-50"
-                                                >
-                                                    {processingEventId === event.id ? '...' : 'Cancelar'}
-                                                </button>
-                                            ) : (
-                                                <button
-                                                    onClick={() => handleRegisterClick(event)}
-                                                    disabled={processingEventId === event.id || isFull}
-                                                    className={`px-6 py-2.5 text-xs font-black uppercase tracking-widest rounded-xl transition-all shadow-lg ${isFull
-                                                        ? 'bg-slate-700 text-slate-500 cursor-not-allowed'
-                                                        : 'bg-sky-600 hover:bg-sky-500 text-white shadow-sky-900/40 hover:scale-105 active:scale-95'
-                                                        }`}
-                                                >
-                                                    {processingEventId === event.id ? '...' : isFull ? 'Completo' : 'Inscribirse'}
-                                                </button>
-                                            )}
-                                        </div>
-                                    </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                            {upcomingEvents.length === 0 ? (
+                                <div className="col-span-full py-20 bg-slate-800/50 rounded-2xl border border-slate-700 border-dashed text-center">
+                                    <p className="text-slate-500 text-lg">No hay torneos próximos agendados.</p>
                                 </div>
-                            );
-                        })
-                    )}
-                </div>
-            </div>
-
-            {/* Calendar Section */}
-            <div>
-                <div className="flex justify-between items-center mb-4">
-                    <div className="flex items-center gap-4">
-                        <h2 className="text-2xl font-bold text-white uppercase tracking-wide capitalize">{monthName}</h2>
-
-                        {/* Navigation Buttons */}
-                        <div className="flex items-center gap-2">
-                            <button
-                                onClick={goToPreviousMonth}
-                                className="p-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors"
-                                title="Mes anterior"
-                            >
-                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                                </svg>
-                            </button>
-                            <button
-                                onClick={goToToday}
-                                className="px-3 py-2 bg-sky-700 hover:bg-sky-600 text-white text-sm font-medium rounded-lg transition-colors"
-                                title="Ir a hoy"
-                            >
-                                Hoy
-                            </button>
-                            <button
-                                onClick={goToNextMonth}
-                                className="p-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors"
-                                title="Mes siguiente"
-                            >
-                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                                </svg>
-                            </button>
+                            ) : (
+                                upcomingEvents.map((event) => {
+                                    const details = getTournamentTypeDetails(event);
+                                    const isFull = (event.playerCount || 0) >= (event.maxPlayers || 64);
+                                    return (
+                                        <div key={event.id} className="bg-slate-800 rounded-2xl border border-slate-700 overflow-hidden hover:border-sky-500/50 transition-all duration-300 group flex flex-col relative">
+                                            <div className={`absolute top-4 right-4 z-10 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-[0.2em] shadow-lg ${details.multiplier === 'x4' ? 'bg-red-500 text-white' : details.multiplier === 'x3' ? 'bg-yellow-500 text-slate-950' : 'bg-sky-500 text-white'}`}>
+                                                Points {details.multiplier}
+                                            </div>
+                                            <div className="p-6 flex flex-col h-full space-y-4">
+                                                <div className="flex-1">
+                                                    <div className="flex items-center gap-2 mb-1 text-[10px] font-black uppercase tracking-widest text-sky-400">
+                                                        <span>{event.format}</span>
+                                                        <span className="w-1 h-1 rounded-full bg-slate-600"></span>
+                                                        <span className="text-slate-500">{details.type}</span>
+                                                    </div>
+                                                    <h3 className="text-xl font-bold text-white group-hover:text-sky-400 transition-colors truncate">{event.title}</h3>
+                                                </div>
+                                                <div className="bg-slate-900/50 rounded-xl p-3 border border-slate-700/50 space-y-2">
+                                                    <div className="flex items-center justify-between text-sm">
+                                                        <div className="flex items-center gap-2 text-slate-300 font-bold">
+                                                            <CalendarIcon className="w-4 h-4 text-slate-500" />
+                                                            {event.date}
+                                                        </div>
+                                                        <span className="text-slate-400">{event.time || "19:00"}</span>
+                                                    </div>
+                                                    <div className="flex items-center gap-2 text-sm text-slate-300">
+                                                        <MapPinIcon className="w-4 h-4 text-slate-500" />
+                                                        <span className="truncate">{event.storeName}</span>
+                                                    </div>
+                                                </div>
+                                                <div className="pt-4 mt-auto border-t border-slate-700/50 flex items-center justify-between">
+                                                    <span className={`text-xs font-black uppercase ${isFull ? 'text-red-400' : 'text-emerald-400'}`}>
+                                                        {event.playerCount || 0}/{event.maxPlayers || 64} JUGADORES
+                                                    </span>
+                                                    <button
+                                                        onClick={() => handleRegisterClick(event)}
+                                                        disabled={isFull || event.isUserRegistered}
+                                                        className={`px-4 py-2 rounded-lg text-xs font-black uppercase tracking-widest transition-all ${event.isUserRegistered ? 'bg-green-900/30 text-green-400 border border-green-700/30' : 'bg-sky-600 hover:bg-sky-500 text-white'}`}
+                                                    >
+                                                        {event.isUserRegistered ? 'Inscrito' : isFull ? 'Completo' : 'Inscribirse'}
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    );
+                                })
+                            )}
                         </div>
                     </div>
-
-                    <div className="flex gap-2 text-sm">
-                        <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-full bg-orange-500"></span> x1</span>
-                        <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-full bg-slate-400"></span> x2</span>
-                        <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-full bg-yellow-500"></span> x3</span>
-                        <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-full bg-red-600"></span> x4</span>
-                    </div>
                 </div>
-
-                <div className="flex bg-slate-700 rounded-lg overflow-hidden shadow-2xl border border-slate-700">
-                    {/* Week Numbers Sidebar */}
-                    <div className="hidden sm:flex flex-col gap-px w-10 bg-slate-700 border-r border-slate-700 z-10">
-                        {/* Header Spacer */}
-                        <div className="bg-slate-800 p-2 text-center text-xs font-bold text-slate-500 uppercase tracking-wider h-[33px] flex items-center justify-center">
-                            #
+            ) : (
+                <div className="animate-fade-in space-y-8">
+                    <div className="flex justify-between items-center bg-slate-800/50 p-4 rounded-xl border border-slate-700">
+                        <div className="flex items-center gap-4">
+                            <h2 className="text-2xl font-bold text-white uppercase tracking-wide capitalize">{monthName}</h2>
+                            <div className="flex items-center gap-2">
+                                <button onClick={goToPreviousMonth} className="p-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg border border-slate-600"><svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg></button>
+                                <button onClick={goToToday} className="px-4 py-2 bg-sky-700 hover:bg-sky-600 text-white text-sm font-bold rounded-lg shadow-lg">Hoy</button>
+                                <button onClick={goToNextMonth} className="p-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg border border-slate-600"><svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg></button>
+                            </div>
                         </div>
-                        {/* Week Rows */}
-                        {weeks.map((w, i) => (
-                            <div key={i} className="h-32 bg-slate-800/80 flex items-center justify-center text-xs text-slate-500 font-bold">
-                                {w.weekNumber}
-                            </div>
-                        ))}
+                        <div className="hidden md:flex gap-4 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">
+                            <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-orange-500"></span> x1</span>
+                            <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-slate-400"></span> x2</span>
+                            <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-yellow-500"></span> x3</span>
+                            <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-red-600"></span> x4</span>
+                        </div>
                     </div>
-
-                    {/* Main Grid */}
-                    <div className="grid grid-cols-7 flex-1 gap-px bg-slate-700 overflow-x-auto min-w-[300px]">
-                        {/* Headers */}
-                        {['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'].map(day => (
-                            <div key={day} className="bg-slate-800 p-2 text-center text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider">
-                                {day}
-                            </div>
-                        ))}
-
-                        {/* Days Grid */}
-                        {weeks.flatMap(w => w.days).map((day, i) => (
-                            <React.Fragment key={i}>
-                                {renderCalendarDay(day)}
-                            </React.Fragment>
-                        ))}
+                    <div className="flex bg-slate-700 rounded-2xl overflow-hidden shadow-2xl border border-slate-600">
+                        <div className="hidden sm:flex flex-col gap-px w-12 bg-slate-700 border-r border-slate-600 z-10">
+                            <div className="bg-slate-800 p-2 text-center text-[10px] font-black text-slate-600 uppercase tracking-widest h-[41px] flex items-center justify-center">Sem</div>
+                            {weeks.map((w, i) => (
+                                <div key={i} className="h-32 bg-slate-900 flex items-center justify-center text-[10px] text-slate-600 font-black border-b border-slate-800/50">{w.weekNumber}</div>
+                            ))}
+                        </div>
+                        <div className="grid grid-cols-7 flex-1 gap-px bg-slate-600 overflow-x-auto">
+                            {['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'].map(day => (
+                                <div key={day} className="bg-slate-800 p-3 text-center text-[10px] sm:text-xs font-black text-slate-400 uppercase tracking-widest border-b border-slate-700">{day}</div>
+                            ))}
+                            {weeks.flatMap(w => w.days).map((day, i) => (
+                                <React.Fragment key={i}>{renderCalendarDay(day)}</React.Fragment>
+                            ))}
+                        </div>
                     </div>
                 </div>
-            </div>
+            )}
 
-            {/* Finished Tournaments Section - Torneos subidos */}
+            {/* Finished Tournaments */}
             <div>
                 <h2 className="text-2xl font-bold text-slate-500 uppercase tracking-wide mb-6">Torneos Finalizados</h2>
-                <div className="overflow-x-auto bg-slate-900/50 rounded-lg border border-slate-800">
+                <div className="overflow-x-auto bg-slate-900/50 rounded-2xl border border-slate-800">
                     <table className="min-w-full divide-y divide-slate-800">
                         <thead className="bg-slate-800/50">
                             <tr>
-                                <th className="px-3 sm:px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider sticky left-0 bg-slate-900 z-20 border-r border-slate-800">Fecha</th>
-                                <th className="px-3 sm:px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Evento</th>
-                                <th className="px-3 sm:px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Formato</th>
-                                <th className="px-3 sm:px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Tienda</th>
-                                <th className="px-3 sm:px-6 py-4 text-center text-xs font-bold text-slate-500 uppercase tracking-wider">Jugadores</th>
-                                <th className="px-3 sm:px-6 py-4 text-center text-xs font-bold text-slate-500 uppercase tracking-wider">Estado</th>
+                                <th className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-widest border-r border-slate-800">Fecha</th>
+                                <th className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-widest">Evento</th>
+                                <th className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-widest">Formato</th>
+                                <th className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-widest">Tienda</th>
+                                <th className="px-6 py-4 text-center text-xs font-bold text-slate-500 uppercase tracking-widest">Jugadores</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-800">
                             {finishedTournaments.length === 0 ? (
-                                <tr><td colSpan={6} className="px-6 py-8 text-center text-slate-600">No hay torneos finalizados.</td></tr>
+                                <tr><td colSpan={5} className="px-6 py-12 text-center text-slate-600 font-medium">No hay registros de torneos finalizados.</td></tr>
                             ) : (
-                                finishedTournaments.map((tournament) => (
-                                    <tr key={tournament.id} className="hover:bg-slate-800/30 transition-colors">
-                                        <td className="px-6 py-4 text-sm text-slate-500 sticky left-0 bg-slate-900 z-10 border-r border-slate-800">
-                                            {new Date(tournament.date).toLocaleDateString('es-CL')}
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <span className="text-slate-400 font-bold">{tournament.name}</span>
-                                        </td>
-                                        <td className="px-6 py-4 text-sm text-slate-600">{tournament.format}</td>
-                                        <td className="px-6 py-4 text-sm text-slate-600">{tournament.storeName}</td>
-                                        <td className="px-6 py-4 text-center">
-                                            <span className="text-sky-400 font-bold">{tournament.playerCount}</span>
-                                        </td>
-                                        <td className="px-6 py-4 text-center">
-                                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-900/30 text-green-400 border border-green-700/50">
-                                                Finalizado
-                                            </span>
-                                        </td>
+                                finishedTournaments.map((t) => (
+                                    <tr key={t.id} className="hover:bg-slate-800/30 transition-colors">
+                                        <td className="px-6 py-4 text-sm text-slate-500 border-r border-slate-800">{new Date(t.date).toLocaleDateString('es-CL')}</td>
+                                        <td className="px-6 py-4 text-sm font-bold text-slate-300">{t.name}</td>
+                                        <td className="px-6 py-4 text-sm text-slate-500">{t.format}</td>
+                                        <td className="px-6 py-4 text-sm text-slate-500">{t.storeName}</td>
+                                        <td className="px-6 py-4 text-center text-sm font-mono font-bold text-sky-400">{t.playerCount}</td>
                                     </tr>
                                 ))
                             )}
@@ -969,189 +888,65 @@ const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [
                 </div>
             </div>
 
-            {/* Modal de Agendamiento */}
-            <ScheduleTournamentModal
-                isOpen={showScheduleModal}
-                onClose={() => setShowScheduleModal(false)}
-                onSchedule={handleScheduleTournament}
-            />
+            {/* Modals */}
+            <ScheduleTournamentModal isOpen={showScheduleModal} onClose={() => setShowScheduleModal(false)} onSchedule={handleScheduleTournament} />
 
-            {/* Modal de Confirmación de Inscripción */}
             {showRegisterModal && selectedEvent && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-                    <div className="bg-slate-800 rounded-xl shadow-2xl border border-slate-700 max-w-md w-full">
-                        {/* Header */}
-                        <div className="bg-gradient-to-r from-sky-600 to-blue-600 px-6 py-4 rounded-t-xl">
-                            <h2 className="text-2xl font-bold text-white">Confirmar Inscripción</h2>
-                        </div>
-
-                        {/* Content */}
+                    <div className="bg-slate-800 rounded-2xl shadow-2xl border border-slate-700 max-w-md w-full overflow-hidden">
+                        <div className="bg-gradient-to-r from-sky-600 to-blue-600 px-6 py-4"><h2 className="text-xl font-bold text-white">Confirmar Inscripción</h2></div>
                         <div className="p-6">
-                            <p className="text-slate-300 text-lg mb-4">
-                                ¿Confirmas que asistirás al torneo:
-                            </p>
-                            <div className="bg-slate-900 rounded-lg p-4 mb-6 border border-slate-700">
-                                <h3 className="text-xl font-bold text-white mb-2">{selectedEvent.title}</h3>
-                                <div className="space-y-1 text-sm text-slate-400">
-                                    <p>📅 Fecha: {selectedEvent.date}</p>
-                                    <p>🎮 Formato: {selectedEvent.format}</p>
-                                    <p>🏪 Lugar: {selectedEvent.storeName}</p>
+                            <p className="text-slate-300 mb-4">Confirmas tu asistencia al torneo:</p>
+                            <div className="bg-slate-900 rounded-xl p-4 mb-6 border border-slate-700">
+                                <h3 className="font-bold text-white mb-2">{selectedEvent.title}</h3>
+                                <div className="text-xs text-slate-400 space-y-1">
+                                    <p>📅 {selectedEvent.date}</p>
+                                    <p>🎮 {selectedEvent.format}</p>
+                                    <p>🏪 {selectedEvent.storeName}</p>
                                 </div>
                             </div>
-                            <p className="text-xs text-slate-500">
-                                Al confirmar, te comprometes a asistir al evento. Si no puedes asistir, por favor cancela tu inscripción con anticipación.
-                            </p>
-                        </div>
-
-                        {/* Buttons */}
-                        <div className="flex gap-3 px-6 pb-6">
-                            <button
-                                onClick={() => {
-                                    setShowRegisterModal(false);
-                                    setSelectedEvent(null);
-                                }}
-                                className="flex-1 px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white font-medium rounded-lg transition-colors"
-                            >
-                                Cancelar
-                            </button>
-                            <button
-                                onClick={handleConfirmRegistration}
-                                className="flex-1 px-4 py-2 bg-sky-600 hover:bg-sky-500 text-white font-bold rounded-lg transition-colors shadow-lg"
-                            >
-                                Confirmar Asistencia
-                            </button>
+                            <div className="flex gap-3">
+                                <button onClick={() => setShowRegisterModal(false)} className="flex-1 px-4 py-2 bg-slate-700 text-white rounded-lg font-bold">Cancelar</button>
+                                <button onClick={handleConfirmRegistration} className="flex-1 px-4 py-2 bg-sky-600 text-white rounded-lg font-bold">Inscribirme</button>
+                            </div>
                         </div>
                     </div>
                 </div>
             )}
 
-            {/* Modal de Detalles del Evento (desde calendario) */}
             {showEventDetailsModal && selectedCalendarEvent && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-                    <div className="bg-slate-800 rounded-xl shadow-2xl border border-slate-700 max-w-lg w-full">
-                        {/* Header */}
-                        <div className="bg-gradient-to-r from-purple-600 to-blue-600 px-6 py-4 rounded-t-xl">
-                            <h2 className="text-2xl font-bold text-white">{selectedCalendarEvent.title}</h2>
+                    <div className="bg-slate-800 rounded-2xl shadow-2xl border border-slate-700 max-w-lg w-full overflow-hidden">
+                        <div className="bg-gradient-to-r from-purple-600 to-blue-600 px-6 py-4 flex justify-between items-center">
+                            <h2 className="text-xl font-bold text-white truncate mr-4">{selectedCalendarEvent.title}</h2>
+                            <button onClick={() => setShowEventDetailsModal(false)} className="text-white hover:text-slate-200"><svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg></button>
                         </div>
-
-                        {/* Content */}
-                        <div className="p-6 space-y-4">
-                            {/* Fecha y Hora */}
-                            <div className="flex items-center gap-3 text-slate-300">
-                                <svg className="w-5 h-5 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                </svg>
-                                <div>
-                                    <p className="text-sm text-slate-500">Fecha y Hora</p>
-                                    <p className="font-semibold">{selectedCalendarEvent.date} {selectedCalendarEvent.time ? `a las ${selectedCalendarEvent.time}` : ''}</p>
+                        <div className="p-6 space-y-6">
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="bg-slate-900/50 p-3 rounded-xl border border-slate-700/50">
+                                    <p className="text-[10px] text-slate-500 uppercase font-black mb-1">Fecha y Hora</p>
+                                    <p className="text-sm font-bold text-white">{selectedCalendarEvent.date} {selectedCalendarEvent.time || "19:00"}</p>
+                                </div>
+                                <div className="bg-slate-900/50 p-3 rounded-xl border border-slate-700/50">
+                                    <p className="text-[10px] text-slate-500 uppercase font-black mb-1">Formato</p>
+                                    <p className="text-sm font-bold text-white">{selectedCalendarEvent.format}</p>
+                                </div>
+                                <div className="bg-slate-900/50 p-3 rounded-xl border border-slate-700/50 col-span-full">
+                                    <p className="text-[10px] text-slate-500 uppercase font-black mb-1">Tienda</p>
+                                    <p className="text-sm font-bold text-white">{selectedCalendarEvent.storeName}</p>
                                 </div>
                             </div>
-
-                            {/* Formato */}
-                            <div className="flex items-center gap-3 text-slate-300">
-                                <svg className="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
-                                </svg>
-                                <div>
-                                    <p className="text-sm text-slate-500">Formato</p>
-                                    <p className="font-semibold">{selectedCalendarEvent.format}</p>
-                                </div>
-                            </div>
-
-                            {/* Lugar */}
-                            <div className="flex items-center gap-3 text-slate-300">
-                                <svg className="w-5 h-5 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                                </svg>
-                                <div>
-                                    <p className="text-sm text-slate-500">Lugar</p>
-                                    <p className="font-semibold">{selectedCalendarEvent.storeName}</p>
-                                </div>
-                            </div>
-
-                            {/* Inscritos */}
-                            {selectedCalendarEvent.maxPlayers && (
-                                <div className="flex items-center gap-3 text-slate-300">
-                                    <svg className="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                                    </svg>
-                                    <div>
-                                        <p className="text-sm text-slate-500">Inscritos</p>
-                                        <p className="font-semibold">{selectedCalendarEvent.playerCount || 0} / {selectedCalendarEvent.maxPlayers}</p>
-                                        <div className="w-full h-2 bg-slate-700 rounded-full mt-1 overflow-hidden">
-                                            <div
-                                                className={`h-full ${(selectedCalendarEvent.playerCount || 0) >= selectedCalendarEvent.maxPlayers ? 'bg-red-500' : 'bg-green-500'} transition-all duration-500 progress-bar-fill`}
-                                                style={{ '--progress-width': `${Math.min(((selectedCalendarEvent.playerCount || 0) / selectedCalendarEvent.maxPlayers) * 100, 100)}%` } as React.CSSProperties}
-                                                role="progressbar"
-                                                aria-valuenow={Math.round(Math.min(((selectedCalendarEvent.playerCount || 0) / selectedCalendarEvent.maxPlayers) * 100, 100))}
-                                                aria-valuemin={0}
-                                                aria-valuemax={100}
-                                                title={`Inscritos: ${selectedCalendarEvent.playerCount || 0}/${selectedCalendarEvent.maxPlayers}`}
-                                                aria-label={`Progreso de inscripción: ${selectedCalendarEvent.playerCount || 0} de ${selectedCalendarEvent.maxPlayers} jugadores`}
-                                            ></div>
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* Tipo de evento */}
-                            <div className="bg-slate-900 rounded-lg p-3 border border-slate-700">
-                                <p className="text-xs text-slate-500 mb-1">Tipo de Evento</p>
-                                <div className="flex items-center gap-2">
-                                    {(() => {
-                                        const details = getTournamentTypeDetails(selectedCalendarEvent);
-                                        return (
-                                            <>
-                                                <span className={`text-xs px-2 py-1 rounded font-bold ${details.color} ${details.color.includes('text-slate-900') ? '' : 'text-white'}`}>
-                                                    {details.type}
-                                                </span>
-                                                <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full font-bold text-xs ${details.multiplier === 'x4' ? 'bg-red-600 text-white' :
-                                                    details.multiplier === 'x3' ? 'bg-yellow-500 text-slate-900' :
-                                                        details.multiplier === 'x2' ? 'bg-slate-400 text-slate-900' :
-                                                            'bg-orange-500 text-white'
-                                                    }`}>
-                                                    {details.multiplier}
-                                                </span>
-                                            </>
-                                        );
-                                    })()}
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Buttons */}
-                        <div className="flex gap-3 px-6 pb-6">
-                            <button
-                                onClick={() => {
-                                    setShowEventDetailsModal(false);
-                                    setSelectedCalendarEvent(null);
-                                }}
-                                className="flex-1 px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white font-medium rounded-lg transition-colors"
-                            >
-                                Cerrar
-                            </button>
-                            {selectedCalendarEvent.isUserRegistered ? (
-                                <button
-                                    onClick={() => {
-                                        setShowEventDetailsModal(false);
-                                        handleCancelRegistration(selectedCalendarEvent);
-                                    }}
-                                    className="flex-1 px-4 py-2 bg-orange-600 hover:bg-orange-500 text-white font-bold rounded-lg transition-colors shadow-lg"
-                                >
-                                    Cancelar Inscripción
+                            <div className="flex flex-col sm:flex-row gap-3">
+                                <button onClick={() => addToGoogleCalendar(selectedCalendarEvent)} className="flex-1 px-4 py-3 bg-slate-700 hover:bg-slate-600 text-white font-bold rounded-xl transition-all flex items-center justify-center gap-2">
+                                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M19,4H18V2H16V4H8V2H6V4H5C3.89,4 3,4.9 3,6V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V6A2,2 0 0,0 19,4M19,19H5V8H19V19M9,13H7V11H9V13M13,13H11V11H13V13M17,13H15V11H17V13M9,17H7V15H9V17M13,17H11V15H13V17M17,17H15V15H17V17Z" /></svg>
+                                    Google Calendar
                                 </button>
-                            ) : (
-                                <button
-                                    onClick={() => {
-                                        setShowEventDetailsModal(false);
-                                        handleRegisterClick(selectedCalendarEvent);
-                                    }}
-                                    className="flex-1 px-4 py-2 bg-sky-600 hover:bg-sky-500 text-white font-bold rounded-lg transition-colors shadow-lg"
-                                >
-                                    Inscribirse
-                                </button>
-                            )}
+                                {selectedCalendarEvent.isUserRegistered ? (
+                                    <button onClick={() => handleCancelRegistration(selectedCalendarEvent)} className="flex-1 px-4 py-3 bg-orange-600 hover:bg-orange-500 text-white font-bold rounded-xl shadow-lg">Cancelar</button>
+                                ) : (
+                                    <button onClick={() => handleRegisterClick(selectedCalendarEvent)} className="flex-1 px-4 py-3 bg-sky-600 hover:bg-sky-500 text-white font-bold rounded-xl shadow-lg">Inscribirse</button>
+                                )}
+                            </div>
                         </div>
                     </div>
                 </div>

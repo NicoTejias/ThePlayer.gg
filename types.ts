@@ -16,9 +16,13 @@ export interface PlayerProfile {
   region: string;
   pwp: number;
   matchesWon?: number;
+  matches_won?: number;
   matchesLost?: number;
+  matches_lost?: number;
   matchesDrew?: number;
+  matches_drew?: number;
   winRate?: number;
+  win_rate?: number;
   username?: string;
   first_name?: string;
   last_name?: string;

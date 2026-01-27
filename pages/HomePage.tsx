@@ -252,42 +252,60 @@ const HomePage: React.FC<HomePageProps> = ({ players, events, session, userRole,
       {session && userRole === 'admin' && <AdminWidget />}
 
       {/* Community Stats */}
-      <section className="mt-24 mb-12 relative px-4">
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-900/10 via-purple-900/10 to-pink-900/10 blur-3xl" />
+      <section className="mt-12 mb-12 relative px-4">
+        {/* TCG Pulse Ticker */}
+        <div className="container mx-auto mb-12">
+          <div className="bg-slate-900/80 border-y border-slate-800 py-2 overflow-hidden whitespace-nowrap relative group">
+            <div className="flex animate-ticker gap-12 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">
+              <span className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> MTG: 24 Torneos hoy</span>
+              <span className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></span> Pokemon: Regional Santiago en 5 días</span>
+              <span className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></span> Marketplace: +150 nuevas cartas hoy</span>
+              <span className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-purple-500 animate-pulse"></span> Ranking updated: Top 100 PLS</span>
+              <span className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> MTG: 24 Torneos hoy</span>
+              <span className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></span> Pokemon: Regional Santiago en 5 días</span>
+              <span className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></span> Marketplace: +150 nuevas cartas hoy</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-900/5 via-purple-900/5 to-pink-900/5 blur-3xl" />
         <div className="container mx-auto relative z-10">
-          <h2 className="text-3xl font-bold text-center text-white mb-8 uppercase tracking-wide">Comunidad en Números</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8">
             {/* Players */}
-            <div className="bg-slate-800/40 backdrop-blur-sm p-6 rounded-xl border border-slate-700/50 flex flex-col items-center hover:border-blue-500/50 hover:bg-slate-800/60 transition-all group hover:animate-float duration-300">
-              <div className="p-3 bg-blue-500/10 rounded-full mb-4 group-hover:bg-blue-500/20 transition-colors text-blue-400 shadow-[0_0_15px_rgba(59,130,246,0.2)]">
+            <div className="bg-slate-800/20 backdrop-blur-md p-8 rounded-3xl border border-white/5 flex flex-col items-center hover:border-blue-500/50 transition-all duration-500 group relative overflow-hidden">
+              <div className="absolute inset-0 bg-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+              <div className="p-4 bg-blue-500/10 rounded-2xl mb-4 text-blue-400 group-hover:scale-110 transition-transform">
                 <UsersIcon className="w-8 h-8" />
               </div>
-              <div className="text-4xl font-bold text-white mb-1 tabular-nums tracking-tight"><CountUp end={stats.totalPlayers} /></div>
-              <div className="text-xs text-slate-400 uppercase tracking-widest font-bold">Jugadores</div>
+              <div className="text-5xl font-black text-white mb-2 tabular-nums tracking-tighter"><CountUp end={stats.totalPlayers} /></div>
+              <div className="text-[10px] text-slate-500 uppercase tracking-[0.3em] font-black">Jugadores</div>
             </div>
             {/* Stores */}
-            <div className="bg-slate-800/40 backdrop-blur-sm p-6 rounded-xl border border-slate-700/50 flex flex-col items-center hover:border-yellow-500/50 hover:bg-slate-800/60 transition-all group hover:-translate-y-1 duration-300">
-              <div className="p-3 bg-yellow-500/10 rounded-full mb-4 group-hover:bg-yellow-500/20 transition-colors text-yellow-400 shadow-[0_0_15px_rgba(234,179,8,0.2)]">
-                <svg xmlns="http://www.w3.org/2000/svg" className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
+            <div className="bg-slate-800/20 backdrop-blur-md p-8 rounded-3xl border border-white/5 flex flex-col items-center hover:border-yellow-500/50 transition-all duration-500 group relative overflow-hidden">
+              <div className="absolute inset-0 bg-yellow-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+              <div className="p-4 bg-yellow-500/10 rounded-2xl mb-4 text-yellow-400 group-hover:scale-110 transition-transform">
+                <svg xmlns="http://www.w3.org/2000/svg" className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
               </div>
-              <div className="text-4xl font-bold text-white mb-1 tabular-nums tracking-tight"><CountUp end={stats.registeredStores} /></div>
-              <div className="text-xs text-slate-400 uppercase tracking-widest font-bold">Tiendas</div>
+              <div className="text-5xl font-black text-white mb-2 tabular-nums tracking-tighter"><CountUp end={stats.registeredStores} /></div>
+              <div className="text-[10px] text-slate-500 uppercase tracking-[0.3em] font-black">Tiendas</div>
             </div>
             {/* Tournaments */}
-            <div className="bg-slate-800/40 backdrop-blur-sm p-6 rounded-xl border border-slate-700/50 flex flex-col items-center hover:border-purple-500/50 hover:bg-slate-800/60 transition-all group hover:-translate-y-1 duration-300">
-              <div className="p-3 bg-purple-500/10 rounded-full mb-4 group-hover:bg-purple-500/20 transition-colors text-purple-400 shadow-[0_0_15px_rgba(168,85,247,0.2)]">
+            <div className="bg-slate-800/20 backdrop-blur-md p-8 rounded-3xl border border-white/5 flex flex-col items-center hover:border-purple-500/50 transition-all duration-500 group relative overflow-hidden">
+              <div className="absolute inset-0 bg-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+              <div className="p-4 bg-purple-500/10 rounded-2xl mb-4 text-purple-400 group-hover:scale-110 transition-transform">
                 <TrophyIcon className="w-8 h-8" />
               </div>
-              <div className="text-4xl font-bold text-white mb-1 tabular-nums tracking-tight"><CountUp end={stats.activeTournaments} /></div>
-              <div className="text-xs text-slate-400 uppercase tracking-widest font-bold">Torneos</div>
+              <div className="text-5xl font-black text-white mb-2 tabular-nums tracking-tighter"><CountUp end={stats.activeTournaments} /></div>
+              <div className="text-[10px] text-slate-500 uppercase tracking-[0.3em] font-black">Torneos</div>
             </div>
             {/* Matches */}
-            <div className="bg-slate-800/40 backdrop-blur-sm p-6 rounded-xl border border-slate-700/50 flex flex-col items-center hover:border-green-500/50 hover:bg-slate-800/60 transition-all group hover:-translate-y-1 duration-300">
-              <div className="p-3 bg-green-500/10 rounded-full mb-4 group-hover:bg-green-500/20 transition-colors text-green-400 shadow-[0_0_15px_rgba(34,197,94,0.2)]">
+            <div className="bg-slate-800/20 backdrop-blur-md p-8 rounded-3xl border border-white/5 flex flex-col items-center hover:border-emerald-500/50 transition-all duration-500 group relative overflow-hidden">
+              <div className="absolute inset-0 bg-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+              <div className="p-4 bg-emerald-500/10 rounded-2xl mb-4 text-emerald-400 group-hover:scale-110 transition-transform">
                 <SparklesIcon className="w-8 h-8" />
               </div>
-              <div className="text-4xl font-bold text-white mb-1 tabular-nums tracking-tight"><CountUp end={stats.totalMatches} /></div>
-              <div className="text-xs text-slate-400 uppercase tracking-widest font-bold">Partidas</div>
+              <div className="text-5xl font-black text-white mb-2 tabular-nums tracking-tighter"><CountUp end={stats.totalMatches} /></div>
+              <div className="text-[10px] text-slate-500 uppercase tracking-[0.3em] font-black">Partidas</div>
             </div>
           </div>
         </div>
