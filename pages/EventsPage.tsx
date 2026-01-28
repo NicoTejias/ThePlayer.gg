@@ -590,7 +590,15 @@ const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [
                             </div>
                         </div>
                         <div className="w-full bg-slate-900 h-1 rounded-full mt-2 overflow-hidden border border-slate-700/30">
-                            <div className="bg-gradient-to-r from-emerald-600 to-emerald-400 h-full rounded-full transition-all duration-1000" style={{ width: `${occupancyRate}%` }}></div>
+                            <div
+                                className="bg-gradient-to-r from-emerald-600 to-emerald-400 h-full rounded-full transition-all duration-1000"
+                                style={{ width: `${occupancyRate}%` }}
+                                role="progressbar"
+                                aria-valuenow={occupancyRate}
+                                aria-valuemin={0}
+                                aria-valuemax={100}
+                                aria-label="Tasa de ocupación"
+                            ></div>
                         </div>
                     </div>
 
@@ -636,11 +644,12 @@ const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [
                                     <div className="w-full bg-slate-700 h-2 rounded-full overflow-hidden">
                                         <div
                                             className="bg-sky-500 h-full rounded-full transition-all duration-500 progress-bar-fill"
-                                            style={{ '--progress-width': `${fmtPercentage}%` } as React.CSSProperties}
+                                            style={{ '--progress-width': `${fmtPercentage}%` } as any}
                                             role="progressbar"
                                             aria-valuenow={fmtPercentage}
                                             aria-valuemin={0}
                                             aria-valuemax={100}
+                                            aria-label={`Distribución de ${fmt}`}
                                             title={`${fmt}: ${count} eventos (${fmtPercentage}%)`}
                                         ></div>
                                     </div>
@@ -737,6 +746,8 @@ const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [
                                             onClick={goToPreviousEvents}
                                             disabled={upcomingPage === 0}
                                             className="p-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                            aria-label="Anterior"
+                                            title="Página Anterior"
                                         >
                                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -747,6 +758,8 @@ const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [
                                             onClick={goToNextEvents}
                                             disabled={upcomingPage >= totalUpcomingPages - 1}
                                             className="p-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                            aria-label="Siguiente"
+                                            title="Siguiente Página"
                                         >
                                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -829,9 +842,9 @@ const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [
                         <div className="flex items-center gap-4">
                             <h2 className="text-2xl font-bold text-white uppercase tracking-wide capitalize">{monthName}</h2>
                             <div className="flex items-center gap-2">
-                                <button onClick={goToPreviousMonth} className="p-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg border border-slate-600"><svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg></button>
+                                <button onClick={goToPreviousMonth} className="p-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg border border-slate-600" aria-label="Mes anterior" title="Mes Anterior"><svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg></button>
                                 <button onClick={goToToday} className="px-4 py-2 bg-sky-700 hover:bg-sky-600 text-white text-sm font-bold rounded-lg shadow-lg">Hoy</button>
-                                <button onClick={goToNextMonth} className="p-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg border border-slate-600"><svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg></button>
+                                <button onClick={goToNextMonth} className="p-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg border border-slate-600" aria-label="Mes siguiente" title="Mes Siguiente"><svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg></button>
                             </div>
                         </div>
                         <div className="hidden md:flex gap-4 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">
@@ -924,7 +937,7 @@ const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [
                     <div className="bg-slate-800 rounded-2xl shadow-2xl border border-slate-700 max-w-lg w-full overflow-hidden">
                         <div className="bg-gradient-to-r from-purple-600 to-blue-600 px-6 py-4 flex justify-between items-center">
                             <h2 className="text-xl font-bold text-white truncate mr-4">{selectedCalendarEvent.title}</h2>
-                            <button onClick={() => setShowEventDetailsModal(false)} className="text-white hover:text-slate-200"><svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg></button>
+                            <button onClick={() => setShowEventDetailsModal(false)} className="text-white hover:text-slate-200" aria-label="Cerrar detalles" title="Cerrar"><svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg></button>
                         </div>
                         <div className="p-6 space-y-6">
                             <div className="grid grid-cols-2 gap-4">

@@ -40,17 +40,13 @@ const UniverseSelectionPage: React.FC = () => {
                     {[...Array(20)].map((_, i) => (
                         <div
                             key={i}
-                            className="absolute w-1 h-1 bg-white rounded-full animate-float"
+                            className="particle-dot"
                             style={{
                                 '--left': `${Math.random() * 100}%`,
                                 '--top': `${Math.random() * 100}%`,
                                 '--duration': `${5 + Math.random() * 10}s`,
-                                '--delay': `${Math.random() * 5}s`,
-                                left: 'var(--left)',
-                                top: 'var(--top)',
-                                animationDuration: 'var(--duration)',
-                                animationDelay: 'var(--delay)'
-                            } as React.CSSProperties}
+                                '--delay': `${Math.random() * 5}s`
+                            } as any}
                         />
                     ))}
                 </div>
@@ -80,8 +76,8 @@ const UniverseSelectionPage: React.FC = () => {
                         <div
                             key={game}
                             onClick={() => handleSelectUniverse(game)}
-                            className="group relative flex flex-col items-center gap-6 bg-slate-900/30 backdrop-blur-xl border border-slate-800/50 p-10 rounded-[2.5rem] hover:border-sky-500/50 hover:bg-slate-800/40 transition-all duration-500 cursor-pointer transform hover:-translate-y-3 shadow-2xl hover:shadow-sky-500/20 opacity-0 animate-[fade-in-up_0.6s_ease-out_forwards]"
-                            style={{ '--animation-delay': `${idx * 0.1}s`, animationDelay: 'var(--animation-delay)' } as React.CSSProperties}
+                            className="group relative flex flex-col items-center gap-6 bg-slate-900/30 backdrop-blur-xl border border-slate-800/50 p-10 rounded-[2.5rem] hover:border-sky-500/50 hover:bg-slate-800/40 transition-all duration-500 cursor-pointer transform hover:-translate-y-3 shadow-2xl hover:shadow-sky-500/20 universe-card"
+                            style={{ '--animation-delay': `${idx * 0.1}s` } as any}
                         >
                             <div className={`w-20 h-20 md:w-28 md:h-28 flex items-center justify-center transform group-hover:scale-115 transition-all duration-500 filter drop-shadow-[0_0_15px_rgba(255,255,255,0.1)] group-hover:drop-shadow-[0_0_20px_var(--color-accent,rgba(59,130,246,0.5))] ${game === 'one_piece' ? 'bg-white/20 shadow-[0_0_40px_rgba(255,255,255,0.2)] rounded-full p-4 backdrop-blur-md' : ''}`}>
                                 {GAME_LOGOS[game]?.src ? (
@@ -144,6 +140,21 @@ const UniverseSelectionPage: React.FC = () => {
             </div>
 
             <style>{`
+                .particle-dot {
+                    position: absolute;
+                    width: 4px;
+                    height: 4px;
+                    background: white;
+                    border-radius: 50%;
+                    left: var(--left);
+                    top: var(--top);
+                    animation: float var(--duration) linear infinite;
+                    animation-delay: var(--delay);
+                }
+                .universe-card {
+                    animation: fade-in-up 0.6s ease-out forwards;
+                    animation-delay: var(--animation-delay);
+                }
                 @keyframes float {
                     0%, 100% { transform: translate(0, 0); }
                     33% { transform: translate(10px, -15px); }
@@ -156,6 +167,10 @@ const UniverseSelectionPage: React.FC = () => {
                 @keyframes fade-in {
                     from { opacity: 0; }
                     to { opacity: 0.8; }
+                }
+                .no-scrollbar {
+                    scrollbar-width: none;
+                    -ms-overflow-style: none;
                 }
             `}</style>
         </div>

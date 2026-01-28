@@ -148,9 +148,7 @@ body {
 
 .no-scrollbar {
   scrollbar-width: none;
-  /* Firefox 64+ */
   -ms-overflow-style: none;
-  /* IE and Edge */
 }
 
 /* Custom Scrollbar */

@@ -55,6 +55,11 @@ const LevelProgressBar: React.FC<LevelProgressBarProps> = ({ points, className =
                 <div
                     className={`h-full rounded-full bg-gradient-to-r ${colorBarClasses[info.color]} progress-bar-fill relative`}
                     style={progressStyle}
+                    role="progressbar"
+                    aria-valuenow={info.progressPercentage}
+                    aria-valuemin={0}
+                    aria-valuemax={100}
+                    aria-label={`Progreso del nivel ${info.level}`}
                 >
                     {/* Animated Shine */}
                     <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent w-full animate-level-shimmer"></div>
