@@ -3,12 +3,12 @@ import React from 'react';
 import { getLevelInfo } from '../utils/levelUtils';
 
 interface LevelProgressBarProps {
-    pwp: number;
+    points: number;
     className?: string;
 }
 
-const LevelProgressBar: React.FC<LevelProgressBarProps> = ({ pwp, className = '' }) => {
-    const info = getLevelInfo(pwp);
+const LevelProgressBar: React.FC<LevelProgressBarProps> = ({ points, className = '' }) => {
+    const info = getLevelInfo(points);
 
     const colorBarClasses: Record<string, string> = {
         slate: 'from-slate-600 to-slate-400',

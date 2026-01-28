@@ -8,7 +8,7 @@ import { es } from 'date-fns/locale';
 interface LeagueRanking {
     player_name: string;
     total_points: number;
-    total_pwp: number;
+    total_player_points: number;
     matches_played: number;
     wins: number;
     draws: number;
@@ -210,7 +210,7 @@ const LeagueRankingPage = () => {
                                                 <span className="text-yellow-400">{player.draws}</span>
                                             </td>
                                             <td className="px-3 sm:px-4 py-4 text-right font-medium text-slate-400">
-                                                {Math.round(player.total_pwp)}
+                                                {Math.round(player.total_player_points)}
                                             </td>
                                             <td className="px-3 sm:px-4 py-4 text-right font-bold text-sky-400 text-lg">
                                                 {player.total_points}

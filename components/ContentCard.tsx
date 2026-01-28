@@ -1,5 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { Share2 } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface ContentCardProps {
     id: string;
@@ -33,6 +35,24 @@ const ContentCard: React.FC<ContentCardProps> = ({
         day: 'numeric'
     });
 
+    const handleShare = (e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        const shareUrl = `${window.location.origin}${linkTo}`;
+
+        if (navigator.share) {
+            navigator.share({
+                title: title,
+                text: description || '',
+                url: shareUrl,
+            }).catch(() => { });
+        } else {
+            navigator.clipboard.writeText(shareUrl);
+            toast.success('¡Enlace copiado!');
+        }
+    };
+
     const CardContent = (
         <div className="bg-slate-800 rounded-xl overflow-hidden border border-slate-700 hover:border-sky-500 transition-all hover:shadow-xl group hover:-translate-y-1 h-full flex flex-col">
             {/* Image Container */}
@@ -54,8 +74,8 @@ const ContentCard: React.FC<ContentCardProps> = ({
                 {/* Type Badge */}
                 <div className="absolute top-2 right-2">
                     <span className={`px-2 py-1 rounded text-xs font-bold uppercase tracking-wider ${type === 'article'
-                            ? 'bg-emerald-500/90 text-white'
-                            : 'bg-red-500/90 text-white'
+                        ? 'bg-emerald-500/90 text-white'
+                        : 'bg-red-500/90 text-white'
                         }`}>
                         {type === 'article' ? 'Artículo' : 'Video'}
                     </span>
@@ -79,7 +99,16 @@ const ContentCard: React.FC<ContentCardProps> = ({
                     <div className="flex items-center gap-2">
                         <span>{creatorName || 'ThePlayer.gg'}</span>
                     </div>
-                    <span>{formattedDate}</span>
+                    <div className="flex items-center gap-3">
+                        <span>{formattedDate}</span>
+                        <button
+                            onClick={handleShare}
+                            className="p-1.5 hover:bg-slate-700 rounded-lg transition-colors text-slate-500 hover:text-sky-400"
+                            title="Compartir"
+                        >
+                            <Share2 className="w-4 h-4" />
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>

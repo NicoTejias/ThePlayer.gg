@@ -12,7 +12,7 @@ interface User {
     suspension_reason: string | null;
     suspended_until: string | null;
     region: string;
-    total_pwp: number;
+    total_points: number;
     created_at: string;
     last_login: string | null;
     listing_count: number;
@@ -264,7 +264,7 @@ const UserManagementPage: React.FC = () => {
                                     <th className="text-left px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Usuario</th>
                                     <th className="text-left px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Rol</th>
                                     <th className="text-left px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Estado</th>
-                                    <th className="text-left px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Points</th>
+                                    <th className="text-left px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Player Points</th>
                                     <th className="text-left px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Torneos</th>
                                     <th className="text-left px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Listings</th>
                                     <th className="text-right px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Acciones</th>
@@ -289,7 +289,7 @@ const UserManagementPage: React.FC = () => {
                                                 </p>
                                             )}
                                         </td>
-                                        <td className="px-6 py-4 text-white">{user.total_pwp || 0}</td>
+                                        <td className="px-6 py-4 text-white">{user.total_points || 0}</td>
                                         <td className="px-6 py-4 text-slate-300">{user.tournament_count || 0}</td>
                                         <td className="px-6 py-4 text-slate-300">{user.listing_count || 0}</td>
                                         <td className="px-6 py-4">

@@ -147,10 +147,10 @@ body {
 }
 
 .no-scrollbar {
+  scrollbar-width: none;
+  /* Firefox 64+ */
   -ms-overflow-style: none;
   /* IE and Edge */
-  scrollbar-width: none;
-  /* Firefox and modern Chrome/Safari */
 }
 
 /* Custom Scrollbar */

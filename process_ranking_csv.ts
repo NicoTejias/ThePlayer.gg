@@ -138,7 +138,7 @@ const run = async () => {
             wins: r.wins,
             losses: r.losses,
             draws: r.draws,
-            pwp_earned: r.points // Usamos los puntos del torneo como PWP base por ahora
+            points_earned: r.points // Usamos los puntos del torneo como base por ahora
         }));
 
         const { error: rError } = await supabase

@@ -21,18 +21,18 @@ export interface LevelInfo {
  * ...
  * Threshold to next level increases by 50 each time.
  */
-export const getLevelInfo = (pwp: number = 0): LevelInfo => {
+export const getLevelInfo = (points: number = 0): LevelInfo => {
     let level = 1;
     let xpThreshold = 0;
     let nextThreshold = 50;
 
-    while (pwp >= nextThreshold && level < 100) { // Cap at level 100 for safety
+    while (points >= nextThreshold && level < 100) { // Cap at level 100 for safety
         level++;
         xpThreshold = nextThreshold;
         nextThreshold = xpThreshold + (level * 50);
     }
 
-    const xpInCurrentLevel = pwp - xpThreshold;
+    const xpInCurrentLevel = points - xpThreshold;
     const xpNeededForNext = nextThreshold - xpThreshold;
     const progressPercentage = Math.min(100, Math.max(0, Math.floor((xpInCurrentLevel / xpNeededForNext) * 100)));
 
@@ -53,7 +53,7 @@ export const getLevelInfo = (pwp: number = 0): LevelInfo => {
         title: titleInfo.title,
         xpForCurrentLevel: xpInCurrentLevel,
         xpForNextLevel: xpNeededForNext,
-        totalXP: pwp,
+        totalXP: points,
         progressPercentage,
         color: titleInfo.color,
         nextThreshold

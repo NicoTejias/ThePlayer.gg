@@ -9,28 +9,31 @@ import TrophyCase from '../components/TrophyCase';
 interface StatsByFormat {
     format: string;
     total_matches: number;
-    total_pwp: number;
+    total_points: number;
 }
 
 interface PLSProgression {
     tournament_date: string;
     tournament_name: string;
     format: string;
-    pwp_earned: number;
-    cumulative_pwp: number;
+    points_earned: number;
+    cumulative_points: number;
 }
 
 interface PerformanceMetrics {
     total_tournaments: number;
-    total_pwp: number;
-    average_pwp_per_tournament: number;
+    total_points: number;
+    total_wins: number;
+    total_losses: number;
+    total_draws: number;
+    average_points_per_tournament: number;
     best_format: string | null;
     worst_format: string | null;
 }
 
 const PlayerStatsPage: React.FC = () => {
     const [statsByFormat, setStatsByFormat] = useState<StatsByFormat[]>([]);
-    const [plsProgression, setPlsProgression] = useState<PLSProgression[]>([]);
+    const [pointsProgression, setPointsProgression] = useState<PLSProgression[]>([]);
     const [metrics, setMetrics] = useState<PerformanceMetrics | null>(null);
     const [loading, setLoading] = useState(true);
     const [currentUser, setCurrentUser] = useState<any>(null);
@@ -78,7 +81,7 @@ const PlayerStatsPage: React.FC = () => {
                 p_player_id: currentUser.id
             });
             if (progressionError) throw progressionError;
-            setPlsProgression(progressionData || []);
+            setPointsProgression(progressionData || []);
 
             // Fetch performance metrics
             const { data: metricsData, error: metricsError } = await supabase.rpc('get_player_performance_metrics', {
@@ -174,7 +177,7 @@ const PlayerStatsPage: React.FC = () => {
                             </div>
                             <span className="text-slate-400 text-sm">Puntos Acumulados</span>
                         </div>
-                        <p className="text-3xl font-bold">{(metrics.total_pwp || 0).toLocaleString()}</p>
+                        <p className="text-3xl font-bold">{(metrics.total_points || 0).toLocaleString()}</p>
                     </div>
 
                     <div className="bg-slate-800 border border-slate-700 rounded-lg p-6 md:col-span-2">
@@ -186,7 +189,7 @@ const PlayerStatsPage: React.FC = () => {
                             </div>
                             <span className="text-slate-400 text-sm">Promedio de Puntos por Torneo</span>
                         </div>
-                        <p className="text-3xl font-bold">{(metrics.average_pwp_per_tournament || 0).toFixed(1)}</p>
+                        <p className="text-3xl font-bold">{(metrics.average_points_per_tournament || 0).toFixed(1)}</p>
                     </div>
                 </div>
 
@@ -241,7 +244,7 @@ const PlayerStatsPage: React.FC = () => {
                                 </div>
                                 <p className="text-3xl font-bold text-white mb-1">
                                     {metrics.total_tournaments > 0
-                                        ? ((metrics.average_pwp_per_tournament / 10) * 100).toFixed(0)
+                                        ? ((metrics.average_points_per_tournament / 10) * 100).toFixed(0)
                                         : 0}%
                                 </p>
                                 <p className="text-xs text-purple-400/70">Basado en puntos promedio</p>
@@ -265,7 +268,7 @@ const PlayerStatsPage: React.FC = () => {
                                     <svg className="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                     </svg>
-                                    <span className="text-sm text-purple-300 font-semibold">Status PWP</span>
+                                    <span className="text-sm text-purple-300 font-semibold">Status Global</span>
                                 </div>
                                 <p className="text-3xl font-bold text-white mb-1">Activo</p>
                                 <p className="text-xs text-purple-400/70">Sumando puntos esta temporada</p>
@@ -284,7 +287,7 @@ const PlayerStatsPage: React.FC = () => {
                                 <div className="flex items-start gap-3">
                                     <div className="w-2 h-2 bg-purple-400 rounded-full mt-2"></div>
                                     <p className="text-sm text-slate-300">
-                                        Tu promedio de <span className="font-bold text-purple-300">{metrics.average_pwp_per_tournament.toFixed(1)} Pts</span> te posiciona bien entre los jugadores activos.
+                                        Tu promedio de <span className="font-bold text-purple-300">{metrics.average_points_per_tournament.toFixed(1)} Pts</span> te posiciona bien entre los jugadores activos.
                                     </p>
                                 </div>
                                 {metrics.best_format && (
@@ -299,8 +302,8 @@ const PlayerStatsPage: React.FC = () => {
                                 <div className="flex items-start gap-3">
                                     <div className="w-2 h-2 bg-purple-400 rounded-full mt-2"></div>
                                     <p className="text-sm text-slate-300">
-                                        Promedio de <span className="font-bold text-purple-300">{metrics.average_pwp_per_tournament.toFixed(1)} Player Points</span> por torneo.
-                                        {metrics.average_pwp_per_tournament >= 5
+                                        Promedio de <span className="font-bold text-purple-300">{metrics.average_points_per_tournament.toFixed(1)} Player Points</span> por torneo.
+                                        {metrics.average_points_per_tournament >= 5
                                             ? ' ¡Excelente rendimiento!'
                                             : ' Sigue mejorando para aumentar tu ranking.'}
                                     </p>
@@ -332,12 +335,12 @@ const PlayerStatsPage: React.FC = () => {
 
                 {/* Charts Grid */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-                    {/* PLS Progression */}
-                    {plsProgression.length > 0 && (
+                    {/* Points Progression */}
+                    {pointsProgression.length > 0 && (
                         <div className="bg-slate-800 border border-slate-700 rounded-lg p-6">
                             <h2 className="text-2xl font-bold mb-4">Progresión de Puntos</h2>
                             <ResponsiveContainer width="100%" height={300}>
-                                <LineChart data={plsProgression}>
+                                <LineChart data={pointsProgression}>
                                     <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
                                     <XAxis
                                         dataKey="tournament_date"
@@ -352,7 +355,7 @@ const PlayerStatsPage: React.FC = () => {
                                     <Legend wrapperStyle={{ color: '#94a3b8' }} />
                                     <Line
                                         type="monotone"
-                                        dataKey="cumulative_pwp"
+                                        dataKey="cumulative_points"
                                         stroke={COLORS.primary}
                                         strokeWidth={2}
                                         name="Puntos Acumulados"
@@ -384,7 +387,7 @@ const PlayerStatsPage: React.FC = () => {
                                         <tr key={index} className="border-b border-slate-700/50 hover:bg-slate-700/30 transition-colors">
                                             <td className="py-3 px-4 font-semibold">{stat.format}</td>
                                             <td className="py-3 px-4 text-center">{stat.total_matches}</td>
-                                            <td className="py-3 px-4 text-center font-bold text-sky-400">{stat.total_pwp}</td>
+                                            <td className="py-3 px-4 text-center font-bold text-sky-400">{stat.total_points}</td>
                                         </tr>
                                     ))}
                                 </tbody>

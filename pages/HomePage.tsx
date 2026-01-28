@@ -168,14 +168,14 @@ const HomePage: React.FC<HomePageProps> = ({ players, events, session, userRole,
     return () => clearInterval(timer);
   }, []);
 
-  const topPwpPlayers = [...players]
-    .sort((a, b) => (b.pwp || 0) - (a.pwp || 0))
+  const topPointsPlayers = [...players]
+    .sort((a, b) => (b.points || 0) - (a.points || 0))
     .slice(0, 10)
     .map((p, i) => ({
       id: p.id,
       rank: i + 1,
       playerName: p.name || `Jugador #${Math.abs(p.id.split('').reduce((acc, c) => c.charCodeAt(0) + ((acc << 5) - acc), 0) % 9000 + 1000)}`,
-      pwp: p.pwp || 0,
+      points: p.points || 0,
       region: p.region || 'Unknown',
       team: p.team || '-',
       is_pro: p.is_pro || false,
@@ -426,7 +426,7 @@ const HomePage: React.FC<HomePageProps> = ({ players, events, session, userRole,
             <div className="w-full max-w-4xl">
               <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3">Top 10 Player Points</h3>
               <div className="bg-slate-800/50 rounded-xl border border-slate-700 overflow-hidden shadow-xl">
-                {topPwpPlayers.slice(0, 10).map(player => {
+                {topPointsPlayers.slice(0, 10).map(player => {
                   const isCurrent = session?.user?.id && player.id === session.user.id;
                   return (
                     <Link key={player.id} to="/ranking" className={`flex items-center gap-3 p-3 hover:bg-slate-700/50 transition-colors border-b border-slate-700/50 last:border-0 ${isCurrent ? 'bg-blue-500/10 border-l-4 border-l-blue-500' : ''}`}>
@@ -441,7 +441,7 @@ const HomePage: React.FC<HomePageProps> = ({ players, events, session, userRole,
                         <p className="text-xs text-slate-500">{player.team}</p>
                       </div>
                       <div className="text-right">
-                        <span className={`block font-bold font-mono text-sm ${isCurrent ? 'text-blue-400' : 'text-green-400'}`}>{player.pwp.toLocaleString()}</span>
+                        <span className={`block font-bold font-mono text-sm ${isCurrent ? 'text-blue-400' : 'text-green-400'}`}>{player.points.toLocaleString()}</span>
                         <span className="text-[10px] text-slate-500 uppercase">Points</span>
                       </div>
                     </Link>

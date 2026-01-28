@@ -49,7 +49,7 @@ const TeamProfilePage: React.FC = () => {
                     logoUrl: teamData.logo_url,
                     description: teamData.description,
                     captainId: teamData.captain_id,
-                    totalPwp: 0, // Will calculate below
+                    totalPoints: 0, // Will calculate below
                     memberCount: membersData?.length || 0
                 });
 
@@ -58,15 +58,15 @@ const TeamProfilePage: React.FC = () => {
                         id: m.id,
                         name: `${m.first_name || ''} ${m.last_name || ''}`.trim() || m.username,
                         region: m.region,
-                        pwp: m.pwp,
+                        points: m.pwp,
                         teamId: teamData.id,
                         isPublic: m.is_public
                     }));
                     setMembers(mappedMembers);
 
-                    // Sum PLS
-                    const totalPwp = mappedMembers.reduce((acc, m) => acc + m.pwp, 0);
-                    setTeam(prev => prev ? { ...prev, totalPwp } : null);
+                    // Sum points
+                    const totalPoints = mappedMembers.reduce((acc, m) => acc + m.points, 0);
+                    setTeam(prev => prev ? { ...prev, totalPoints } : null);
                 }
             }
         } catch (error) {
@@ -165,7 +165,7 @@ const TeamProfilePage: React.FC = () => {
                     <div className="grid grid-cols-2 gap-4 w-full md:w-auto">
                         <div className="bg-slate-950/60 backdrop-blur-md p-4 rounded-2xl border border-white/5 text-center px-8">
                             <p className="text-[10px] text-slate-500 uppercase font-black tracking-widest mb-1">Player Points Totales</p>
-                            <p className="text-3xl font-black text-sky-400 tabular-nums">{(team.totalPwp || 0).toLocaleString()}</p>
+                            <p className="text-3xl font-black text-sky-400 tabular-nums">{(team.totalPoints || 0).toLocaleString()}</p>
                         </div>
                         <div className="bg-slate-950/60 backdrop-blur-md p-4 rounded-2xl border border-white/5 text-center px-8">
                             <p className="text-[10px] text-slate-500 uppercase font-black tracking-widest mb-1">Miembros</p>
@@ -199,7 +199,7 @@ const TeamProfilePage: React.FC = () => {
                                         </div>
                                     </div>
                                     <div className="text-right">
-                                        <p className="text-sky-400 font-black text-xl">{member.pwp.toLocaleString()}</p>
+                                        <p className="text-sky-400 font-black text-xl">{member.points.toLocaleString()}</p>
                                         <p className="text-[10px] text-slate-500 uppercase font-bold">Points</p>
                                     </div>
                                 </div>

@@ -239,7 +239,7 @@ const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpl
             // Fetch context for integrity check
             const { data: recentResults, error: recentError } = await supabase
                 .from('tournament_results')
-                .select('tournament_id, player_name, pwp_earned')
+                .select('tournament_id, player_name, points_earned')
                 .order('created_at', { ascending: false })
                 .limit(1000)
                 .abortSignal(abortController.signal);
@@ -249,7 +249,7 @@ const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpl
             const tournamentGroups: Record<string, any[]> = {};
             recentResults?.forEach(r => {
                 if (!tournamentGroups[r.tournament_id]) tournamentGroups[r.tournament_id] = [];
-                tournamentGroups[r.tournament_id].push({ playerName: r.player_name, pwpEarned: r.pwp_earned });
+                tournamentGroups[r.tournament_id].push({ playerName: r.player_name, pointsEarned: r.points_earned });
             });
 
             const recentFingerprints = Object.values(tournamentGroups).map(g => getTournamentFingerprint(g as any));
@@ -317,7 +317,13 @@ const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpl
                         estimatedLosses = Math.max(0, totalRounds - played);
                     }
 
-                    const pwpEarned = ((estimatedWins * 3) + (estimatedDraws * 1) + participationPoints) * multiplier;
+                    // Logica de Torneo Chico (< 8 jugadores): 
+                    // No hay puntos por participación (ya es 0 por getParticipationPoints)
+                    // No hay multiplicador (se fuerza a 1)
+                    const effectiveMultiplier = parsedRows.length < 8 ? 1 : multiplier;
+                    const effectiveParticipation = parsedRows.length < 8 ? 0 : participationPoints;
+
+                    const pointsEarned = ((estimatedWins * 3) + (estimatedDraws * 1) + effectiveParticipation) * effectiveMultiplier;
 
                     return {
                         rank: row.rank,
@@ -326,7 +332,7 @@ const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpl
                         wins: estimatedWins,
                         losses: estimatedLosses,
                         draws: estimatedDraws,
-                        pwpEarned: Math.round(pwpEarned)
+                        pointsEarned: Math.round(pointsEarned)
                     };
                 });
 
@@ -354,14 +360,17 @@ const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpl
                 const multiplier = getTournamentMultiplier(tournamentType);
                 const participationPoints = getParticipationPoints(parsedRows.length);
                 const finalResults: TournamentParseResult[] = parsedRows.map((row: any) => {
-                    const pwpEarned = ((row.wins * 3) + (row.draws * 1) + participationPoints) * multiplier;
+                    const effectiveMultiplier = parsedRows.length < 8 ? 1 : multiplier;
+                    const effectiveParticipation = parsedRows.length < 8 ? 0 : participationPoints;
+
+                    const pointsEarned = ((row.wins * 3) + (row.draws * 1) + effectiveParticipation) * effectiveMultiplier;
                     return {
                         playerName: row.name,
                         matchRecord: `${row.wins}-${row.losses}-${row.draws}`,
                         wins: row.wins,
                         losses: row.losses,
                         draws: row.draws,
-                        pwpEarned: Math.round(pwpEarned)
+                        pointsEarned: Math.round(pointsEarned)
                     };
                 });
                 setParsedData(finalResults);
@@ -510,7 +519,7 @@ const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpl
                         </div>
                         <div>
                             <h3 className="text-3xl font-black text-white tracking-tighter uppercase leading-none">Reportes</h3>
-                            <p className="text-slate-400 text-sm mt-3 font-medium leading-relaxed">Sube resultados oficiales para sumar puntos PWP.</p>
+                            <p className="text-slate-400 text-sm mt-3 font-medium leading-relaxed">Sube resultados oficiales para sumar Player Points.</p>
                         </div>
                         <button
                             onClick={() => {
@@ -900,7 +909,7 @@ const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpl
                                                                 <p className="text-[10px] text-slate-500 font-bold font-mono">{player.matchRecord}</p>
                                                             </td>
                                                             <td className="px-6 py-4 text-right">
-                                                                <span className="text-xl font-black text-sky-400">+{player.pwpEarned}</span>
+                                                                <span className="text-xl font-black text-sky-400">+{player.pointsEarned}</span>
                                                             </td>
                                                         </tr>
                                                     ))}

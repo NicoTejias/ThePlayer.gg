@@ -113,7 +113,7 @@ const TournamentStandingsPage: React.FC<TournamentStandingsProps> = ({ userRole,
                     return {
                         rank: r.rank || index + 1,
                         playerName: finalName,
-                        pwpEarned: r.pwp_earned
+                        pointsEarned: r.pwp_earned
                     };
                 });
 
@@ -214,7 +214,7 @@ const TournamentStandingsPage: React.FC<TournamentStandingsProps> = ({ userRole,
                                     </td>
                                     <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-right text-sm font-bold text-sky-400">
                                         <div className="flex items-center justify-end space-x-2">
-                                            <span>{player.pwpEarned}</span>
+                                            <span>{player.pointsEarned}</span>
                                             <TrophyIcon className="w-4 h-4 sm:w-5 sm:h-5 text-sky-500/70" />
                                         </div>
                                     </td>

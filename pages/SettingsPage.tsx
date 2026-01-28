@@ -3,7 +3,7 @@ import { supabase } from '../supabaseClient';
 import { useNavigate } from 'react-router-dom';
 import { sanitizeText, sanitizeUrl } from '../utils/sanitize';
 import { z } from 'zod';
-import { Upload, Image as ImageIcon, X } from 'lucide-react';
+import { Upload, Image as ImageIcon, X, Facebook, Instagram, MessageCircle, Mail } from 'lucide-react';
 import { GAME_LABELS } from '../types';
 
 const LATAM_COUNTRIES = [
@@ -57,6 +57,10 @@ const SettingsPage: React.FC = () => {
     const [preferredGames, setPreferredGames] = useState<string[]>([]);
     const [favoriteFormat, setFavoriteFormat] = useState('');
     const [team, setTeam] = useState('');
+    const [facebookUrl, setFacebookUrl] = useState('');
+    const [instagramUrl, setInstagramUrl] = useState('');
+    const [whatsappNumber, setWhatsappNumber] = useState('');
+    const [publicEmail, setPublicEmail] = useState('');
 
     // Password State
     const [newPassword, setNewPassword] = useState('');
@@ -311,6 +315,12 @@ const SettingsPage: React.FC = () => {
                 setBankAccountNumber(data.bank_account_number || '');
                 setBankRut(data.bank_rut || '');
 
+                // Social Media fields
+                setFacebookUrl(data.facebook_url || '');
+                setInstagramUrl(data.instagram_url || '');
+                setWhatsappNumber(data.whatsapp_number || '');
+                setPublicEmail(data.public_email || '');
+
                 // Fetch aliases once profile is loaded
                 fetchAliases(user.id);
             }
@@ -359,6 +369,10 @@ const SettingsPage: React.FC = () => {
                 bank_account_type: bankAccountType,
                 bank_account_number: bankAccountNumber,
                 bank_rut: bankRut,
+                facebook_url: sanitizeUrl(facebookUrl),
+                instagram_url: sanitizeUrl(instagramUrl),
+                whatsapp_number: sanitizeText(whatsappNumber),
+                public_email: sanitizeText(publicEmail),
                 updated_at: new Date().toISOString(),
             };
 
@@ -703,6 +717,68 @@ const SettingsPage: React.FC = () => {
                             </div>
                         </section>
                     )}
+
+                    {/* Sección: Redes Sociales */}
+                    <section className="animate-in fade-in slide-in-from-bottom-4 duration-600">
+                        <h2 className="text-xl font-bold text-white mb-4 border-b border-slate-700 pb-2 flex items-center gap-2">
+                            <span className="text-xl">🌐</span> Redes Sociales
+                        </h2>
+                        <div className="bg-slate-900/50 p-6 rounded-lg border border-slate-700 space-y-6">
+                            <p className="text-sm text-slate-400">
+                                Agrega tus redes sociales para que otros jugadores y tiendas puedan contactarte o seguir tu contenido.
+                            </p>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div className="space-y-2">
+                                    <label className="flex items-center gap-2 text-sm font-medium text-slate-400">
+                                        <Facebook className="w-4 h-4 text-blue-500" /> Facebook (URL)
+                                    </label>
+                                    <input
+                                        type="url"
+                                        value={facebookUrl}
+                                        onChange={(e) => setFacebookUrl(e.target.value)}
+                                        className={commonInputClass}
+                                        placeholder="https://facebook.com/tuperfil"
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="flex items-center gap-2 text-sm font-medium text-slate-400">
+                                        <Instagram className="w-4 h-4 text-pink-500" /> Instagram (URL)
+                                    </label>
+                                    <input
+                                        type="url"
+                                        value={instagramUrl}
+                                        onChange={(e) => setInstagramUrl(e.target.value)}
+                                        className={commonInputClass}
+                                        placeholder="https://instagram.com/tuperfil"
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="flex items-center gap-2 text-sm font-medium text-slate-400">
+                                        <MessageCircle className="w-4 h-4 text-green-500" /> WhatsApp (Número)
+                                    </label>
+                                    <input
+                                        type="tel"
+                                        value={whatsappNumber}
+                                        onChange={(e) => setWhatsappNumber(e.target.value)}
+                                        className={commonInputClass}
+                                        placeholder="+56 9 1234 5678"
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="flex items-center gap-2 text-sm font-medium text-slate-400">
+                                        <Mail className="w-4 h-4 text-sky-500" /> Email Público
+                                    </label>
+                                    <input
+                                        type="email"
+                                        value={publicEmail}
+                                        onChange={(e) => setPublicEmail(e.target.value)}
+                                        className={commonInputClass}
+                                        placeholder="contacto@ejemplo.com"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    </section>
 
                     {/* Sección 5: Cuenta */}
                     <section>

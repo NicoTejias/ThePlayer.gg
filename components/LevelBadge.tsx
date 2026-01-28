@@ -3,13 +3,13 @@ import React from 'react';
 import { getLevelInfo } from '../utils/levelUtils';
 
 interface LevelBadgeProps {
-    pwp: number;
+    points: number;
     size?: 'xs' | 'sm' | 'md' | 'lg';
     showTitle?: boolean;
 }
 
-const LevelBadge: React.FC<LevelBadgeProps> = ({ pwp, size = 'md', showTitle = true }) => {
-    const info = getLevelInfo(pwp);
+const LevelBadge: React.FC<LevelBadgeProps> = ({ points, size = 'md', showTitle = true }) => {
+    const info = getLevelInfo(points);
 
     const sizeClasses = {
         xs: 'px-1.5 py-0 text-[8px] gap-0.5',

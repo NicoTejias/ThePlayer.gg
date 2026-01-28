@@ -20,6 +20,9 @@ const RankingsPage: React.FC<RankingsPageProps> = ({ players, teams }) => {
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedRegion, setSelectedRegion] = useState('');
 
+    const ITEMS_PER_PAGE = 50;
+    const [currentPage, setCurrentPage] = useState(1);
+
     const regions = useMemo(() => {
         const uniqueRegions = new Set<string>();
         players.forEach(p => {
@@ -46,47 +49,57 @@ const RankingsPage: React.FC<RankingsPageProps> = ({ players, teams }) => {
     const getPlayerBadges = (player: any, index: number) => {
         const badges = [];
         if (index < 3) badges.push({ icon: '🔥', label: 'On Fire', color: 'text-orange-400' });
-        if (player.pwp > 5000) badges.push({ icon: '🎖️', label: 'Veterano', color: 'text-slate-400' });
+        if (player.points > 5000) badges.push({ icon: '🎖️', label: 'Veterano', color: 'text-slate-400' });
         if (index < 20 && player.win_rate && Number(player.win_rate) > 65) badges.push({ icon: '⭐', label: 'Rising Star', color: 'text-amber-400' });
         return badges;
     };
 
-    const pwpRanking = useMemo(() => {
-        return [...players]
+    // Calculate full ranking first
+    const fullRanking = useMemo(() => {
+        return [...players].sort((a, b) => (b.points || 0) - (a.points || 0));
+    }, [players]);
+
+    // Apply filters to the pre-sorted list
+    const filteredRanking = useMemo(() => {
+        return fullRanking
+            .map((player, index) => ({ ...player, globalRank: index + 1 }))
             .filter(player => {
                 const nameMatch = (player.name || '').toLowerCase().includes(searchQuery.toLowerCase());
                 const usernameMatch = (player.username || '').toLowerCase().includes(searchQuery.toLowerCase());
                 const matchesSearch = nameMatch || usernameMatch;
                 const matchesRegion = !selectedRegion || player.region === selectedRegion;
                 return matchesSearch && matchesRegion;
-            })
-            .sort((a, b) => b.pwp - a.pwp)
-            .map((player: PlayerProfile, index) => {
-                return {
-                    ...player,
-                    rank: index + 1
-                };
             });
-    }, [players, searchQuery, selectedRegion]);
+    }, [fullRanking, searchQuery, selectedRegion]);
+
+    // Paginate results
+    const displayedPlayers = useMemo(() => {
+        return filteredRanking.slice(0, currentPage * ITEMS_PER_PAGE);
+    }, [filteredRanking, currentPage]);
+
+    // Reset page when filters change
+    React.useEffect(() => {
+        setCurrentPage(1);
+    }, [searchQuery, selectedRegion]);
 
     // Calculate team totals based on players
     const processedTeams = useMemo(() => {
-        const stats: Record<string, { totalPwp: number, memberCount: number }> = {};
+        const stats: Record<string, { totalPoints: number, memberCount: number }> = {};
 
         players.forEach(p => {
             const tId = p.teamId || p.team_id;
             if (tId) {
-                if (!stats[tId]) stats[tId] = { totalPwp: 0, memberCount: 0 };
-                stats[tId].totalPwp += p.pwp || 0;
+                if (!stats[tId]) stats[tId] = { totalPoints: 0, memberCount: 0 };
+                stats[tId].totalPoints += p.points || 0;
                 stats[tId].memberCount += 1;
             }
         });
 
         return teams.map(t => ({
             ...t,
-            totalPwp: stats[t.id]?.totalPwp || 0,
+            totalPoints: stats[t.id]?.totalPoints || 0,
             memberCount: stats[t.id]?.memberCount || 0
-        })).sort((a, b) => (b.totalPwp || 0) - (a.totalPwp || 0));
+        })).sort((a, b) => (b.totalPoints || 0) - (a.totalPoints || 0));
     }, [players, teams]);
 
 
@@ -176,7 +189,7 @@ const RankingsPage: React.FC<RankingsPageProps> = ({ players, teams }) => {
                             </h2>
                             <div className="flex items-center gap-2 text-slate-500 text-[10px] font-black uppercase tracking-[0.2em] pt-2 md:pt-0">
                                 <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                                Actualizado hace instantes
+                                Mostrando {displayedPlayers.length} de {filteredRanking.length} jugadores
                             </div>
                         </div>
 
@@ -193,7 +206,8 @@ const RankingsPage: React.FC<RankingsPageProps> = ({ players, teams }) => {
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-white/5">
-                                    {pwpRanking.map((player, index) => {
+                                    {displayedPlayers.map((player) => {
+                                        const index = player.globalRank - 1;
                                         const isTop3 = index < 3;
                                         return (
                                             <tr
@@ -207,7 +221,7 @@ const RankingsPage: React.FC<RankingsPageProps> = ({ players, teams }) => {
                                                                 index === 2 ? 'text-orange-500 drop-shadow-[0_0_12px_rgba(249,115,22,0.4)]' :
                                                                     'text-slate-700'
                                                             }`}>
-                                                            {index + 1}
+                                                            {player.globalRank}
                                                         </span>
                                                     </div>
                                                 </td>
@@ -235,7 +249,7 @@ const RankingsPage: React.FC<RankingsPageProps> = ({ players, teams }) => {
                                                                 </div>
                                                             </div>
                                                             <div className="flex items-center gap-2 mt-1">
-                                                                <LevelBadge pwp={player.pwp} size="xs" />
+                                                                <LevelBadge points={player.points} size="xs" />
                                                                 {player.is_content_creator && (
                                                                     <span className="px-2 py-0.5 rounded-full bg-pink-500/10 text-pink-500 text-[8px] font-black uppercase tracking-widest border border-pink-500/20">CREATOR</span>
                                                                 )}
@@ -266,7 +280,7 @@ const RankingsPage: React.FC<RankingsPageProps> = ({ players, teams }) => {
                                                 <td className="px-6 py-6 text-right">
                                                     <div className="flex flex-col items-end">
                                                         <span className={`text-2xl font-black italic tracking-tighter leading-none tabular-nums ${isTop3 ? 'text-sky-400 drop-shadow-[0_0_12px_rgba(56,189,248,0.5)]' : 'text-white'}`}>
-                                                            {player.pwp.toLocaleString()}
+                                                            {(player.points || 0).toLocaleString()}
                                                         </span>
                                                         <span className="text-[10px] text-slate-600 font-black uppercase tracking-widest mt-1">{getPointsLabel()}</span>
                                                     </div>
@@ -276,6 +290,17 @@ const RankingsPage: React.FC<RankingsPageProps> = ({ players, teams }) => {
                                     })}
                                 </tbody>
                             </table>
+
+                            {displayedPlayers.length < filteredRanking.length && (
+                                <div className="p-8 border-t border-white/5 flex justify-center">
+                                    <button
+                                        onClick={() => setCurrentPage(prev => prev + 1)}
+                                        className="px-10 py-4 bg-white/5 hover:bg-white/10 text-white font-black text-xs uppercase tracking-[0.2em] rounded-2xl border border-white/10 transition-all active:scale-95 shadow-xl"
+                                    >
+                                        Cargar más jugadores
+                                    </button>
+                                </div>
+                            )}
                         </div>
                     </div>
                 ) : (
@@ -335,7 +360,7 @@ const RankingsPage: React.FC<RankingsPageProps> = ({ players, teams }) => {
                                             <td className="px-6 py-6 text-right">
                                                 <div className="flex flex-col items-end">
                                                     <span className="text-2xl font-black italic tracking-tighter text-violet-400 drop-shadow-[0_0_12px_rgba(167,139,250,0.5)] leading-none tabular-nums">
-                                                        {(team.totalPwp || 0).toLocaleString()}
+                                                        {(team.totalPoints || 0).toLocaleString()}
                                                     </span>
                                                     <span className="text-[10px] text-slate-600 font-black uppercase tracking-widest mt-1">Sumatoria Pts</span>
                                                 </div>

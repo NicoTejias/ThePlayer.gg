@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import { useGame } from '../context/GameContext';
 import { GAME_LABELS, GameType } from '../types';
+import { Facebook, Instagram, MessageCircle, Mail } from 'lucide-react';
 
 interface SidebarProps {
     isOpen: boolean;
@@ -241,6 +242,25 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, isLoggedIn, userRole
                                 <NavItem item={{ name: 'Reglamento', path: '/reglamento', icon: '📜' }} />
                             </div>
                         )}
+                    </div>
+
+                    {/* Redes Sociales - Sidebar Bottom */}
+                    <div className="p-6 border-t border-slate-800">
+                        <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-4 text-center">SÍGUENOS</p>
+                        <div className="flex justify-center gap-4">
+                            <a href="https://web.facebook.com/theplayercl" target="_blank" rel="noopener noreferrer" title="Facebook" className="p-2 bg-slate-800 rounded-lg text-slate-400 hover:text-blue-500 hover:bg-slate-700 transition-all">
+                                <Facebook className="w-5 h-5" />
+                            </a>
+                            <a href="https://www.instagram.com/theplayer_cl/" target="_blank" rel="noopener noreferrer" title="Instagram" className="p-2 bg-slate-800 rounded-lg text-slate-400 hover:text-pink-500 hover:bg-slate-700 transition-all">
+                                <Instagram className="w-5 h-5" />
+                            </a>
+                            <a href="https://wa.me/56992274852" target="_blank" rel="noopener noreferrer" title="WhatsApp" className="p-2 bg-slate-800 rounded-lg text-slate-400 hover:text-green-500 hover:bg-slate-700 transition-all">
+                                <MessageCircle className="w-5 h-5" />
+                            </a>
+                            <a href="mailto:contacto@theplayer.cl" title="Email" className="p-2 bg-slate-800 rounded-lg text-slate-400 hover:text-sky-400 hover:bg-slate-700 transition-all">
+                                <Mail className="w-5 h-5" />
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>

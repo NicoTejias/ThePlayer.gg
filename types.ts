@@ -6,7 +6,7 @@ export interface Team {
   logoUrl?: string;
   description?: string;
   captainId?: string;
-  totalPwp?: number; // Calculated field
+  totalPoints?: number; // Calculated field
   memberCount?: number; // Calculated field
 }
 
@@ -14,7 +14,7 @@ export interface PlayerProfile {
   id: string;
   name: string;
   region: string;
-  pwp: number;
+  points: number;
   matchesWon?: number;
   matches_won?: number;
   matchesLost?: number;
@@ -27,6 +27,7 @@ export interface PlayerProfile {
   first_name?: string;
   last_name?: string;
   teamId?: string;
+  team_id?: string;
   team?: string; // Legacy text field (still used for display if teamId is null)
   teamData?: Team; // Formal team entity
   isPublic?: boolean;
@@ -34,13 +35,17 @@ export interface PlayerProfile {
   is_content_creator?: boolean; // Content creator status
   game_type?: GameType;
   tournaments_played?: number; // Number of tournaments the player has participated in
+  facebook_url?: string;
+  instagram_url?: string;
+  whatsapp_number?: string;
+  public_email?: string;
 }
 
 // FIX: Add RankingEntry type used in HomePage.tsx
 export interface RankingEntry {
   rank: number;
   playerName: string;
-  pwp: number;
+  points: number;
   region: string;
 }
 
@@ -134,7 +139,7 @@ export interface TournamentParseResult {
   wins?: number;
   losses?: number;
   draws?: number;
-  pwpEarned: number;
+  pointsEarned: number;
 }
 
 export type GameType = 'mtg' | 'pokemon' | 'one_piece' | 'lorcana' | 'flesh_blood' | 'yugioh' | 'star_wars' | 'board_game' | 'rpg' | 'warhammer' | 'digimon' | 'other';
@@ -239,7 +244,7 @@ export interface TournamentStanding {
   rank: number;
   playerName: string;
   matchRecord?: string; // "W-L-D"
-  pwpEarned: number;
+  pointsEarned: number;
 }
 
 export interface Award {

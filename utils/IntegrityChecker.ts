@@ -13,7 +13,7 @@ export interface IntegrityWarning {
  */
 export const getTournamentFingerprint = (results: TournamentParseResult[]): string => {
     return results
-        .map(r => `${r.playerName.toLowerCase().trim()}:${r.pwpEarned}`)
+        .map(r => `${r.playerName.toLowerCase().trim()}:${r.pointsEarned}`)
         .sort()
         .join('|');
 };
@@ -116,7 +116,16 @@ export const checkTournamentIntegrity = (
         }
     });
 
-    // 6. Torneos muy pequeños con multiplicadores altos
+    // 6. Torneos pequeños (4-7 jugadores)
+    if (playerCount < 8) {
+        warnings.push({
+            type: 'low_player_count',
+            message: `Este torneo tiene menos de 8 jugadores. Se procesará sin multiplicadores ni puntos por participación (Solo victorias de ronda).`,
+            severity: 'low'
+        });
+    }
+
+    // 7. Torneos oficiales con multiplicadores altos pero pocos jugadores
     if ((tournamentType === 'rcq' || tournamentType === 'premier') && playerCount < 8) {
         warnings.push({
             type: 'low_player_count',

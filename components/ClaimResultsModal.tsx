@@ -6,7 +6,7 @@ interface UnclaimedResult {
     tournament_id: string;
     tournament_name: string;
     tournament_date: string;
-    pwp_earned: number;
+    pointsEarned: number;
     match_count: number;
 }
 
@@ -129,7 +129,7 @@ const ClaimResultsModal: React.FC<ClaimResultsModalProps> = ({
                     <div className="grid grid-cols-2 gap-4 pt-2">
                         <div className="bg-slate-800/50 rounded-lg p-3 text-center">
                             <p className="text-xs text-slate-500 uppercase tracking-wider font-bold">Puntos Ganados</p>
-                            <p className="text-2xl font-black text-emerald-400">{currentResult.pwp_earned}</p>
+                            <p className="text-2xl font-black text-emerald-400">{currentResult.pointsEarned}</p>
                         </div>
                         <div className="bg-slate-800/50 rounded-lg p-3 text-center">
                             <p className="text-xs text-slate-500 uppercase tracking-wider font-bold">Apariciones</p>

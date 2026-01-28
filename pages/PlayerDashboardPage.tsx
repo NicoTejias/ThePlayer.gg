@@ -16,6 +16,7 @@ import LevelProgressBar from '../components/LevelProgressBar';
 import { toast } from 'sonner';
 import { useGame } from '../context/GameContext';
 import AliasReminderBanner from '../components/AliasReminderBanner';
+import { Facebook, Instagram, MessageCircle, Mail } from 'lucide-react';
 
 const StatCard: React.FC<{ icon: React.ReactNode, title: string, value: string | number, rank?: string | number, color: 'sky' | 'purple' | 'emerald' | 'amber' | 'blue' }> = ({ icon, title, value, rank, color }) => {
     const colorMap = {
@@ -64,7 +65,7 @@ const StatCard: React.FC<{ icon: React.ReactNode, title: string, value: string |
 const PlayerDashboardPage: React.FC<{ profile?: any, showAliasReminder?: boolean }> = ({ profile, showAliasReminder = false }) => {
     const [tournamentHistory, setTournamentHistory] = useState<any[]>([]);
     const [registeredEvents, setRegisteredEvents] = useState<any[]>([]);
-    const [ranking, setRanking] = useState<{ pwpRank: number }>({ pwpRank: 0 });
+    const [ranking, setRanking] = useState<{ rankingPos: number }>({ rankingPos: 0 });
     const [gameStats, setGameStats] = useState({ points: 0 });
     const [teamData, setTeamData] = useState<any>(null);
     const [loading, setLoading] = useState(true);
@@ -143,14 +144,14 @@ const PlayerDashboardPage: React.FC<{ profile?: any, showAliasReminder?: boolean
                     if (myStats) {
                         const myIndex = rankingData.findIndex((r: any) => r.id === profile.id);
                         setRanking({
-                            pwpRank: myIndex + 1
+                            rankingPos: myIndex + 1
                         });
 
                         setGameStats({
-                            points: parseInt(myStats.pwp)
+                            points: parseInt(myStats.points || myStats.pwp || 0)
                         });
                     } else {
-                        setRanking({ pwpRank: 0 });
+                        setRanking({ rankingPos: 0 });
                         setGameStats({ points: 0 });
                     }
                 }
@@ -255,8 +256,34 @@ const PlayerDashboardPage: React.FC<{ profile?: any, showAliasReminder?: boolean
                         <span className="flex items-center gap-2 px-3 py-1 bg-white/5 rounded-lg border border-white/5">
                             REGION: {profile?.region || 'Sudamérica'}
                         </span>
-                        <LevelBadge pwp={gameStats.points} size="sm" />
+                        <LevelBadge points={gameStats.points} size="sm" />
                     </div>
+
+                    {/* Redes Sociales del Usuario */}
+                    {(profile?.facebook_url || profile?.instagram_url || profile?.whatsapp_number || profile?.public_email) && (
+                        <div className="flex flex-wrap gap-2 pt-2">
+                            {profile?.facebook_url && (
+                                <a href={profile.facebook_url} target="_blank" rel="noopener noreferrer" className="p-2 bg-slate-800 rounded-lg border border-slate-700 text-slate-400 hover:text-blue-500 hover:border-blue-500 transition-all hover:-translate-y-1" title="Ver Facebook">
+                                    <Facebook className="w-4 h-4" />
+                                </a>
+                            )}
+                            {profile?.instagram_url && (
+                                <a href={profile.instagram_url} target="_blank" rel="noopener noreferrer" className="p-2 bg-slate-800 rounded-lg border border-slate-700 text-slate-400 hover:text-pink-500 hover:border-pink-500 transition-all hover:-translate-y-1" title="Ver Instagram">
+                                    <Instagram className="w-4 h-4" />
+                                </a>
+                            )}
+                            {profile?.whatsapp_number && (
+                                <a href={`https://wa.me/${profile.whatsapp_number.replace(/[^0-9]/g, '')}`} target="_blank" rel="noopener noreferrer" className="p-2 bg-slate-800 rounded-lg border border-slate-700 text-slate-400 hover:text-green-500 hover:border-green-500 transition-all hover:-translate-y-1" title="Enviar WhatsApp">
+                                    <MessageCircle className="w-4 h-4" />
+                                </a>
+                            )}
+                            {profile?.public_email && (
+                                <a href={`mailto:${profile.public_email}`} className="p-2 bg-slate-800 rounded-lg border border-slate-700 text-slate-400 hover:text-sky-400 hover:border-sky-400 transition-all hover:-translate-y-1" title="Enviar Email">
+                                    <Mail className="w-4 h-4" />
+                                </a>
+                            )}
+                        </div>
+                    )}
 
                     {(profile?.is_content_creator || profile?.role === 'content_creator') && (
                         <div className="pt-4">
@@ -330,7 +357,7 @@ const PlayerDashboardPage: React.FC<{ profile?: any, showAliasReminder?: boolean
 
             {/* Level & XP Progression */}
             <section>
-                <LevelProgressBar pwp={gameStats.points} />
+                <LevelProgressBar points={gameStats.points} />
             </section>
 
             {/* Event Reminders & Upcoming Events */}
@@ -406,9 +433,9 @@ const PlayerDashboardPage: React.FC<{ profile?: any, showAliasReminder?: boolean
             <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
                 <StatCard
                     icon={<TrophyIcon className="w-8 h-8" />}
-                    title="Ranking PWP"
-                    value={`#${ranking.pwpRank || '-'}`}
-                    rank={ranking.pwpRank || '-'}
+                    title="Ranking Global"
+                    value={`#${ranking.rankingPos || '-'}`}
+                    rank={ranking.rankingPos || '-'}
                     color="sky"
                 />
                 <StatCard
@@ -465,7 +492,7 @@ const PlayerDashboardPage: React.FC<{ profile?: any, showAliasReminder?: boolean
                                                 <span className="px-3 py-1 bg-slate-900/50 rounded-lg border border-white/5 text-xs font-black text-slate-400">#4</span>
                                             </td>
                                             <td className="px-6 py-5 text-right">
-                                                <span className="text-lg font-black text-sky-400 tabular-nums">+{t.pwp_earned}</span>
+                                                <span className="text-lg font-black text-sky-400 tabular-nums">+{t.points_earned || t.pwp_earned || 0}</span>
                                             </td>
                                         </tr>
                                     ))

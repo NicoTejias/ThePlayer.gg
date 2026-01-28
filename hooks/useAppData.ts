@@ -31,7 +31,8 @@ export const useAppData = (currentGame: string, userId: string | undefined) => {
                     name: p.username || (p.first_name ? `${p.first_name} ${p.last_name || ''}`.trim() : 'Jugador Sin Nombre'),
                     isPublic: true,
                     team_internal: p.team_id ? tMap[p.team_id]?.name || p.team : p.team,
-                    pwp_claimed: p.pwp,
+                    points: p.pwp,
+                    points_claimed: p.pwp,
                     is_active: true
                 })));
             }

@@ -50,7 +50,7 @@ const AdminAwardsPage: React.FC = () => {
                 .from('profiles')
                 .select('*')
                 .eq('role', 'player')
-                .order('pwp', { ascending: false })
+                .order('pwp', { ascending: false }) // Sorting by DB column 'pwp' (Player Points)
                 .limit(10);
             setTopPlayers(data || []);
         } catch (err) {
@@ -362,7 +362,7 @@ const AdminAwardsPage: React.FC = () => {
                                             <span className="font-black text-slate-600">#{i + 1}</span>
                                             <span className="text-white font-bold">{p.username}</span>
                                         </div>
-                                        <span className="text-yellow-500 font-black text-xs">{p.pwp} Pts</span>
+                                        <span className="text-yellow-500 font-black text-xs">{p.points || (p as any).pwp} Player Points</span>
                                     </div>
                                 ))}
                             </div>

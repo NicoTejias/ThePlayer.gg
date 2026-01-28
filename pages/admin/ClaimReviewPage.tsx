@@ -11,7 +11,7 @@ interface PendingClaim {
     result_name: string;
     tournament_name: string;
     tournament_date: string;
-    pwp_earned: number;
+    points_earned: number;
     status: string;
     created_at: string;
 }
@@ -102,7 +102,7 @@ const ClaimReviewPage: React.FC = () => {
                 <div className="bg-slate-800 p-4 rounded-lg border border-slate-700">
                     <p className="text-slate-400 text-xs uppercase font-bold">Player Points en Revisión</p>
                     <p className="text-2xl font-bold text-sky-400 mt-1">
-                        {claims.reduce((sum, c) => sum + (c.pwp_earned || 0), 0)}
+                        {claims.reduce((sum, c) => sum + (c.points_earned || 0), 0)}
                     </p>
                 </div>
                 <div className="bg-slate-800 p-4 rounded-lg border border-slate-700">
@@ -158,7 +158,7 @@ const ClaimReviewPage: React.FC = () => {
                                         </td>
                                         <td className="px-6 py-4">
                                             <span className="px-2 py-1 bg-sky-900/40 text-sky-300 rounded-full text-xs font-bold">
-                                                {claim.pwp_earned} Pts
+                                                {claim.points_earned} Pts
                                             </span>
                                         </td>
                                         <td className="px-6 py-4 text-slate-400 text-sm">
@@ -223,7 +223,7 @@ const ClaimReviewPage: React.FC = () => {
                             </div>
                             <div className="flex justify-between">
                                 <span className="text-slate-400 text-sm">Player Points:</span>
-                                <span className="text-sky-400 font-bold">{selectedClaim.pwp_earned}</span>
+                                <span className="text-sky-400 font-bold">{selectedClaim.points_earned}</span>
                             </div>
                         </div>
 

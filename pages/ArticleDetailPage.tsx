@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { supabase } from '../supabaseClient';
 import ReactMarkdown from 'react-markdown';
 import { toast } from 'sonner';
+import SocialShare from '../components/SocialShare';
 
 interface Article {
     id: string;
@@ -159,6 +160,10 @@ const ArticleDetailPage: React.FC = () => {
                 <h1 className="text-4xl md:text-5xl font-bold text-white mb-6 leading-tight">
                     {article.title}
                 </h1>
+
+                <div className="mb-8">
+                    <SocialShare title={article.title} description={article.content.substring(0, 100)} />
+                </div>
 
                 {/* Author */}
                 <div className="flex items-center gap-3 mb-10 border-b border-slate-700 pb-6">

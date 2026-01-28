@@ -39,7 +39,7 @@ const AliasReminderBanner: React.FC<AliasReminderBannerProps> = ({ show }) => {
             <div className="absolute inset-0 opacity-5 pointer-events-none overflow-hidden select-none">
                 <div className="flex flex-wrap gap-x-8 gap-y-4 -rotate-12 scale-150 font-black text-white text-4xl whitespace-nowrap">
                     {Array.from({ length: 15 }).map((_, i) => (
-                        <span key={i}>UPDATE ALIAS • COMPANION APP • LINK PWP • RANKING</span>
+                        <span key={i}>UPDATE ALIAS • COMPANION APP • LINK POINTS • RANKING</span>
                     ))}
                 </div>
             </div>

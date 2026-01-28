@@ -64,7 +64,7 @@ const ReglamentoPage: React.FC = () => {
 
                 <div className="grid gap-12 max-w-2xl mx-auto">
 
-                    {/* Section 1: PWP System */}
+                    {/* Section 1: Player Points System */}
                     <div className="bg-slate-900 border border-slate-800 rounded-3xl p-8 md:p-12 shadow-2xl relative overflow-hidden">
                         <div className="absolute top-0 right-0 p-8 opacity-5 pointer-events-none">
                             <span className="text-9xl font-black">PLAYER POINTS</span>
