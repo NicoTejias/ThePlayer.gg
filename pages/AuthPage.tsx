@@ -139,6 +139,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ handleLogin }) => {
                 email,
                 password,
                 options: {
+                    emailRedirectTo: `${window.location.origin}/#/confirm-email`,
                     data: {
                         full_name: username,
                         role: role,

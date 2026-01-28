@@ -7,6 +7,7 @@ import PricingCard from '../components/PricingCard';
 import StoreSubscriptionModal from '../components/StoreSubscriptionModal';
 import SubscriptionBadge from '../components/SubscriptionBadge';
 import { toast } from 'sonner';
+import SEO from '../components/SEO';
 
 const HeartIcon: React.FC<{ className?: string, fill?: boolean }> = ({ className, fill }) => (
     <svg xmlns="http://www.w3.org/2000/svg" className={className} fill={fill ? "currentColor" : "none"} viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -70,6 +71,10 @@ const StoresPage: React.FC = () => {
 
     return (
         <div className="space-y-16">
+            <SEO
+                title="Directorio de Tiendas"
+                description="Listado oficial de tiendas asociadas a ThePlayer.gg en Chile. Encuentra tu tienda local de TCG más cercana."
+            />
             {/* Hero Section - Join ThePlayer */}
             <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate-900 via-sky-900/20 to-slate-900 border border-sky-500/30 p-12">
                 <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiMzYjgyZjYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDM0djItaDJWMzRoLTJ6bTAgNHYyaDJ2LTJoLTJ6bTAtOHYyaDJ2LTJoLTJ6bTAtNHYyaDJ2LTJoLTJ6bTAtNHYyaDJ2LTJoLTJ6bTAtNHYyaDJ2LTJoLTJ6bTAtNHYyaDJ2LTJoLTJ6bTAtNHYyaDJ2LTJoLTJ6bTAtNHYyaDJ2LTJoLTJ6Ii8+PC9nPjwvZz48L3N2Zz4=')] opacity-30"></div>

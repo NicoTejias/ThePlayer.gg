@@ -7,6 +7,7 @@ import UserIcon from '../components/icons/UserIcon';
 import DocumentTextIcon from '../components/icons/DocumentTextIcon';
 import PlayIcon from '../components/icons/PlayIcon';
 import { supabase } from '../supabaseClient';
+import SEO from '../components/SEO';
 
 const SectionHeader: React.FC<{ title: string, linkTo: string }> = ({ title, linkTo }) => (
     <div className="flex justify-between items-center mb-6">
@@ -67,6 +68,10 @@ const MediaPage: React.FC = () => {
 
     return (
         <div className="space-y-16 animate-fade-in-up">
+            <SEO
+                title="Contenido y Comunidad"
+                description="Explora artículos, guías y videos sobre Magic, Pokémon y el mundo de los TCG en Chile."
+            />
             <div className="text-center">
                 <h1 className="text-4xl sm:text-5xl font-bold text-white tracking-tighter uppercase">Comunidad y Contenido</h1>
                 <p className="text-lg text-slate-300 mt-2 max-w-4xl mx-auto">

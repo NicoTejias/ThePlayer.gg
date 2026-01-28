@@ -8,6 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import ScheduleTournamentModal from '../components/ScheduleTournamentModal';
 import { supabase } from '../supabaseClient';
 import { toast } from 'sonner';
+import SEO from '../components/SEO';
 
 interface EventsPageProps {
     events: CommunityEvent[];
@@ -549,6 +550,10 @@ const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [
 
     return (
         <div className="space-y-8">
+            <SEO
+                title="Calendario de Eventos TCG"
+                description="Encuentra los próximos torneos de Magic, Pokémon y Yu-Gi-Oh! en Chile. Inscríbete y participa en eventos regionales y locales."
+            />
             <div className="text-center mb-8">
                 <h1 className="text-4xl sm:text-5xl font-bold text-white tracking-tighter uppercase">Calendario de Eventos</h1>
                 <p className="text-lg text-slate-300 mt-2 max-w-4xl mx-auto">

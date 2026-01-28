@@ -78,19 +78,27 @@ const VideoManager: React.FC<VideoManagerProps> = ({ creatorId, startOpen = fals
         }
 
         setIsSaving(true);
+        console.log('VideoManager: Iniciando publicación de video...', formData);
+
         try {
             const ytId = extractYoutubeId(formData.youtubeId);
+            console.log('VideoManager: Youtube ID extraído:', ytId);
 
             // Get current user if creatorId is not provided
             let finalCreatorId = creatorId;
             if (!finalCreatorId) {
+                console.log('VideoManager: No se proporcionó creatorId, obteniendo usuario actual...');
                 const { data: { user } } = await supabase.auth.getUser();
                 finalCreatorId = user?.id;
             }
 
-            if (!finalCreatorId) throw new Error('No se pudo identificar al autor. Por favor reingresa.');
+            if (!finalCreatorId) {
+                console.error('VideoManager: Error - No se pudo identificar al autor');
+                throw new Error('No se pudo identificar al autor. Por favor reingresa.');
+            }
 
-            const { error } = await supabase.from('videos').insert([{
+            console.log('VideoManager: Insertando video en la base de datos para creator:', finalCreatorId);
+            const { data, error } = await supabase.from('videos').insert([{
                 youtube_id: ytId,
                 title: formData.title,
                 description: formData.description,
@@ -98,10 +106,14 @@ const VideoManager: React.FC<VideoManagerProps> = ({ creatorId, startOpen = fals
                 is_featured: formData.isFeatured,
                 is_premium: formData.isPremium,
                 creator_id: finalCreatorId
-            }]);
+            }]).select();
 
-            if (error) throw error;
+            if (error) {
+                console.error('VideoManager: Error de Supabase al insertar:', error);
+                throw error;
+            }
 
+            console.log('VideoManager: Video insertado exitosamente:', data);
             toast.success('¡Video publicado con éxito!');
             setShowForm(false);
             setFormData({
@@ -114,9 +126,10 @@ const VideoManager: React.FC<VideoManagerProps> = ({ creatorId, startOpen = fals
             });
             fetchVideos();
         } catch (error: any) {
-            console.error('Error saving video:', error);
+            console.error('VideoManager: Exception en handleSubmit:', error);
             toast.error('Error: ' + (error.message || 'Error desconocido'));
         } finally {
+            console.log('VideoManager: Finalizando estado de guardado.');
             setIsSaving(false);
         }
     };

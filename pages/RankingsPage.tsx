@@ -8,6 +8,7 @@ import { useGame } from '../context/GameContext';
 import ProBadge from '../components/ProBadge';
 import ContentCreatorBadge from '../components/ContentCreatorBadge';
 import LevelBadge from '../components/LevelBadge';
+import SEO from '../components/SEO';
 
 interface RankingsPageProps {
     players: PlayerProfile[];
@@ -105,6 +106,10 @@ const RankingsPage: React.FC<RankingsPageProps> = ({ players, teams }) => {
 
     return (
         <div className="space-y-12 pb-20">
+            <SEO
+                title={getRankingTitle()}
+                description={`Ranking oficial de ${currentGame} en Chile. Revisa los mejores jugadores de la temporada, sus puntos y estadísticas.`}
+            />
             <div className="text-center space-y-4 pt-8">
                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-500/10 border border-sky-500/20 text-sky-400 text-[10px] font-black uppercase tracking-[0.2em] animate-fade-in">
                     <SparklesIcon className="w-3 h-3" />

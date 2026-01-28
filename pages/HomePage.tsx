@@ -12,6 +12,7 @@ import PlayerWidget from '../components/widgets/PlayerWidget';
 import StoreWidget from '../components/widgets/StoreWidget';
 import ProBadge from '../components/ProBadge';
 import ContentCreatorBadge from '../components/ContentCreatorBadge';
+import SEO from '../components/SEO';
 
 import AdminWidget from '../components/widgets/AdminWidget';
 import QuickRegistrationModal from '../components/QuickRegistrationModal';
@@ -210,6 +211,10 @@ const HomePage: React.FC<HomePageProps> = ({ players, events, session, userRole,
 
   return (
     <div className="min-h-screen bg-slate-900 text-slate-200 animate-fade-in">
+      <SEO
+        title="Inicio"
+        description="ThePlayer.gg es la plataforma líder para el ecosistema TCG en Chile. Rankings, torneos y comunidad en un solo lugar."
+      />
       {/* Hero Carousel */}
       <section className="relative h-[300px] sm:h-[350px] md:h-[400px] overflow-hidden group">
         {sliderItems.map((item, idx) => (
