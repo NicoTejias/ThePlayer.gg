@@ -92,163 +92,49 @@ const Header: React.FC<HeaderProps> = ({
               </Link>
             </div>
 
-            {/* Center Section: Game Logo + Name + Format Buttons */}
-            <div className="hidden md:flex items-center gap-4">
-              {/* Game Logo + Name - More Prominent, No Background */}
-              <div className="flex items-center gap-4">
-                {/* Logo - Much Larger size (112px) */}
-                <div className="w-28 h-28 flex items-center justify-center">
-                  <img
-                    src={GAME_LOGOS[currentGame].src}
-                    alt={GAME_LABELS[currentGame]}
-                    className={`w-full h-full object-contain drop-shadow-2xl ${imgError ? 'hidden' : 'block'}`}
-                    onError={() => setImgError(true)}
-                  />
-                  <span
-                    className={`text-7xl drop-shadow-2xl ${!imgError && GAME_LOGOS[currentGame].src ? 'hidden' : 'block'}`}
-                  >
-                    {GAME_LOGOS[currentGame].emoji}
-                  </span>
-                </div>
-                {/* Game Name - Much Larger text */}
-                <span className="text-white font-bold text-2xl whitespace-nowrap">
-                  {GAME_LABELS[currentGame]}
+            {/* Center Section: Game Logo only */}
+            <div className="hidden md:flex items-center ml-4">
+              <div className="w-20 h-20 flex items-center justify-center">
+                <img
+                  src={GAME_LOGOS[currentGame].src}
+                  alt={GAME_LABELS[currentGame]}
+                  className={`w-full h-full object-contain ${imgError ? 'hidden' : 'block'}`}
+                  onError={() => setImgError(true)}
+                />
+                <span className={`text-5xl ${!imgError && GAME_LOGOS[currentGame].src ? 'hidden' : 'block'}`}>
+                  {GAME_LOGOS[currentGame].emoji}
                 </span>
               </div>
-
-              {/* Separator */}
-              {GAME_FORMATS[currentGame].length > 0 && (
-                <div className="h-8 w-px bg-slate-600"></div>
-              )}
-
-              {/* Format Buttons */}
-              {GAME_FORMATS[currentGame].length > 0 && (
-                <div className="flex items-center gap-2">
-                  {GAME_FORMATS[currentGame].map((format) => (
-                    <Link
-                      key={format.id}
-                      to={format.path}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${location.pathname === format.path
-                        ? 'bg-sky-600 text-white shadow-lg shadow-sky-900/30'
-                        : 'bg-slate-700/50 text-slate-300 hover:bg-slate-600 hover:text-white border border-slate-600/50'
-                        }`}
-                    >
-                      {format.name}
-                    </Link>
-                  ))}
-                </div>
-              )}
             </div>
 
-            {/* Right Section: Quick Actions + Profile */}
-            <div className="flex items-center gap-2 sm:gap-3">
-              {/* Live Signal Indicator */}
-              {isLiveSignal && (
-                <Link
-                  to="/envivo"
-                  className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-red-600 hover:bg-red-500 text-white text-xs font-bold rounded-full animate-pulse"
-                >
-                  <span className="w-2 h-2 bg-white rounded-full"></span>
-                  EN VIVO
-                </Link>
-              )}
-
-              {/* Quick Action Buttons (only visible on desktop) */}
-              {isLoggedIn && userRole === 'admin' && (
-                <Link
-                  to="/admin"
-                  className="hidden md:block px-3 py-1.5 bg-red-600 hover:bg-red-500 text-white font-bold rounded-lg transition-colors text-xs"
-                >
-                  Admin
-                </Link>
-              )}
-
-              <Link
-                to="/soporte"
-                className="hidden md:flex items-center gap-1 px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-white font-bold rounded-full transition-all text-xs border border-slate-600"
-              >
-                <span>❔</span>
-                AYUDA
-              </Link>
-
-              <Link
-                to="/premium"
-                className="hidden md:flex items-center gap-1 px-3 py-1.5 bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-yellow-500 hover:to-orange-500 text-white font-bold rounded-full transition-all text-xs shadow-lg shadow-yellow-900/20 mr-2"
-              >
-                <div className="w-2 h-2 rounded-full bg-white animate-pulse" />
-                PREMIUM
-              </Link>
-
-              {/* Notification Bell */}
-              {isLoggedIn && <NotificationBell />}
-
-              {/* User Profile / Login */}
+            {/* Right Section: Access / Profile only */}
+            <div className="flex items-center">
               {isLoggedIn ? (
                 <div className="relative" ref={profileMenuRef}>
                   <button
                     onClick={() => setProfileMenuOpen(!isProfileMenuOpen)}
-                    className="flex items-center gap-2 bg-slate-700/50 p-1.5 pr-3 rounded-full hover:bg-slate-700 transition-all border border-slate-600 hover:border-slate-500"
-                    aria-haspopup="true"
-                    aria-expanded={isProfileMenuOpen}
+                    className="flex items-center gap-2 bg-slate-700/50 p-1 px-3 rounded-full hover:bg-slate-700 transition-all border border-slate-600"
                     aria-label="Menú de usuario"
                   >
                     <UserCircleIcon className="w-8 h-8 text-sky-400" />
-                    <div className="flex flex-col items-start hidden sm:block">
-                      <span className="text-white font-semibold text-sm max-w-[100px] truncate leading-tight">{userName}</span>
-                      <div className="flex gap-1">
-                        {(userProfile?.is_content_creator || userProfile?.role === 'content_creator') && (
-                          <span className="text-[9px] bg-sky-500/20 text-sky-400 px-1 rounded-full font-bold uppercase tracking-tighter">Creador</span>
-                        )}
-                        {(userProfile?.is_judge || userProfile?.role === 'judge') && (
-                          <span className="text-[9px] bg-purple-500/20 text-purple-400 px-1 rounded-full font-bold uppercase tracking-tighter">Juez</span>
-                        )}
-                      </div>
-                    </div>
-                    <svg className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${isProfileMenuOpen ? 'rotate-180' : ''}`} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
-                    </svg>
+                    <span className="text-white font-semibold text-sm hidden sm:block truncate max-w-[100px]">{userName}</span>
                   </button>
 
                   {/* Profile Dropdown */}
                   {isProfileMenuOpen && (
-                    <div
-                      role="menu"
-                      className="absolute right-0 mt-2 w-56 rounded-xl shadow-2xl bg-slate-800 ring-1 ring-black ring-opacity-5 border border-slate-700/50 divide-y divide-slate-700/50 animate-in fade-in slide-in-from-top-2 z-50"
-                    >
+                    <div className="absolute right-0 mt-2 w-56 rounded-xl shadow-2xl bg-slate-800 border border-slate-700/50 divide-y divide-slate-700/50 z-50">
                       <div className="py-2">
-                        <div className="px-4 py-2 sm:hidden border-b border-slate-700/50 mb-2">
-                          <p className="text-xs text-slate-400">Logueado como</p>
-                          <p className="text-white font-bold truncate">{userName}</p>
-                        </div>
-                        <Link to={getDashboardPath()} className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-200 hover:bg-slate-700/50 transition-colors" role="menuitem">
+                        <Link to={getDashboardPath()} className="flex items-center gap-3 px-4 py-2 text-sm text-slate-200 hover:bg-slate-700/50 transition-colors">
                           <ShieldCheckIcon className="w-5 h-5 text-sky-400" />
                           Mi Panel
                         </Link>
-                        {(userProfile?.is_content_creator || userProfile?.role === 'content_creator') && (
-                          <Link to="/dashboard/creador" className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-200 hover:bg-slate-700/50 transition-colors" role="menuitem">
-                            <span className="text-xl">🎬</span>
-                            Panel de Creador
-                          </Link>
-                        )}
-                        <Link to="/favorites" className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-200 hover:bg-slate-700/50 transition-colors" role="menuitem">
-                          <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                          </svg>
-                          Favoritos
-                        </Link>
-                        <Link to="/notifications" className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-200 hover:bg-slate-700/50 transition-colors" role="menuitem">
-                          <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-                          </svg>
-                          Notificaciones
-                        </Link>
-                        <Link to="/settings" className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-200 hover:bg-slate-700/50 transition-colors" role="menuitem">
+                        <Link to="/settings" className="flex items-center gap-3 px-4 py-2 text-sm text-slate-200 hover:bg-slate-700/50 transition-colors">
                           <CogIcon className="w-5 h-5 text-slate-400" />
                           Configuración
                         </Link>
                       </div>
                       <div className="py-2">
-                        <button onClick={handleLogout} className="w-full text-left flex items-center gap-3 px-4 py-2.5 text-sm text-red-300 hover:bg-red-900/20 transition-colors" role="menuitem">
+                        <button onClick={handleLogout} className="w-full text-left flex items-center gap-3 px-4 py-2 text-sm text-red-300 hover:bg-red-900/20 transition-colors">
                           <LogoutIcon className="w-5 h-5" />
                           Cerrar Sesión
                         </button>
@@ -257,20 +143,12 @@ const Header: React.FC<HeaderProps> = ({
                   )}
                 </div>
               ) : (
-                <div className="flex items-center gap-2">
-                  <Link
-                    to="/login"
-                    className="text-slate-300 hover:text-white text-sm font-medium px-3 py-2 transition-colors"
-                  >
-                    Acceder
-                  </Link>
-                  <Link
-                    to="/auth?mode=register"
-                    className="bg-gradient-to-r from-sky-600 to-blue-600 text-white font-bold py-2 px-4 rounded-full hover:from-sky-500 hover:to-blue-500 transition-all shadow-lg shadow-sky-900/20 text-sm whitespace-nowrap"
-                  >
-                    Registrarse
-                  </Link>
-                </div>
+                <Link
+                  to="/login"
+                  className="bg-sky-600 hover:bg-sky-500 text-white font-bold py-1.5 px-6 rounded-full transition-all text-sm shadow-lg shadow-sky-900/20"
+                >
+                  Acceder
+                </Link>
               )}
             </div>
           </div>

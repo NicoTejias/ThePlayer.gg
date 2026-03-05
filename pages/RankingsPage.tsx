@@ -8,6 +8,7 @@ import { useGame } from '../context/GameContext';
 import ProBadge from '../components/ProBadge';
 import ContentCreatorBadge from '../components/ContentCreatorBadge';
 import LevelBadge from '../components/LevelBadge';
+import TierBadge from '../components/TierBadge';
 import SEO from '../components/SEO';
 
 interface RankingsPageProps {
@@ -116,7 +117,7 @@ const RankingsPage: React.FC<RankingsPageProps> = ({ players, teams }) => {
                     Resultados Oficiales de Temporada
                 </div>
                 <h1 className="text-5xl sm:text-7xl font-black text-white tracking-tighter uppercase italic leading-none drop-shadow-2xl">
-                    <span className="text-transparent bg-clip-text bg-gradient-to-b from-white to-slate-500">The Ranking</span>
+                    <span className="text-transparent bg-clip-text bg-gradient-to-b from-white to-slate-500 inline-block pr-6 pb-2">The Ranking</span>
                 </h1>
                 <p className="text-lg text-slate-400 max-w-2xl mx-auto font-medium leading-relaxed">
                     Al finalizar el ciclo, se conserva el <span className="text-sky-400 font-bold underline decoration-sky-500/30 underline-offset-4">50%</span> de los Player Points para la siguiente temporada.
@@ -203,7 +204,7 @@ const RankingsPage: React.FC<RankingsPageProps> = ({ players, teams }) => {
                                 <thead>
                                     <tr className="bg-slate-950/40 border-b border-white/5 text-[10px] sm:text-xs">
                                         <th className="px-6 py-6 text-left font-black text-slate-500 uppercase tracking-[0.2em] w-24 text-center">Rango</th>
-                                        <th className="px-6 py-6 text-left font-black text-slate-500 uppercase tracking-[0.2em]">Leyenda</th>
+                                        <th className="px-6 py-6 text-left font-black text-slate-500 uppercase tracking-[0.2em]">Jugador</th>
                                         <th className="hidden lg:table-cell px-6 py-6 text-left font-black text-slate-500 uppercase tracking-[0.2em]">Territorio</th>
                                         <th className="hidden md:table-cell px-6 py-6 text-left font-black text-slate-500 uppercase tracking-[0.2em]">Escuadrón</th>
                                         <th className="hidden sm:table-cell px-6 py-6 text-center font-black text-slate-500 uppercase tracking-[0.2em] w-28">Win %</th>
@@ -254,7 +255,7 @@ const RankingsPage: React.FC<RankingsPageProps> = ({ players, teams }) => {
                                                                 </div>
                                                             </div>
                                                             <div className="flex items-center gap-2 mt-1">
-                                                                <LevelBadge points={player.points} size="xs" />
+                                                                <TierBadge points={player.points} size="sm" />
                                                                 {player.is_content_creator && (
                                                                     <span className="px-2 py-0.5 rounded-full bg-pink-500/10 text-pink-500 text-[8px] font-black uppercase tracking-widest border border-pink-500/20">CREATOR</span>
                                                                 )}

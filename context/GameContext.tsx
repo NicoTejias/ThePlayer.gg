@@ -9,19 +9,11 @@ interface GameContextType {
 const GameContext = createContext<GameContextType | undefined>(undefined);
 
 export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-    const [currentGame, setCurrentGame] = useState<GameType>(() => {
-        const saved = localStorage.getItem('selectedGame');
-        return (saved as GameType) || 'mtg';
-    });
-
-    // Remove the automatic useEffect sync which causes default 'mtg' to be written to empty storage on boot
-    // useEffect(() => {
-    //     localStorage.setItem('selectedGame', currentGame);
-    // }, [currentGame]);
+    // Current application is locked to Magic: The Gathering
+    const [currentGame] = useState<GameType>('mtg');
 
     const setGame = (game: GameType) => {
-        localStorage.setItem('selectedGame', game);
-        setCurrentGame(game);
+        console.warn('Game selection is currently disabled. Locked to mtg.');
     };
 
     return (

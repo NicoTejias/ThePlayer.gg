@@ -146,106 +146,45 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, isLoggedIn, userRole
                     </button>
                 </div>
 
-                {/* Game Selector */}
-                <div className="p-4 border-b border-slate-700/50">
-                    <p className="text-xs text-slate-500 uppercase tracking-wider mb-2 font-bold">Universo Actual</p>
-                    <div className="relative">
-                        <select
-                            value={currentGame}
-                            onChange={(e) => setGame(e.target.value as GameType)}
-                            title="Universo Actual"
-                            aria-label="Seleccionar universo de juego"
-                            className="w-full appearance-none bg-slate-800 text-sky-400 font-bold px-4 py-3 rounded-lg border border-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent cursor-pointer"
-                        >
-                            {(Object.keys(GAME_LABELS) as GameType[]).map((game) => (
-                                <option key={game} value={game}>
-                                    {GAME_LABELS[game]}
-                                </option>
-                            ))}
-                        </select>
-                        <svg className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                        </svg>
-                    </div>
-                </div>
-
-                {/* Navigation */}
-                <div className="overflow-y-auto h-[calc(100%-180px)] custom-scrollbar">
-                    {/* Sección Competencia */}
-                    <div className="p-2">
-                        <SectionHeader title="Competencia" section="competition" icon="🏆" />
-                        {expandedSection === 'competition' && (
-                            <div className="space-y-1 mt-1">
-                                <NavItem item={{ name: 'PLS', path: '/pls', icon: '🌟', isSpecial: true }} />
-                                <NavItem item={{ name: 'Ranking', path: '/ranking', icon: '📊' }} />
-                                <NavItem item={{ name: 'Torneos', path: '/torneos', icon: '⚔️' }} />
-                                <NavItem item={{ name: 'Eventos', path: '/eventos', icon: '📅' }} />
-                                {currentGame === 'mtg' && (
-                                    <>
-                                        <NavItem item={{ name: 'Commander', path: '/commander', icon: '🏰' }} />
-                                        <NavItem item={{ name: 'Pauper', path: '/pauper', icon: '💎' }} />
-                                        <NavItem item={{ name: 'Premodern', path: '/premodern', icon: '📜' }} />
-                                    </>
-                                )}
-                            </div>
-                        )}
+                {/* Navigation - Simple Direct List */}
+                <div className="overflow-y-auto h-[calc(100%-140px)] custom-scrollbar p-4">
+                    <div className="space-y-1">
+                        <NavItem item={{ name: 'Ranking', path: '/ranking', icon: '📊' }} />
+                        <NavItem item={{ name: 'Eventos', path: '/eventos', icon: '📅' }} />
+                        <NavItem item={{ name: 'Tiendas', path: '/tiendas', icon: '🏪' }} />
+                        <NavItem item={{ name: 'Foro', path: '/foro', icon: '💬' }} />
+                        <NavItem item={{ name: 'Contenido', path: '/contenido', icon: '📱' }} />
                     </div>
 
-
-                    {/* Sección Comunidad */}
-                    <div className="p-2 border-t border-slate-800">
-                        <SectionHeader title="Comunidad" section="community" icon="👥" />
-                        {expandedSection === 'community' && (
-                            <div className="space-y-1 mt-1">
-                                <NavItem item={{ name: 'Mercado TCG', path: '/mercado', icon: '🛒' }} />
-                                <NavItem item={{ name: 'Tiendas', path: '/tiendas', icon: '🏪' }} />
-                                <NavItem item={{ name: 'Foro', path: '/foro', icon: '💬' }} />
-                                <NavItem item={{ name: 'Señal Online', path: '/envivo', icon: '📺' }} />
-                                <NavItem item={{ name: 'Contenido', path: '/contenido', icon: '📱' }} />
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Sección Mi Perfil (Solo Logueados) */}
+                    {/* Mi Perfil (Solo Logueados) - Direct List if logged in */}
                     {isLoggedIn && (
-                        <div className="p-2 border-t border-slate-800">
-                            <SectionHeader title="Mi Perfil" section="profile" icon="👤" />
-                            {expandedSection === 'profile' && (
-                                <div className="space-y-1 mt-1">
-                                    {userRole === 'admin' && (
-                                        <NavItem item={{ name: 'Panel Admin', path: '/admin', icon: '🛡️' }} />
-                                    )}
-                                    {userRole === 'store' && (
-                                        <NavItem item={{ name: 'Panel Tienda', path: '/dashboard/tienda', icon: '🏪' }} />
-                                    )}
-                                    {userRole === 'player' && (
-                                        <NavItem item={{ name: 'Mi Dashboard', path: '/dashboard/jugador', icon: '🎮' }} />
-                                    )}
-                                    {isContentCreator && (
-                                        <NavItem item={{ name: 'Panel de Creador', path: '/dashboard/creador', icon: '🎬' }} />
-                                    )}
-                                    <NavItem item={{ name: 'Mis Anuncios', path: '/mis-anuncios', icon: '🏷️' }} />
-                                    <NavItem item={{ name: 'Favoritos', path: '/favorites', icon: '❤️' }} />
-                                    <NavItem item={{ name: 'Notificaciones', path: '/notifications', icon: '🔔' }} />
-                                    <NavItem item={{ name: 'Configuración', path: '/settings', icon: '⚙️' }} />
-                                </div>
+                        <div className="mt-4 pt-4 border-t border-slate-800 space-y-1">
+                            {userRole === 'admin' && (
+                                <NavItem item={{ name: 'Panel Admin', path: '/admin', icon: '🛡️' }} />
                             )}
+                            {userRole === 'store' && (
+                                <NavItem item={{ name: 'Panel Tienda', path: '/dashboard/tienda', icon: '🏪' }} />
+                            )}
+                            {userRole === 'player' && (
+                                <NavItem item={{ name: 'Mi Dashboard', path: '/dashboard/jugador', icon: '🎮' }} />
+                            )}
+                            {isContentCreator && (
+                                <NavItem item={{ name: 'Panel de Creador', path: '/dashboard/creador', icon: '🎬' }} />
+                            )}
+                            <NavItem item={{ name: 'Favoritos', path: '/favorites', icon: '❤️' }} />
+                            <NavItem item={{ name: 'Notificaciones', path: '/notifications', icon: '🔔' }} />
+                            <NavItem item={{ name: 'Configuración', path: '/settings', icon: '⚙️' }} />
                         </div>
                     )}
 
-                    {/* Sección Información */}
-                    <div className="p-2 border-t border-slate-800">
-                        <SectionHeader title="Información" section="info" icon="ℹ️" />
-                        {expandedSection === 'info' && (
-                            <div className="space-y-1 mt-1">
-                                <NavItem item={{ name: 'Quiénes Somos', path: '/quienes-somos', icon: '🤝' }} />
-                                <NavItem item={{ name: 'Reglamento', path: '/reglamento', icon: '📜' }} />
-                            </div>
-                        )}
+                    {/* Información - Direct List */}
+                    <div className="mt-4 pt-4 border-t border-slate-800 space-y-1">
+                        <NavItem item={{ name: 'Quiénes Somos', path: '/quienes-somos', icon: '🤝' }} />
+                        <NavItem item={{ name: 'Reglamento', path: '/reglamento', icon: '📜' }} />
                     </div>
 
                     {/* Redes Sociales - Sidebar Bottom */}
-                    <div className="p-6 border-t border-slate-800">
+                    <div className="p-6 border-t border-slate-800 mt-4">
                         <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-4 text-center">SÍGUENOS</p>
                         <div className="flex justify-center gap-4">
                             <a href="https://web.facebook.com/theplayercl" target="_blank" rel="noopener noreferrer" title="Facebook" className="p-2 bg-slate-800 rounded-lg text-slate-400 hover:text-blue-500 hover:bg-slate-700 transition-all">

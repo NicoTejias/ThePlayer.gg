@@ -18,6 +18,7 @@ import AdminWidget from '../components/widgets/AdminWidget';
 import QuickRegistrationModal from '../components/QuickRegistrationModal';
 import GalaNominationsBanner from '../components/GalaNominationsBanner';
 import AliasReminderBanner from '../components/AliasReminderBanner';
+import TierBadge from '../components/TierBadge';
 
 
 
@@ -253,22 +254,20 @@ const HomePage: React.FC<HomePageProps> = ({ players, events, session, userRole,
       {!session && <VisitorWidget />}
       {session && userRole === 'player' && userId && <PlayerWidget userId={userId} />}
       {session && userRole === 'store' && userId && <StoreWidget storeId={userId} />}
-
       {session && userRole === 'admin' && <AdminWidget />}
 
       {/* Community Stats */}
-      <section className="mt-12 mb-12 relative px-4">
-        {/* TCG Pulse Ticker */}
-        <div className="container mx-auto mb-12">
+      <section className="mt-8 mb-8 relative px-4">
+        {/* Magic Pulse Ticker */}
+        <div className="container mx-auto mb-8">
           <div className="bg-slate-900/80 border-y border-slate-800 py-2 overflow-hidden whitespace-nowrap relative group">
             <div className="flex animate-ticker gap-12 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">
-              <span className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> MTG: 24 Torneos hoy</span>
-              <span className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></span> Pokemon: Regional Santiago en 5 días</span>
-              <span className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></span> Marketplace: +150 nuevas cartas hoy</span>
-              <span className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-purple-500 animate-pulse"></span> Ranking updated: Top 100 PLS</span>
-              <span className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> MTG: 24 Torneos hoy</span>
-              <span className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></span> Pokemon: Regional Santiago en 5 días</span>
-              <span className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></span> Marketplace: +150 nuevas cartas hoy</span>
+              <span className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> MTG: 24 Torneos programados</span>
+              <span className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-sky-500 animate-pulse"></span> Marketplace: +500 nuevas cartas hoy</span>
+              <span className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-purple-500 animate-pulse"></span> Ranking: Top 100 MTG actualizado</span>
+              <span className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse"></span> Eventos: Registro abierto para el próximo RCQ</span>
+              <span className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> MTG: 24 Torneos programados</span>
+              <span className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-sky-500 animate-pulse"></span> Marketplace: +500 nuevas cartas hoy</span>
             </div>
           </div>
         </div>
@@ -423,39 +422,94 @@ const HomePage: React.FC<HomePageProps> = ({ players, events, session, userRole,
           </div>
         </section>
 
-        {/* Rankings */}
-        <section>
-          <SectionHeader title="Rankings" linkTo="/ranking" />
-          <div className="flex justify-center">
-            {/* PLS Ranking */}
-            <div className="w-full max-w-4xl">
-              <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3">Top 10 Player Points</h3>
-              <div className="bg-slate-800/50 rounded-xl border border-slate-700 overflow-hidden shadow-xl">
-                {topPointsPlayers.slice(0, 10).map(player => {
-                  const isCurrent = session?.user?.id && player.id === session.user.id;
-                  return (
-                    <Link key={player.id} to="/ranking" className={`flex items-center gap-3 p-3 hover:bg-slate-700/50 transition-colors border-b border-slate-700/50 last:border-0 ${isCurrent ? 'bg-blue-500/10 border-l-4 border-l-blue-500' : ''}`}>
-                      <span className={`text-lg font-black w-6 ${isCurrent ? 'text-blue-400' : 'text-slate-600'}`}>{player.rank}</span>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2">
-                          <p className="text-white font-bold truncate text-sm">{player.playerName}</p>
-                          {player.is_pro && <ProBadge size="small" />}
-                          {player.is_content_creator && <ContentCreatorBadge size="small" />}
-                          {isCurrent && <span className="px-2 py-0.5 bg-blue-500 text-white text-xs font-bold rounded-full">Tú</span>}
+        {/* Rankings - Moved to bottom and restricted to registered users */}
+        {session && (
+          <section className="pt-8 border-t border-slate-800">
+            <div className="flex items-center gap-3 mb-6">
+              <h2 className="text-3xl font-bold text-white uppercase tracking-wider">Rankings Oficiales</h2>
+              <TierBadge points={topPointsPlayers.find(p => p.id === userId)?.points || 0} size="lg" />
+            </div>
+
+            <div className="flex justify-center">
+              <div className="w-full max-w-4xl">
+                <div className="flex justify-between items-end mb-4">
+                  <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider font-mono">Top 10 Player Points <span className="text-sky-500 ml-2">#Temporada2026</span></h3>
+                  <Link to="/ranking" className="text-sky-400 hover:text-sky-300 text-xs font-bold uppercase tracking-widest transition-colors flex items-center gap-1">
+                    Ver Ranking Completo
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+                  </Link>
+                </div>
+
+                <div className="bg-slate-800/50 rounded-2xl border border-slate-700/50 overflow-hidden shadow-2xl backdrop-blur-sm">
+                  {topPointsPlayers.slice(0, 10).map(player => {
+                    const isCurrent = session?.user?.id && player.id === session.user.id;
+                    return (
+                      <Link key={player.id} to="/ranking" className={`flex items-center gap-4 p-4 hover:bg-white/5 transition-all border-b border-slate-700/30 last:border-0 ${isCurrent ? 'bg-blue-600/10 border-l-4 border-l-blue-500 relative' : ''}`}>
+                        {isCurrent && <div className="absolute inset-0 bg-blue-500/5 animate-pulse pointer-events-none" />}
+
+                        <div className="flex items-center justify-center w-8 h-8 rounded-full bg-slate-900/50 border border-slate-700 text-sm font-black text-slate-400">
+                          {player.rank}
                         </div>
-                        <p className="text-xs text-slate-500">{player.team}</p>
+
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-0.5">
+                            <p className={`font-bold truncate ${isCurrent ? 'text-blue-300 text-lg' : 'text-white text-base'}`}>{player.playerName}</p>
+                            {player.is_pro && <ProBadge size="small" />}
+                            {player.is_content_creator && <ContentCreatorBadge size="small" />}
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <p className="text-[10px] text-slate-500 uppercase font-black tracking-widest">{player.team}</p>
+                            <TierBadge points={player.points} size="sm" showIcon={false} />
+                          </div>
+                        </div>
+
+                        <div className="text-right flex flex-col items-end">
+                          <div className="flex items-center gap-1.5">
+                            <span className={`text-xl font-black font-mono leading-none ${isCurrent ? 'text-blue-400' : 'text-slate-100'}`}>
+                              {player.points.toLocaleString()}
+                            </span>
+                            <span className="text-[10px] text-sky-500 font-bold uppercase tracking-tighter">pts</span>
+                          </div>
+                        </div>
+                      </Link>
+                    );
+                  })}
+                </div>
+
+                {/* Ranking CTA for registered users who are not in top 10 */}
+                {!topPointsPlayers.some(p => p.id === userId) && (
+                  <div className="mt-6 p-6 bg-gradient-to-r from-slate-800 to-slate-900 rounded-2xl border border-slate-700 flex flex-col md:flex-row items-center justify-between gap-4 shadow-xl">
+                    <div className="flex items-center gap-4 text-center md:text-left">
+                      <div className="w-12 h-12 bg-sky-500/10 rounded-full flex items-center justify-center text-2xl">📈</div>
+                      <div>
+                        <h4 className="font-bold text-white uppercase tracking-tight">¡Sube en el Ranking!</h4>
+                        <p className="text-sm text-slate-400">Inscríbete en torneos oficiales y escala posiciones para ganar beneficios exclusivos.</p>
                       </div>
-                      <div className="text-right">
-                        <span className={`block font-bold font-mono text-sm ${isCurrent ? 'text-blue-400' : 'text-green-400'}`}>{player.points.toLocaleString()}</span>
-                        <span className="text-[10px] text-slate-500 uppercase">Points</span>
-                      </div>
+                    </div>
+                    <Link to="/eventos" className="px-6 py-3 bg-sky-600 hover:bg-sky-500 text-white font-black rounded-xl transition-all shadow-lg shadow-sky-900/40 uppercase tracking-widest text-xs whitespace-nowrap">
+                      Buscar Torneos
                     </Link>
-                  );
-                })}
+                  </div>
+                )}
               </div>
             </div>
-          </div>
-        </section>
+          </section>
+        )}
+
+        {!session && (
+          <section className="pt-8 border-t border-slate-800 text-center py-12">
+            <div className="max-w-xl mx-auto space-y-4">
+              <div className="w-16 h-16 bg-slate-800 rounded-full flex items-center justify-center text-3xl mx-auto border border-slate-700 mb-6 group-hover:scale-110 transition-transform">🔒</div>
+              <h2 className="text-2xl font-black text-white uppercase tracking-wider italic">Rankings Exclusivos</h2>
+              <p className="text-slate-400 text-lg">Inicia sesión o regístrate para ver tu posición en el ranking oficial y descubrir los niveles competitivos de nuestra comunidad.</p>
+              <div className="pt-6">
+                <Link to="/auth" className="px-8 py-4 bg-gradient-to-r from-sky-600 to-blue-600 text-white font-black rounded-full hover:from-sky-500 hover:to-blue-500 transition-all shadow-2xl shadow-sky-900/40 uppercase tracking-[0.15em]">
+                  Unirse Ahora
+                </Link>
+              </div>
+            </div>
+          </section>
+        )}
 
         {/* Últimas Novedades */}
         <section>

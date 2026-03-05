@@ -13,7 +13,7 @@ const GalaNominationsBanner: React.FC = () => {
                 const { data } = await supabase
                     .from('user_awards')
                     .select('*, award:award_id!inner(*), profile:user_id(username, points, pwp)')
-                    .ilike('award.name', '%Nominado Gala%')
+                    .filter('award.name', 'ilike', '%Nominado Gala%')
                     .order('obtained_at', { ascending: false })
                     .limit(5);
 

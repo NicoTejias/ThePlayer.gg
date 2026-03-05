@@ -122,11 +122,16 @@ const AppContent: React.FC = () => {
     return () => clearInterval(ytInterval);
   }, []);
 
-
+  // Redirect Root to Home if needed
+  useEffect(() => {
+    if (location.pathname === '/' || location.pathname === '') {
+      navigate('/home', { replace: true });
+    }
+  }, [location.pathname, navigate]);
 
   // Auth/Loading UI
-  const isLanding = location.pathname === '/';
-  if (isAuthLoading && !isLanding) {
+  const isExcludedPath = location.pathname === '/' || location.pathname === '/home';
+  if (isAuthLoading && !isExcludedPath) {
     return (
       <div className="bg-slate-900 min-h-screen flex flex-col items-center justify-center text-white p-4">
         <div className="flex flex-col items-center gap-6 max-w-md text-center">
@@ -164,7 +169,7 @@ const AppContent: React.FC = () => {
         wins: result.wins,
         losses: result.losses,
         draws: result.draws,
-        pwp_earned: result.pwpEarned,
+        pwp_earned: result.pointsEarned,
         rank: result.rank || index + 1
       }));
 
@@ -205,12 +210,12 @@ const AppContent: React.FC = () => {
   }[currentGame] || 'theme-mtg';
 
   return (
-    <div className={`bg-slate-900 text-slate-200 min-h-screen flex flex-col relative isolate ${themeClass}`}>
+    <div className="bg-slate-900 text-slate-200 min-h-screen flex flex-col relative isolate theme-mtg">
       <Toaster position="top-center" richColors theme="dark" />
       <CookieConsent />
-      {!isLanding && <ParticlesBackground />}
+      <ParticlesBackground />
 
-      {!isLanding && (
+      {!isAuthLoading && (
         <Header
           isLoggedIn={isLoggedIn}
           userRole={userRole}
@@ -226,9 +231,9 @@ const AppContent: React.FC = () => {
       <OnboardingModal isOpen={showOnboarding} onClose={() => setShowOnboarding(false)} onGoToSettings={() => { setShowOnboarding(false); navigate('/settings'); }} />
       <ClaimResultsModal isOpen={showClaimModal} unclaimedResults={unclaimedResults} onClose={() => setShowClaimModal(false)} onClaimProcessed={fetchData} />
 
-      <main className={`flex-grow ${!isLanding ? 'container mx-auto px-4 py-8' : ''}`}>
+      <main className="flex-grow container mx-auto px-4 py-8">
         <Routes>
-          <Route path="/" element={<UniverseSelectionPage />} />
+          <Route path="/" element={<HomePage players={players} events={communityEvents} session={userProfile ? { user: userProfile } : null} userRole={userRole} userId={userProfile?.id} showAliasReminder={isLoggedIn && userRole === 'player' && !hasAlias} />} />
           <Route path="/home" element={<HomePage players={players} events={communityEvents} session={userProfile ? { user: userProfile } : null} userRole={userRole} userId={userProfile?.id} showAliasReminder={isLoggedIn && userRole === 'player' && !hasAlias} />} />
           <Route path="/envivo" element={<LiveStreamPage />} />
           <Route path="/pls" element={<PLSPage />} />
@@ -293,7 +298,7 @@ const AppContent: React.FC = () => {
         </Routes>
       </main>
 
-      {!isLanding && <Footer />}
+      <Footer />
       <ChatAssistant />
     </div>
   );
