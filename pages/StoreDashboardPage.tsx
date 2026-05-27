@@ -1,7 +1,7 @@
 import React, { useState, ChangeEvent } from 'react';
 import UploadIcon from '../components/icons/UploadIcon';
 import CheckCircleIcon from '../components/icons/CheckCircleIcon';
-import { TournamentParseResult, TournamentResult } from '../types';
+import { TournamentParseResult, TournamentResult, PlayerProfile } from '../types';
 import { parseEventLinkPdf } from '../utils/PdfParser';
 import { parseEventLinkText } from '../utils/TextParser';
 import { parseMeleeCSV } from '../utils/CSVParser';
@@ -11,18 +11,20 @@ import { supabase } from '../supabaseClient';
 import { useGame } from '../context/GameContext';
 import { toast } from 'sonner';
 import { Trophy } from 'lucide-react';
+import { TournamentManager } from '../components/TournamentManager';
 
 interface StoreDashboardPageProps {
-    onTournamentUpload: (tournamentData: Omit<TournamentResult, 'id'>, players: TournamentParseResult[]) => void;
+    onTournamentUpload: (tournamentData: Omit<TournamentResult, 'id'>, players: TournamentParseResult[]) => Promise<void>;
     onDeleteTournament: (tournamentId: string) => Promise<void>;
     userRole: 'player' | 'store' | 'admin' | null;
     tournaments: TournamentResult[]; // Real data from database
     storeStatus?: string;
     storeName?: string; // Nombre de la tienda
     storeLogo?: string;
+    players: PlayerProfile[];
 }
 
-const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpload, onDeleteTournament, userRole, tournaments, storeStatus, storeName, storeLogo }) => {
+const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpload, onDeleteTournament, userRole, tournaments, storeStatus, storeName, storeLogo, players }) => {
     const { currentGame } = useGame();
     const [step, setStep] = useState<'upload' | 'confirm'>('upload');
     const [uploadMethod, setUploadMethod] = useState<'text'>('text');
@@ -41,7 +43,7 @@ const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpl
 
     // League State
     const [leagues, setLeagues] = useState<any[]>([]);
-    const [view, setView] = useState<'tournaments' | 'leagues'>('tournaments');
+    const [view, setView] = useState<'tournaments' | 'leagues' | 'run_tournament'>('tournaments');
     const [isCreatingLeague, setIsCreatingLeague] = useState(false);
     const [newLeagueData, setNewLeagueData] = useState({ name: '', format: 'Pauper', is_private: false });
     const [selectedLeagueId, setSelectedLeagueId] = useState<string>('');
@@ -521,15 +523,26 @@ const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpl
                             <h3 className="text-3xl font-black text-white tracking-tighter uppercase leading-none">Reportes</h3>
                             <p className="text-slate-400 text-sm mt-3 font-medium leading-relaxed">Sube resultados oficiales para sumar Player Points.</p>
                         </div>
-                        <button
-                            onClick={() => {
-                                setView('tournaments');
-                                setTimeout(() => document.getElementById('upload-section')?.scrollIntoView({ behavior: 'smooth' }), 100);
-                            }}
-                            className="w-full py-5 bg-sky-600 hover:bg-sky-500 text-white font-black text-[10px] uppercase tracking-[0.2em] rounded-2xl shadow-xl shadow-sky-900/40 transition-all active:scale-95"
-                        >
-                            Comenzar Reporte
-                        </button>
+                        <div className="grid grid-cols-1 gap-3">
+                            <button
+                                onClick={() => {
+                                    setView('tournaments');
+                                    setTimeout(() => {
+                                        const uploadSec = document.getElementById('upload-section');
+                                        uploadSec?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                                    }, 100);
+                                }}
+                                className="w-full py-4 bg-sky-600 hover:bg-sky-500 text-white font-black text-[10px] uppercase tracking-[0.2em] rounded-2xl shadow-xl shadow-sky-900/40 transition-all active:scale-95"
+                            >
+                                Subir Archivo de Reporte
+                            </button>
+                            <button
+                                onClick={() => setView('run_tournament')}
+                                className="w-full py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-black text-[10px] uppercase tracking-[0.2em] rounded-2xl shadow-xl shadow-emerald-900/40 transition-all active:scale-95"
+                            >
+                                Correr Torneo en Vivo
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -553,6 +566,18 @@ const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpl
                     </div>
                 </div>
             </div>
+
+            {/* RUN TOURNAMENT VIEW */}
+            {view === 'run_tournament' && (
+                <TournamentManager 
+                    players={players}
+                    currentGame={currentGame}
+                    storeName={storeName || 'Tienda Oficial'}
+                    leagues={leagues}
+                    onTournamentUpload={onTournamentUpload}
+                    onCancel={() => setView('tournaments')}
+                />
+            )}
 
             {/* LEAGUES VIEW */}
             {view === 'leagues' && (
@@ -750,7 +775,7 @@ const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpl
                 </div>
             )}
 
-            <div className={`grid grid-cols-1 lg:grid-cols-5 gap-12 ${view === 'leagues' ? 'hidden' : ''}`}>
+            <div className={`grid grid-cols-1 lg:grid-cols-5 gap-12 ${view !== 'tournaments' ? 'hidden' : ''}`}>
                 <section id="upload-section" className="lg:col-span-2 space-y-6">
                     {step === 'upload' && (
                         <div className="animate-fade-in space-y-6">
