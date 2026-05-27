@@ -160,7 +160,10 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, isLoggedIn, userRole
                     {isLoggedIn && (
                         <div className="mt-4 pt-4 border-t border-slate-800 space-y-1">
                             {userRole === 'admin' && (
-                                <NavItem item={{ name: 'Panel Admin', path: '/admin', icon: '🛡️' }} />
+                                <>
+                                    <NavItem item={{ name: 'Panel Admin', path: '/admin', icon: '🛡️' }} />
+                                    <NavItem item={{ name: 'Panel Tienda', path: '/dashboard/tienda', icon: '🏪' }} />
+                                </>
                             )}
                             {userRole === 'store' && (
                                 <NavItem item={{ name: 'Panel Tienda', path: '/dashboard/tienda', icon: '🏪' }} />
