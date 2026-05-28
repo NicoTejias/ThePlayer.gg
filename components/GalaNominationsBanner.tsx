@@ -12,7 +12,7 @@ const GalaNominationsBanner: React.FC = () => {
             try {
                 const { data } = await supabase
                     .from('user_awards')
-                    .select('*, award:award_id!inner(*), profile:user_id(username, points, pwp)')
+                    .select('*, award:award_id!inner(*), profile:user_id(username, pwp)')
                     .filter('award.name', 'ilike', '%Nominado Gala%')
                     .order('obtained_at', { ascending: false })
                     .limit(5);
@@ -52,24 +52,24 @@ const GalaNominationsBanner: React.FC = () => {
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
-                    {nominations.map((nom) => (
-                        <div key={nom.id} className="bg-slate-950 border border-slate-800 p-4 rounded-2xl flex flex-col items-center text-center gap-3 hover:border-yellow-500/40 transition-all hover:scale-105 group/card">
-                            <div className="relative">
-                                <AwardBadge award={nom.award} size="md" />
-                                <div className="absolute -top-1 -right-1 w-4 h-4 bg-yellow-500 rounded-full flex items-center justify-center text-[8px] font-black text-slate-950 shadow-lg">
-                                    ✓
-                                </div>
-                            </div>
-                            <div>
-                                <p className="text-white font-black uppercase tracking-tighter text-sm group-hover/card:text-yellow-400 transition-colors">
-                                    {nom.profile?.username}
-                                </p>
-                                <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-1">
-                                    {nom.profile?.points || nom.profile?.pwp} Player Points
-                                </p>
-                            </div>
-                        </div>
-                    ))}
+                  {nominations.map((nom) => (
+                      <div key={nom.id} className="bg-slate-950 border border-slate-800 p-4 rounded-2xl flex flex-col items-center text-center gap-3 hover:border-yellow-500/40 transition-all hover:scale-105 group/card">
+                          <div className="relative">
+                              <AwardBadge award={nom.award} size="md" />
+                              <div className="absolute -top-1 -right-1 w-4 h-4 bg-yellow-500 rounded-full flex items-center justify-center text-[8px] font-black text-slate-950 shadow-lg">
+                                  ✓
+                              </div>
+                          </div>
+                          <div>
+                              <p className="text-white font-black uppercase tracking-tighter text-sm group-hover/card:text-yellow-400 transition-colors">
+                                  {nom.profile?.username}
+                              </p>
+                              <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-1">
+                                  {nom.profile?.pwp} Player Points
+                              </p>
+                          </div>
+                      </div>
+                  ))}
 
                     {/* Placeholder for "Your name here" */}
                     <div className="bg-slate-950/40 border border-slate-800 border-dashed p-4 rounded-2xl flex flex-col items-center justify-center text-center gap-2 opacity-60">
