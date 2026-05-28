@@ -26,7 +26,7 @@ const UniverseSelectionPage: React.FC = () => {
         navigate('/home');
     };
 
-    const universes: GameType[] = ['mtg', 'pokemon', 'one_piece', 'lorcana', 'yugioh', 'star_wars', 'flesh_blood', 'digimon'];
+    const universes: GameType[] = ['mtg', 'pokemon', 'one_piece', 'lorcana', 'yugioh', 'star_wars', 'flesh_blood', 'digimon', 'alpha_clash'];
 
     return (
         <div className="min-h-screen bg-[#050510] text-white flex flex-col items-center justify-center p-6 relative overflow-hidden">

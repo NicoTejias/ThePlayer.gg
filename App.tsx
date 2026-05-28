@@ -8,6 +8,9 @@ import Header from './components/Header';
 import Footer from './components/Footer';
 import FloatingActionButton from './components/FloatingActionButton';
 import ParticlesBackground from './components/ParticlesBackground';
+import Sidebar from './components/Sidebar';
+import { LanguageProvider } from './context/LanguageContext';
+import { ThemeProvider } from './context/ThemeContext';
 import HomePage from './pages/HomePage';
 import RankingsPage from './pages/RankingsPage';
 import EventsPage from './pages/EventsPage';
@@ -207,101 +210,120 @@ const AppContent: React.FC = () => {
   const themeClass = {
     mtg: 'theme-mtg', pokemon: 'theme-pokemon', one_piece: 'theme-one_piece',
     lorcana: 'theme-lorcana', star_wars: 'theme-star_wars', yugioh: 'theme-yugioh',
-    flesh_blood: 'theme-flesh_blood', digimon: 'theme-digimon'
+    flesh_blood: 'theme-flesh_blood', digimon: 'theme-digimon', alpha_clash: 'theme-alpha_clash'
   }[currentGame] || 'theme-mtg';
 
   return (
-    <div className="bg-slate-900 text-slate-200 min-h-screen flex flex-col relative isolate theme-mtg">
+    <div className={`bg-slate-900 text-slate-200 min-h-screen flex flex-col lg:flex-row relative isolate ${themeClass}`}>
       <Toaster position="top-center" richColors theme="dark" />
       <CookieConsent />
       <ParticlesBackground />
 
+      {/* Desktop Sidebar (inline, visible on lg screens) */}
       {!isAuthLoading && (
-        <Header
-          isLoggedIn={isLoggedIn}
-          userRole={userRole}
-          handleLogout={handleLogout}
-          isLiveSignal={isLiveSignal}
-          userName={userProfile?.username || 'Jugador'}
-          userProfile={userProfile}
-        />
+        <div className="hidden lg:block w-72 flex-shrink-0 border-r border-slate-700/50 bg-[#130712]/30 backdrop-blur-xl h-screen sticky top-0 overflow-y-auto custom-scrollbar">
+          <Sidebar
+            isOpen={true}
+            onClose={() => {}}
+            isLoggedIn={isLoggedIn}
+            userRole={userRole}
+            isContentCreator={userProfile?.is_content_creator || userProfile?.role === 'content_creator'}
+            isInline={true}
+          />
+        </div>
       )}
 
-      <FloatingActionButton userRole={userRole} />
+      {/* Main Content Pane */}
+      <div className="flex-grow flex flex-col min-w-0 min-h-screen">
+        {!isAuthLoading && (
+          <Header
+            isLoggedIn={isLoggedIn}
+            userRole={userRole}
+            handleLogout={handleLogout}
+            isLiveSignal={isLiveSignal}
+            userName={userProfile?.username || 'Jugador'}
+            userProfile={userProfile}
+          />
+        )}
 
-      <OnboardingModal isOpen={showOnboarding} onClose={() => setShowOnboarding(false)} onGoToSettings={() => { setShowOnboarding(false); navigate('/settings'); }} />
-      <ClaimResultsModal isOpen={showClaimModal} unclaimedResults={unclaimedResults} onClose={() => setShowClaimModal(false)} onClaimProcessed={fetchData} />
+        <FloatingActionButton userRole={userRole} />
 
-      <main className="flex-grow container mx-auto px-4 py-8">
-        <Routes>
-          <Route path="/" element={<HomePage players={players} events={communityEvents} session={userProfile ? { user: userProfile } : null} userRole={userRole} userId={userProfile?.id} showAliasReminder={isLoggedIn && userRole === 'player' && !hasAlias} />} />
-          <Route path="/home" element={<HomePage players={players} events={communityEvents} session={userProfile ? { user: userProfile } : null} userRole={userRole} userId={userProfile?.id} showAliasReminder={isLoggedIn && userRole === 'player' && !hasAlias} />} />
-          <Route path="/envivo" element={<LiveStreamPage />} />
-          <Route path="/pls" element={<PLSPage />} />
-          <Route path="/ranking" element={<RankingsPage players={players} teams={teams} />} />
-          <Route path="/hall-of-fame" element={<HallOfFamePage />} />
-          <Route path="/soporte" element={<SupportPage />} />
-          <Route path="/equipo/:teamId" element={<TeamProfilePage />} />
-          <Route path="/eventos" element={<EventsPage events={communityEvents} finishedTournaments={tournamentResults} userRole={userRole} userId={userProfile?.id} />} />
-          <Route path="/torneos" element={<TournamentsListPage tournaments={tournamentResults} />} />
-          <Route path="/torneos/:tournamentId" element={<TournamentStandingsPage userRole={userRole} userId={userProfile?.id} />} />
-          <Route path="/mercado" element={<MarketplacePage />} />
-          <Route path="/mercado/:id" element={<MarketplaceDetailPage />} />
-          <Route path="/mis-anuncios" element={<MyListingsPage />} />
-          <Route path="/commander" element={<CommanderPage />} />
-          <Route path="/pauper" element={<PauperPage />} />
-          <Route path="/premodern" element={<PremodernPage />} />
-          <Route path="/media" element={<MediaPage />} />
-          <Route path="/media/articulos" element={<MediaArticlesPage />} />
-          <Route path="/media/articulos/:slug" element={<ArticleDetailPage />} />
-          <Route path="/media/videos" element={<MediaVideosPage />} />
-          <Route path="/tiendas" element={<StoresPage />} />
-          <Route path="/login" element={<AuthPage handleLogin={handleLogin} />} />
-          <Route path="/auth" element={<AuthPage handleLogin={handleLogin} />} />
-          <Route path="/confirm-email" element={<EmailConfirmationPage />} />
-          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-          <Route path="/reset-password" element={<ResetPasswordPage />} />
-          <Route path="/content" element={<ContentPage />} />
-          <Route path="/reglamento" element={<ReglamentoPage />} />
-          <Route path="/quienes-somos" element={<AboutPage />} />
-          <Route path="/contenido" element={<ContentPage />} />
-          <Route path="/ligas" element={<CommunityLeaguesPage />} />
-          <Route path="/terminos" element={<TermsPage />} />
-          <Route path="/premium" element={<SubscriptionPage />} />
-          <Route path="/settings" element={<SettingsPage />} />
-          <Route path="/creadores" element={<ContentCreatorApplicationPage />} />
-          <Route path="/admin" element={<AdminDashboardPage />} />
-          <Route path="/admin/users" element={<UserManagementPage />} />
-          <Route path="/admin/awards" element={<AdminAwardsPage />} />
-          <Route path="/admin/season" element={<AdminSeasonPage />} />
-          <Route path="/admin/claims" element={<ClaimReviewPage />} />
-          <Route path="/admin/integrity" element={<IntegrityReviewPanel />} />
-          <Route path="/admin/tournaments/edit" element={<TournamentEditPage />} />
-          <Route path="/admin/subscriptions" element={<SubscriptionManagementPage />} />
-          <Route path="/admin/creators" element={<ContentCreatorsAdminPage />} />
-          <Route path="/admin/marketplace" element={<MarketplaceAdminPage />} />
-          <Route path="/admin/cms" element={<AdminCMSPage />} />
-          <Route path="/admin/foro" element={<AdminForumPage />} />
-          <Route path="/notifications" element={<NotificationsPage />} />
+        <OnboardingModal isOpen={showOnboarding} onClose={() => setShowOnboarding(false)} onGoToSettings={() => { setShowOnboarding(false); navigate('/settings'); }} />
+        <ClaimResultsModal isOpen={showClaimModal} unclaimedResults={unclaimedResults} onClose={() => setShowClaimModal(false)} onClaimProcessed={fetchData} />
 
-          <Route path="/foro" element={<ForumIndexPage />} />
-          <Route path="/foro/:categorySlug/:boardSlug" element={<ForumBoardPage />} />
-          <Route path="/foro/:categorySlug/:boardSlug/nuevo" element={<CreateThreadPage />} />
-          <Route path="/foro/:categorySlug/:boardSlug/:threadSlug" element={<ForumThreadPage />} />
-          <Route path="/favorites" element={<FavoritesPage />} />
-          <Route path="/seller/:sellerId" element={<SellerProfilePage />} />
-          <Route path="/calendario" element={<CalendarPage />} />
-          <Route path="/stats" element={<PlayerStatsPage />} />
-          <Route path="/torneos/inscribir" element={<TournamentJoinPage />} />
-          <Route path="/dashboard/tienda" element={<StoreDashboardPage onTournamentUpload={handleTournamentUpload} onDeleteTournament={handleDeleteTournament} userRole={userRole} tournaments={tournamentResults} storeStatus={userProfile?.status} storeName={userProfile?.username} storeLogo={userProfile?.avatar_url} players={players} />} />
-          <Route path="/dashboard/jugador" element={<PlayerDashboardPage profile={userProfile} showAliasReminder={isLoggedIn && userRole === 'player' && !hasAlias} />} />
-          <Route path="/dashboard/creador" element={<CreatorDashboardPage profile={userProfile} />} />
-          <Route path="*" element={<NotFoundPage />} />
-        </Routes>
-      </main>
+        <main className="flex-grow container mx-auto px-4 py-8">
+          <Routes>
+            <Route path="/" element={<HomePage players={players} events={communityEvents} session={userProfile ? { user: userProfile } : null} userRole={userRole} userId={userProfile?.id} showAliasReminder={isLoggedIn && userRole === 'player' && !hasAlias} />} />
+            <Route path="/home" element={<HomePage players={players} events={communityEvents} session={userProfile ? { user: userProfile } : null} userRole={userRole} userId={userProfile?.id} showAliasReminder={isLoggedIn && userRole === 'player' && !hasAlias} />} />
+            <Route path="/universe" element={<UniverseSelectionPage />} />
+            <Route path="/universe-selection" element={<UniverseSelectionPage />} />
+            <Route path="/envivo" element={<LiveStreamPage />} />
+            <Route path="/pls" element={<PLSPage />} />
+            <Route path="/ranking" element={<RankingsPage players={players} teams={teams} />} />
+            <Route path="/hall-of-fame" element={<HallOfFamePage />} />
+            <Route path="/soporte" element={<SupportPage />} />
+            <Route path="/equipo/:teamId" element={<TeamProfilePage />} />
+            <Route path="/eventos" element={<EventsPage events={communityEvents} finishedTournaments={tournamentResults} userRole={userRole} userId={userProfile?.id} />} />
+            <Route path="/torneos" element={<TournamentsListPage tournaments={tournamentResults} />} />
+            <Route path="/torneos/:tournamentId" element={<TournamentStandingsPage userRole={userRole} userId={userProfile?.id} />} />
+            <Route path="/mercado" element={<MarketplacePage />} />
+            <Route path="/mercado/:id" element={<MarketplaceDetailPage />} />
+            <Route path="/mis-anuncios" element={<MyListingsPage />} />
+            <Route path="/commander" element={<CommanderPage />} />
+            <Route path="/pauper" element={<PauperPage />} />
+            <Route path="/premodern" element={<PremodernPage />} />
+            <Route path="/media" element={<MediaPage />} />
+            <Route path="/media/articulos" element={<MediaArticlesPage />} />
+            <Route path="/media/articulos/:slug" element={<ArticleDetailPage />} />
+            <Route path="/media/videos" element={<MediaVideosPage />} />
+            <Route path="/tiendas" element={<StoresPage />} />
+            <Route path="/login" element={<AuthPage handleLogin={handleLogin} />} />
+            <Route path="/auth" element={<AuthPage handleLogin={handleLogin} />} />
+            <Route path="/confirm-email" element={<EmailConfirmationPage />} />
+            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+            <Route path="/reset-password" element={<ResetPasswordPage />} />
+            <Route path="/content" element={<ContentPage />} />
+            <Route path="/reglamento" element={<ReglamentoPage />} />
+            <Route path="/quienes-somos" element={<AboutPage />} />
+            <Route path="/contenido" element={<ContentPage />} />
+            <Route path="/ligas" element={<CommunityLeaguesPage />} />
+            <Route path="/terminos" element={<TermsPage />} />
+            <Route path="/premium" element={<SubscriptionPage />} />
+            <Route path="/settings" element={<SettingsPage />} />
+            <Route path="/creadores" element={<ContentCreatorApplicationPage />} />
+            <Route path="/admin" element={<AdminDashboardPage />} />
+            <Route path="/admin/users" element={<UserManagementPage />} />
+            <Route path="/admin/awards" element={<AdminAwardsPage />} />
+            <Route path="/admin/season" element={<AdminSeasonPage />} />
+            <Route path="/admin/claims" element={<ClaimReviewPage />} />
+            <Route path="/admin/integrity" element={<IntegrityReviewPanel />} />
+            <Route path="/admin/tournaments/edit" element={<TournamentEditPage />} />
+            <Route path="/admin/subscriptions" element={<SubscriptionManagementPage />} />
+            <Route path="/admin/creators" element={<ContentCreatorsAdminPage />} />
+            <Route path="/admin/marketplace" element={<MarketplaceAdminPage />} />
+            <Route path="/admin/cms" element={<AdminCMSPage />} />
+            <Route path="/admin/foro" element={<AdminForumPage />} />
+            <Route path="/notifications" element={<NotificationsPage />} />
 
-      <Footer />
-      <ChatAssistant />
+            <Route path="/foro" element={<ForumIndexPage />} />
+            <Route path="/foro/:categorySlug/:boardSlug" element={<ForumBoardPage />} />
+            <Route path="/foro/:categorySlug/:boardSlug/nuevo" element={<CreateThreadPage />} />
+            <Route path="/foro/:categorySlug/:boardSlug/:threadSlug" element={<ForumThreadPage />} />
+            <Route path="/favorites" element={<FavoritesPage />} />
+            <Route path="/seller/:sellerId" element={<SellerProfilePage />} />
+            <Route path="/calendario" element={<CalendarPage />} />
+            <Route path="/stats" element={<PlayerStatsPage />} />
+            <Route path="/torneos/inscribir" element={<TournamentJoinPage />} />
+            <Route path="/dashboard/tienda" element={<StoreDashboardPage onTournamentUpload={handleTournamentUpload} onDeleteTournament={handleDeleteTournament} userRole={userRole} tournaments={tournamentResults} storeStatus={userProfile?.status} storeName={userProfile?.username} storeLogo={userProfile?.avatar_url} players={players} />} />
+            <Route path="/dashboard/jugador" element={<PlayerDashboardPage profile={userProfile} showAliasReminder={isLoggedIn && userRole === 'player' && !hasAlias} />} />
+            <Route path="/dashboard/creador" element={<CreatorDashboardPage profile={userProfile} />} />
+            <Route path="*" element={<NotFoundPage />} />
+          </Routes>
+        </main>
+
+        <Footer />
+        <ChatAssistant />
+      </div>
     </div>
   );
 };
@@ -309,9 +331,13 @@ const AppContent: React.FC = () => {
 export default function App() {
   return (
     <HashRouter>
-      <GameProvider>
-        <AppContent />
-      </GameProvider>
+      <ThemeProvider>
+        <LanguageProvider>
+          <GameProvider>
+            <AppContent />
+          </GameProvider>
+        </LanguageProvider>
+      </ThemeProvider>
     </HashRouter>
   );
 }

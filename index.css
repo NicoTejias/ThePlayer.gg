@@ -3,50 +3,73 @@
 :root {
   color-scheme: dark;
 
-  /* Default Theme (MTG) - Slate & Blue */
-  --bg-base: #0f172a;
-  /* slate-900 */
-  --bg-secondary: #1e293b;
-  /* slate-800 */
-  --color-accent: #3b82f6;
-  /* blue-500 */
-  --color-accent-hover: #2563eb;
-  /* blue-600 */
+  /* Default Theme (MTG) - Deep Plum & Rose (inspired by premium dashboard) */
+  --bg-base: #130712;
+  --bg-secondary: #220e1e;
+  --color-accent: #ff2a5f;
+  --color-accent-hover: #d61a46;
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --border-glow: rgba(255, 42, 95, 0.15);
+}
+
+.light-mode {
+  color-scheme: light;
+  --bg-base: #f8fafc;
+  --bg-secondary: #ffffff;
+  --color-accent: #db2777; /* Deep rose pink */
+  --color-accent-hover: #be185d;
+  --text-primary: #0f172a;
+  --text-secondary: #64748b;
+  --border-glow: rgba(219, 39, 119, 0.1);
 }
 
 /* Pokemon Theme - Zinc & Yellow/Amber */
 .theme-pokemon {
   --bg-base: #18181b;
-  /* zinc-900 */
   --bg-secondary: #27272a;
-  /* zinc-800 */
   --color-accent: #eab308;
-  /* yellow-500 */
   --color-accent-hover: #ca8a04;
-  /* yellow-600 */
+  --border-glow: rgba(234, 179, 8, 0.15);
+}
+.light-mode.theme-pokemon {
+  --bg-base: #fef08a; /* Soft Pokemon yellow background */
+  --bg-secondary: #ffffff;
+  --color-accent: #ca8a04;
+  --color-accent-hover: #a16207;
+  --border-glow: rgba(202, 138, 4, 0.1);
 }
 
 /* One Piece Theme - Stone & Red */
 .theme-one_piece {
   --bg-base: #1c1917;
-  /* stone-900 */
   --bg-secondary: #292524;
-  /* stone-800 */
   --color-accent: #ef4444;
-  /* red-500 */
   --color-accent-hover: #dc2626;
-  /* red-600 */
+  --border-glow: rgba(239, 68, 68, 0.15);
+}
+.light-mode.theme-one_piece {
+  --bg-base: #fee2e2;
+  --bg-secondary: #ffffff;
+  --color-accent: #dc2626;
+  --color-accent-hover: #b91c1c;
+  --border-glow: rgba(220, 38, 38, 0.1);
 }
 
 /* Lorcana Theme - Indigo/Violet */
 .theme-lorcana {
   --bg-base: #1e1b4b;
-  /* indigo-950 (slightly richer) */
   --bg-secondary: #312e81;
-  /* indigo-900 */
   --color-accent: #f59e0b;
-  /* amber-500 (Gold ink feel) */
   --color-accent-hover: #d97706;
+  --border-glow: rgba(245, 158, 11, 0.15);
+}
+.light-mode.theme-lorcana {
+  --bg-base: #e0f2fe;
+  --bg-secondary: #ffffff;
+  --color-accent: #d97706;
+  --color-accent-hover: #b45309;
+  --border-glow: rgba(217, 119, 6, 0.1);
 }
 
 /* Star Wars - Black & Cyan */
@@ -54,44 +77,94 @@
   --bg-base: #000000;
   --bg-secondary: #111111;
   --color-accent: #06b6d4;
-  /* cyan-500 */
   --color-accent-hover: #0891b2;
+  --border-glow: rgba(6, 182, 212, 0.15);
+}
+.light-mode.theme-star_wars {
+  --bg-base: #ecfeff;
+  --bg-secondary: #ffffff;
+  --color-accent: #0891b2;
+  --color-accent-hover: #0369a1;
+  --border-glow: rgba(8, 145, 178, 0.1);
 }
 
 /* Yu-Gi-Oh - Purple/Violet */
 .theme-yugioh {
   --bg-base: #1e1b4b;
-  /* indigo-950 */
   --bg-secondary: #312e81;
-  /* indigo-900 */
   --color-accent: #a855f7;
-  /* purple-500 */
   --color-accent-hover: #9333ea;
-  /* purple-600 */
+  --border-glow: rgba(168, 85, 247, 0.15);
+}
+.light-mode.theme-yugioh {
+  --bg-base: #f3e8ff;
+  --bg-secondary: #ffffff;
+  --color-accent: #9333ea;
+  --color-accent-hover: #7e22ce;
+  --border-glow: rgba(147, 51, 234, 0.1);
 }
 
 /* Flesh and Blood - Crimson/Red */
 .theme-flesh_blood {
   --bg-base: #450a0a;
-  /* red-950 */
   --bg-secondary: #7f1d1d;
-  /* red-900 */
   --color-accent: #f87171;
-  /* red-400 */
   --color-accent-hover: #ef4444;
-  /* red-500 */
+  --border-glow: rgba(248, 113, 113, 0.15);
+}
+.light-mode.theme-flesh_blood {
+  --bg-base: #fef2f2;
+  --bg-secondary: #ffffff;
+  --color-accent: #ef4444;
+  --color-accent-hover: #dc2626;
+  --border-glow: rgba(239, 68, 68, 0.1);
 }
 
 /* Digimon - Orange/Teal */
 .theme-digimon {
   --bg-base: #0c4a6e;
-  /* sky-900 */
   --bg-secondary: #075985;
-  /* sky-800 */
   --color-accent: #fb923c;
-  /* orange-400 */
   --color-accent-hover: #f97316;
-  /* orange-500 */
+  --border-glow: rgba(251, 146, 60, 0.15);
+}
+.light-mode.theme-digimon {
+  --bg-base: #f0f9ff;
+  --bg-secondary: #ffffff;
+  --color-accent: #f97316;
+  --color-accent-hover: #ea580c;
+  --border-glow: rgba(249, 115, 22, 0.1);
+}
+
+/* Alpha Clash Theme - Charcoal & Gold */
+.theme-alpha_clash {
+  --bg-base: #0a0f18;
+  --bg-secondary: #141d2f;
+  --color-accent: #fbbf24;
+  --color-accent-hover: #f59e0b;
+  --border-glow: rgba(251, 191, 36, 0.15);
+}
+.light-mode.theme-alpha_clash {
+  --bg-base: #fffbeb;
+  --bg-secondary: #ffffff;
+  --color-accent: #f59e0b;
+  --color-accent-hover: #d97706;
+  --border-glow: rgba(245, 158, 11, 0.1);
+}
+
+.theme-mtg {
+  --bg-base: #130712;
+  --bg-secondary: #220e1e;
+  --color-accent: #ff2a5f;
+  --color-accent-hover: #d61a46;
+  --border-glow: rgba(255, 42, 95, 0.15);
+}
+.light-mode.theme-mtg {
+  --bg-base: #fdf2f8;
+  --bg-secondary: #ffffff;
+  --color-accent: #db2777;
+  --color-accent-hover: #be185d;
+  --border-glow: rgba(219, 39, 119, 0.1);
 }
 
 /* Override Tailwind utilities to use our dynamic variables */
@@ -130,15 +203,26 @@
   .ring-blue-500 {
     --tw-ring-color: var(--color-accent) !important;
   }
+
+  /* Make slate text classes responsive to dark/light mode */
+  .text-slate-200,
+  .text-slate-300 {
+    color: var(--text-primary) !important;
+  }
+
+  .text-slate-400,
+  .text-slate-500 {
+    color: var(--text-secondary) !important;
+  }
 }
 
 body {
   margin: 0;
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   background-color: var(--bg-base);
-  color: #f8fafc;
+  color: var(--text-primary);
   overflow-x: hidden;
-  transition: background-color 0.5s ease;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 /* Hide scrollbar */

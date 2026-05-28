@@ -9,11 +9,14 @@ interface GameContextType {
 const GameContext = createContext<GameContextType | undefined>(undefined);
 
 export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-    // Current application is locked to Magic: The Gathering
-    const [currentGame] = useState<GameType>('mtg');
+    const [currentGame, setCurrentGameState] = useState<GameType>(() => {
+        const saved = localStorage.getItem('app_game');
+        return (saved ? saved as GameType : 'mtg');
+    });
 
     const setGame = (game: GameType) => {
-        console.warn('Game selection is currently disabled. Locked to mtg.');
+        setCurrentGameState(game);
+        localStorage.setItem('app_game', game);
     };
 
     return (

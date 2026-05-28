@@ -3,6 +3,8 @@ import { Link, NavLink, useLocation } from 'react-router-dom';
 import { useGame } from '../context/GameContext';
 import { GAME_LABELS, GameType } from '../types';
 import { Facebook, Instagram, MessageCircle, Mail } from 'lucide-react';
+import { useTranslation } from '../context/LanguageContext';
+import { useAppTheme } from '../context/ThemeContext';
 
 interface SidebarProps {
     isOpen: boolean;
@@ -10,54 +12,26 @@ interface SidebarProps {
     isLoggedIn: boolean;
     userRole: 'player' | 'store' | 'admin' | null;
     isContentCreator?: boolean;
+    isInline?: boolean;
 }
 
-// Navigation structure
-const mainNavItems = [
-    { name: 'Inicio', path: '/', icon: '🏠' },
-    { name: 'PLS', path: '/pls', icon: '🏆' },
-    { name: 'Ranking', path: '/ranking', icon: '📊' },
-    { name: 'Eventos', path: '/eventos', icon: '📅' },
-    { name: 'Torneos', path: '/torneos', icon: '🎮' },
-    { name: 'Mercado TCG', path: '/mercado', icon: '🛒' },
-];
-
-const communityItems = [
-    { name: 'Creadores', path: '/creadores', icon: '🎬' },
-    { name: 'Tiendas', path: '/tiendas', icon: '🏪' },
-    { name: 'Ligas', path: '/ligas', icon: '🏆' },
-    { name: 'Señal Online', path: '/envivo', icon: '📺' },
-];
-
-const mediaItems = [
-    { name: 'Portada Media', path: '/media', icon: '📰' },
-    { name: 'Artículos', path: '/media/articulos', icon: '📝' },
-    { name: 'Videos', path: '/media/videos', icon: '🎥' },
-];
-
-const mtgFormats = [
-    { name: 'Commander', path: '/commander', icon: '🏰' },
-    { name: 'Pauper', path: '/pauper', icon: '💎' },
-    { name: 'Premodern', path: '/premodern', icon: '📜' },
-];
-
-const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, isLoggedIn, userRole, isContentCreator }) => {
-    const { currentGame, setGame } = useGame();
-    const [expandedSection, setExpandedSection] = useState<string | null>('community');
+const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, isLoggedIn, userRole, isContentCreator, isInline = false }) => {
+    const { currentGame } = useGame();
+    const { language, setLanguage, t } = useTranslation();
+    const { theme, toggleTheme } = useAppTheme();
     const sidebarRef = useRef<HTMLDivElement>(null);
     const location = useLocation();
 
     // Close sidebar when clicking outside
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
-            if (sidebarRef.current && !sidebarRef.current.contains(event.target as Node)) {
+            if (!isInline && sidebarRef.current && !sidebarRef.current.contains(event.target as Node)) {
                 onClose();
             }
         };
 
-        if (isOpen) {
+        if (isOpen && !isInline) {
             document.addEventListener('mousedown', handleClickOutside);
-            // Prevent body scroll when sidebar is open
             document.body.style.overflow = 'hidden';
         }
 
@@ -65,55 +39,162 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, isLoggedIn, userRole
             document.removeEventListener('mousedown', handleClickOutside);
             document.body.style.overflow = 'unset';
         };
-    }, [isOpen, onClose]);
+    }, [isOpen, onClose, isInline]);
 
     // Close sidebar on route change
     useEffect(() => {
-        onClose();
-    }, [location.pathname]);
-
-    const toggleSection = (section: string) => {
-        setExpandedSection(prev => prev === section ? null : section);
-    };
+        if (!isInline) {
+            onClose();
+        }
+    }, [location.pathname, isInline, onClose]);
 
     const NavItem: React.FC<{ item: { name: string; path: string; icon: string; isSpecial?: boolean } }> = ({ item }) => (
         <NavLink
             to={item.path}
             className={({ isActive }) =>
-                `flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${isActive
+                `flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 ${isActive
                     ? 'bg-sky-600/20 text-sky-300 border-l-4 border-sky-500'
                     : item.isSpecial
                         ? 'bg-amber-500/10 text-amber-400 hover:bg-amber-500/20 border-l-4 border-amber-500/50 hover:text-amber-300'
-                        : 'text-slate-300 hover:bg-slate-700/50 hover:text-white border-l-4 border-transparent'
+                        : 'text-slate-300 hover:bg-slate-750 hover:text-white border-l-4 border-transparent'
                 }`
             }
         >
             <span className="text-lg">{item.icon}</span>
-            <span className="font-medium flex items-center gap-2">
+            <span className="font-semibold flex items-center gap-2">
                 {item.name}
             </span>
         </NavLink>
     );
 
-    const SectionHeader: React.FC<{ title: string; section: string; icon: string }> = ({ title, section, icon }) => (
-        <button
-            onClick={() => toggleSection(section)}
-            className="flex items-center justify-between w-full px-4 py-3 text-left text-slate-400 hover:text-white transition-colors"
-        >
-            <span className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider">
-                <span>{icon}</span>
-                {title}
-            </span>
-            <svg
-                className={`w-4 h-4 transition-transform duration-200 ${expandedSection === section ? 'rotate-180' : ''}`}
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-            >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-            </svg>
-        </button>
+    const sidebarInnerContent = (
+        <div className="flex flex-col h-full justify-between">
+            {/* Header */}
+            {!isInline && (
+                <div className="flex items-center justify-between p-4 border-b border-slate-700/50">
+                    <Link to="/home" className="flex items-center gap-2" onClick={onClose}>
+                        <img src="/logotheplayer.png" alt="ThePlayer.gg" className="h-8" />
+                    </Link>
+                    <button
+                        onClick={onClose}
+                        title="Close"
+                        className="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors"
+                    >
+                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+            )}
+            {isInline && (
+                <div className="p-6 border-b border-slate-800/40 flex items-center justify-center">
+                    <Link to="/home" className="flex flex-col items-center gap-1">
+                        <img src="/logotheplayer.png" alt="ThePlayer.gg" className="h-10 hover:scale-105 transition-transform duration-300" />
+                        <span className="text-[9px] uppercase font-black tracking-[0.3em] text-slate-500">TCG Platform</span>
+                    </Link>
+                </div>
+            )}
+
+            {/* Navigation - Scrollable area */}
+            <div className="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-4">
+                <div className="space-y-1">
+                    <NavItem item={{ name: t('inicio'), path: '/home', icon: '🏠' }} />
+                    <NavItem item={{ name: t('ranking'), path: '/ranking', icon: '📊' }} />
+                    <NavItem item={{ name: t('eventos'), path: '/eventos', icon: '📅' }} />
+                    <NavItem item={{ name: t('tiendas'), path: '/tiendas', icon: '🏪' }} />
+                    <NavItem item={{ name: t('foro'), path: '/foro', icon: '💬' }} />
+                    <NavItem item={{ name: t('contenido'), path: '/contenido', icon: '📱' }} />
+                    <NavItem item={{ name: t('cambiar_juego'), path: '/universe-selection', icon: '🌌', isSpecial: true }} />
+                </div>
+
+                {/* Mi Perfil (Solo Logueados) */}
+                {isLoggedIn && (
+                    <div className="pt-4 border-t border-slate-850 space-y-1">
+                        {userRole === 'admin' && (
+                            <>
+                                <NavItem item={{ name: t('panel_admin'), path: '/admin', icon: '🛡️' }} />
+                                <NavItem item={{ name: t('panel_tienda'), path: '/dashboard/tienda', icon: '🏪' }} />
+                            </>
+                        )}
+                        {userRole === 'store' && (
+                            <NavItem item={{ name: t('panel_tienda'), path: '/dashboard/tienda', icon: '🏪' }} />
+                        )}
+                        {userRole === 'player' && (
+                            <NavItem item={{ name: t('mi_panel'), path: '/dashboard/jugador', icon: '🎮' }} />
+                        )}
+                        {isContentCreator && (
+                            <NavItem item={{ name: t('panel_creador'), path: '/dashboard/creador', icon: '🎬' }} />
+                        )}
+                        <NavItem item={{ name: t('favoritos'), path: '/favorites', icon: '❤️' }} />
+                        <NavItem item={{ name: t('notificaciones'), path: '/notifications', icon: '🔔' }} />
+                        <NavItem item={{ name: t('configuracion'), path: '/settings', icon: '⚙️' }} />
+                    </div>
+                )}
+
+                {/* Información */}
+                <div className="pt-4 border-t border-slate-850 space-y-1">
+                    <NavItem item={{ name: t('quienes_somos'), path: '/quienes-somos', icon: '🤝' }} />
+                    <NavItem item={{ name: t('reglamento'), path: '/reglamento', icon: '📜' }} />
+                </div>
+
+                {/* Language and Theme controls */}
+                <div className="pt-4 border-t border-slate-850 space-y-3">
+                    <div>
+                        <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-1.5">{t('idioma')}</p>
+                        <div className="flex gap-2">
+                            {(['es', 'pt', 'en'] as const).map(lang => (
+                                <button
+                                    key={lang}
+                                    onClick={() => setLanguage(lang)}
+                                    className={`flex-1 py-1 rounded-lg text-[10px] font-black uppercase transition-all ${language === lang ? 'bg-sky-600/30 text-sky-400 border border-sky-500/50' : 'bg-slate-800/40 text-slate-400 hover:text-slate-200 border border-slate-800'}`}
+                                >
+                                    {lang}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-1.5">{t('tema')}</p>
+                        <button
+                            onClick={toggleTheme}
+                            className="w-full flex items-center justify-between px-3 py-1.5 bg-slate-800/40 border border-slate-800 rounded-lg text-[10px] font-black uppercase text-slate-450 hover:text-slate-200 transition-all cursor-pointer"
+                        >
+                            <span>{theme === 'dark' ? t('oscuro') : t('claro')}</span>
+                            <span>{theme === 'dark' ? '🌙' : '☀️'}</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            {/* Redes Sociales - Sidebar Bottom */}
+            <div className="p-4 border-t border-slate-850">
+                <p className="text-[9px] font-black text-slate-500 uppercase tracking-[0.2em] mb-3 text-center">{t('siguenos')}</p>
+                <div className="flex justify-center gap-3">
+                    <a href="https://web.facebook.com/theplayercl" target="_blank" rel="noopener noreferrer" title="Facebook" className="p-1.5 bg-slate-800/40 border border-slate-805 hover:border-slate-700 rounded-lg text-slate-400 hover:text-blue-500 hover:bg-slate-700/20 transition-all">
+                        <Facebook className="w-4 h-4" />
+                    </a>
+                    <a href="https://www.instagram.com/theplayer_cl/" target="_blank" rel="noopener noreferrer" title="Instagram" className="p-1.5 bg-slate-800/40 border border-slate-805 hover:border-slate-700 rounded-lg text-slate-400 hover:text-pink-500 hover:bg-slate-700/20 transition-all">
+                        <Instagram className="w-4 h-4" />
+                    </a>
+                    <a href="https://wa.me/56992274852" target="_blank" rel="noopener noreferrer" title="WhatsApp" className="p-1.5 bg-slate-800/40 border border-slate-805 hover:border-slate-700 rounded-lg text-slate-400 hover:text-green-500 hover:bg-slate-700/20 transition-all">
+                        <MessageCircle className="w-4 h-4" />
+                    </a>
+                    <a href="mailto:contacto@theplayer.cl" title="Email" className="p-1.5 bg-slate-800/40 border border-slate-805 hover:border-slate-700 rounded-lg text-slate-400 hover:text-sky-400 hover:bg-slate-700/20 transition-all">
+                        <Mail className="w-4 h-4" />
+                    </a>
+                </div>
+            </div>
+        </div>
     );
+
+    if (isInline) {
+        return (
+            <div className="h-full w-full flex flex-col bg-slate-950/10">
+                {sidebarInnerContent}
+            </div>
+        );
+    }
 
     return (
         <>
@@ -130,81 +211,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, isLoggedIn, userRole
                 className={`fixed left-0 top-0 h-full w-72 bg-slate-900 border-r border-slate-700/50 z-[201] transform transition-transform duration-300 ease-out ${isOpen ? 'translate-x-0' : '-translate-x-full'
                     }`}
             >
-                {/* Header */}
-                <div className="flex items-center justify-between p-4 border-b border-slate-700/50">
-                    <Link to="/home" className="flex items-center gap-2" onClick={onClose}>
-                        <img src="/logotheplayer.png" alt="ThePlayer.gg" className="h-8" />
-                    </Link>
-                    <button
-                        onClick={onClose}
-                        title="Cerrar menú"
-                        className="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors"
-                    >
-                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </button>
-                </div>
-
-                {/* Navigation - Simple Direct List */}
-                <div className="overflow-y-auto h-[calc(100%-140px)] custom-scrollbar p-4">
-                    <div className="space-y-1">
-                        <NavItem item={{ name: 'Ranking', path: '/ranking', icon: '📊' }} />
-                        <NavItem item={{ name: 'Eventos', path: '/eventos', icon: '📅' }} />
-                        <NavItem item={{ name: 'Tiendas', path: '/tiendas', icon: '🏪' }} />
-                        <NavItem item={{ name: 'Foro', path: '/foro', icon: '💬' }} />
-                        <NavItem item={{ name: 'Contenido', path: '/contenido', icon: '📱' }} />
-                    </div>
-
-                    {/* Mi Perfil (Solo Logueados) - Direct List if logged in */}
-                    {isLoggedIn && (
-                        <div className="mt-4 pt-4 border-t border-slate-800 space-y-1">
-                            {userRole === 'admin' && (
-                                <>
-                                    <NavItem item={{ name: 'Panel Admin', path: '/admin', icon: '🛡️' }} />
-                                    <NavItem item={{ name: 'Panel Tienda', path: '/dashboard/tienda', icon: '🏪' }} />
-                                </>
-                            )}
-                            {userRole === 'store' && (
-                                <NavItem item={{ name: 'Panel Tienda', path: '/dashboard/tienda', icon: '🏪' }} />
-                            )}
-                            {userRole === 'player' && (
-                                <NavItem item={{ name: 'Mi Dashboard', path: '/dashboard/jugador', icon: '🎮' }} />
-                            )}
-                            {isContentCreator && (
-                                <NavItem item={{ name: 'Panel de Creador', path: '/dashboard/creador', icon: '🎬' }} />
-                            )}
-                            <NavItem item={{ name: 'Favoritos', path: '/favorites', icon: '❤️' }} />
-                            <NavItem item={{ name: 'Notificaciones', path: '/notifications', icon: '🔔' }} />
-                            <NavItem item={{ name: 'Configuración', path: '/settings', icon: '⚙️' }} />
-                        </div>
-                    )}
-
-                    {/* Información - Direct List */}
-                    <div className="mt-4 pt-4 border-t border-slate-800 space-y-1">
-                        <NavItem item={{ name: 'Quiénes Somos', path: '/quienes-somos', icon: '🤝' }} />
-                        <NavItem item={{ name: 'Reglamento', path: '/reglamento', icon: '📜' }} />
-                    </div>
-
-                    {/* Redes Sociales - Sidebar Bottom */}
-                    <div className="p-6 border-t border-slate-800 mt-4">
-                        <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-4 text-center">SÍGUENOS</p>
-                        <div className="flex justify-center gap-4">
-                            <a href="https://web.facebook.com/theplayercl" target="_blank" rel="noopener noreferrer" title="Facebook" className="p-2 bg-slate-800 rounded-lg text-slate-400 hover:text-blue-500 hover:bg-slate-700 transition-all">
-                                <Facebook className="w-5 h-5" />
-                            </a>
-                            <a href="https://www.instagram.com/theplayer_cl/" target="_blank" rel="noopener noreferrer" title="Instagram" className="p-2 bg-slate-800 rounded-lg text-slate-400 hover:text-pink-500 hover:bg-slate-700 transition-all">
-                                <Instagram className="w-5 h-5" />
-                            </a>
-                            <a href="https://wa.me/56992274852" target="_blank" rel="noopener noreferrer" title="WhatsApp" className="p-2 bg-slate-800 rounded-lg text-slate-400 hover:text-green-500 hover:bg-slate-700 transition-all">
-                                <MessageCircle className="w-5 h-5" />
-                            </a>
-                            <a href="mailto:contacto@theplayer.cl" title="Email" className="p-2 bg-slate-800 rounded-lg text-slate-400 hover:text-sky-400 hover:bg-slate-700 transition-all">
-                                <Mail className="w-5 h-5" />
-                            </a>
-                        </div>
-                    </div>
-                </div>
+                {sidebarInnerContent}
             </div>
         </>
     );

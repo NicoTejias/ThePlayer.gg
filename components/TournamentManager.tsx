@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { 
-  Trophy, Play, CheckCircle, Plus, Trash, Users, Award, 
+import {
+  Trophy, Play, CheckCircle, Plus, Trash, Users, Award,
   ArrowRight, ChevronRight, RotateCcw, AlertTriangle, Monitor,
-  Undo, ShieldAlert, Timer, PlusCircle, ArrowLeft, RefreshCw, LogOut, Check
+  Undo, ShieldAlert, Timer, PlusCircle, ArrowLeft, RefreshCw, LogOut, Check,
+  FileSpreadsheet, Calendar
 } from 'lucide-react';
 import { PlayerProfile, TournamentResult, TournamentParseResult, GameType } from '../types';
 import { supabase } from '../supabaseClient';
@@ -121,6 +122,7 @@ export const TournamentManager: React.FC<TournamentManagerProps> = ({
   ];
 
   const isCommander = format.toLowerCase() === 'commander';
+  const currentPairings = rounds.find(r => r.roundNumber === currentRoundNumber)?.pairings || [];
 
   // -------------------------------------------------------------
   // Offline-First Recovery Check
@@ -460,12 +462,32 @@ export const TournamentManager: React.FC<TournamentManagerProps> = ({
   // Pairing Generators (Swiss Pods, Seating, 1v1, Point Wager)
   // -------------------------------------------------------------
 
+  const calculateRounds = (playerCount: number, commanderFormat: boolean): number => {
+    if (commanderFormat) {
+      if (playerCount <= 7) return 2;
+      if (playerCount <= 15) return 3;
+      if (playerCount <= 63) return 4;
+      if (playerCount <= 255) return 5;
+      return 6;
+    } else {
+      if (playerCount <= 8) return 3;
+      if (playerCount <= 16) return 4;
+      if (playerCount <= 32) return 5;
+      if (playerCount <= 64) return 6;
+      if (playerCount <= 128) return 7;
+      return 8;
+    }
+  };
+
   const startTournament = () => {
     const minPlayers = isCommander ? 3 : 2;
     if (registeredPlayers.length < minPlayers) {
       toast.error(`Se requieren al menos ${minPlayers} jugadores para iniciar.`);
       return;
     }
+
+    const calculatedRounds = calculateRounds(registeredPlayers.length, isCommander);
+    setTotalRounds(calculatedRounds);
 
     // Initialize stats
     const initialStats: Record<string, PlayerStats> = {};
@@ -1332,28 +1354,14 @@ export const TournamentManager: React.FC<TournamentManagerProps> = ({
               </div>
             )}
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3">Fecha del Torneo</label>
-                <input 
-                  type="date" 
-                  value={tournamentDate}
-                  onChange={e => setTournamentDate(e.target.value)}
-                  className="w-full px-5 py-4 bg-slate-900 border border-white/5 rounded-2xl focus:outline-none focus:ring-2 focus:ring-sky-500 text-white font-bold transition-all shadow-inner"
-                />
-              </div>
-
-              <div>
-                <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3">Cantidad de Rondas</label>
-                <input 
-                  type="number" 
-                  min={1}
-                  max={10}
-                  value={totalRounds}
-                  onChange={e => setTotalRounds(parseInt(e.target.value) || 3)}
-                  className="w-full px-5 py-4 bg-slate-900 border border-white/5 rounded-2xl focus:outline-none focus:ring-2 focus:ring-sky-500 text-white font-bold transition-all shadow-inner"
-                />
-              </div>
+            <div>
+              <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3">Fecha del Torneo</label>
+              <input
+                type="date"
+                value={tournamentDate}
+                onChange={e => setTournamentDate(e.target.value)}
+                className="w-full px-5 py-4 bg-slate-900 border border-white/5 rounded-2xl focus:outline-none focus:ring-2 focus:ring-sky-500 text-white font-bold transition-all shadow-inner"
+              />
             </div>
 
             {leagues.length > 0 && (

@@ -142,7 +142,7 @@ export interface TournamentParseResult {
   pointsEarned: number;
 }
 
-export type GameType = 'mtg' | 'pokemon' | 'one_piece' | 'lorcana' | 'flesh_blood' | 'yugioh' | 'star_wars' | 'board_game' | 'rpg' | 'warhammer' | 'digimon' | 'other';
+export type GameType = 'mtg' | 'pokemon' | 'one_piece' | 'lorcana' | 'flesh_blood' | 'yugioh' | 'star_wars' | 'board_game' | 'rpg' | 'warhammer' | 'digimon' | 'alpha_clash' | 'other';
 
 export const GAME_LABELS: Record<GameType, string> = {
   mtg: 'Magic: The Gathering',
@@ -156,6 +156,7 @@ export const GAME_LABELS: Record<GameType, string> = {
   rpg: 'Rol (RPG)',
   warhammer: 'Warhammer / Wargames',
   digimon: 'Digimon Card Game',
+  alpha_clash: 'Alpha Clash TCG',
   other: 'Otro'
 };
 
@@ -195,6 +196,9 @@ export const GAME_FORMATS: Record<GameType, GameFormat[]> = {
   rpg: [],
   warhammer: [],
   digimon: [],
+  alpha_clash: [
+    { id: 'competitive', name: 'Competitivo', path: '/ranking' },
+  ],
   other: [],
 };
 
@@ -211,6 +215,7 @@ export const GAME_LOGOS: Record<GameType, { src: string; emoji: string }> = {
   rpg: { src: '', emoji: '🎭' },
   warhammer: { src: '', emoji: '🛡️' },
   digimon: { src: '/images/games/digimon-logo.png', emoji: '🦖' },
+  alpha_clash: { src: '/images/games/alphaclash-logo.png', emoji: '💥' },
   other: { src: '', emoji: '🎮' },
 };
 
