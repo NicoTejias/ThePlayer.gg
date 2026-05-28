@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { supabase } from '../supabaseClient';
 import type { Store } from '../types';
 import MapPinIcon from '../components/icons/MapPinIcon';
@@ -8,6 +8,7 @@ import StoreSubscriptionModal from '../components/StoreSubscriptionModal';
 import SubscriptionBadge from '../components/SubscriptionBadge';
 import { toast } from 'sonner';
 import SEO from '../components/SEO';
+import { useTranslation } from '../context/LanguageContext';
 
 const HeartIcon: React.FC<{ className?: string, fill?: boolean }> = ({ className, fill }) => (
     <svg xmlns="http://www.w3.org/2000/svg" className={className} fill={fill ? "currentColor" : "none"} viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -16,6 +17,7 @@ const HeartIcon: React.FC<{ className?: string, fill?: boolean }> = ({ className
 );
 
 const StoresPage: React.FC = () => {
+    const { t } = useTranslation();
     const [stores, setStores] = useState<Store[]>([]);
     const [loading, setLoading] = useState(true);
     const [followedStores, setFollowedStores] = React.useState<string[]>([]);
@@ -24,6 +26,9 @@ const StoresPage: React.FC = () => {
     const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('monthly');
     const [searchTerm, setSearchTerm] = useState('');
     const [regionFilter, setRegionFilter] = useState('Todas las Regiones');
+
+    const mapContainerRef = useRef<HTMLDivElement>(null);
+    const mapRef = useRef<any>(null);
 
     useEffect(() => {
         const fetchStores = async () => {
@@ -65,46 +70,139 @@ const StoresPage: React.FC = () => {
     const filteredStores = stores.filter(store => {
         const matchesSearch = store.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
             (store.address || '').toLowerCase().includes(searchTerm.toLowerCase());
-        const matchesRegion = regionFilter === 'Todas las Regiones' || store.region === regionFilter;
+        const matchesRegion = regionFilter === 'Todas las Regiones' || regionFilter === 'All Regions' || store.region === regionFilter;
         return matchesSearch && matchesRegion;
     });
+
+    // Dynamic Leaflet Map loading and initialization
+    useEffect(() => {
+        let isMounted = true;
+        let leafletMap: any = null;
+
+        const initMap = () => {
+            const L = (window as any).L;
+            if (!mapContainerRef.current || !L) return;
+
+            // Remove existing map if any
+            if (mapRef.current) {
+                mapRef.current.remove();
+                mapRef.current = null;
+            }
+
+            // Center on Chile
+            leafletMap = L.map(mapContainerRef.current, {
+                scrollWheelZoom: false
+            }).setView([-33.4489, -70.6693], 5);
+            mapRef.current = leafletMap;
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; OpenStreetMap contributors'
+            }).addTo(leafletMap);
+
+            // Coordinates for Chilean cities/regions
+            const CITY_COORDS: Record<string, [number, number]> = {
+                "Santiago": [-33.4489, -70.6693],
+                "Valparaíso": [-33.0472, -71.6127],
+                "Concepción": [-36.8201, -73.0444],
+                "La Serena": [-29.9027, -71.2519],
+                "Antofagasta": [-23.6509, -70.3975],
+                "Temuco": [-38.7359, -72.5904],
+                "Puerto Montt": [-41.4693, -72.9424],
+                "Iquique": [-20.2133, -70.1436],
+                "Rancagua": [-34.1708, -70.7444],
+                "Talca": [-35.4264, -71.6554],
+                "Arica": [-18.4781, -70.3125],
+                "Chillán": [-36.6066, -72.1034],
+                "Osorno": [-40.5739, -73.1253],
+                "Valdivia": [-39.8142, -73.2459]
+            };
+
+            filteredStores.forEach(store => {
+                const city = store.city || store.region || '';
+                let coords = CITY_COORDS[city];
+                
+                if (!coords) {
+                    // Try to match city from address
+                    const matchedCity = Object.keys(CITY_COORDS).find(c => 
+                        store.address?.toLowerCase().includes(c.toLowerCase())
+                    );
+                    coords = matchedCity ? CITY_COORDS[matchedCity] : [-33.4489, -70.6693];
+                }
+
+                // Add tiny jitter to avoid overlapping markers in same city
+                const jitterLat = (Math.random() - 0.5) * 0.05;
+                const jitterLng = (Math.random() - 0.5) * 0.05;
+
+                const marker = L.marker([coords[0] + jitterLat, coords[1] + jitterLng]).addTo(leafletMap);
+                
+                marker.bindPopup(`
+                    <div style="color: #0f172a; font-family: system-ui, -apple-system, sans-serif; padding: 4px;">
+                        <h4 style="margin: 0 0 4px 0; font-weight: bold; font-size: 13px; text-transform: uppercase;">${store.name}</h4>
+                        <p style="margin: 0 0 6px 0; font-size: 11px; color: #475569;">📍 ${store.address || city}</p>
+                        ${store.website ? `<a href="${store.website}" target="_blank" rel="noopener noreferrer" style="display: inline-block; font-size: 11px; font-weight: bold; color: #0284c7; text-decoration: underline;">Sitio Web</a>` : ''}
+                    </div>
+                `);
+            });
+        };
+
+        // Load Leaflet assets dynamically if not present
+        const L = (window as any).L;
+        if (!L) {
+            const link = document.createElement('link');
+            link.rel = 'stylesheet';
+            link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+            document.head.appendChild(link);
+
+            const script = document.createElement('script');
+            script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+            script.onload = () => {
+                if (isMounted) initMap();
+            };
+            document.head.appendChild(script);
+        } else {
+            initMap();
+        }
+
+        return () => {
+            isMounted = false;
+        };
+    }, [filteredStores]);
 
     return (
         <div className="space-y-16">
             <SEO
-                title="Directorio de Tiendas"
+                title={t('directorio_tiendas')}
                 description="Listado oficial de tiendas asociadas a ThePlayer.gg en Chile. Encuentra tu tienda local de TCG más cercana."
             />
             {/* Hero Section - Join ThePlayer */}
-            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate-900 via-sky-900/20 to-slate-900 border border-sky-500/30 p-12">
-                <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiMzYjgyZjYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDM0djItaDJWMzRoLTJ6bTAgNHYyaDJ2LTJoLTJ6bTAtOHYyaDJ2LTJoLTJ6bTAtNHYyaDJ2LTJoLTJ6bTAtNHYyaDJ2LTJoLTJ6bTAtNHYyaDJ2LTJoLTJ6bTAtNHYyaDJ2LTJoLTJ6bTAtNHYyaDJ2LTJoLTJ6bTAtNHYyaDJ2LTJoLTJ6Ii8+PC9nPjwvZz48L3N2Zz4=')] opacity-30"></div>
+            <div className="relative overflow-hidden rounded-3xl bg-slate-900/30 border border-white/5 p-12">
+                <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiMzYjgyZjYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDM0djItaDJWMzRoLTJ6bTAgNHYyaDJ2LTJoLTJ6bTAtOHYyaDJ2LTJoLTJ6bTAtNHYyaDJ2LTJoLTJ6bTAtNHYyaDJ2LTJoLTJ6bTAtNHYyaDJ2LTJoLTJ6bTAtNHYyaDJ2LTJoLTJ6bTAtNHYyaDJ2LTJoLTJ6bTAtNHYyaDJ2LTJoLTJ6Ii8+PC9nPjwvZz48L3N2Zz4=')] opacity-20"></div>
 
                 <div className="relative z-10 text-center mb-12">
-                    <h2 className="text-5xl font-bold text-white mb-4">¿Tienes una Tienda de TCG?</h2>
-                    <p className="text-xl text-slate-300 max-w-3xl mx-auto">
-                        Únete a ThePlayer.gg y lleva tu tienda al siguiente nivel. Atrae más jugadores, organiza torneos oficiales y crece con la comunidad.
+                    <h2 className="text-4xl font-bold text-white mb-4 uppercase tracking-tight">{t('tienes_tienda')}</h2>
+                    <p className="text-lg text-slate-350 max-w-3xl mx-auto leading-relaxed">
+                        {t('tienes_tienda_desc')}
                     </p>
                 </div>
 
                 <div className="flex justify-center mb-10 relative z-10">
-                    <div className="bg-slate-800 p-1 rounded-full border border-slate-700 inline-flex relative min-w-[280px]">
-                        {/* Background slider animation */}
+                    <div className="bg-slate-950/40 p-1 rounded-full border border-slate-800 inline-flex relative min-w-[280px]">
                         <div
-                            className={`absolute top-1 bottom-1 bg-sky-600 rounded-full transition-all duration-300 ease-in-out w-[calc(50%-4px)] ${billingCycle === 'annual' ? 'left-[calc(50%+2px)]' : 'left-1'}`}
+                            className={`absolute top-1 bottom-1 bg-sky-650 rounded-full transition-all duration-300 ease-in-out w-[calc(50%-4px)] ${billingCycle === 'annual' ? 'left-[calc(50%+2px)]' : 'left-1'}`}
                         ></div>
 
                         <button
                             onClick={() => setBillingCycle('monthly')}
-                            className={`relative z-10 w-1/2 px-6 py-2 rounded-full text-sm font-bold transition-colors ${billingCycle === 'monthly' ? 'text-white' : 'text-slate-400 hover:text-white'}`}
+                            className={`relative z-10 w-1/2 px-6 py-2 rounded-full text-xs font-black uppercase transition-colors cursor-pointer ${billingCycle === 'monthly' ? 'text-white' : 'text-slate-500 hover:text-slate-350'}`}
                         >
-                            Mensual
+                            {t('mensual')}
                         </button>
                         <button
                             onClick={() => setBillingCycle('annual')}
-                            className={`relative z-10 w-1/2 px-6 py-2 rounded-full text-sm font-bold transition-colors flex items-center justify-center gap-2 ${billingCycle === 'annual' ? 'text-white' : 'text-slate-400 hover:text-white'}`}
+                            className={`relative z-10 w-1/2 px-6 py-2 rounded-full text-xs font-black uppercase transition-colors flex items-center justify-center gap-2 cursor-pointer ${billingCycle === 'annual' ? 'text-white' : 'text-slate-500 hover:text-slate-350'}`}
                         >
-                            Anual
-                            <span className="bg-green-500 text-white text-[10px] px-1.5 py-0.5 rounded-full">Ahorra 17%</span>
+                            {t('anual')}
+                            <span className="bg-green-600 text-white text-[9px] px-1.5 py-0.5 rounded-full">{t('ahorra_17')}</span>
                         </button>
                     </div>
                 </div>
@@ -112,7 +210,7 @@ const StoresPage: React.FC = () => {
                 {/* Pricing Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto relative z-10">
                     <PricingCard
-                        title="Plan Básico"
+                        title={t('plan_basico')}
                         price={billingCycle === 'monthly' ? "25.000" : "250.000"}
                         period={billingCycle === 'monthly' ? "/mes" : "/año"}
                         features={[
@@ -122,12 +220,12 @@ const StoresPage: React.FC = () => {
                             'Gestión de eventos desde dashboard',
                             'Estadísticas básicas de asistencia'
                         ]}
-                        ctaText="Elegir Plan"
+                        ctaText={t('elegir_plan')}
                         onCTAClick={() => handleSubscribe('basic')}
                     />
 
                     <PricingCard
-                        title="Plan Medio"
+                        title={t('plan_medio')}
                         price={billingCycle === 'monthly' ? "50.000" : "500.000"}
                         period={billingCycle === 'monthly' ? "/mes" : "/año"}
                         badge="Más Popular"
@@ -141,12 +239,12 @@ const StoresPage: React.FC = () => {
                             'Prioridad en búsquedas',
                             'Estadísticas avanzadas'
                         ]}
-                        ctaText="Elegir Plan"
+                        ctaText={t('elegir_plan')}
                         onCTAClick={() => handleSubscribe('medium')}
                     />
 
                     <PricingCard
-                        title="Plan Premium"
+                        title={t('plan_premium')}
                         price={billingCycle === 'monthly' ? "100.000" : "1.000.000"}
                         period={billingCycle === 'monthly' ? "/mes" : "/año"}
                         badge="Mejor Valor"
@@ -160,63 +258,53 @@ const StoresPage: React.FC = () => {
                             'Soporte prioritario',
                             'Co-branding en eventos'
                         ]}
-                        ctaText="Elegir Plan"
+                        ctaText={t('elegir_plan')}
                         onCTAClick={() => handleSubscribe('premium')}
                     />
                 </div>
 
                 <div className="text-center mt-12 relative z-10">
-                    <p className="text-slate-400 text-sm">
+                    <p className="text-slate-500 text-xs font-semibold">
                         💡 Todos los precios son en CLP (Pesos Chilenos). {billingCycle === 'annual' ? '¡Disfruta de 2 meses gratis con el plan anual!' : 'Sin permanencia mínima.'}
                     </p>
                 </div>
             </div>
 
             {/* Map Section */}
-            <div className="bg-slate-800 rounded-xl overflow-hidden border border-slate-700 shadow-2xl relative z-10">
-                <div className="p-4 bg-slate-900 border-b border-slate-800 flex justify-between items-center">
-                    <h3 className="text-xl font-bold text-white flex items-center gap-2">
+            <div className="bg-slate-900/40 rounded-3xl overflow-hidden border border-white/5 shadow-2xl relative z-10">
+                <div className="p-5 bg-slate-950/20 border-b border-white/5 flex justify-between items-center">
+                    <h3 className="text-lg font-black text-white uppercase tracking-wider flex items-center gap-2">
                         <MapPinIcon className="w-5 h-5 text-sky-400" />
-                        Mapa de Tiendas
+                        {t('mapa_tiendas')}
                     </h3>
-                    <span className="text-xs text-slate-400">Mostrando tiendas principales</span>
+                    <span className="text-xs text-slate-500 font-bold uppercase tracking-wider">{t('mostrando_tiendas')}</span>
                 </div>
-                <div className="w-full h-96 bg-slate-900 relative">
-                    <iframe
-                        title="Mapa de Tiendas"
-                        width="100%"
-                        height="100%"
-                        frameBorder="0"
-                        scrolling="no"
-                        marginHeight={0}
-                        marginWidth={0}
-                        src="https://www.openstreetmap.org/export/embed.html?bbox=-75.608%2C-55.0%2C-66.0%2C-17.5&layer=mapnik"
-                        className="w-full h-full opacity-80 hover:opacity-100 transition-opacity"
-                    ></iframe>
-                    <div className="absolute bottom-4 right-4 bg-slate-900/90 px-3 py-1 rounded text-xs text-white pointer-events-none border border-slate-700">
+                <div className="w-full h-96 bg-slate-950 relative">
+                    <div ref={mapContainerRef} className="w-full h-full opacity-85 hover:opacity-100 transition-opacity z-10" />
+                    <div className="absolute bottom-4 right-4 bg-slate-900/90 px-3 py-1 rounded text-[10px] uppercase font-black tracking-widest text-slate-400 pointer-events-none border border-slate-700/50 z-20">
                         Solo referencial
                     </div>
                 </div>
             </div>
 
             {/* Stores Directory Section */}
-            <div className="text-center">
-                <h1 className="text-4xl sm:text-5xl font-bold text-white tracking-tighter uppercase">Directorio de Tiendas Asociadas</h1>
-                <p className="text-lg text-slate-300 mt-2 max-w-4xl mx-auto">
-                    Encuentra tu tienda local más cercana. Apoya a los organizadores que hacen crecer nuestra comunidad.
+            <div className="text-center space-y-2">
+                <h1 className="text-3xl sm:text-5xl font-black text-white tracking-tight uppercase">{t('directorio_tiendas')}</h1>
+                <p className="text-slate-400 text-base max-w-4xl mx-auto">
+                    {t('directorio_tiendas_desc')}
                 </p>
             </div>
 
             {/* Toolbar */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 bg-slate-800/50 p-4 rounded-lg border border-slate-700 items-center">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 bg-slate-900/30 p-4 rounded-2xl border border-white/5 items-center">
                 <div className="relative flex-grow md:col-span-2">
                     <input
                         type="search"
-                        placeholder="Buscar por nombre o ciudad..."
+                        placeholder={t('buscar_tienda_placeholder')}
                         aria-label="Buscar tiendas por nombre o ciudad"
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="bg-slate-900/80 text-white placeholder-slate-400 rounded-md py-2 px-4 w-full focus:outline-none focus:ring-2 focus:ring-sky-500 border border-slate-700"
+                        className="bg-slate-950/40 text-white placeholder-slate-500 rounded-xl py-2.5 px-4 w-full focus:outline-none focus:ring-2 focus:ring-sky-500 border border-slate-800"
                     />
                 </div>
                 <div className="relative">
@@ -225,9 +313,9 @@ const StoresPage: React.FC = () => {
                         aria-label="Filtrar por región"
                         value={regionFilter}
                         onChange={(e) => setRegionFilter(e.target.value)}
-                        className="bg-slate-900/80 text-white rounded-md py-2.5 px-4 w-full appearance-none focus:outline-none focus:ring-2 focus:ring-sky-500 border border-slate-700"
+                        className="bg-slate-950/40 text-white rounded-xl py-2.5 px-4 w-full appearance-none focus:outline-none focus:ring-2 focus:ring-sky-500 border border-slate-800 cursor-pointer text-sm font-semibold"
                     >
-                        <option>Todas las Regiones</option>
+                        <option>{t('todas_regiones')}</option>
                         <option>Arica y Parinacota</option>
                         <option>Tarapacá</option>
                         <option>Antofagasta</option>
@@ -254,8 +342,8 @@ const StoresPage: React.FC = () => {
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-sky-500"></div>
                 </div>
             ) : filteredStores.length === 0 ? (
-                <div className="text-center py-20 bg-slate-800/30 rounded-xl border border-dashed border-slate-700">
-                    <p className="text-slate-400">No se encontraron tiendas que coincidan con tu búsqueda.</p>
+                <div className="text-center py-20 bg-slate-900/30 rounded-3xl border border-dashed border-slate-800">
+                    <p className="text-slate-550 uppercase tracking-widest font-black text-xs">{t('no_tiendas_encontradas')}</p>
                 </div>
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-8">
@@ -265,59 +353,59 @@ const StoresPage: React.FC = () => {
 
                         // Conditional styling based on tier
                         const borderClass = {
-                            premium: 'border-2 border-yellow-500 shadow-2xl shadow-yellow-900/30',
-                            medium: 'border-2 border-sky-500 shadow-xl shadow-sky-900/20',
+                            premium: 'border-2 border-yellow-500 shadow-2xl shadow-yellow-950/20',
+                            medium: 'border-2 border-sky-500 shadow-xl shadow-sky-950/15',
                             basic: 'border border-emerald-500/50 shadow-lg',
-                            free: 'border border-slate-700'
+                            free: 'border border-white/5'
                         }[tier];
 
                         const bgClass = {
-                            premium: 'bg-gradient-to-br from-slate-800 via-slate-800 to-yellow-900/20',
-                            medium: 'bg-slate-800',
-                            basic: 'bg-slate-800',
-                            free: 'bg-slate-800'
+                            premium: 'bg-gradient-to-br from-slate-900/40 via-slate-900/40 to-yellow-950/10',
+                            medium: 'bg-slate-900/30',
+                            basic: 'bg-slate-900/30',
+                            free: 'bg-slate-900/30'
                         }[tier];
 
                         return (
-                            <div key={store.id} className={`${bgClass} rounded-lg overflow-hidden hover:shadow-sky-500/20 transition-all duration-300 ease-in-out transform hover:-translate-y-1 ${borderClass} flex flex-col text-center relative group`}>
+                            <div key={store.id} className={`${bgClass} rounded-3xl overflow-hidden hover:shadow-sky-500/10 transition-all duration-300 ease-in-out transform hover:-translate-y-1 ${borderClass} flex flex-col text-center relative group`}>
 
                                 {/* Follow Button */}
                                 <button
                                     onClick={() => toggleFollow(store.id)}
-                                    className="absolute top-3 right-3 z-10 p-2 rounded-full bg-slate-900/50 hover:bg-slate-900/80 transition-colors focus:outline-none"
+                                    className="absolute top-4 right-4 z-10 p-2 rounded-full bg-slate-950/60 hover:bg-slate-950/80 transition-colors focus:outline-none cursor-pointer"
                                     title={isFollowing ? "Dejar de seguir" : "Seguir tienda"}
                                 >
-                                    <HeartIcon className={`w-6 h-6 transition-colors duration-300 ${isFollowing ? 'text-red-500' : 'text-slate-400 group-hover:text-white'}`} fill={isFollowing} />
+                                    <HeartIcon className={`w-5 h-5 transition-colors duration-300 ${isFollowing ? 'text-red-500' : 'text-slate-400 group-hover:text-white'}`} fill={isFollowing} />
                                 </button>
 
                                 {/* Subscription Badge */}
                                 {tier !== 'free' && (
-                                    <div className="absolute top-3 left-3 z-10">
+                                    <div className="absolute top-4 left-4 z-10">
                                         <SubscriptionBadge tier={tier} size="small" />
                                     </div>
                                 )}
 
-                                <div className="p-6 bg-slate-700/50 relative">
-                                    <img className={`w-24 h-24 object-contain rounded-full mx-auto border-4 ${tier === 'premium' ? 'border-yellow-500 shadow-lg shadow-yellow-900/50' :
+                                <div className="p-6 bg-slate-950/10 relative border-b border-white/5">
+                                    <img className={`w-20 h-20 object-contain rounded-full mx-auto border-4 ${tier === 'premium' ? 'border-yellow-500 shadow-lg shadow-yellow-950/30' :
                                         tier === 'medium' ? 'border-sky-500' :
                                             tier === 'basic' ? 'border-emerald-500' :
-                                                'border-slate-600'
+                                                'border-slate-750'
                                         }`} src={store.logoUrl} alt={`${store.name} logo`} />
                                 </div>
                                 <div className="p-6 flex-grow flex flex-col items-center">
-                                    <h3 className="font-bold text-xl mb-2 text-white uppercase">{store.name}</h3>
-                                    <span className="inline-block bg-slate-700 rounded-full px-3 py-1 text-sm font-semibold text-slate-300 mb-4">{store.region}</span>
-                                    <div className="space-y-2 text-slate-300 text-sm">
-                                        <div className="flex items-center gap-2">
-                                            <MapPinIcon className="w-4 h-4 text-slate-400" />
-                                            <span>{store.address}</span>
+                                    <h3 className="font-black text-lg mb-2 text-white uppercase leading-snug">{store.name}</h3>
+                                    <span className="inline-block bg-slate-800/40 text-slate-350 border border-slate-800 rounded-full px-3 py-1 text-xs font-black uppercase tracking-wider mb-4">{store.region}</span>
+                                    <div className="space-y-2 text-slate-400 text-sm">
+                                        <div className="flex items-center gap-2 justify-center">
+                                            <MapPinIcon className="w-4 h-4 text-slate-500" />
+                                            <span className="font-semibold text-xs leading-normal">{store.address}</span>
                                         </div>
                                     </div>
                                 </div>
-                                <div className="px-6 py-4 bg-slate-800/50 mt-auto border-t border-slate-700">
-                                    <a href={store.website} target="_blank" rel="noopener noreferrer" className="w-full inline-flex items-center justify-center gap-2 bg-sky-600 text-white font-bold py-2 px-4 rounded-md hover:bg-sky-700 transition duration-300">
-                                        <GlobeAltIcon className="w-5 h-5" />
-                                        Visitar Sitio Web
+                                <div className="p-4 bg-slate-950/20 mt-auto border-t border-white/5">
+                                    <a href={store.website} target="_blank" rel="noopener noreferrer" className="w-full inline-flex items-center justify-center gap-2 bg-sky-600 hover:bg-sky-550 text-white font-black py-2.5 px-4 rounded-xl transition duration-300 text-xs uppercase tracking-wider">
+                                        <GlobeAltIcon className="w-4 h-4" />
+                                        {t('visitar_sitio')}
                                     </a>
                                 </div>
                             </div>
