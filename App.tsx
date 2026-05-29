@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { Toaster, toast } from 'sonner';
 import { HashRouter, Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from './supabaseClient';
@@ -11,70 +11,68 @@ import ParticlesBackground from './components/ParticlesBackground';
 import Sidebar from './components/Sidebar';
 import { LanguageProvider } from './context/LanguageContext';
 import { ThemeProvider } from './context/ThemeContext';
-import HomePage from './pages/HomePage';
-import RankingsPage from './pages/RankingsPage';
-import EventsPage from './pages/EventsPage';
-import MarketplacePage from './pages/MarketplacePage';
-import MyListingsPage from './pages/MyListingsPage';
-import MarketplaceDetailPage from './pages/MarketplaceDetailPage';
-import CommanderPage from './pages/CommanderPage';
-import PauperPage from './pages/PauperPage';
-import PremodernPage from './pages/PremodernPage';
-import MediaPage from './pages/MediaPage';
-import MediaArticlesPage from './pages/MediaArticlesPage';
-import MediaVideosPage from './pages/MediaVideosPage';
-import StoresPage from './pages/StoresPage';
-import AuthPage from './pages/AuthPage';
-import AdminDashboardPage from './pages/AdminDashboardPage';
-import AdminCMSPage from './pages/AdminCMSPage';
-import ArticleDetailPage from './pages/ArticleDetailPage';
-import UserManagementPage from './pages/admin/UserManagementPage';
-import ClaimReviewPage from './pages/admin/ClaimReviewPage';
-import IntegrityReviewPanel from './pages/admin/IntegrityReviewPanel';
-import TournamentEditPage from './pages/admin/TournamentEditPage';
-import SubscriptionManagementPage from './pages/admin/SubscriptionManagementPage';
-import ContentCreatorsAdminPage from './pages/admin/ContentCreatorsAdminPage';
-import MarketplaceAdminPage from './pages/admin/MarketplaceAdminPage';
-import NotificationsPage from './pages/NotificationsPage';
-import FavoritesPage from './pages/FavoritesPage';
-import SellerProfilePage from './pages/SellerProfilePage';
-import CalendarPage from './pages/CalendarPage';
-import CreatorDashboardPage from './pages/CreatorDashboardPage';
-import PlayerStatsPage from './pages/PlayerStatsPage';
-import StoreDashboardPage from './pages/StoreDashboardPage';
-import LeagueRankingPage from './pages/LeagueRankingPage';
-import CommunityLeaguesPage from './pages/CommunityLeaguesPage';
-import PlayerDashboardPage from './pages/PlayerDashboardPage';
-import TeamProfilePage from './pages/TeamProfilePage';
-import TournamentsListPage from './pages/TournamentsListPage';
-import TournamentStandingsPage from './pages/TournamentStandingsPage';
-import TournamentJoinPage from './pages/TournamentJoinPage';
-import SettingsPage from './pages/SettingsPage';
-import LiveStreamPage from './pages/LiveStreamPage';
-import SubscriptionSuccessPage from './pages/SubscriptionSuccessPage';
-import SubscriptionFailurePage from './pages/SubscriptionFailurePage';
-import LogoutSuccessPage from './pages/LogoutSuccessPage';
-import AboutPage from './pages/AboutPage';
-import ContentPage from './pages/ContentPage';
-import ReglamentoPage from './pages/ReglamentoPage';
-import PLSPage from './pages/PLSPage';
-import EmailConfirmationPage from './pages/EmailConfirmationPage';
-import ForgotPasswordPage from './pages/ForgotPasswordPage';
-import ResetPasswordPage from './pages/ResetPasswordPage';
-import NotFoundPage from './pages/NotFoundPage';
-import HallOfFamePage from './pages/HallOfFamePage';
-import ForumIndexPage from './pages/forum/ForumIndexPage';
-import ForumBoardPage from './pages/forum/ForumBoardPage';
-import ForumThreadPage from './pages/forum/ForumThreadPage';
-import CreateThreadPage from './pages/forum/CreateThreadPage';
-import AdminForumPage from './pages/admin/AdminForumPage';
-import AdminAwardsPage from './pages/AdminAwardsPage';
-import AdminSeasonPage from './pages/admin/AdminSeasonPage';
-import SupportPage from './pages/SupportPage';
-import ContentCreatorApplicationPage from './pages/ContentCreatorApplicationPage';
-import TermsPage from './pages/TermsPage';
-import SubscriptionPage from './pages/SubscriptionPage';
-import UniverseSelectionPage from './pages/UniverseSelectionPage';
+// Páginas con carga diferida (code-splitting): cada ruta genera su propio chunk
+// y solo se descarga cuando el usuario la visita, reduciendo el bundle inicial.
+const HomePage = lazy(() => import('./pages/HomePage'));
+const RankingsPage = lazy(() => import('./pages/RankingsPage'));
+const EventsPage = lazy(() => import('./pages/EventsPage'));
+const MarketplacePage = lazy(() => import('./pages/MarketplacePage'));
+const MyListingsPage = lazy(() => import('./pages/MyListingsPage'));
+const MarketplaceDetailPage = lazy(() => import('./pages/MarketplaceDetailPage'));
+const CommanderPage = lazy(() => import('./pages/CommanderPage'));
+const PauperPage = lazy(() => import('./pages/PauperPage'));
+const PremodernPage = lazy(() => import('./pages/PremodernPage'));
+const MediaPage = lazy(() => import('./pages/MediaPage'));
+const MediaArticlesPage = lazy(() => import('./pages/MediaArticlesPage'));
+const MediaVideosPage = lazy(() => import('./pages/MediaVideosPage'));
+const StoresPage = lazy(() => import('./pages/StoresPage'));
+const AuthPage = lazy(() => import('./pages/AuthPage'));
+const AdminDashboardPage = lazy(() => import('./pages/AdminDashboardPage'));
+const AdminCMSPage = lazy(() => import('./pages/AdminCMSPage'));
+const ArticleDetailPage = lazy(() => import('./pages/ArticleDetailPage'));
+const UserManagementPage = lazy(() => import('./pages/admin/UserManagementPage'));
+const ClaimReviewPage = lazy(() => import('./pages/admin/ClaimReviewPage'));
+const IntegrityReviewPanel = lazy(() => import('./pages/admin/IntegrityReviewPanel'));
+const TournamentEditPage = lazy(() => import('./pages/admin/TournamentEditPage'));
+const SubscriptionManagementPage = lazy(() => import('./pages/admin/SubscriptionManagementPage'));
+const ContentCreatorsAdminPage = lazy(() => import('./pages/admin/ContentCreatorsAdminPage'));
+const MarketplaceAdminPage = lazy(() => import('./pages/admin/MarketplaceAdminPage'));
+const NotificationsPage = lazy(() => import('./pages/NotificationsPage'));
+const FavoritesPage = lazy(() => import('./pages/FavoritesPage'));
+const SellerProfilePage = lazy(() => import('./pages/SellerProfilePage'));
+const CalendarPage = lazy(() => import('./pages/CalendarPage'));
+const CreatorDashboardPage = lazy(() => import('./pages/CreatorDashboardPage'));
+const PlayerStatsPage = lazy(() => import('./pages/PlayerStatsPage'));
+const StoreDashboardPage = lazy(() => import('./pages/StoreDashboardPage'));
+const CommunityLeaguesPage = lazy(() => import('./pages/CommunityLeaguesPage'));
+const PlayerDashboardPage = lazy(() => import('./pages/PlayerDashboardPage'));
+const TeamProfilePage = lazy(() => import('./pages/TeamProfilePage'));
+const TournamentsListPage = lazy(() => import('./pages/TournamentsListPage'));
+const TournamentStandingsPage = lazy(() => import('./pages/TournamentStandingsPage'));
+const TournamentJoinPage = lazy(() => import('./pages/TournamentJoinPage'));
+const SettingsPage = lazy(() => import('./pages/SettingsPage'));
+const LiveStreamPage = lazy(() => import('./pages/LiveStreamPage'));
+const AboutPage = lazy(() => import('./pages/AboutPage'));
+const ContentPage = lazy(() => import('./pages/ContentPage'));
+const ReglamentoPage = lazy(() => import('./pages/ReglamentoPage'));
+const PLSPage = lazy(() => import('./pages/PLSPage'));
+const EmailConfirmationPage = lazy(() => import('./pages/EmailConfirmationPage'));
+const ForgotPasswordPage = lazy(() => import('./pages/ForgotPasswordPage'));
+const ResetPasswordPage = lazy(() => import('./pages/ResetPasswordPage'));
+const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
+const HallOfFamePage = lazy(() => import('./pages/HallOfFamePage'));
+const ForumIndexPage = lazy(() => import('./pages/forum/ForumIndexPage'));
+const ForumBoardPage = lazy(() => import('./pages/forum/ForumBoardPage'));
+const ForumThreadPage = lazy(() => import('./pages/forum/ForumThreadPage'));
+const CreateThreadPage = lazy(() => import('./pages/forum/CreateThreadPage'));
+const AdminForumPage = lazy(() => import('./pages/admin/AdminForumPage'));
+const AdminAwardsPage = lazy(() => import('./pages/AdminAwardsPage'));
+const AdminSeasonPage = lazy(() => import('./pages/admin/AdminSeasonPage'));
+const SupportPage = lazy(() => import('./pages/SupportPage'));
+const ContentCreatorApplicationPage = lazy(() => import('./pages/ContentCreatorApplicationPage'));
+const TermsPage = lazy(() => import('./pages/TermsPage'));
+const SubscriptionPage = lazy(() => import('./pages/SubscriptionPage'));
+const UniverseSelectionPage = lazy(() => import('./pages/UniverseSelectionPage'));
 import type { TournamentResult, CommunityEvent, PlayerProfile, TournamentParseResult, Team } from './types';
 import OnboardingModal from './components/OnboardingModal';
 import ClaimResultsModal from './components/ClaimResultsModal';
@@ -108,23 +106,11 @@ const AppContent: React.FC = () => {
     refreshData: fetchData
   } = useAppData(currentGame, userProfile?.id);
 
-  const [unclaimedResults, setUnclaimedResults] = useState<any[]>([]);
+  const [unclaimedResults] = useState<any[]>([]);
   const [showClaimModal, setShowClaimModal] = useState(false);
-  const [isLiveSignal, setIsLiveSignal] = useState(false);
-
-  // YouTube Live Detection
-  const YOUTUBE_CHANNEL_ID = 'UC-ymLrXBUoNFhku0d8tWCVA';
-  const YOUTUBE_API_KEY = import.meta.env.VITE_YOUTUBE_API_KEY;
-
-  const checkYouTubeLiveStatus = async () => {
-    setIsLiveSignal(false);
-  };
-
-  useEffect(() => {
-    checkYouTubeLiveStatus();
-    const ytInterval = setInterval(checkYouTubeLiveStatus, 5 * 60 * 1000);
-    return () => clearInterval(ytInterval);
-  }, []);
+  // Detección de "en vivo": deshabilitada (la antigua integración con YouTube
+  // exponía la API key en el cliente). Pendiente: mover a Edge Function si se reactiva.
+  const isLiveSignal = false;
 
   // Redirect Root to Home if needed
   useEffect(() => {
@@ -252,6 +238,11 @@ const AppContent: React.FC = () => {
         <ClaimResultsModal isOpen={showClaimModal} unclaimedResults={unclaimedResults} onClose={() => setShowClaimModal(false)} onClaimProcessed={fetchData} />
 
         <main className="flex-grow container mx-auto px-4 py-8">
+          <Suspense fallback={
+            <div className="flex justify-center items-center py-24">
+              <div className="w-12 h-12 border-4 border-sky-500 border-t-transparent rounded-full animate-spin"></div>
+            </div>
+          }>
           <Routes>
             <Route path="/" element={<HomePage players={players} events={communityEvents} session={userProfile ? { user: userProfile } : null} userRole={userRole} userId={userProfile?.id} showAliasReminder={isLoggedIn && userRole === 'player' && !hasAlias} />} />
             <Route path="/home" element={<HomePage players={players} events={communityEvents} session={userProfile ? { user: userProfile } : null} userRole={userRole} userId={userProfile?.id} showAliasReminder={isLoggedIn && userRole === 'player' && !hasAlias} />} />
@@ -319,6 +310,7 @@ const AppContent: React.FC = () => {
             <Route path="/dashboard/creador" element={<CreatorDashboardPage profile={userProfile} />} />
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
+          </Suspense>
         </main>
 
         <Footer />

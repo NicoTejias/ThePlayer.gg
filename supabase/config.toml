@@ -2,7 +2,14 @@
 # This file is used by Supabase CLI to deploy functions
 
 [functions.create-subscription]
+# La función verifica el JWT manualmente (getUser) y necesita leer el header
+# Authorization, por eso verify_jwt se queda en false.
 verify_jwt = false
 
 [functions.webhook-handler]
+# MercadoPago no envía un JWT de Supabase; se valida con firma HMAC. Debe ser false.
+verify_jwt = false
+
+[functions.gemini-chat]
+# El chat asistente es público (visitantes sin login), no requiere JWT.
 verify_jwt = false

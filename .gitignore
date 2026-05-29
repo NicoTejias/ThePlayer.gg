@@ -12,6 +12,15 @@ dist
 dist-ssr
 *.local
 
+# Environment variables (NUNCA versionar secretos)
+.env
+.env.*
+!.env.example
+
+# Supabase local state
+supabase/.temp
+supabase/.branches
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
@@ -25,3 +34,12 @@ dist-ssr
 
 # INI files
 *.ini
+
+# Archivos de trabajo / experimentación (no son parte de la app)
+*.pdf
+*.mp3
+analyze_pdf*.*
+test_parser.cjs
+test-security-headers.cjs
+ranking_data.csv
+sample_eventlink_export.html
