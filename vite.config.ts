@@ -24,6 +24,22 @@ export default defineConfig(({ mode }) => {
     // Elimina console.* y debugger del bundle de producción.
     // (La API key de Gemini ya NO se inyecta en el cliente: vive en la Edge Function "gemini-chat").
     esbuild: isProd ? { drop: ['console', 'debugger'] } : {},
+    build: {
+      rollupOptions: {
+        output: {
+          // Separa las librerías pesadas en chunks propios para que se cacheen
+          // de forma independiente y no inflen el bundle de cada página.
+          manualChunks: {
+            'vendor-react': ['react', 'react-dom', 'react-router-dom'],
+            'vendor-charts': ['recharts'],
+            'vendor-pdf': ['pdfjs-dist', 'pdf-parse'],
+            'vendor-markdown': ['react-markdown'],
+            'vendor-supabase': ['@supabase/supabase-js'],
+            'vendor-particles': ['react-tsparticles', 'tsparticles-slim'],
+          },
+        },
+      },
+    },
     resolve: {
       alias: {
         '@': path.resolve(__dirname, '.'),
