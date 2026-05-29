@@ -60,7 +60,10 @@ BEGIN
 
   RETURN NEW;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
+-- IMPORTANTE: SECURITY INVOKER (default). Si fuera DEFINER, current_user dentro
+-- del trigger sería siempre 'postgres' (el dueño) y el chequeo del paso (1)
+-- dejaría pasar TODO. Debe correr con el rol real del que hace el UPDATE.
+$$ LANGUAGE plpgsql SET search_path = public;
 
 DROP TRIGGER IF EXISTS trg_prevent_profile_privilege_escalation ON public.profiles;
 CREATE TRIGGER trg_prevent_profile_privilege_escalation
