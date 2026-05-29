@@ -34,3 +34,12 @@ supabase/.branches
 
 # INI files
 *.ini
+
+# Archivos de trabajo / experimentación (no son parte de la app)
+*.pdf
+*.mp3
+analyze_pdf*.*
+test_parser.cjs
+test-security-headers.cjs
+ranking_data.csv
+sample_eventlink_export.html
