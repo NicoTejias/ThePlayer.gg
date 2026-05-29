@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../../supabaseClient';
+import { useTranslation } from '../../context/LanguageContext';
 
 interface PlayerWidgetProps {
     userId: string;
 }
 
 const PlayerWidget: React.FC<PlayerWidgetProps> = ({ userId }) => {
+    const { t } = useTranslation();
     const [playerData, setPlayerData] = useState<any>(null);
     const [loading, setLoading] = useState(true);
 
@@ -72,16 +74,16 @@ const PlayerWidget: React.FC<PlayerWidgetProps> = ({ userId }) => {
                     {/* Player Stats Card */}
                     <div className="bg-slate-800/50 backdrop-blur-sm p-6 rounded-xl border border-slate-700/50">
                         <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-                            <span className="text-2xl">📊</span> Tu Progreso
+                            <span className="text-2xl">📊</span> {t('player_progress')}
                         </h3>
                         <div className="space-y-3">
                             <div className="flex justify-between items-center">
-                                <span className="text-slate-400 text-sm">Player Points</span>
+                                <span className="text-slate-400 text-sm">{t('player_points')}</span>
                                 <span className="text-2xl font-black text-green-400 font-mono">{profile?.pwp || 0}</span>
                             </div>
                             <div className="pt-3 border-t border-slate-700">
                                 <Link to="/perfil" className="text-sky-400 hover:text-sky-300 text-sm font-bold flex items-center gap-1">
-                                    Ver Perfil Completo →
+                                    {t('player_view_profile')} →
                                 </Link>
                             </div>
                         </div>
@@ -90,7 +92,7 @@ const PlayerWidget: React.FC<PlayerWidgetProps> = ({ userId }) => {
                     {/* Upcoming Events Card */}
                     <div className="bg-slate-800/50 backdrop-blur-sm p-6 rounded-xl border border-slate-700/50">
                         <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-                            <span className="text-2xl">📅</span> Próximos Eventos
+                            <span className="text-2xl">📅</span> {t('player_upcoming_events')}
                         </h3>
                         {upcomingEvents.length > 0 ? (
                             <div className="space-y-2">
@@ -103,14 +105,14 @@ const PlayerWidget: React.FC<PlayerWidgetProps> = ({ userId }) => {
                                     </div>
                                 ))}
                                 <Link to="/eventos" className="text-sky-400 hover:text-sky-300 text-sm font-bold flex items-center gap-1 pt-2">
-                                    Ver Todos →
+                                    {t('player_view_all')} →
                                 </Link>
                             </div>
                         ) : (
                             <div className="text-center py-4">
-                                <p className="text-slate-500 text-sm mb-3">No tienes eventos próximos</p>
+                                <p className="text-slate-500 text-sm mb-3">{t('player_no_events')}</p>
                                 <Link to="/eventos" className="inline-block px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-bold rounded-lg transition-colors">
-                                    Buscar Eventos
+                                    {t('player_search_events')}
                                 </Link>
                             </div>
                         )}
@@ -119,7 +121,7 @@ const PlayerWidget: React.FC<PlayerWidgetProps> = ({ userId }) => {
                     {/* Recent Results Card */}
                     <div className="bg-slate-800/50 backdrop-blur-sm p-6 rounded-xl border border-slate-700/50">
                         <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-                            <span className="text-2xl">🏆</span> Resultados Recientes
+                            <span className="text-2xl">🏆</span> {t('player_recent_results')}
                         </h3>
                         {recentResults.length > 0 ? (
                             <div className="space-y-2">
@@ -135,13 +137,13 @@ const PlayerWidget: React.FC<PlayerWidgetProps> = ({ userId }) => {
                                     </div>
                                 ))}
                                 <Link to="/ranking" className="text-sky-400 hover:text-sky-300 text-sm font-bold flex items-center gap-1 pt-2">
-                                    Ver Historial →
+                                    {t('player_view_history')} →
                                 </Link>
                             </div>
                         ) : (
                             <div className="text-center py-4">
-                                <p className="text-slate-500 text-sm">Sin resultados aún</p>
-                                <p className="text-slate-600 text-xs mt-1">¡Participa en tu primer torneo!</p>
+                                <p className="text-slate-500 text-sm">{t('player_no_results')}</p>
+                                <p className="text-slate-600 text-xs mt-1">{t('player_first_tournament')}</p>
                             </div>
                         )}
                     </div>

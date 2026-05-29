@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../../supabaseClient';
+import { useTranslation } from '../../context/LanguageContext';
 
 const AdminWidget: React.FC = () => {
+    const { t } = useTranslation();
     const [adminData, setAdminData] = useState<any>(null);
     const [loading, setLoading] = useState(true);
 
@@ -83,15 +85,15 @@ const AdminWidget: React.FC = () => {
                             <div className="flex items-center gap-3">
                                 <span className="text-3xl">🔔</span>
                                 <div>
-                                    <p className="text-white font-bold">Tienes {totalPending} elemento{totalPending > 1 ? 's' : ''} pendiente{totalPending > 1 ? 's' : ''} de revisión</p>
-                                    <p className="text-slate-400 text-sm">Requiere tu atención como administrador</p>
+                                    <p className="text-white font-bold">{t('admin_pending_review').replace('{count}', String(totalPending))}</p>
+                                    <p className="text-slate-400 text-sm">{t('admin_attention_required')}</p>
                                 </div>
                             </div>
                             <Link
                                 to="/admin"
                                 className="px-6 py-2 bg-red-600 hover:bg-red-500 text-white font-bold rounded-lg transition-colors"
                             >
-                                Panel Admin
+                                {t('admin_panel')}
                             </Link>
                         </div>
                     </div>
@@ -101,16 +103,16 @@ const AdminWidget: React.FC = () => {
 
                     {/* Pending Content Card */}
                     <div className="bg-slate-800/50 backdrop-blur-sm p-6 rounded-xl border border-slate-700/50">
-                        <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3">Contenido Pendiente</h3>
+                        <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3">{t('admin_pending_content')}</h3>
                         <div className="space-y-2">
                             <div className="flex justify-between items-center">
-                                <span className="text-slate-300 text-sm">Artículos</span>
+                                <span className="text-slate-300 text-sm">{t('articulos')}</span>
                                 <span className={`text-xl font-black font-mono ${pendingArticles > 0 ? 'text-yellow-400' : 'text-slate-600'}`}>
                                     {pendingArticles}
                                 </span>
                             </div>
                             <Link to="/admin/cms" className="text-sky-400 hover:text-sky-300 text-xs font-bold flex items-center gap-1 pt-1">
-                                Gestionar →
+                                {t('admin_manage')} →
                             </Link>
                         </div>
                     </div>
@@ -119,14 +121,14 @@ const AdminWidget: React.FC = () => {
 
                     {/* Growth Metrics Card */}
                     <div className="bg-slate-800/50 backdrop-blur-sm p-6 rounded-xl border border-slate-700/50">
-                        <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3">Últimos 7 Días</h3>
+                        <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3">{t('admin_last_7_days')}</h3>
                         <div className="space-y-2">
                             <div className="flex justify-between items-center">
-                                <span className="text-slate-300 text-sm">Nuevos Jugadores</span>
+                                <span className="text-slate-300 text-sm">{t('admin_new_players')}</span>
                                 <span className="text-lg font-bold text-green-400">+{newPlayers}</span>
                             </div>
                             <div className="flex justify-between items-center">
-                                <span className="text-slate-300 text-sm">Nuevos Torneos</span>
+                                <span className="text-slate-300 text-sm">{t('admin_new_tournaments')}</span>
                                 <span className="text-lg font-bold text-blue-400">+{newTournaments}</span>
                             </div>
                         </div>
@@ -140,26 +142,26 @@ const AdminWidget: React.FC = () => {
                         state={{ openNewArticle: true }}
                         className="px-4 py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold text-center rounded-lg transition-colors"
                     >
-                        ✍️ Nuevo Artículo
+                        ✍️ {t('admin_new_article')}
                     </Link>
                     <Link
                         to="/admin/cms"
                         state={{ openNewVideo: true }}
                         className="px-4 py-3 bg-red-600 hover:bg-red-500 text-white font-bold text-center rounded-lg transition-colors"
                     >
-                        🎥 Nuevo Video
+                        🎥 {t('admin_new_video')}
                     </Link>
                     <Link
                         to="/admin/users"
                         className="px-4 py-3 bg-purple-600 hover:bg-purple-500 text-white font-bold text-center rounded-lg transition-colors"
                     >
-                        👥 Usuarios
+                        👥 {t('admin_users')}
                     </Link>
                     <Link
                         to="/admin"
                         className="px-4 py-3 bg-slate-700 hover:bg-slate-600 text-white font-bold text-center rounded-lg transition-colors"
                     >
-                        ⚙️ Panel Admin
+                        ⚙️ {t('admin_panel')}
                     </Link>
                 </div>
             </div>

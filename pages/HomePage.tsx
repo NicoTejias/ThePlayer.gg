@@ -183,7 +183,45 @@ const HomePage: React.FC<HomePageProps> = ({ players, events, session, userRole,
         description="ThePlayer.gg es la plataforma líder para el ecosistema TCG en Chile. Rankings, torneos y comunidad en un solo lugar."
       />
 
-      {/* Role-Based Widgets on Top */}
+      {/* Hero Banner (Dynamic Gradient Base, full width after sidebar) */}
+      <div className="relative rounded-[2rem] overflow-hidden group shadow-2xl border border-white/5 bg-gradient-to-r from-[var(--bg-secondary)] via-[var(--bg-base)] to-[var(--bg-secondary)] p-8 lg:p-12">
+        {/* Glow decoration */}
+        <div className="absolute -inset-0.5 bg-gradient-to-r from-[var(--color-accent)] to-indigo-500 rounded-[2rem] blur opacity-10 group-hover:opacity-15 transition duration-1000" />
+        
+        <div className="relative z-10 flex flex-col justify-center space-y-4 max-w-4xl">
+          <div>
+            <span className="px-3 py-1 bg-[var(--color-accent)]/20 border border-[var(--color-accent)]/40 text-[var(--color-accent)] text-[10px] font-black uppercase tracking-[0.2em] rounded-full">
+              {t('popular')}
+            </span>
+          </div>
+          
+          <h1 className="text-3xl sm:text-5xl font-black text-white uppercase tracking-wide leading-none drop-shadow-lg">
+            {t('jace_title')}
+          </h1>
+          
+          <p className="text-slate-350 text-sm sm:text-base font-medium leading-relaxed drop-shadow-md">
+            {t('jace_desc')}
+          </p>
+
+          <div className="pt-2 flex items-center gap-4">
+            <Link 
+              to="/eventos" 
+              className="px-8 py-3.5 bg-gradient-to-r from-rose-600 to-[#ff2a5f] hover:from-rose-500 hover:to-[#ff4575] text-white font-black rounded-xl text-xs uppercase tracking-wider shadow-lg shadow-rose-950/40 active:scale-95 transition-all duration-300"
+            >
+              {t('jugar')}
+            </Link>
+            
+            <Link 
+              to="/quienes-somos" 
+              className="px-6 py-3.5 bg-slate-800/60 hover:bg-slate-700/60 border border-slate-700/50 text-white font-black rounded-xl text-xs uppercase tracking-wider transition-all duration-300"
+            >
+              {t('detalles')}
+            </Link>
+          </div>
+        </div>
+      </div>
+
+      {/* Role-Based Widgets */}
       {!session && <VisitorWidget />}
       {session && userRole === 'player' && userId && <PlayerWidget userId={userId} />}
       {session && userRole === 'store' && userId && <StoreWidget storeId={userId} />}
@@ -192,131 +230,6 @@ const HomePage: React.FC<HomePageProps> = ({ players, events, session, userRole,
       {/* Gala Banner & Reminders */}
       <AliasReminderBanner show={showAliasReminder} />
       <GalaNominationsBanner />
-
-      {/* Main Dashboard Layout (Inspired by reference screenshot) */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        
-        {/* Left Side: Jace Hero Banner (2/3 width) */}
-        <div className="lg:col-span-2 relative h-[380px] sm:h-[420px] rounded-[2rem] overflow-hidden group shadow-2xl border border-white/5 bg-[#1a0c1a]">
-          {/* Hero Image Background */}
-          <div 
-            className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-102"
-            style={{ 
-              backgroundImage: `url('/images/jace_banner.png')`,
-              backgroundPosition: '50% 30%' 
-            }}
-          />
-          {/* Vignette Gradients */}
-          <div className="absolute inset-0 bg-gradient-to-r from-[#180818]/90 via-[#180818]/50 to-transparent" />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#180818] via-transparent to-transparent opacity-80" />
-
-          {/* Banner Content */}
-          <div className="absolute inset-0 flex flex-col justify-end p-8 lg:p-10 space-y-4">
-            <div>
-              <span className="px-3 py-1 bg-sky-500/25 border border-sky-400/40 text-sky-300 text-[10px] font-black uppercase tracking-[0.2em] rounded-full">
-                Popular
-              </span>
-            </div>
-            
-            <h1 className="text-3xl sm:text-5xl font-black text-white uppercase tracking-wide leading-none drop-shadow-lg">
-              {t('jace_title')}
-            </h1>
-            
-            <p className="text-slate-300 text-sm sm:text-base font-medium max-w-lg leading-relaxed drop-shadow-md">
-              {t('jace_desc')}
-            </p>
-
-            <div className="pt-2 flex items-center gap-4">
-              <Link 
-                to="/eventos" 
-                className="px-8 py-3.5 bg-gradient-to-r from-rose-600 to-[#ff2a5f] hover:from-rose-500 hover:to-[#ff4575] text-white font-black rounded-xl text-xs uppercase tracking-wider shadow-lg shadow-rose-950/40 active:scale-95 transition-all duration-300"
-              >
-                {t('jugar')}
-              </Link>
-              
-              <Link 
-                to="/quienes-somos" 
-                className="px-6 py-3.5 bg-slate-800/60 hover:bg-slate-700/60 border border-slate-700/50 text-white font-black rounded-xl text-xs uppercase tracking-wider transition-all duration-300"
-              >
-                {t('detalles')}
-              </Link>
-            </div>
-          </div>
-
-          {/* Slides Indicator dots */}
-          <div className="absolute bottom-6 right-8 flex items-center gap-2">
-            <span className="text-[10px] font-black text-slate-500 font-mono">1/3</span>
-            <div className="w-2 h-2 rounded-full bg-white shadow" />
-            <div className="w-1.5 h-1.5 rounded-full bg-white/30" />
-            <div className="w-1.5 h-1.5 rounded-full bg-white/30" />
-          </div>
-        </div>
-
-        {/* Right Side: Featured Tournaments ("In Library" style list) */}
-        <div className="bg-slate-900/40 border border-white/5 rounded-[2rem] p-6 flex flex-col shadow-2xl backdrop-blur-xl justify-between h-[380px] sm:h-[420px]">
-          <div>
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-lg font-black text-white uppercase tracking-wider">
-                {t('en_biblioteca')}
-              </h2>
-              <span className="text-xs text-sky-400 font-black cursor-pointer hover:underline">
-                {t('ver_mas')}
-              </span>
-            </div>
-
-            <div className="space-y-4 overflow-y-auto max-h-[260px] custom-scrollbar pr-1">
-              {upcomingEvents.slice(0, 4).map((event) => (
-                <Link 
-                  key={event.id}
-                  to="/eventos"
-                  className="flex items-center justify-between p-2.5 rounded-2xl bg-slate-800/20 hover:bg-slate-800/40 border border-white/0 hover:border-white/5 transition-all duration-300 group"
-                >
-                  <div className="flex items-center gap-3">
-                    {/* Event Thumbnail */}
-                    <div className="w-12 h-12 rounded-xl overflow-hidden bg-slate-800 flex-shrink-0 border border-slate-750">
-                      {event.imageUrl ? (
-                        <img src={event.imageUrl} alt={event.storeName} className="w-full h-full object-cover" />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-lg">🏪</div>
-                      )}
-                    </div>
-
-                    <div className="min-w-0">
-                      <h4 className="text-xs font-black text-white truncate group-hover:text-[#ff2a5f] transition-colors leading-tight" title={event.title}>
-                        {event.title}
-                      </h4>
-                      <p className="text-[10px] text-slate-500 uppercase font-black tracking-wider mt-0.5 truncate">
-                        {event.storeName}
-                      </p>
-                      {/* Format tag */}
-                      <span className="inline-block text-[8px] font-black text-sky-400 bg-sky-500/10 px-1.5 py-0.5 rounded uppercase mt-1">
-                        {event.format}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Arrow Action Icon */}
-                  <div className="p-2 rounded-xl bg-slate-800/50 text-slate-400 group-hover:text-white group-hover:bg-[#ff2a5f]/25 border border-slate-700/50 group-hover:border-[#ff2a5f]/40 transition-all">
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
-                    </svg>
-                  </div>
-                </Link>
-              ))}
-
-              {upcomingEvents.length === 0 && (
-                <p className="text-xs text-slate-500 text-center py-10 uppercase tracking-widest font-black">
-                  {t('no_eventos')}
-                </p>
-              )}
-            </div>
-          </div>
-
-          <div className="text-[9px] uppercase font-black text-slate-500 text-center tracking-widest mt-2 border-t border-slate-850 pt-3">
-            {stats.activeTournaments} {t('torneos')} Activos
-          </div>
-        </div>
-      </div>
 
       {/* Community Stats Row */}
       <section className="relative">

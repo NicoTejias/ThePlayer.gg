@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../../supabaseClient';
+import { useTranslation } from '../../context/LanguageContext';
 
 interface StoreWidgetProps {
     storeId: string;
 }
 
 const StoreWidget: React.FC<StoreWidgetProps> = ({ storeId }) => {
+    const { t } = useTranslation();
     const [storeData, setStoreData] = useState<any>(null);
     const [loading, setLoading] = useState(true);
 
@@ -82,20 +84,20 @@ const StoreWidget: React.FC<StoreWidgetProps> = ({ storeId }) => {
                             ) : (
                                 <span className="text-2xl">🏪</span>
                             )}
-                            Tu Tienda
+                            {t('store_your_store')}
                         </h3>
                         <div className="space-y-3">
                             <div className="flex justify-between items-center">
-                                <span className="text-slate-400 text-sm">Torneos Realizados</span>
+                                <span className="text-slate-400 text-sm">{t('store_tournaments_hosted')}</span>
                                 <span className="text-2xl font-black text-yellow-400 font-mono">{totalTournaments}</span>
                             </div>
                             <div className="flex justify-between items-center">
-                                <span className="text-slate-400 text-sm">Jugadores Inscritos</span>
+                                <span className="text-slate-400 text-sm">{t('store_registered_players')}</span>
                                 <span className="text-xl font-bold text-green-400">{playersCount}</span>
                             </div>
                             <div className="pt-3 border-t border-slate-700">
                                 <Link to="/tienda/perfil" className="text-sky-400 hover:text-sky-300 text-sm font-bold flex items-center gap-1">
-                                    Ver Perfil de Tienda →
+                                    {t('store_view_profile')} →
                                 </Link>
                             </div>
                         </div>
@@ -104,7 +106,7 @@ const StoreWidget: React.FC<StoreWidgetProps> = ({ storeId }) => {
                     {/* Upcoming Tournaments Card */}
                     <div className="bg-slate-800/50 backdrop-blur-sm p-6 rounded-xl border border-slate-700/50">
                         <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-                            <span className="text-2xl">📅</span> Tus Próximos Torneos
+                            <span className="text-2xl">📅</span> {t('store_upcoming_tournaments')}
                         </h3>
                         {upcomingTournaments.length > 0 ? (
                             <div className="space-y-2">
@@ -117,14 +119,14 @@ const StoreWidget: React.FC<StoreWidgetProps> = ({ storeId }) => {
                                     </div>
                                 ))}
                                 <Link to="/tienda/torneos" className="text-sky-400 hover:text-sky-300 text-sm font-bold flex items-center gap-1 pt-2">
-                                    Gestionar Torneos →
+                                    {t('store_manage_tournaments')} →
                                 </Link>
                             </div>
                         ) : (
                             <div className="text-center py-4">
-                                <p className="text-slate-500 text-sm mb-3">No tienes torneos programados</p>
+                                <p className="text-slate-500 text-sm mb-3">{t('store_no_tournaments')}</p>
                                 <Link to="/tienda/crear-torneo" className="inline-block px-4 py-2 bg-yellow-600 hover:bg-yellow-500 text-white text-sm font-bold rounded-lg transition-colors">
-                                    Crear Torneo
+                                    {t('store_create_tournament')}
                                 </Link>
                             </div>
                         )}
@@ -133,26 +135,26 @@ const StoreWidget: React.FC<StoreWidgetProps> = ({ storeId }) => {
                     {/* Quick Actions Card */}
                     <div className="bg-slate-800/50 backdrop-blur-sm p-6 rounded-xl border border-slate-700/50">
                         <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-                            <span className="text-2xl">⚡</span> Acciones Rápidas
+                            <span className="text-2xl">⚡</span> {t('store_quick_actions')}
                         </h3>
                         <div className="space-y-3">
                             <Link
                                 to="/tienda/crear-torneo"
                                 className="block w-full px-4 py-3 bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-yellow-500 hover:to-orange-500 text-white font-bold text-center rounded-lg transition-all transform hover:scale-105"
                             >
-                                🏆 Crear Torneo
+                                🏆 {t('store_create_tournament')}
                             </Link>
                             <Link
                                 to="/tienda/torneos"
                                 className="block w-full px-4 py-3 bg-slate-700 hover:bg-slate-600 text-white font-bold text-center rounded-lg transition-colors"
                             >
-                                📋 Gestionar Eventos
+                                📋 {t('store_manage_events')}
                             </Link>
                             <Link
                                 to="/tienda/perfil"
                                 className="block w-full px-4 py-3 bg-slate-700 hover:bg-slate-600 text-white font-bold text-center rounded-lg transition-colors"
                             >
-                                ⚙️ Configuración
+                                ⚙️ {t('store_settings')}
                             </Link>
                         </div>
                     </div>

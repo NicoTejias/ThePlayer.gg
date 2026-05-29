@@ -167,7 +167,6 @@
   --border-glow: rgba(219, 39, 119, 0.1);
 }
 
-/* Override Tailwind utilities to use our dynamic variables */
 @layer utilities {
   .bg-slate-900 {
     background-color: var(--bg-base) !important;
@@ -205,14 +204,58 @@
   }
 
   /* Make slate text classes responsive to dark/light mode */
+  .text-slate-100,
   .text-slate-200,
   .text-slate-300 {
     color: var(--text-primary) !important;
   }
 
+  .text-slate-350,
   .text-slate-400,
   .text-slate-500 {
     color: var(--text-secondary) !important;
+  }
+}
+
+/* Light Mode Overrides for High Contrast and Full Scheme Translation */
+.light-mode {
+  .text-white {
+    color: var(--text-primary) !important;
+  }
+
+  .bg-slate-950,
+  .bg-slate-900,
+  .bg-\[\#130712\],
+  .bg-\[\#1a0c1a\],
+  .bg-\[\#180c18\] {
+    background-color: var(--bg-base) !important;
+  }
+
+  .bg-slate-900\/40,
+  .bg-slate-900\/30,
+  .bg-slate-800\/20,
+  .bg-slate-800\/40,
+  .bg-slate-800\/50,
+  .bg-slate-900\/45,
+  .bg-slate-900\/65,
+  .bg-\[\#130712\]\/30 {
+    background-color: var(--bg-secondary) !important;
+  }
+
+  .border-white\/5,
+  .border-slate-700\/50,
+  .border-slate-850\/30,
+  .border-slate-850 {
+    border-color: rgba(15, 23, 42, 0.1) !important;
+  }
+
+  .hover\:bg-slate-800\/10:hover {
+    background-color: rgba(15, 23, 42, 0.04) !important;
+  }
+
+  #tsparticles canvas,
+  .particles-bg {
+    opacity: 0.15 !important;
   }
 }
 
