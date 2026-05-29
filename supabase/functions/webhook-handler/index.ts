@@ -7,6 +7,51 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 const MERCADOPAGO_ACCESS_TOKEN = Deno.env.get('MERCADOPAGO_ACCESS_TOKEN')!
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+// Secreto de la firma del webhook (MercadoPago > Notificaciones webhook).
+// Configurar con: supabase secrets set MERCADOPAGO_WEBHOOK_SECRET=...
+const MERCADOPAGO_WEBHOOK_SECRET = Deno.env.get('MERCADOPAGO_WEBHOOK_SECRET')
+
+/**
+ * Verifica la firma HMAC-SHA256 de MercadoPago.
+ * Plantilla firmada: `id:<data.id>;request-id:<x-request-id>;ts:<ts>;`
+ */
+async function isValidSignature(req: Request, dataId: string): Promise<boolean> {
+    // Si no hay secreto configurado, no podemos validar: rechazamos por seguridad.
+    if (!MERCADOPAGO_WEBHOOK_SECRET) {
+        console.error('MERCADOPAGO_WEBHOOK_SECRET no configurado: webhook rechazado.')
+        return false
+    }
+
+    const xSignature = req.headers.get('x-signature')
+    const xRequestId = req.headers.get('x-request-id')
+    if (!xSignature || !xRequestId) return false
+
+    // x-signature: "ts=...,v1=..."
+    const parts = Object.fromEntries(
+        xSignature.split(',').map((kv) => kv.split('=').map((s) => s.trim()) as [string, string])
+    )
+    const ts = parts['ts']
+    const v1 = parts['v1']
+    if (!ts || !v1) return false
+
+    const manifest = `id:${dataId};request-id:${xRequestId};ts:${ts};`
+
+    const key = await crypto.subtle.importKey(
+        'raw',
+        new TextEncoder().encode(MERCADOPAGO_WEBHOOK_SECRET),
+        { name: 'HMAC', hash: 'SHA-256' },
+        false,
+        ['sign']
+    )
+    const sigBuf = await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(manifest))
+    const computed = Array.from(new Uint8Array(sigBuf)).map((b) => b.toString(16).padStart(2, '0')).join('')
+
+    // Comparación en tiempo (razonablemente) constante.
+    if (computed.length !== v1.length) return false
+    let diff = 0
+    for (let i = 0; i < computed.length; i++) diff |= computed.charCodeAt(i) ^ v1.charCodeAt(i)
+    return diff === 0
+}
 
 serve(async (req) => {
     try {
@@ -14,9 +59,14 @@ serve(async (req) => {
 
         // Parse webhook data
         const body = await req.json()
-        console.log('Webhook received:', body)
 
         const { type, data } = body
+
+        // Validar la firma ANTES de procesar nada.
+        const dataId = String(data?.id ?? '')
+        if (!(await isValidSignature(req, dataId))) {
+            return new Response('Invalid signature', { status: 401 })
+        }
 
         // Handle different webhook events
         if (type === 'payment') {
