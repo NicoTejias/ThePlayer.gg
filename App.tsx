@@ -8,6 +8,7 @@ import Header from './components/Header';
 import Footer from './components/Footer';
 import FloatingActionButton from './components/FloatingActionButton';
 import ParticlesBackground from './components/ParticlesBackground';
+import AnimatedBackground from './components/AnimatedBackground';
 import Sidebar from './components/Sidebar';
 import { LanguageProvider } from './context/LanguageContext';
 import { ThemeProvider } from './context/ThemeContext';
@@ -200,9 +201,10 @@ const AppContent: React.FC = () => {
   }[currentGame] || 'theme-mtg';
 
   return (
-    <div className={`bg-slate-900 text-slate-200 min-h-screen flex flex-col lg:flex-row relative isolate ${themeClass}`}>
+    <div className={`text-slate-200 min-h-screen flex flex-col lg:flex-row relative isolate ${themeClass}`}>
       <Toaster position="top-center" richColors theme="dark" />
       <CookieConsent />
+      <AnimatedBackground />
       <ParticlesBackground />
 
       {/* Desktop Sidebar (inline, visible on lg screens) */}
