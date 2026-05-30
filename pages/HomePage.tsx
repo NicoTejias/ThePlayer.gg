@@ -197,8 +197,19 @@ const HomePage: React.FC<HomePageProps> = ({ players, events, session, userRole,
           }}
         />
         {/* Vignette Gradients */}
-        <div className="absolute inset-0 bg-gradient-to-r from-[var(--bg-secondary)] via-[var(--bg-secondary)]/90 to-transparent" />
-        <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg-base)] via-transparent to-transparent opacity-60" />
+        <div 
+          className="absolute inset-0 pointer-events-none" 
+          style={{
+            background: 'linear-gradient(to right, var(--bg-secondary) 0%, var(--bg-secondary) 40%, transparent 100%)'
+          }}
+        />
+        <div 
+          className="absolute inset-0 pointer-events-none" 
+          style={{
+            background: 'linear-gradient(to top, var(--bg-base) 0%, transparent 100%)',
+            opacity: 0.6
+          }}
+        />
 
         <div className="relative z-10 flex flex-col justify-center space-y-4 max-w-4xl">
           <div>
