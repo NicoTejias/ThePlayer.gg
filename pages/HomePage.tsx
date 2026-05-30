@@ -189,18 +189,18 @@ const HomePage: React.FC<HomePageProps> = ({ players, events, session, userRole,
         <div className="absolute -inset-0.5 bg-gradient-to-r from-[var(--color-accent)] to-indigo-500 rounded-[2rem] blur opacity-10 group-hover:opacity-15 transition duration-1000" />
         
         {/* Jace Image Background */}
-        <div 
-          className="absolute inset-0 bg-cover bg-right transition-transform duration-700 group-hover:scale-[1.02] opacity-50 sm:opacity-75"
-          style={{ 
+        <div
+          className="absolute inset-0 bg-cover transition-transform duration-700 group-hover:scale-[1.03] opacity-90 sm:opacity-100"
+          style={{
             backgroundImage: `url('/images/jace_banner.png')`,
-            backgroundPosition: 'right 30%' 
+            backgroundPosition: 'right center'
           }}
         />
         {/* Vignette Gradients */}
-        <div 
-          className="absolute inset-0 pointer-events-none" 
+        <div
+          className="absolute inset-0 pointer-events-none"
           style={{
-            background: 'linear-gradient(to right, var(--bg-secondary) 0%, var(--bg-secondary) 40%, transparent 100%)'
+            background: 'linear-gradient(to right, var(--bg-secondary) 0%, var(--bg-secondary) 22%, transparent 75%)'
           }}
         />
         <div 

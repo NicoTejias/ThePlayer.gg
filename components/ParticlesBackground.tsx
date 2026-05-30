@@ -32,8 +32,10 @@ const ParticlesBackground: React.FC = () => {
 
     const options = useMemo(() => ({
         background: {
+            // Transparent so the animated gradient background (AnimatedBackground) shows through.
+            // This also fixes light mode, where a hardcoded dark canvas used to keep the page dark.
             color: {
-                value: currentTheme.bg,
+                value: "transparent",
             },
         },
         fpsLimit: 120,

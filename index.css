@@ -11,6 +11,15 @@
   --text-primary: #f8fafc;
   --text-secondary: #94a3b8;
   --border-glow: rgba(255, 42, 95, 0.15);
+
+  /* Animated background gradient (dark theme): deep plum, indigo & rose */
+  --grad-1: #130712;
+  --grad-2: #2b0a33;
+  --grad-3: #14093a;
+  --grad-4: #3d0a26;
+  --blob-1: rgba(255, 42, 95, 0.38);
+  --blob-2: rgba(99, 102, 241, 0.32);
+  --blob-3: rgba(56, 189, 248, 0.22);
 }
 
 .light-mode {
@@ -22,6 +31,15 @@
   --text-primary: #0f172a;
   --text-secondary: #64748b;
   --border-glow: rgba(219, 39, 119, 0.1);
+
+  /* Animated background gradient (light theme): soft pastel pink, indigo & sky */
+  --grad-1: #fde7f3;
+  --grad-2: #e7e9ff;
+  --grad-3: #e6f7ff;
+  --grad-4: #fbe8ff;
+  --blob-1: rgba(244, 114, 182, 0.30);
+  --blob-2: rgba(129, 140, 248, 0.28);
+  --blob-3: rgba(56, 189, 248, 0.22);
 }
 
 /* Pokemon Theme - Zinc & Yellow/Amber */
@@ -294,6 +312,81 @@ body {
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: #64748b;
+}
+
+/* Animated gradient background */
+.animated-bg {
+  position: fixed;
+  inset: 0;
+  z-index: -20;
+  overflow: hidden;
+  pointer-events: none;
+  background: linear-gradient(-45deg, var(--grad-1), var(--grad-2), var(--grad-3), var(--grad-4));
+  background-size: 400% 400%;
+  animation: gradient-shift 22s ease infinite;
+}
+
+.animated-bg__blob {
+  position: absolute;
+  width: 45vw;
+  height: 45vw;
+  max-width: 720px;
+  max-height: 720px;
+  border-radius: 9999px;
+  filter: blur(90px);
+  opacity: 0.9;
+  will-change: transform;
+}
+
+.animated-bg__blob--1 {
+  top: -10%;
+  left: -8%;
+  background: radial-gradient(circle at center, var(--blob-1) 0%, transparent 70%);
+  animation: blob-drift-1 26s ease-in-out infinite;
+}
+
+.animated-bg__blob--2 {
+  bottom: -12%;
+  right: -10%;
+  background: radial-gradient(circle at center, var(--blob-2) 0%, transparent 70%);
+  animation: blob-drift-2 30s ease-in-out infinite;
+}
+
+.animated-bg__blob--3 {
+  top: 30%;
+  right: 25%;
+  background: radial-gradient(circle at center, var(--blob-3) 0%, transparent 70%);
+  animation: blob-drift-3 34s ease-in-out infinite;
+}
+
+@keyframes gradient-shift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes blob-drift-1 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(12vw, 8vh) scale(1.15); }
+  66% { transform: translate(6vw, 16vh) scale(0.92); }
+}
+
+@keyframes blob-drift-2 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(-14vw, -6vh) scale(0.9); }
+  66% { transform: translate(-6vw, -14vh) scale(1.18); }
+}
+
+@keyframes blob-drift-3 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(-10vw, 10vh) scale(1.1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animated-bg,
+  .animated-bg__blob {
+    animation: none;
+  }
 }
 
 /* Custom Animations */

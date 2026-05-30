@@ -4,7 +4,6 @@ import { useGame } from '../context/GameContext';
 import { GAME_LABELS, GameType } from '../types';
 import { Facebook, Instagram, MessageCircle, Mail } from 'lucide-react';
 import { useTranslation } from '../context/LanguageContext';
-import { useAppTheme } from '../context/ThemeContext';
 
 interface SidebarProps {
     isOpen: boolean;
@@ -17,8 +16,7 @@ interface SidebarProps {
 
 const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, isLoggedIn, userRole, isContentCreator, isInline = false }) => {
     const { currentGame } = useGame();
-    const { language, setLanguage, t } = useTranslation();
-    const { theme, toggleTheme } = useAppTheme();
+    const { t } = useTranslation();
     const sidebarRef = useRef<HTMLDivElement>(null);
     const location = useLocation();
 
@@ -135,35 +133,6 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, isLoggedIn, userRole
                 <div className="pt-4 border-t border-slate-850 space-y-1">
                     <NavItem item={{ name: t('quienes_somos'), path: '/quienes-somos', icon: '🤝' }} />
                     <NavItem item={{ name: t('reglamento'), path: '/reglamento', icon: '📜' }} />
-                </div>
-
-                {/* Language and Theme controls */}
-                <div className="pt-4 border-t border-slate-850 space-y-3">
-                    <div>
-                        <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-1.5">{t('idioma')}</p>
-                        <div className="flex gap-2">
-                            {(['es', 'pt', 'en'] as const).map(lang => (
-                                <button
-                                    key={lang}
-                                    onClick={() => setLanguage(lang)}
-                                    className={`flex-1 py-1 rounded-lg text-[10px] font-black uppercase transition-all ${language === lang ? 'bg-sky-600/30 text-sky-400 border border-sky-500/50' : 'bg-slate-800/40 text-slate-400 hover:text-slate-200 border border-slate-800'}`}
-                                >
-                                    {lang}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-                    
-                    <div>
-                        <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-1.5">{t('tema')}</p>
-                        <button
-                            onClick={toggleTheme}
-                            className="w-full flex items-center justify-between px-3 py-1.5 bg-slate-800/40 border border-slate-800 rounded-lg text-[10px] font-black uppercase text-slate-450 hover:text-slate-200 transition-all cursor-pointer"
-                        >
-                            <span>{theme === 'dark' ? t('oscuro') : t('claro')}</span>
-                            <span>{theme === 'dark' ? '🌙' : '☀️'}</span>
-                        </button>
-                    </div>
                 </div>
             </div>
 
