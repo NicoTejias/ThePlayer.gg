@@ -184,10 +184,22 @@ const HomePage: React.FC<HomePageProps> = ({ players, events, session, userRole,
       />
 
       {/* Hero Banner (Dynamic Gradient Base, full width after sidebar) */}
-      <div className="relative rounded-[2rem] overflow-hidden group shadow-2xl border border-white/5 bg-gradient-to-r from-[var(--bg-secondary)] via-[var(--bg-base)] to-[var(--bg-secondary)] p-8 lg:p-12">
+      <div className="relative rounded-[2rem] overflow-hidden group shadow-2xl border border-white/5 bg-gradient-to-r from-[var(--bg-secondary)] via-[var(--bg-base)] to-[var(--bg-secondary)] p-8 lg:p-12 min-h-[360px] flex items-center">
         {/* Glow decoration */}
         <div className="absolute -inset-0.5 bg-gradient-to-r from-[var(--color-accent)] to-indigo-500 rounded-[2rem] blur opacity-10 group-hover:opacity-15 transition duration-1000" />
         
+        {/* Jace Image Background */}
+        <div 
+          className="absolute inset-0 bg-cover bg-right transition-transform duration-700 group-hover:scale-[1.02] opacity-50 sm:opacity-75"
+          style={{ 
+            backgroundImage: `url('/images/jace_banner.png')`,
+            backgroundPosition: 'right 30%' 
+          }}
+        />
+        {/* Vignette Gradients */}
+        <div className="absolute inset-0 bg-gradient-to-r from-[var(--bg-secondary)] via-[var(--bg-secondary)]/90 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg-base)] via-transparent to-transparent opacity-60" />
+
         <div className="relative z-10 flex flex-col justify-center space-y-4 max-w-4xl">
           <div>
             <span className="px-3 py-1 bg-[var(--color-accent)]/20 border border-[var(--color-accent)]/40 text-[var(--color-accent)] text-[10px] font-black uppercase tracking-[0.2em] rounded-full">
