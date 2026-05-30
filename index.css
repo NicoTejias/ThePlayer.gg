@@ -50,7 +50,7 @@
   --color-accent-hover: #ca8a04;
   --border-glow: rgba(234, 179, 8, 0.15);
 }
-.light-mode.theme-pokemon {
+.light-mode .theme-pokemon {
   --bg-base: #fef08a; /* Soft Pokemon yellow background */
   --bg-secondary: #ffffff;
   --color-accent: #ca8a04;
@@ -66,7 +66,7 @@
   --color-accent-hover: #dc2626;
   --border-glow: rgba(239, 68, 68, 0.15);
 }
-.light-mode.theme-one_piece {
+.light-mode .theme-one_piece {
   --bg-base: #fee2e2;
   --bg-secondary: #ffffff;
   --color-accent: #dc2626;
@@ -82,7 +82,7 @@
   --color-accent-hover: #d97706;
   --border-glow: rgba(245, 158, 11, 0.15);
 }
-.light-mode.theme-lorcana {
+.light-mode .theme-lorcana {
   --bg-base: #e0f2fe;
   --bg-secondary: #ffffff;
   --color-accent: #d97706;
@@ -98,7 +98,7 @@
   --color-accent-hover: #0891b2;
   --border-glow: rgba(6, 182, 212, 0.15);
 }
-.light-mode.theme-star_wars {
+.light-mode .theme-star_wars {
   --bg-base: #ecfeff;
   --bg-secondary: #ffffff;
   --color-accent: #0891b2;
@@ -114,7 +114,7 @@
   --color-accent-hover: #9333ea;
   --border-glow: rgba(168, 85, 247, 0.15);
 }
-.light-mode.theme-yugioh {
+.light-mode .theme-yugioh {
   --bg-base: #f3e8ff;
   --bg-secondary: #ffffff;
   --color-accent: #9333ea;
@@ -130,7 +130,7 @@
   --color-accent-hover: #ef4444;
   --border-glow: rgba(248, 113, 113, 0.15);
 }
-.light-mode.theme-flesh_blood {
+.light-mode .theme-flesh_blood {
   --bg-base: #fef2f2;
   --bg-secondary: #ffffff;
   --color-accent: #ef4444;
@@ -146,7 +146,7 @@
   --color-accent-hover: #f97316;
   --border-glow: rgba(251, 146, 60, 0.15);
 }
-.light-mode.theme-digimon {
+.light-mode .theme-digimon {
   --bg-base: #f0f9ff;
   --bg-secondary: #ffffff;
   --color-accent: #f97316;
@@ -162,7 +162,7 @@
   --color-accent-hover: #f59e0b;
   --border-glow: rgba(251, 191, 36, 0.15);
 }
-.light-mode.theme-alpha_clash {
+.light-mode .theme-alpha_clash {
   --bg-base: #fffbeb;
   --bg-secondary: #ffffff;
   --color-accent: #f59e0b;
@@ -177,7 +177,7 @@
   --color-accent-hover: #d61a46;
   --border-glow: rgba(255, 42, 95, 0.15);
 }
-.light-mode.theme-mtg {
+.light-mode .theme-mtg {
   --bg-base: #fdf2f8;
   --bg-secondary: #ffffff;
   --color-accent: #db2777;
