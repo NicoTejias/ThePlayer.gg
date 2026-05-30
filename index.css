@@ -235,46 +235,106 @@
   }
 }
 
-/* Light Mode Overrides for High Contrast and Full Scheme Translation */
-.light-mode {
-  .text-white {
-    color: var(--text-primary) !important;
-  }
+/* =========================================================================
+   Light Mode Overrides — High Contrast / Full Scheme Translation
+   This is a dark-first app with hundreds of hardcoded dark colors. Instead of
+   listing every exact class, we match by substring so EVERY opacity/variant of
+   a dark surface is converted to a light one in light mode. Selectors are
+   anchored (start-of-string or after a space) so we don't accidentally fill
+   `hover:`/`focus:`/responsive-prefixed utilities that should stay transparent.
+   ========================================================================= */
 
-  .bg-slate-950,
-  .bg-slate-900,
-  .bg-\[\#130712\],
-  .bg-\[\#1a0c1a\],
-  .bg-\[\#180c18\] {
-    background-color: var(--bg-base) !important;
-  }
+/* Hardcoded white text → readable dark text */
+.light-mode .text-white {
+  color: var(--text-primary) !important;
+}
 
-  .bg-slate-900\/40,
-  .bg-slate-900\/30,
-  .bg-slate-800\/20,
-  .bg-slate-800\/40,
-  .bg-slate-800\/50,
-  .bg-slate-900\/45,
-  .bg-slate-900\/65,
-  .bg-\[\#130712\]\/30 {
-    background-color: var(--bg-secondary) !important;
-  }
+/* Dark surfaces (slate/zinc/gray/neutral + dark custom hex), any opacity,
+   non-prefixed → light surface */
+.light-mode :is(
+  [class^="bg-slate-9"], [class*=" bg-slate-9"],
+  [class^="bg-slate-8"], [class*=" bg-slate-8"],
+  [class^="bg-slate-7"], [class*=" bg-slate-7"],
+  [class^="bg-zinc-9"],  [class*=" bg-zinc-9"],
+  [class^="bg-zinc-8"],  [class*=" bg-zinc-8"],
+  [class^="bg-gray-9"],  [class*=" bg-gray-9"],
+  [class^="bg-gray-8"],  [class*=" bg-gray-8"],
+  [class^="bg-neutral-9"], [class*=" bg-neutral-9"],
+  [class^="bg-[#1"], [class*=" bg-[#1"],
+  [class^="bg-[#0"], [class*=" bg-[#0"],
+  [class^="bg-[#2"], [class*=" bg-[#2"]
+) {
+  background-color: var(--bg-secondary) !important;
+}
 
-  .border-white\/5,
-  .border-slate-700\/50,
-  .border-slate-850\/30,
-  .border-slate-850 {
-    border-color: rgba(15, 23, 42, 0.1) !important;
-  }
+/* Dark hover backgrounds → subtle light hover tint (instead of turning dark) */
+.light-mode :is(
+  [class*="hover:bg-slate-9"],
+  [class*="hover:bg-slate-8"],
+  [class*="hover:bg-slate-7"],
+  [class*="hover:bg-zinc-9"],
+  [class*="hover:bg-zinc-8"]
+):hover {
+  background-color: rgba(15, 23, 42, 0.06) !important;
+}
 
-  .hover\:bg-slate-800\/10:hover {
-    background-color: rgba(15, 23, 42, 0.04) !important;
-  }
+/* Dark gradients can't be recolored reliably → flatten to a light surface */
+.light-mode [class*="bg-gradient"]:is(
+  [class*="from-slate-9"], [class*="from-slate-8"], [class*="from-slate-7"],
+  [class*="via-slate-9"],  [class*="via-slate-8"],  [class*="via-slate-7"],
+  [class*="to-slate-9"],   [class*="to-slate-8"],   [class*="to-slate-7"],
+  [class*="from-zinc-9"],  [class*="to-zinc-9"],
+  [class*="from-gray-9"],  [class*="to-gray-9"]
+) {
+  background-image: none !important;
+  background-color: var(--bg-secondary) !important;
+}
 
-  #tsparticles canvas,
-  .particles-bg {
-    opacity: 0.15 !important;
-  }
+/* Dark borders → subtle light borders */
+.light-mode :is(
+  [class*="border-slate-9"],
+  [class*="border-slate-8"],
+  [class*="border-slate-7"],
+  [class*="border-white/5"],
+  [class*="border-white/10"]
+) {
+  border-color: rgba(15, 23, 42, 0.12) !important;
+}
+
+/* Glassmorphism panels → light glass */
+.light-mode .glass {
+  background: rgba(255, 255, 255, 0.55) !important;
+  border-color: rgba(15, 23, 42, 0.08) !important;
+}
+.light-mode .glass-premium {
+  background: rgba(255, 255, 255, 0.72) !important;
+  border-color: rgba(15, 23, 42, 0.1) !important;
+}
+
+/* Keep WHITE text on solid saturated accent buttons (exact classes only, so we
+   don't touch translucent `/opacity` tint badges) */
+.light-mode :is(
+  .bg-sky-500, .bg-sky-600, .bg-blue-500, .bg-blue-600,
+  .bg-rose-500, .bg-rose-600, .bg-indigo-600, .bg-violet-600,
+  .bg-emerald-600, .bg-green-600, .bg-red-600, .bg-purple-600,
+  .bg-amber-500, .bg-\[\#ff2a5f\], .bg-\[\#5865F2\],
+  .bg-\[\#FF0000\], .bg-\[\#CC0000\]
+) {
+  color: #ffffff !important;
+}
+
+/* Light accent text (amber/yellow) is unreadable on light surfaces → darken */
+.light-mode :is(
+  [class*="text-amber-3"], [class*="text-amber-4"],
+  [class*="text-yellow-3"], [class*="text-yellow-4"]
+) {
+  color: #b45309 !important;
+}
+
+/* Keep particles faint so they don't muddy the light background */
+.light-mode #tsparticles canvas,
+.light-mode .particles-bg {
+  opacity: 0.12 !important;
 }
 
 body {
