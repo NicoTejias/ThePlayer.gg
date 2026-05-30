@@ -184,13 +184,13 @@ const HomePage: React.FC<HomePageProps> = ({ players, events, session, userRole,
       />
 
       {/* Hero Banner (Dynamic Gradient Base, full width after sidebar) */}
-      <div className="relative rounded-[2rem] overflow-hidden group shadow-2xl border border-white/5 bg-gradient-to-r from-[var(--bg-secondary)] via-[var(--bg-base)] to-[var(--bg-secondary)] p-8 lg:p-12 min-h-[360px] flex items-center">
+      <div className="relative rounded-[2rem] overflow-hidden group shadow-2xl border border-white/5 bg-gradient-to-r from-[var(--bg-secondary)] via-[var(--bg-base)] to-[var(--bg-secondary)] p-8 lg:p-12 min-h-[440px] sm:min-h-[520px] flex items-center">
         {/* Glow decoration */}
         <div className="absolute -inset-0.5 bg-gradient-to-r from-[var(--color-accent)] to-indigo-500 rounded-[2rem] blur opacity-10 group-hover:opacity-15 transition duration-1000" />
-        
-        {/* Jace Image Background */}
+
+        {/* Jace Image Background (full image, no crop) */}
         <div
-          className="absolute inset-0 bg-cover transition-transform duration-700 group-hover:scale-[1.03] opacity-90 sm:opacity-100"
+          className="absolute inset-0 bg-contain bg-no-repeat transition-transform duration-700 group-hover:scale-[1.03] opacity-90 sm:opacity-100"
           style={{
             backgroundImage: `url('/images/jace_banner.png')`,
             backgroundPosition: 'right center'
