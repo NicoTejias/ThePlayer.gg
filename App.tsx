@@ -46,6 +46,7 @@ const CreatorDashboardPage = lazy(() => import('./pages/CreatorDashboardPage'));
 const PlayerStatsPage = lazy(() => import('./pages/PlayerStatsPage'));
 const StoreDashboardPage = lazy(() => import('./pages/StoreDashboardPage'));
 const CommunityLeaguesPage = lazy(() => import('./pages/CommunityLeaguesPage'));
+const LeagueRankingPage = lazy(() => import('./pages/LeagueRankingPage'));
 const PlayerDashboardPage = lazy(() => import('./pages/PlayerDashboardPage'));
 const TeamProfilePage = lazy(() => import('./pages/TeamProfilePage'));
 const TournamentsListPage = lazy(() => import('./pages/TournamentsListPage'));
@@ -280,6 +281,7 @@ const AppContent: React.FC = () => {
             <Route path="/quienes-somos" element={<AboutPage />} />
             <Route path="/contenido" element={<ContentPage />} />
             <Route path="/ligas" element={<CommunityLeaguesPage />} />
+            <Route path="/leagues/:leagueId" element={<LeagueRankingPage />} />
             <Route path="/terminos" element={<TermsPage />} />
             <Route path="/premium" element={<SubscriptionPage />} />
             <Route path="/settings" element={<SettingsPage />} />

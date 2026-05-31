@@ -10,7 +10,7 @@ import { checkTournamentIntegrity, IntegrityWarning, getTournamentFingerprint } 
 import { supabase } from '../supabaseClient';
 import { useGame } from '../context/GameContext';
 import { toast } from 'sonner';
-import { Trophy } from 'lucide-react';
+import { Trophy, History, Upload, Play } from 'lucide-react';
 import { TournamentManager } from '../components/TournamentManager';
 
 interface StoreDashboardPageProps {
@@ -43,7 +43,7 @@ const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpl
 
     // League State
     const [leagues, setLeagues] = useState<any[]>([]);
-    const [view, setView] = useState<'tournaments' | 'leagues' | 'run_tournament'>('tournaments');
+    const [activeTab, setActiveTab] = useState<'historial' | 'reporte' | 'correr' | 'ligas'>('historial');
     const [isCreatingLeague, setIsCreatingLeague] = useState(false);
     const [newLeagueData, setNewLeagueData] = useState({ name: '', format: 'Pauper', is_private: false });
     const [selectedLeagueId, setSelectedLeagueId] = useState<string>('');
@@ -53,10 +53,9 @@ const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpl
         // Fetch leagues on mount to populate selector and view
         fetchLeagues();
 
-        // Listen for FAB event to switch view
+        // Listen for FAB event to switch to the report tab
         const handleSwitchView = () => {
-            setView('tournaments');
-            // Small delay to allow view update before scrolling (if handled elsewhere) or just to ensure it's visible
+            setActiveTab('reporte');
             setTimeout(() => {
                 const uploadSection = document.getElementById('upload-section');
                 uploadSection?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -68,10 +67,16 @@ const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpl
     }, []);
 
     const fetchLeagues = async () => {
-        const { data } = await supabase
+        const { data, error } = await supabase
             .from('store_leagues')
             .select('*')
             .order('created_at', { ascending: false });
+        if (error) {
+            // Surface the failure instead of swallowing it silently.
+            console.error('Error al cargar ligas (¿existe la tabla store_leagues?):', error);
+            toast.error('No se pudieron cargar las ligas: ' + error.message);
+            return;
+        }
         if (data) setLeagues(data);
     };
 
@@ -479,109 +484,54 @@ const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpl
                 </div>
             </div>
 
-            {/* Quick Actions Portal */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                {/* Managed Ligas Card */}
-                <div className="glass-premium glass-card-hover p-10 rounded-[2.5rem] border border-white/5 shadow-2xl relative overflow-hidden group">
-                    <div className="absolute top-0 right-0 w-40 h-40 bg-violet-600/10 blur-[80px] rounded-full translate-x-1/2 -translate-y-1/2 group-hover:bg-violet-600/20 transition-all duration-700"></div>
-                    <div className="relative z-10 space-y-8">
-                        <div className="w-16 h-16 bg-slate-950 rounded-2xl flex items-center justify-center border border-white/5 shadow-2xl transition-all group-hover:scale-110 group-hover:rotate-6 group-hover:border-violet-500/30 group-hover:bg-violet-500/5 duration-500 shadow-violet-900/10">
-                            <Trophy className="w-8 h-8 text-violet-400" />
-                        </div>
-                        <div>
-                            <h3 className="text-3xl font-black text-white tracking-tighter uppercase leading-none">Ligas</h3>
-                            <p className="text-slate-400 text-sm mt-3 font-medium leading-relaxed">Temporadas personalizadas y rankings de tienda.</p>
-                        </div>
-                        <div className="space-y-3">
-                            {view === 'leagues' ? (
-                                <button
-                                    onClick={() => setView('tournaments')}
-                                    className="w-full py-5 bg-white/5 hover:bg-white/10 text-white font-black text-[10px] uppercase tracking-[0.2em] rounded-2xl border border-white/10 transition-all active:scale-95"
-                                >
-                                    Volver a Torneos
-                                </button>
-                            ) : (
-                                <button
-                                    onClick={() => setView('leagues')}
-                                    className="w-full py-5 bg-violet-600 hover:bg-violet-500 text-white font-black text-[10px] uppercase tracking-[0.2em] rounded-2xl shadow-xl shadow-violet-900/40 transition-all active:scale-95"
-                                >
-                                    Abrir Panel
-                                </button>
-                            )}
-                        </div>
-                    </div>
-                </div>
-
-                {/* Report Tournament Portal */}
-                <div className="glass-premium glass-card-hover p-10 rounded-[2.5rem] border border-white/5 shadow-2xl relative overflow-hidden group">
-                    <div className="absolute top-0 right-0 w-40 h-40 bg-sky-600/10 blur-[80px] rounded-full translate-x-1/2 -translate-y-1/2 group-hover:bg-sky-600/20 transition-all duration-700"></div>
-                    <div className="relative z-10 space-y-8">
-                        <div className="w-16 h-16 bg-slate-950 rounded-2xl flex items-center justify-center border border-white/5 shadow-2xl transition-all group-hover:scale-110 group-hover:-rotate-6 group-hover:border-sky-500/30 group-hover:bg-sky-500/5 duration-500 shadow-sky-900/10">
-                            <UploadIcon className="w-8 h-8 text-sky-400" />
-                        </div>
-                        <div>
-                            <h3 className="text-3xl font-black text-white tracking-tighter uppercase leading-none">Reportes</h3>
-                            <p className="text-slate-400 text-sm mt-3 font-medium leading-relaxed">Sube resultados oficiales para sumar Player Points.</p>
-                        </div>
-                        <div className="grid grid-cols-1 gap-3">
-                            <button
-                                onClick={() => {
-                                    setView('tournaments');
-                                    setTimeout(() => {
-                                        const uploadSec = document.getElementById('upload-section');
-                                        uploadSec?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                                    }, 100);
-                                }}
-                                className="w-full py-4 bg-sky-600 hover:bg-sky-500 text-white font-black text-[10px] uppercase tracking-[0.2em] rounded-2xl shadow-xl shadow-sky-900/40 transition-all active:scale-95"
-                            >
-                                Subir Archivo de Reporte
-                            </button>
-                            <button
-                                onClick={() => setView('run_tournament')}
-                                className="w-full py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-black text-[10px] uppercase tracking-[0.2em] rounded-2xl shadow-xl shadow-emerald-900/40 transition-all active:scale-95"
-                            >
-                                Correr Torneo en Vivo
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Resources Portal */}
-                <div className="glass-premium glass-card-hover p-10 rounded-[2.5rem] border border-white/5 shadow-2xl relative overflow-hidden group">
-                    <div className="absolute top-0 right-0 w-40 h-40 bg-emerald-600/10 blur-[80px] rounded-full translate-x-1/2 -translate-y-1/2 group-hover:bg-emerald-600/20 transition-all duration-700"></div>
-                    <div className="relative z-10 space-y-8">
-                        <div className="w-16 h-16 bg-slate-950 rounded-2xl flex items-center justify-center border border-white/5 shadow-2xl transition-all group-hover:scale-110 group-hover:rotate-6 group-hover:border-emerald-500/30 group-hover:bg-emerald-500/5 duration-500 shadow-emerald-900/10">
-                            <svg className="w-8 h-8 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                            </svg>
-                        </div>
-                        <div>
-                            <h3 className="text-3xl font-black text-white tracking-tighter uppercase leading-none">Soporte</h3>
-                            <p className="text-slate-400 text-sm mt-3 font-medium leading-relaxed">Guías oficiales y contacto directo con staff.</p>
-                        </div>
-                        <div className="grid grid-cols-2 gap-3">
-                            <button onClick={() => window.open('/#/soporte')} className="py-5 bg-white/5 hover:bg-white/10 text-white font-black text-[10px] uppercase tracking-widest rounded-2xl border border-white/10 transition-all active:scale-95">Manuales</button>
-                            <a href="mailto:soporte@theplayer.gg" className="py-5 bg-white/5 hover:bg-white/10 text-white font-black text-[10px] uppercase tracking-widest rounded-2xl border border-white/10 transition-all text-center flex items-center justify-center active:scale-95">Staff</a>
-                        </div>
-                    </div>
-                </div>
+            {/* Tab Navigation */}
+            <div className="flex flex-wrap gap-2 p-2 glass-premium rounded-2xl border border-white/5">
+                {([
+                    { key: 'historial', label: 'Historial', icon: History },
+                    { key: 'reporte', label: 'Subir Reporte', icon: Upload },
+                    { key: 'correr', label: 'Correr Torneo', icon: Play },
+                    { key: 'ligas', label: 'Ligas', icon: Trophy },
+                ] as const).map(tab => {
+                    const Icon = tab.icon;
+                    const isActive = activeTab === tab.key;
+                    return (
+                        <button
+                            key={tab.key}
+                            onClick={() => setActiveTab(tab.key)}
+                            className={`flex-1 min-w-[140px] flex items-center justify-center gap-2 py-3.5 px-5 rounded-xl text-[11px] font-black uppercase tracking-[0.15em] transition-all active:scale-95 ${isActive
+                                ? 'bg-sky-600 text-white shadow-lg shadow-sky-900/40'
+                                : 'text-slate-400 hover:text-white hover:bg-white/5'}`}
+                        >
+                            <Icon className="w-4 h-4" />
+                            <span>{tab.label}</span>
+                        </button>
+                    );
+                })}
             </div>
 
-            {/* RUN TOURNAMENT VIEW */}
-            {view === 'run_tournament' && (
-                <TournamentManager 
+            {/* RUN TOURNAMENT TAB */}
+            {activeTab === 'correr' && (
+                <TournamentManager
                     players={players}
                     currentGame={currentGame}
                     storeName={storeName || 'Tienda Oficial'}
                     leagues={leagues}
                     onTournamentUpload={onTournamentUpload}
-                    onCancel={() => setView('tournaments')}
+                    onCancel={() => setActiveTab('historial')}
                 />
             )}
 
-            {/* LEAGUES VIEW */}
-            {view === 'leagues' && (
+            {/* LEAGUES TAB */}
+            {activeTab === 'ligas' && (
                 <div className="space-y-8">
+                    <div className="flex justify-end">
+                        <button
+                            onClick={() => setIsCreatingLeague(v => !v)}
+                            className="px-5 py-3 bg-violet-600 hover:bg-violet-500 text-white font-black text-[10px] uppercase tracking-[0.2em] rounded-xl shadow-lg shadow-violet-900/40 transition-all active:scale-95"
+                        >
+                            {isCreatingLeague ? 'Cerrar' : '+ Nueva Liga'}
+                        </button>
+                    </div>
                     {isCreatingLeague && (
                         <div className="bg-slate-800 p-6 rounded-lg border border-slate-700 animate-in fade-in slide-in-from-top-4">
                             <h3 className="text-xl font-bold text-white mb-4">Nueva Liga Personalizada</h3>
@@ -775,8 +725,9 @@ const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpl
                 </div>
             )}
 
-            <div className={`grid grid-cols-1 lg:grid-cols-5 gap-12 ${view !== 'tournaments' ? 'hidden' : ''}`}>
-                <section id="upload-section" className="lg:col-span-2 space-y-6">
+            {/* REPORT TAB */}
+            {activeTab === 'reporte' && (
+                <section id="upload-section" className="max-w-2xl mx-auto space-y-6">
                     {step === 'upload' && (
                         <div className="animate-fade-in space-y-6">
                             <h2 className="text-xs font-black text-slate-500 uppercase tracking-[0.3em] inline-flex items-center gap-2">
@@ -969,8 +920,11 @@ const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpl
                         </div>
                     )}
                 </section>
+            )}
 
-                <section className="lg:col-span-3">
+            {/* HISTORY TAB */}
+            {activeTab === 'historial' && (
+                <section>
                     <h2 className="text-3xl font-bold text-white uppercase tracking-wider mb-6">Historial de Torneos</h2>
                     <div className="overflow-x-auto bg-slate-800 rounded-lg shadow-xl border border-slate-700">
                         <table className="min-w-full divide-y divide-slate-700">
@@ -1008,8 +962,8 @@ const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpl
                         </table>
                     </div>
                 </section>
-            </div >
-        </div >
+            )}
+        </div>
     );
 };
 
