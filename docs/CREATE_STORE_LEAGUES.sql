@@ -57,6 +57,10 @@ create policy "store_leagues_delete" on public.store_leagues
 
 -- 4) RPC de ranking de liga ---------------------------------------------------
 -- Agrega los resultados de todos los torneos vinculados a la liga.
+-- DROP previo: Postgres no permite cambiar el tipo de retorno de una función
+-- existente con CREATE OR REPLACE (error 42P13), así que la borramos primero.
+drop function if exists public.get_league_ranking(uuid);
+
 create or replace function public.get_league_ranking(p_league_id uuid)
 returns table (
     player_name          text,
