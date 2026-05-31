@@ -56,7 +56,7 @@ const ForumThreadPage: React.FC = () => {
                 .from('forum_threads')
                 .select(`
                     *,
-                    author:profiles!author_profile_id(username, avatar_url, role)
+                    author:profiles!user_id(username, avatar_url, role)
                 `)
                 .eq('slug', threadSlug)
                 .single();
@@ -79,7 +79,7 @@ const ForumThreadPage: React.FC = () => {
                 .from('forum_posts')
                 .select(`
                     *,
-                    author:profiles!author_profile_id(username, avatar_url, role)
+                    author:profiles!user_id(username, avatar_url, role)
                 `)
                 .eq('thread_id', threadData.id)
                 .order('created_at', { ascending: true });
@@ -107,7 +107,6 @@ const ForumThreadPage: React.FC = () => {
                 .insert({
                     thread_id: thread.id,
                     user_id: currentUser.id,
-                    author_profile_id: currentUser.id, // Keep linked
                     content: newItemContent,
                     author_name: 'Usuario' // Fallback
                 });

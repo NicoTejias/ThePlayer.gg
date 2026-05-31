@@ -53,7 +53,6 @@ const CreateThreadPage: React.FC = () => {
                 .insert({
                     board_id: boardId,
                     user_id: user.id,
-                    author_profile_id: user.id,
                     title: title.trim(),
                     slug: slug,
                     content: content,

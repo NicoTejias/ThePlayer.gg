@@ -62,7 +62,7 @@ const ForumBoardPage: React.FC = () => {
                 .from('forum_threads')
                 .select(`
                     *,
-                    author:profiles!author_profile_id(username, avatar_url),
+                    author:profiles!user_id(username, avatar_url),
                     forum_posts(count)
                 `)
                 .eq('board_id', boards.id)
