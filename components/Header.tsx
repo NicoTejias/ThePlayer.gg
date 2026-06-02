@@ -11,6 +11,42 @@ import { GAME_LABELS, GAME_LOGOS, GAME_FORMATS } from '../types';
 import { useTranslation } from '../context/LanguageContext';
 import { useAppTheme } from '../context/ThemeContext';
 
+const SpainFlag = () => (
+  <svg viewBox="0 0 750 500" className="w-5 h-3.5 object-cover rounded-sm flex-shrink-0">
+    <rect width="750" height="500" fill="#AD1519"/>
+    <rect y="125" width="750" height="250" fill="#FABD00"/>
+  </svg>
+);
+
+const BrazilFlag = () => (
+  <svg viewBox="0 0 720 504" className="w-5 h-3.5 object-cover rounded-sm flex-shrink-0">
+    <rect width="720" height="504" fill="#009B3A"/>
+    <polygon points="360,36 684,252 360,468 36,252" fill="#FEDF00"/>
+    <circle cx="360" cy="252" r="100" fill="#002776"/>
+  </svg>
+);
+
+const EnglandFlag = () => (
+  <svg viewBox="0 0 5 3" className="w-5 h-3.5 object-cover rounded-sm border border-white/10 flex-shrink-0">
+    <rect width="5" height="3" fill="#FFFFFF"/>
+    <rect x="2.2" width="0.6" height="3" fill="#CE1124"/>
+    <rect y="1.2" width="5" height="0.6" fill="#CE1124"/>
+  </svg>
+);
+
+const getFlagIcon = (lang: string) => {
+  switch (lang) {
+    case 'es':
+      return <SpainFlag />;
+    case 'pt':
+      return <BrazilFlag />;
+    case 'en':
+      return <EnglandFlag />;
+    default:
+      return null;
+  }
+};
+
 interface HeaderProps {
   isLoggedIn: boolean;
   userRole: 'player' | 'store' | 'admin' | null;
@@ -176,9 +212,7 @@ const Header: React.FC<HeaderProps> = ({
                   aria-label={t('idioma')}
                   style={{ border: '1px solid rgba(255,255,255,0.08)' }}
                 >
-                  <span className="text-base leading-none">
-                    {language === 'es' ? '🇪🇸' : language === 'pt' ? '🇧🇷' : '🇬🇧'}
-                  </span>
+                  {getFlagIcon(language)}
                   <span className="text-xs uppercase font-bold tracking-wider" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
                     {language}
                   </span>
@@ -199,9 +233,9 @@ const Header: React.FC<HeaderProps> = ({
                   >
                     <div className="py-1">
                       {[
-                        { code: 'es', flag: '🇪🇸', label: 'Español' },
-                        { code: 'pt', flag: '🇧🇷', label: 'Português' },
-                        { code: 'en', flag: '🇬🇧', label: 'English' }
+                        { code: 'es', label: 'Español' },
+                        { code: 'pt', label: 'Português' },
+                        { code: 'en', label: 'English' }
                       ].map((item) => (
                         <button
                           key={item.code}
@@ -216,7 +250,7 @@ const Header: React.FC<HeaderProps> = ({
                           }`}
                           style={{ fontFamily: 'Rajdhani, sans-serif', letterSpacing: '0.04em' }}
                         >
-                          <span className="text-base leading-none">{item.flag}</span>
+                          {getFlagIcon(item.code)}
                           <span>{item.label}</span>
                         </button>
                       ))}
