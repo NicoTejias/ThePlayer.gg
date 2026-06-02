@@ -207,7 +207,7 @@ export const GAME_LOGOS: Record<GameType, { src: string; emoji: string }> = {
   mtg: { src: '/images/games/mtg-logo.png', emoji: '🎴' },
   pokemon: { src: '/images/games/pokemon-logo.png', emoji: '⚡' },
   one_piece: { src: '/images/games/onepiece-logo.png', emoji: '🏴‍☠️' },
-  lorcana: { src: '/images/games/lorcana-logo.png', emoji: '✨' },
+  lorcana: { src: '/images/games/Disney_Lorcana_TCG_Logo_transparent.png', emoji: '✨' },
   flesh_blood: { src: '/images/games/fab-logo.png', emoji: '⚔️' },
   yugioh: { src: '/images/games/yugioh-logo.png', emoji: '🃏' },
   star_wars: { src: '/images/games/starwars-logo.png', emoji: '⭐' },
