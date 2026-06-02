@@ -32,24 +32,36 @@ const Header: React.FC<HeaderProps> = ({
   const { language, setLanguage, t } = useTranslation();
   const { theme, toggleTheme } = useAppTheme();
   const [isProfileMenuOpen, setProfileMenuOpen] = useState(false);
+  const [isLangMenuOpen, setLangMenuOpen] = useState(false);
   const [isSidebarOpen, setSidebarOpen] = useState(false);
   const [imgError, setImgError] = useState(false);
+  const [headerImgError, setHeaderImgError] = useState(false);
   const profileMenuRef = useRef<HTMLDivElement>(null);
+  const langMenuRef = useRef<HTMLDivElement>(null);
   const location = useLocation();
 
-  useEffect(() => { setImgError(false); }, [currentGame]);
+  useEffect(() => {
+    setImgError(false);
+    setHeaderImgError(false);
+  }, [currentGame]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (profileMenuRef.current && !profileMenuRef.current.contains(event.target as Node)) {
         setProfileMenuOpen(false);
       }
+      if (langMenuRef.current && !langMenuRef.current.contains(event.target as Node)) {
+        setLangMenuOpen(false);
+      }
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  useEffect(() => { setProfileMenuOpen(false); }, [location.pathname]);
+  useEffect(() => {
+    setProfileMenuOpen(false);
+    setLangMenuOpen(false);
+  }, [location.pathname]);
 
   const getDashboardPath = () => {
     switch (userRole) {
@@ -57,6 +69,28 @@ const Header: React.FC<HeaderProps> = ({
       case 'store': return '/dashboard/tienda';
       default: return '/dashboard/jugador';
     }
+  };
+
+  const renderGameLogo = (sizeClass: string) => {
+    const logoInfo = GAME_LOGOS[currentGame];
+    if (logoInfo?.src && !headerImgError) {
+      return (
+        <img
+          src={logoInfo.src}
+          alt={GAME_LABELS[currentGame]}
+          className={`${sizeClass} w-auto object-contain`}
+          onError={() => setHeaderImgError(true)}
+        />
+      );
+    }
+    return (
+      <div className="flex items-center gap-2">
+        <span className="text-xl">{logoInfo?.emoji || '🎮'}</span>
+        <span className="font-bold text-white tracking-wider" style={{ fontFamily: 'Cinzel, serif', fontSize: '0.85rem' }}>
+          {GAME_LABELS[currentGame]}
+        </span>
+      </div>
+    );
   };
 
   return (
@@ -82,7 +116,7 @@ const Header: React.FC<HeaderProps> = ({
 
               {/* Mobile logo */}
               <Link to="/home" className="flex items-center lg:hidden">
-                <img src="/logotheplayer.png" alt="ThePlayer.gg" className="h-8 w-auto" />
+                {renderGameLogo("h-8")}
               </Link>
 
               {/* Desktop: game switcher pill */}
@@ -119,7 +153,7 @@ const Header: React.FC<HeaderProps> = ({
             {/* CENTER: Site logo (desktop only) */}
             <div className="hidden lg:flex absolute left-1/2 -translate-x-1/2 items-center">
               <Link to="/home" className="flex items-center gap-2 group">
-                <img src="/logotheplayer.png" alt="ThePlayer.gg" className="h-9 w-auto opacity-90 group-hover:opacity-100 transition-opacity" />
+                {renderGameLogo("h-9 opacity-90 group-hover:opacity-100 transition-opacity")}
               </Link>
             </div>
 
@@ -134,26 +168,61 @@ const Header: React.FC<HeaderProps> = ({
                 </div>
               )}
 
-              {/* Language selector */}
-              <div className="hidden md:flex items-center game-pill p-1 rounded-xl gap-0.5">
-                {(['es', 'pt', 'en'] as const).map(lang => (
-                  <button
-                    key={lang}
-                    onClick={() => setLanguage(lang)}
-                    className="px-2.5 py-1 rounded-lg transition-all cursor-pointer"
+              {/* Language selector dropdown */}
+              <div className="hidden md:block relative" ref={langMenuRef}>
+                <button
+                  onClick={() => setLangMenuOpen(!isLangMenuOpen)}
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-xl game-pill transition-all cursor-pointer text-slate-305 hover:text-white"
+                  aria-label={t('idioma')}
+                  style={{ border: '1px solid rgba(255,255,255,0.08)' }}
+                >
+                  <span className="text-base leading-none">
+                    {language === 'es' ? '🇪🇸' : language === 'pt' ? '🇧🇷' : '🇬🇧'}
+                  </span>
+                  <span className="text-xs uppercase font-bold tracking-wider" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                    {language}
+                  </span>
+                  <svg className="w-3 h-3 text-slate-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+
+                {isLangMenuOpen && (
+                  <div
+                    className="absolute right-0 mt-2 w-36 rounded-2xl z-50 overflow-hidden animate-scale-in"
                     style={{
-                      fontFamily: 'Rajdhani, sans-serif',
-                      fontWeight: 700,
-                      letterSpacing: '0.1em',
-                      fontSize: '0.65rem',
-                      textTransform: 'uppercase',
-                      background: language === lang ? 'var(--color-accent)' : 'transparent',
-                      color: language === lang ? '#fff' : 'var(--text-secondary)',
+                      background: 'rgba(15,7,20,0.95)',
+                      backdropFilter: 'blur(24px)',
+                      border: '1px solid rgba(255,255,255,0.08)',
+                      boxShadow: '0 20px 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.04)',
                     }}
                   >
-                    {lang}
-                  </button>
-                ))}
+                    <div className="py-1">
+                      {[
+                        { code: 'es', flag: '🇪🇸', label: 'Español' },
+                        { code: 'pt', flag: '🇧🇷', label: 'Português' },
+                        { code: 'en', flag: '🇬🇧', label: 'English' }
+                      ].map((item) => (
+                        <button
+                          key={item.code}
+                          onClick={() => {
+                            setLanguage(item.code as any);
+                            setLangMenuOpen(false);
+                          }}
+                          className={`w-full text-left flex items-center gap-3 px-4 py-2 text-sm transition-colors cursor-pointer ${
+                            language === item.code 
+                              ? 'text-white bg-white/10 font-bold' 
+                              : 'text-slate-305 hover:text-white hover:bg-white/5'
+                          }`}
+                          style={{ fontFamily: 'Rajdhani, sans-serif', letterSpacing: '0.04em' }}
+                        >
+                          <span className="text-base leading-none">{item.flag}</span>
+                          <span>{item.label}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Theme toggle */}

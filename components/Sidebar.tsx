@@ -102,7 +102,6 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, isLoggedIn, userRole
                     <NavItem item={{ name: t('tiendas'), path: '/tiendas', icon: '🏪' }} />
                     <NavItem item={{ name: t('foro'), path: '/foro', icon: '💬' }} />
                     <NavItem item={{ name: t('contenido'), path: '/contenido', icon: '📱' }} />
-                    <NavItem item={{ name: t('cambiar_juego'), path: '/universe-selection', icon: '🌌', isSpecial: true }} />
                 </div>
 
                 {/* Mi Perfil (Solo Logueados) */}
