@@ -64,6 +64,7 @@ export interface CommunityEvent {
   isUserRegistered?: boolean; // Si el usuario actual está inscrito
   gameType?: GameType;
   entryFee?: string; // Valor de la entrada
+  imagePosition?: string; // object-position CSS del arte (ej: "50% 20%")
 }
 
 export interface MediaArticle {

@@ -1,6 +1,12 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { Download, Copy, X, MessageCircle, Facebook, Instagram, Sparkles, ImageIcon } from 'lucide-react';
+import { Download, Copy, X, MessageCircle, Facebook, Instagram, Sparkles, ImageIcon, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
+import { generateEventFlyer } from '../utils/geminiApi';
+
+// Envuelve una URL de imagen a través de un proxy con cabeceras CORS, para poder
+// dibujarla en el canvas sin que quede "tainted" (Scryfall sirve las imágenes
+// finales desde cards.scryfall.io sin Access-Control-Allow-Origin).
+const toCorsProxy = (url: string) => `https://images.weserv.nl/?url=${encodeURIComponent(url.replace(/^https?:\/\//, ''))}`;
 
 interface ShareEventModalProps {
     isOpen: boolean;
@@ -71,30 +77,6 @@ const getCardNameForFormat = (format: string, gameType?: string): string => {
     return 'Command Tower';
 };
 
-const simpleHash = (str: string): number => {
-    let hash = 0;
-    for (let i = 0; i < str.length; i++) {
-        const char = str.charCodeAt(i);
-        hash = ((hash << 5) - hash) + char;
-        hash = hash & hash;
-    }
-    return Math.abs(hash);
-};
-
-const buildAiPrompt = (event: ShareEventModalProps['event']): string => {
-    const game = (event.game_type || event.gameType || 'mtg').toLowerCase();
-    const format = event.format;
-    const store = event.storeName;
-
-    let gameDesc = 'trading card game';
-    if (game === 'mtg') gameDesc = 'Magic: The Gathering';
-    else if (game === 'pokemon') gameDesc = 'Pokémon Trading Card Game';
-    else if (game === 'yugioh') gameDesc = 'Yu-Gi-Oh!';
-    else if (game === 'one_piece') gameDesc = 'One Piece Card Game';
-
-    return `Epic competitive tournament poster for "${event.title}", ${format} format ${gameDesc} championship event at ${store} game store, dramatic fantasy lighting, dark mystical atmosphere, magical energy, glowing arcane effects, card game artwork style, championship trophy, competitive gaming arena, professional esports poster, cinematic composition, vibrant colors`;
-};
-
 type FlyerTab = 'classic' | 'ai';
 
 const ShareEventModal: React.FC<ShareEventModalProps> = ({ isOpen, onClose, event, storeLogoUrl, storeNameDisplay }) => {
@@ -103,6 +85,7 @@ const ShareEventModal: React.FC<ShareEventModalProps> = ({ isOpen, onClose, even
     const [generating, setGenerating] = useState(false);
     const [aiImageUrl, setAiImageUrl] = useState<string | null>(null);
     const [aiLoading, setAiLoading] = useState(false);
+    const [aiError, setAiError] = useState<string | null>(null);
     const [cardArtUrl, setCardArtUrl] = useState<string | null>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -145,8 +128,8 @@ const ShareEventModal: React.FC<ShareEventModalProps> = ({ isOpen, onClose, even
             ctx.fillStyle = '#0f172a';
             ctx.fillRect(0, 0, 1080, 1080);
 
-            // Background card art
-            const bgImgUrl = getEventImageUrl(event);
+            // Background card art (vía proxy CORS para no "tintar" el canvas)
+            const bgImgUrl = toCorsProxy(getEventImageUrl(event));
             const bgImg = document.createElement('img') as HTMLImageElement;
             bgImg.crossOrigin = 'anonymous';
             bgImg.src = bgImgUrl;
@@ -322,18 +305,26 @@ const ShareEventModal: React.FC<ShareEventModalProps> = ({ isOpen, onClose, even
 
     // ─── AI FLYER via Pollinations.ai ───────────────────────────────────────────
 
-    const buildAiFlyer = () => {
+    const buildAiFlyer = async () => {
         setAiLoading(true);
-        const seed = simpleHash(event.title); // mismo título → misma imagen (recurrentes)
-        const prompt = buildAiPrompt(event);
-        // Endpoint gratuito de Pollinations: sin `model=flux` ni `nologo=true`
-        // (esos parámetros requieren cuenta de pago y devuelven HTTP 402).
-        const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=1080&height=1080&seed=${seed}`;
-        setAiImageUrl(url);
+        setAiError(null);
+        try {
+            // El flyer se genera con Gemini en la Edge Function "gemini-flyer".
+            // Los torneos recurrentes (mismo título+formato+tienda) reusan la imagen.
+            const url = await generateEventFlyer({
+                title: event.title,
+                format: event.format,
+                storeName: storeNameDisplay || event.storeName,
+                gameType: event.game_type || event.gameType,
+            });
+            setAiImageUrl(url);
+        } catch (e: any) {
+            console.error('Error generando flyer IA:', e);
+            setAiError('No se pudo generar el flyer con IA. Intenta de nuevo.');
+        } finally {
+            setAiLoading(false);
+        }
     };
-
-    const handleAiImageLoad = () => setAiLoading(false);
-    const handleAiImageError = () => { setAiLoading(false); };
 
     // ─── Download helpers ────────────────────────────────────────────────────────
 
@@ -467,20 +458,30 @@ const ShareEventModal: React.FC<ShareEventModalProps> = ({ isOpen, onClose, even
                                         <p className="text-slate-600 text-[10px]">Puede tardar unos segundos</p>
                                     </div>
                                 )}
-                                {aiImageUrl && (
+                                {!aiLoading && aiError && (
+                                    <div className="absolute inset-0 bg-slate-900 flex flex-col items-center justify-center gap-3 z-10 px-6 text-center">
+                                        <p className="text-red-400 text-xs font-bold">{aiError}</p>
+                                        <button
+                                            onClick={buildAiFlyer}
+                                            className="px-4 py-2 bg-violet-600/80 hover:bg-violet-500 text-white text-[11px] font-black uppercase tracking-widest rounded-lg flex items-center gap-1.5"
+                                        >
+                                            <RefreshCw className="w-3.5 h-3.5" />
+                                            Reintentar
+                                        </button>
+                                    </div>
+                                )}
+                                {aiImageUrl && !aiError && (
                                     <img
                                         src={aiImageUrl}
                                         alt="Flyer IA del evento"
                                         className="w-full h-full object-cover"
-                                        onLoad={handleAiImageLoad}
-                                        onError={handleAiImageError}
                                     />
                                 )}
                             </div>
 
                             <button
                                 onClick={handleDownloadAi}
-                                disabled={aiLoading}
+                                disabled={aiLoading || !!aiError || !aiImageUrl}
                                 className="mt-5 px-6 py-3 bg-violet-600 hover:bg-violet-500 disabled:opacity-40 text-white text-xs font-black uppercase tracking-widest rounded-xl transition-all shadow-lg flex items-center gap-2"
                             >
                                 <Download className="w-4 h-4" />

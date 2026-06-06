@@ -3,6 +3,8 @@ import { useGame } from '../context/GameContext';
 import { GAME_LABELS } from '../types';
 import { supabase } from '../supabaseClient';
 import ImageUpload from './cms/ImageUpload';
+import ImageFocusPicker from './ImageFocusPicker';
+import { getEventImageUrl } from './ShareEventModal';
 
 interface ScheduleTournamentModalProps {
     isOpen: boolean;
@@ -43,7 +45,8 @@ const ScheduleTournamentModal: React.FC<ScheduleTournamentModalProps> = ({ isOpe
         description: '',
         entry_fee: '', // Added entry_fee
         game_type: currentGame,
-        image_url: ''
+        image_url: '',
+        image_position: '50% 50%'
     });
 
     // Fetch user profile on mount or open
@@ -85,7 +88,8 @@ const ScheduleTournamentModal: React.FC<ScheduleTournamentModalProps> = ({ isOpe
                 description: editingEvent.description || '',
                 entry_fee: editingEvent.entryFee || editingEvent.entry_fee || '',
                 game_type: editingEvent.gameType || editingEvent.game_type || currentGame,
-                image_url: editingEvent.imageUrl || editingEvent.image_url || ''
+                image_url: editingEvent.imageUrl || editingEvent.image_url || '',
+                image_position: editingEvent.imagePosition || editingEvent.image_position || '50% 50%'
             });
         }
     }, [isOpen, editingEvent]);
@@ -130,7 +134,8 @@ const ScheduleTournamentModal: React.FC<ScheduleTournamentModalProps> = ({ isOpe
                 description: '',
                 entry_fee: '',
                 game_type: currentGame,
-                image_url: ''
+                image_url: '',
+                image_position: '50% 50%'
             });
         } catch (error) {
             console.error('Error scheduling/updating tournament:', error);
@@ -363,6 +368,22 @@ const ScheduleTournamentModal: React.FC<ScheduleTournamentModalProps> = ({ isOpe
                         <p className="text-xs text-slate-500 mt-1 font-medium">
                             Si no subes una imagen, el sistema cargará automáticamente el arte crop de una carta icónica según tu formato de Magic (ej: Mightform Harmonizer en Standard, Survival of the Fittest en Premodern, Command Tower en Commander).
                         </p>
+
+                        {/* Selector de recorte: elegir qué parte del arte se muestra */}
+                        <div className="mt-4">
+                            <label className="block text-sm font-medium text-slate-300 mb-2">
+                                Encuadre del arte
+                            </label>
+                            <ImageFocusPicker
+                                imageUrl={getEventImageUrl({
+                                    imageUrl: formData.image_url,
+                                    format: formData.format,
+                                    game_type: formData.game_type as string,
+                                })}
+                                value={formData.image_position}
+                                onChange={(pos) => setFormData({ ...formData, image_position: pos })}
+                            />
+                        </div>
                     </div>
 
                     {/* Descripción */}

@@ -347,7 +347,8 @@ const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [
                         game_type: eventData.game_type || 'mtg',
                         entry_fee: eventData.entry_fee || null,
                         created_by: userId,
-                        image_url: eventData.image_url || null
+                        image_url: eventData.image_url || null,
+                        image_position: eventData.image_position || '50% 50%'
                     });
 
                     // Calcular siguiente fecha según tipo de recurrencia
@@ -372,7 +373,8 @@ const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [
                     game_type: eventData.game_type || 'mtg',
                     entry_fee: eventData.entry_fee || null,
                     created_by: userId,
-                    image_url: eventData.image_url || null
+                    image_url: eventData.image_url || null,
+                    image_position: eventData.image_position || '50% 50%'
                 });
             }
 
@@ -438,7 +440,8 @@ const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [
                     description: eventData.description || null,
                     game_type: eventData.game_type || 'mtg',
                     entry_fee: eventData.entry_fee || null,
-                    image_url: eventData.image_url || null
+                    image_url: eventData.image_url || null,
+                    image_position: eventData.image_position || '50% 50%'
                 })
                 .eq('id', eventId);
 
@@ -868,7 +871,8 @@ const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [
                                                 <img
                                                     src={getEventImageUrl(event)}
                                                     alt={event.title}
-                                                    className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500"
+                                                    style={{ objectPosition: event.imagePosition || '50% 50%' }}
+                                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                                                 />
                                                 <div className="absolute inset-0 bg-gradient-to-t from-slate-800 to-transparent"></div>
                                                 <div className={`absolute top-4 right-4 z-10 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-[0.2em] shadow-lg ${details.multiplier === 'x4' ? 'bg-red-500 text-white' : details.multiplier === 'x3' ? 'bg-yellow-500 text-slate-950' : 'bg-sky-500 text-white'}`}>
@@ -1053,7 +1057,8 @@ const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [
                                 <img
                                     src={getEventImageUrl(selectedCalendarEvent)}
                                     alt={selectedCalendarEvent.title}
-                                    className="w-full h-full object-cover object-top"
+                                    style={{ objectPosition: selectedCalendarEvent.imagePosition || '50% 50%' }}
+                                    className="w-full h-full object-cover"
                                 />
                                 <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/40 to-transparent"></div>
                             </div>
