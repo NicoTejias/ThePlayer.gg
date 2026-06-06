@@ -865,10 +865,10 @@ const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [
                                         <div key={event.id} className="bg-slate-800 rounded-2xl border border-slate-700 overflow-hidden hover:border-sky-500/50 transition-all duration-300 group flex flex-col relative">
                                             {/* Header Image */}
                                             <div className="h-36 w-full relative overflow-hidden border-b border-slate-700/50 bg-slate-950">
-                                                <img 
-                                                    src={getEventImageUrl(event)} 
-                                                    alt={event.title} 
-                                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+                                                <img
+                                                    src={getEventImageUrl(event)}
+                                                    alt={event.title}
+                                                    className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500"
                                                 />
                                                 <div className="absolute inset-0 bg-gradient-to-t from-slate-800 to-transparent"></div>
                                                 <div className={`absolute top-4 right-4 z-10 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-[0.2em] shadow-lg ${details.multiplier === 'x4' ? 'bg-red-500 text-white' : details.multiplier === 'x3' ? 'bg-yellow-500 text-slate-950' : 'bg-sky-500 text-white'}`}>
@@ -1050,10 +1050,10 @@ const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [
                         <div className="p-6 space-y-6">
                             {/* Visual Image Header */}
                             <div className="h-44 w-full rounded-xl overflow-hidden bg-slate-950 border border-slate-700 relative">
-                                <img 
-                                    src={getEventImageUrl(selectedCalendarEvent)} 
-                                    alt={selectedCalendarEvent.title} 
-                                    className="w-full h-full object-cover" 
+                                <img
+                                    src={getEventImageUrl(selectedCalendarEvent)}
+                                    alt={selectedCalendarEvent.title}
+                                    className="w-full h-full object-cover object-top"
                                 />
                                 <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/40 to-transparent"></div>
                             </div>

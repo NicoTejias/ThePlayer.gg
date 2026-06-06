@@ -324,9 +324,11 @@ const ShareEventModal: React.FC<ShareEventModalProps> = ({ isOpen, onClose, even
 
     const buildAiFlyer = () => {
         setAiLoading(true);
-        const seed = simpleHash(event.title); // same title → same image (recurring)
+        const seed = simpleHash(event.title); // mismo título → misma imagen (recurrentes)
         const prompt = buildAiPrompt(event);
-        const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=1080&height=1080&seed=${seed}&model=flux&nologo=true`;
+        // Endpoint gratuito de Pollinations: sin `model=flux` ni `nologo=true`
+        // (esos parámetros requieren cuenta de pago y devuelven HTTP 402).
+        const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=1080&height=1080&seed=${seed}`;
         setAiImageUrl(url);
     };
 
@@ -448,7 +450,6 @@ const ShareEventModal: React.FC<ShareEventModalProps> = ({ isOpen, onClose, even
                                         src={cardArtUrl}
                                         alt={`Carta de ${event.format}`}
                                         className="w-full h-28 object-cover object-top"
-                                        crossOrigin="anonymous"
                                     />
                                     <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 to-transparent flex items-end px-3 pb-2">
                                         <span className="text-[10px] font-black text-violet-300 uppercase tracking-widest">
@@ -473,7 +474,6 @@ const ShareEventModal: React.FC<ShareEventModalProps> = ({ isOpen, onClose, even
                                         className="w-full h-full object-cover"
                                         onLoad={handleAiImageLoad}
                                         onError={handleAiImageError}
-                                        crossOrigin="anonymous"
                                     />
                                 )}
                             </div>
