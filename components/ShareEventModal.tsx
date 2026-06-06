@@ -60,23 +60,6 @@ export const getEventImageUrl = (event: { imageUrl?: string; image_url?: string;
     }
 };
 
-const getCardNameForFormat = (format: string, gameType?: string): string => {
-    const game = (gameType || 'mtg').toLowerCase();
-    const fmt = (format || '').toLowerCase();
-    if (game !== 'mtg') return '';
-
-    if (fmt.includes('standard')) return 'Mightform Harmonizer';
-    if (fmt.includes('modern')) return 'Ragavan, Nimble Pilferer';
-    if (fmt.includes('pioneer')) return 'Treasure Cruise';
-    if (fmt.includes('legacy')) return 'Brainstorm';
-    if (fmt.includes('pauper')) return "Chainer's Edict";
-    if (fmt.includes('premodern')) return 'Survival of the Fittest';
-    if (fmt.includes('commander') || fmt.includes('edh')) return 'Command Tower';
-    if (fmt.includes('draft') || fmt.includes('sealed') || fmt.includes('limited')) return 'Colossal Dreadmaw';
-    if (fmt.includes('rcq') || fmt.includes('premier') || fmt.includes('championship')) return 'Omnath, Locus of Creation';
-    return 'Command Tower';
-};
-
 type FlyerTab = 'classic' | 'ai';
 
 const ShareEventModal: React.FC<ShareEventModalProps> = ({ isOpen, onClose, event, storeLogoUrl, storeNameDisplay }) => {
@@ -84,10 +67,11 @@ const ShareEventModal: React.FC<ShareEventModalProps> = ({ isOpen, onClose, even
     const [flyerUrl, setFlyerUrl] = useState<string | null>(null);
     const [generating, setGenerating] = useState(false);
     const [aiImageUrl, setAiImageUrl] = useState<string | null>(null);
+    const [aiFlyerUrl, setAiFlyerUrl] = useState<string | null>(null);
     const [aiLoading, setAiLoading] = useState(false);
     const [aiError, setAiError] = useState<string | null>(null);
-    const [cardArtUrl, setCardArtUrl] = useState<string | null>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
+    const aiCanvasRef = useRef<HTMLCanvasElement>(null);
 
     const joinUrl = `${window.location.origin}/#/eventos`;
     const formattedFee = event.entry_fee ? `$${parseInt(event.entry_fee).toLocaleString('es-CL')} CLP` : 'Gratuito';
@@ -105,14 +89,199 @@ const ShareEventModal: React.FC<ShareEventModalProps> = ({ isOpen, onClose, even
 
     useEffect(() => {
         if (isOpen && event) {
-            const art = getEventImageUrl(event);
-            setCardArtUrl(art);
             generateClassicFlyer();
             buildAiFlyer();
         }
     }, [isOpen, event, storeLogoUrl]);
 
-    // ─── CLASSIC CANVAS FLYER ───────────────────────────────────────────────────
+    // ─── Carga de imágenes para canvas ──────────────────────────────────────────
+
+    const loadImg = (src: string, useProxy: boolean): Promise<HTMLImageElement> => {
+        return new Promise((resolve) => {
+            const img = document.createElement('img') as HTMLImageElement;
+            img.crossOrigin = 'anonymous';
+            img.src = (useProxy && src.startsWith('http')) ? toCorsProxy(src) : src;
+            img.onload = () => resolve(img);
+            img.onerror = () => resolve(img);
+        });
+    };
+
+    // ─── Overlay compartido (info del evento) ────────────────────────────────────
+    // Dibuja toda la información del evento sobre el fondo ya pintado en el canvas.
+    const drawEventOverlay = async (ctx: CanvasRenderingContext2D) => {
+        // Capa oscura para legibilidad
+        const gradient = ctx.createLinearGradient(0, 0, 0, 1080);
+        gradient.addColorStop(0, 'rgba(15, 23, 42, 0.55)');
+        gradient.addColorStop(0.45, 'rgba(15, 23, 42, 0.88)');
+        gradient.addColorStop(1, 'rgba(15, 23, 42, 0.98)');
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, 1080, 1080);
+
+        // Borde
+        ctx.strokeStyle = 'rgba(56, 189, 248, 0.3)';
+        ctx.lineWidth = 20;
+        ctx.strokeRect(30, 30, 1020, 1020);
+
+        let topY = 80;
+
+        // ── Header: logo + nombre de la tienda (lado a lado, centrados) ──
+        const displayName = (storeNameDisplay || event.storeName).toUpperCase();
+        const headerCenterY = topY + 60;
+        const r = 55;
+        const gap = 28;
+
+        let logoImg: HTMLImageElement | null = null;
+        if (storeLogoUrl) {
+            const img = await loadImg(storeLogoUrl, false);
+            if (img.complete && img.naturalWidth > 0) logoImg = img;
+        }
+
+        ctx.font = 'bold 38px "Inter", sans-serif';
+        ctx.textAlign = 'left';
+        ctx.shadowBlur = 0;
+        const nameWidth = ctx.measureText(displayName).width;
+
+        const logoBlockWidth = logoImg ? r * 2 + gap : 0;
+        const totalWidth = logoBlockWidth + nameWidth;
+        const startX = 540 - totalWidth / 2;
+
+        if (logoImg) {
+            const cx = startX + r;
+            const cy = headerCenterY;
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(cx, cy, r + 5, 0, Math.PI * 2);
+            ctx.fillStyle = '#1e293b';
+            ctx.fill();
+            ctx.lineWidth = 5;
+            ctx.strokeStyle = '#38bdf8';
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.arc(cx, cy, r, 0, Math.PI * 2);
+            ctx.clip();
+            ctx.drawImage(logoImg, cx - r, cy - r, r * 2, r * 2);
+            ctx.restore();
+        }
+
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 38px "Inter", sans-serif';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(displayName, startX + logoBlockWidth, headerCenterY);
+        ctx.textBaseline = 'alphabetic';
+
+        topY = headerCenterY + r + 25;
+
+        // Línea divisora
+        ctx.strokeStyle = 'rgba(56, 189, 248, 0.4)';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(200, topY);
+        ctx.lineTo(880, topY);
+        ctx.stroke();
+        topY += 50;
+
+        // ── Título del torneo ──
+        ctx.textAlign = 'center';
+        ctx.fillStyle = '#ffffff';
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+        ctx.shadowBlur = 10;
+
+        const title = event.title.toUpperCase();
+        const maxLineWidth = 880;
+
+        let titleFont = 64;
+        const fitsAt = (size: number) => {
+            ctx.font = `900 ${size}px "Outfit", "Inter", sans-serif`;
+            return title.split(' ').every(w => ctx.measureText(w).width <= maxLineWidth);
+        };
+        while (titleFont > 36 && !fitsAt(titleFont)) titleFont -= 4;
+        ctx.font = `900 ${titleFont}px "Outfit", "Inter", sans-serif`;
+        const lineHeight = Math.round(titleFont * 1.25);
+
+        const words = title.split(' ');
+        let line = '';
+        let currentY = topY;
+        for (let n = 0; n < words.length; n++) {
+            const testLine = line + words[n] + ' ';
+            if (ctx.measureText(testLine).width > maxLineWidth && n > 0) {
+                ctx.fillText(line.trim(), 540, currentY);
+                line = words[n] + ' ';
+                currentY += lineHeight;
+            } else {
+                line = testLine;
+            }
+        }
+        ctx.fillText(line.trim(), 540, currentY);
+
+        // ── Badge de formato ──
+        const badgeY = currentY + 90;
+        const badgeText = event.format.toUpperCase();
+        ctx.font = '900 36px "Outfit", "Inter", sans-serif';
+        ctx.shadowBlur = 0;
+        const badgeWidth = ctx.measureText(badgeText).width + 60;
+
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.7)';
+        ctx.beginPath();
+        ctx.roundRect(540 - badgeWidth / 2, badgeY - 50, badgeWidth, 70, 15);
+        ctx.fill();
+        ctx.fillStyle = 'rgba(56, 189, 248, 0.2)';
+        ctx.strokeStyle = '#38bdf8';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.roundRect(540 - badgeWidth / 2, badgeY - 50, badgeWidth, 70, 15);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.fillStyle = '#38bdf8';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(badgeText, 540, badgeY - 15);
+        ctx.textBaseline = 'alphabetic';
+
+        // ── Detalles ──
+        let infoY = badgeY + 120;
+        ctx.textAlign = 'left';
+        ctx.font = 'bold 36px "Inter", sans-serif';
+
+        const drawDetailLine = (label: string, value: string, icon: string) => {
+            ctx.fillStyle = '#94a3b8';
+            ctx.fillText(`${icon}  ${label}:`, 150, infoY);
+            ctx.fillStyle = '#ffffff';
+            ctx.fillText(value, 460, infoY);
+            infoY += 75;
+        };
+
+        let displayDate = event.date;
+        try {
+            const dateObj = new Date(event.date + 'T00:00:00');
+            displayDate = dateObj.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+            displayDate = displayDate.charAt(0).toUpperCase() + displayDate.slice(1);
+        } catch (e) {}
+
+        drawDetailLine('Fecha', displayDate, '📅');
+        drawDetailLine('Hora', `${event.time || '19:00'} hrs`, '⏰');
+        drawDetailLine('Inscripción', formattedFee, '💰');
+        drawDetailLine('Capacidad', `${event.maxPlayers || 64} jugadores`, '👥');
+
+        // ── Footer ──
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+        ctx.font = 'black 28px "Outfit", sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('INSCRÍBETE Y SIGUE EL DETALLE EN THEPLAYER.GG', 540, 985);
+    };
+
+    // Pinta una imagen de fondo cubriendo el canvas (cover).
+    const drawCoverBackground = (ctx: CanvasRenderingContext2D, img: HTMLImageElement) => {
+        ctx.fillStyle = '#0f172a';
+        ctx.fillRect(0, 0, 1080, 1080);
+        if (img.complete && img.naturalWidth > 0) {
+            const scale = Math.max(1080 / img.width, 1080 / img.height);
+            const x = (1080 - img.width * scale) / 2;
+            const y = (1080 - img.height * scale) / 2;
+            ctx.drawImage(img, x, y, img.width * scale, img.height * scale);
+        }
+    };
+
+    // ─── CLASSIC CANVAS FLYER (fondo = arte de carta) ────────────────────────────
 
     const generateClassicFlyer = async () => {
         setGenerating(true);
@@ -121,194 +290,12 @@ const ShareEventModal: React.FC<ShareEventModalProps> = ({ isOpen, onClose, even
             if (!canvas) return;
             const ctx = canvas.getContext('2d');
             if (!ctx) return;
-
             canvas.width = 1080;
             canvas.height = 1080;
 
-            ctx.fillStyle = '#0f172a';
-            ctx.fillRect(0, 0, 1080, 1080);
-
-            // Background card art (vía proxy CORS para no "tintar" el canvas)
-            const bgImgUrl = toCorsProxy(getEventImageUrl(event));
-            const bgImg = document.createElement('img') as HTMLImageElement;
-            bgImg.crossOrigin = 'anonymous';
-            bgImg.src = bgImgUrl;
-            await new Promise<void>((resolve) => { bgImg.onload = () => resolve(); bgImg.onerror = () => resolve(); });
-
-            if (bgImg.complete && bgImg.naturalWidth > 0) {
-                const scale = Math.max(1080 / bgImg.width, 1080 / bgImg.height);
-                const x = (1080 - bgImg.width * scale) / 2;
-                const y = (1080 - bgImg.height * scale) / 2;
-                ctx.drawImage(bgImg, x, y, bgImg.width * scale, bgImg.height * scale);
-            }
-
-            // Dark overlay
-            const gradient = ctx.createLinearGradient(0, 0, 0, 1080);
-            gradient.addColorStop(0, 'rgba(15, 23, 42, 0.55)');
-            gradient.addColorStop(0.45, 'rgba(15, 23, 42, 0.88)');
-            gradient.addColorStop(1, 'rgba(15, 23, 42, 0.98)');
-            ctx.fillStyle = gradient;
-            ctx.fillRect(0, 0, 1080, 1080);
-
-            // Border
-            ctx.strokeStyle = 'rgba(56, 189, 248, 0.3)';
-            ctx.lineWidth = 20;
-            ctx.strokeRect(30, 30, 1020, 1020);
-
-            let topY = 80;
-
-            // ── Store Logo + Name header (logo y nombre lado a lado, centrados) ────
-            const displayName = (storeNameDisplay || event.storeName).toUpperCase();
-            const headerCenterY = topY + 60;
-            const r = 55;
-            const gap = 28; // espacio entre logo y texto
-
-            // Cargar logo (si existe) para medir y centrar el conjunto
-            let logoImg: HTMLImageElement | null = null;
-            if (storeLogoUrl) {
-                const img = document.createElement('img') as HTMLImageElement;
-                img.crossOrigin = 'anonymous';
-                img.src = storeLogoUrl;
-                await new Promise<void>((resolve) => { img.onload = () => resolve(); img.onerror = () => resolve(); });
-                if (img.complete && img.naturalWidth > 0) logoImg = img;
-            }
-
-            // Medir ancho del nombre
-            ctx.font = 'bold 38px "Inter", sans-serif';
-            ctx.textAlign = 'left';
-            ctx.shadowBlur = 0;
-            const nameWidth = ctx.measureText(displayName).width;
-
-            // Ancho total del bloque (logo + gap + nombre)
-            const logoBlockWidth = logoImg ? r * 2 + gap : 0;
-            const totalWidth = logoBlockWidth + nameWidth;
-            const startX = 540 - totalWidth / 2;
-
-            // Dibujar logo a la izquierda
-            if (logoImg) {
-                const cx = startX + r;
-                const cy = headerCenterY;
-
-                ctx.save();
-                ctx.beginPath();
-                ctx.arc(cx, cy, r + 5, 0, Math.PI * 2);
-                ctx.fillStyle = '#1e293b';
-                ctx.fill();
-                ctx.lineWidth = 5;
-                ctx.strokeStyle = '#38bdf8';
-                ctx.stroke();
-
-                ctx.beginPath();
-                ctx.arc(cx, cy, r, 0, Math.PI * 2);
-                ctx.clip();
-                ctx.drawImage(logoImg, cx - r, cy - r, r * 2, r * 2);
-                ctx.restore();
-            }
-
-            // Dibujar nombre a la derecha del logo, verticalmente centrado
-            ctx.fillStyle = '#ffffff';
-            ctx.font = 'bold 38px "Inter", sans-serif';
-            ctx.textBaseline = 'middle';
-            ctx.fillText(displayName, startX + logoBlockWidth, headerCenterY);
-            ctx.textBaseline = 'alphabetic';
-
-            topY = headerCenterY + r + 25;
-
-            // Divider line
-            ctx.strokeStyle = 'rgba(56, 189, 248, 0.4)';
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.moveTo(200, topY);
-            ctx.lineTo(880, topY);
-            ctx.stroke();
-            topY += 50;
-
-            // ── Tournament Title ──────────────────────────────────────────────────
-            ctx.textAlign = 'center'; // <- importante: el header dejó textAlign en 'left'
-            ctx.fillStyle = '#ffffff';
-            ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
-            ctx.shadowBlur = 10;
-
-            const title = event.title.toUpperCase();
-            const maxLineWidth = 880;
-
-            // Escalar la fuente para títulos largos (palabra más ancha que el margen).
-            let titleFont = 64;
-            const fitsAt = (size: number) => {
-                ctx.font = `900 ${size}px "Outfit", "Inter", sans-serif`;
-                return event.title.toUpperCase().split(' ')
-                    .every(w => ctx.measureText(w).width <= maxLineWidth);
-            };
-            while (titleFont > 36 && !fitsAt(titleFont)) titleFont -= 4;
-            ctx.font = `900 ${titleFont}px "Outfit", "Inter", sans-serif`;
-            const lineHeight = Math.round(titleFont * 1.25);
-
-            const words = title.split(' ');
-            let line = '';
-            let currentY = topY;
-
-            for (let n = 0; n < words.length; n++) {
-                const testLine = line + words[n] + ' ';
-                if (ctx.measureText(testLine).width > maxLineWidth && n > 0) {
-                    ctx.fillText(line.trim(), 540, currentY);
-                    line = words[n] + ' ';
-                    currentY += lineHeight;
-                } else {
-                    line = testLine;
-                }
-            }
-            ctx.fillText(line.trim(), 540, currentY);
-
-            // ── Format Badge ──────────────────────────────────────────────────────
-            const badgeY = currentY + 90;
-            const badgeText = event.format.toUpperCase();
-            ctx.font = '900 36px "Outfit", "Inter", sans-serif';
-            ctx.shadowBlur = 0;
-            const badgeWidth = ctx.measureText(badgeText).width + 60;
-
-            ctx.fillStyle = 'rgba(56, 189, 248, 0.2)';
-            ctx.strokeStyle = '#38bdf8';
-            ctx.lineWidth = 3;
-            ctx.beginPath();
-            ctx.roundRect(540 - badgeWidth / 2, badgeY - 50, badgeWidth, 70, 15);
-            ctx.fill();
-            ctx.stroke();
-
-            ctx.fillStyle = '#38bdf8';
-            ctx.textBaseline = 'middle';
-            ctx.fillText(badgeText, 540, badgeY - 15);
-            ctx.textBaseline = 'alphabetic';
-
-            // ── Details Block ─────────────────────────────────────────────────────
-            let infoY = badgeY + 120;
-            ctx.textAlign = 'left';
-            ctx.font = 'bold 36px "Inter", sans-serif';
-
-            const drawDetailLine = (label: string, value: string, icon: string) => {
-                ctx.fillStyle = '#94a3b8';
-                ctx.fillText(`${icon}  ${label}:`, 150, infoY);
-                ctx.fillStyle = '#ffffff';
-                ctx.fillText(value, 460, infoY);
-                infoY += 75;
-            };
-
-            let displayDate = event.date;
-            try {
-                const dateObj = new Date(event.date + 'T00:00:00');
-                displayDate = dateObj.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
-                displayDate = displayDate.charAt(0).toUpperCase() + displayDate.slice(1);
-            } catch (e) {}
-
-            drawDetailLine('Fecha', displayDate, '📅');
-            drawDetailLine('Hora', `${event.time || '19:00'} hrs`, '⏰');
-            drawDetailLine('Inscripción', formattedFee, '💰');
-            drawDetailLine('Capacidad', `${event.maxPlayers || 64} jugadores`, '👥');
-
-            // ── Footer ────────────────────────────────────────────────────────────
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
-            ctx.font = 'black 28px "Outfit", sans-serif';
-            ctx.textAlign = 'center';
-            ctx.fillText('INSCRÍBETE Y SIGUE EL DETALLE EN THEPLAYER.GG', 540, 985);
+            const bgImg = await loadImg(getEventImageUrl(event), true);
+            drawCoverBackground(ctx, bgImg);
+            await drawEventOverlay(ctx);
 
             setFlyerUrl(canvas.toDataURL('image/png'));
         } catch (error) {
@@ -318,14 +305,13 @@ const ShareEventModal: React.FC<ShareEventModalProps> = ({ isOpen, onClose, even
         }
     };
 
-    // ─── AI FLYER via Pollinations.ai ───────────────────────────────────────────
+    // ─── AI FLYER (fondo = imagen Gemini + overlay con info del evento) ───────────
 
     const buildAiFlyer = async () => {
         setAiLoading(true);
         setAiError(null);
         try {
-            // El flyer se genera con Gemini en la Edge Function "gemini-flyer".
-            // Los torneos recurrentes (mismo título+formato+tienda) reusan la imagen.
+            // 1. Generar/obtener la imagen de fondo con Gemini (Edge Function).
             const url = await generateEventFlyer({
                 title: event.title,
                 format: event.format,
@@ -333,6 +319,21 @@ const ShareEventModal: React.FC<ShareEventModalProps> = ({ isOpen, onClose, even
                 gameType: event.game_type || event.gameType,
             });
             setAiImageUrl(url);
+
+            // 2. Componer: imagen IA de fondo + info del evento encima (texto nítido,
+            //    listo para subir a Instagram).
+            const canvas = aiCanvasRef.current;
+            if (!canvas) { setAiFlyerUrl(url); return; }
+            const ctx = canvas.getContext('2d');
+            if (!ctx) { setAiFlyerUrl(url); return; }
+            canvas.width = 1080;
+            canvas.height = 1080;
+
+            const bgImg = await loadImg(url, true);
+            drawCoverBackground(ctx, bgImg);
+            await drawEventOverlay(ctx);
+
+            setAiFlyerUrl(canvas.toDataURL('image/png'));
         } catch (e: any) {
             console.error('Error generando flyer IA:', e);
             setAiError('No se pudo generar el flyer con IA. Intenta de nuevo.');
@@ -352,21 +353,13 @@ const ShareEventModal: React.FC<ShareEventModalProps> = ({ isOpen, onClose, even
         toast.success('¡Flyer descargado!');
     };
 
-    const handleDownloadAi = async () => {
-        if (!aiImageUrl) return;
-        try {
-            const res = await fetch(aiImageUrl, { mode: 'cors' });
-            const blob = await res.blob();
-            const objectUrl = URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.download = `Flyer-IA-${event.title.replace(/\s+/g, '-')}.png`;
-            link.href = objectUrl;
-            link.click();
-            URL.revokeObjectURL(objectUrl);
-            toast.success('¡Flyer IA descargado!');
-        } catch {
-            window.open(aiImageUrl, '_blank');
-        }
+    const handleDownloadAi = () => {
+        if (!aiFlyerUrl) return;
+        const link = document.createElement('a');
+        link.download = `Flyer-IA-${event.title.replace(/\s+/g, '-')}.png`;
+        link.href = aiFlyerUrl; // data URL del composite (imagen IA + info)
+        link.click();
+        toast.success('¡Flyer IA descargado!');
     };
 
     const handleCopyText = () => {
@@ -375,8 +368,6 @@ const ShareEventModal: React.FC<ShareEventModalProps> = ({ isOpen, onClose, even
     };
 
     if (!isOpen) return null;
-
-    const cardName = getCardNameForFormat(event.format, event.game_type || event.gameType);
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
@@ -458,30 +449,14 @@ const ShareEventModal: React.FC<ShareEventModalProps> = ({ isOpen, onClose, even
                     {/* ── AI Tab ── */}
                     {activeTab === 'ai' && (
                         <>
-                            <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Flyer Generado con IA</p>
-                            <p className="text-[9px] text-slate-600 mb-4 text-center">Imagen única por torneo · Mismo nombre = misma imagen</p>
-
-                            {/* Card Art Badge */}
-                            {cardArtUrl && (
-                                <div className="w-full max-w-[340px] mb-4 rounded-xl overflow-hidden border border-violet-500/20 relative">
-                                    <img
-                                        src={cardArtUrl}
-                                        alt={`Carta de ${event.format}`}
-                                        className="w-full h-28 object-cover object-top"
-                                    />
-                                    <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 to-transparent flex items-end px-3 pb-2">
-                                        <span className="text-[10px] font-black text-violet-300 uppercase tracking-widest">
-                                            {cardName} · {event.format}
-                                        </span>
-                                    </div>
-                                </div>
-                            )}
+                            <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Flyer IA — Listo para Instagram</p>
+                            <p className="text-[9px] text-slate-600 mb-4 text-center">Arte generado con IA + info del evento · Mismo torneo = misma imagen</p>
 
                             <div className="w-full max-w-[340px] aspect-square relative rounded-2xl overflow-hidden border border-violet-500/20 shadow-2xl shadow-violet-900/20">
                                 {aiLoading && (
                                     <div className="absolute inset-0 bg-slate-900 flex flex-col items-center justify-center gap-3 z-10">
                                         <div className="w-10 h-10 border-4 border-violet-500 border-t-transparent rounded-full animate-spin" />
-                                        <p className="text-slate-400 text-xs font-bold">Generando imagen IA...</p>
+                                        <p className="text-slate-400 text-xs font-bold">Generando flyer IA...</p>
                                         <p className="text-slate-600 text-[10px]">Puede tardar unos segundos</p>
                                     </div>
                                 )}
@@ -497,18 +472,19 @@ const ShareEventModal: React.FC<ShareEventModalProps> = ({ isOpen, onClose, even
                                         </button>
                                     </div>
                                 )}
-                                {aiImageUrl && !aiError && (
+                                {aiFlyerUrl && !aiError && (
                                     <img
-                                        src={aiImageUrl}
+                                        src={aiFlyerUrl}
                                         alt="Flyer IA del evento"
                                         className="w-full h-full object-cover"
                                     />
                                 )}
                             </div>
+                            <canvas ref={aiCanvasRef} className="hidden" />
 
                             <button
                                 onClick={handleDownloadAi}
-                                disabled={aiLoading || !!aiError || !aiImageUrl}
+                                disabled={aiLoading || !!aiError || !aiFlyerUrl}
                                 className="mt-5 px-6 py-3 bg-violet-600 hover:bg-violet-500 disabled:opacity-40 text-white text-xs font-black uppercase tracking-widest rounded-xl transition-all shadow-lg flex items-center gap-2"
                             >
                                 <Download className="w-4 h-4" />
