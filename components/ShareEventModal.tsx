@@ -273,12 +273,49 @@ const ShareEventModal: React.FC<ShareEventModalProps> = ({ isOpen, onClose, even
     const drawCoverBackground = (ctx: CanvasRenderingContext2D, img: HTMLImageElement) => {
         ctx.fillStyle = '#0f172a';
         ctx.fillRect(0, 0, 1080, 1080);
-        if (img.complete && img.naturalWidth > 0) {
-            const scale = Math.max(1080 / img.width, 1080 / img.height);
-            const x = (1080 - img.width * scale) / 2;
-            const y = (1080 - img.height * scale) / 2;
-            ctx.drawImage(img, x, y, img.width * scale, img.height * scale);
-        }
+        if (!img.complete || img.naturalWidth === 0) return;
+
+        // Detectar y recortar bordes blancos/claros baked-in de la imagen IA.
+        // Dibujamos la imagen en un canvas auxiliar y escaneamos sus bordes.
+        const aux = document.createElement('canvas');
+        aux.width = img.naturalWidth;
+        aux.height = img.naturalHeight;
+        const ax = aux.getContext('2d')!;
+        ax.drawImage(img, 0, 0);
+
+        const W = img.naturalWidth;
+        const H = img.naturalHeight;
+        const data = ax.getImageData(0, 0, W, H).data;
+
+        const isLight = (x: number, y: number) => {
+            const i = (y * W + x) * 4;
+            return data[i] > 230 && data[i + 1] > 230 && data[i + 2] > 230;
+        };
+
+        const THRESHOLD = 0.85; // si >85% de los píxeles del borde son claros, recortar
+        const rowLightRatio = (y: number) => {
+            let count = 0;
+            for (let x = 0; x < W; x++) if (isLight(x, y)) count++;
+            return count / W;
+        };
+        const colLightRatio = (x: number) => {
+            let count = 0;
+            for (let y = 0; y < H; y++) if (isLight(x, y)) count++;
+            return count / H;
+        };
+
+        let top = 0, bottom = H, left = 0, right = W;
+        while (top < bottom && rowLightRatio(top) >= THRESHOLD) top++;
+        while (bottom > top && rowLightRatio(bottom - 1) >= THRESHOLD) bottom--;
+        while (left < right && colLightRatio(left) >= THRESHOLD) left++;
+        while (right > left && colLightRatio(right - 1) >= THRESHOLD) right--;
+
+        const sw = right - left;
+        const sh = bottom - top;
+        const scale = Math.max(1080 / sw, 1080 / sh);
+        const dx = (1080 - sw * scale) / 2;
+        const dy = (1080 - sh * scale) / 2;
+        ctx.drawImage(img, left, top, sw, sh, dx, dy, sw * scale, sh * scale);
     };
 
     // ─── CLASSIC CANVAS FLYER (fondo = arte de carta) ────────────────────────────

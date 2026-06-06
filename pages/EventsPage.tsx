@@ -90,6 +90,7 @@ const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [
 
     // State for filtering
     const [selectedFormat, setSelectedFormat] = React.useState('Todos los Formatos');
+    const [selectedRegion, setSelectedRegion] = React.useState('Todas las Regiones');
     const [viewMode, setViewMode] = React.useState<'list' | 'calendar'>('list');
 
     const addToGoogleCalendar = (event: CommunityEvent) => {
@@ -113,20 +114,33 @@ const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [
 
     // Derived filtered events
     const filteredEvents = React.useMemo(() => {
-        if (selectedFormat === 'Todos los Formatos') return events;
+        let result = events;
 
-        if (selectedFormat === 'Competitivo') {
-            const competitiveFormats = ['Standard', 'Pioneer', 'Modern', 'Sealed', 'Draft', 'Prerelease', 'Sellado', 'Limited'];
-            return events.filter(e =>
-                competitiveFormats.some(fmt =>
-                    e.format.toLowerCase().includes(fmt.toLowerCase()) ||
-                    e.title.toLowerCase().includes(fmt.toLowerCase())
-                )
+        if (selectedFormat !== 'Todos los Formatos') {
+            if (selectedFormat === 'Competitivo') {
+                const competitiveFormats = ['Standard', 'Pioneer', 'Modern', 'Sealed', 'Draft', 'Prerelease', 'Sellado', 'Limited'];
+                result = result.filter(e =>
+                    competitiveFormats.some(fmt =>
+                        e.format.toLowerCase().includes(fmt.toLowerCase()) ||
+                        e.title.toLowerCase().includes(fmt.toLowerCase())
+                    )
+                );
+            } else {
+                result = result.filter(e =>
+                    e.format.toLowerCase().includes(selectedFormat.toLowerCase())
+                );
+            }
+        }
+
+        if (selectedRegion !== 'Todas las Regiones') {
+            result = result.filter(e =>
+                e.storeName?.toLowerCase().includes(selectedRegion.toLowerCase()) ||
+                (e as any).region?.toLowerCase().includes(selectedRegion.toLowerCase())
             );
         }
 
-        return events.filter(e => e.format === selectedFormat);
-    }, [events, selectedFormat]);
+        return result;
+    }, [events, selectedFormat, selectedRegion]);
 
     // State for calendar navigation
     const today = new Date();
@@ -789,23 +803,57 @@ const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [
                                 className="bg-slate-900/80 text-white rounded-md py-2.5 px-4 w-full appearance-none focus:outline-none focus:ring-2 focus:ring-sky-500 border border-slate-700"
                             >
                                 <option>Todos los Formatos</option>
-                                <option>Competitivo</option>
-                                <option>Commander</option>
-                                <option>Pauper</option>
-                                <option>Premodern</option>
-                                <option>Legacy</option>
+                                <optgroup label="── MTG ──────────────">
+                                    <option>Competitivo</option>
+                                    <option>Standard</option>
+                                    <option>Pioneer</option>
+                                    <option>Modern</option>
+                                    <option>Legacy</option>
+                                    <option>Vintage</option>
+                                    <option>Pauper</option>
+                                    <option>Premodern</option>
+                                    <option>Commander</option>
+                                    <option>Draft</option>
+                                    <option>Sealed</option>
+                                    <option>Prerelease</option>
+                                    <option>Store Championship</option>
+                                    <option>RCQ</option>
+                                </optgroup>
+                                <optgroup label="── Otros TCG ─────────">
+                                    <option>Pokémon Standard</option>
+                                    <option>Pokémon Expanded</option>
+                                    <option>Yu-Gi-Oh! Advanced</option>
+                                    <option>One Piece Standard</option>
+                                    <option>Lorcana</option>
+                                    <option>Flesh and Blood</option>
+                                    <option>Digimon</option>
+                                </optgroup>
                             </select>
                         </div>
                         <div className="relative">
                             <select
                                 aria-label="Filtrar por región"
+                                value={selectedRegion}
+                                onChange={(e) => { setSelectedRegion(e.target.value); setUpcomingPage(0); }}
                                 className="bg-slate-900/80 text-white rounded-md py-2.5 px-4 w-full appearance-none focus:outline-none focus:ring-2 focus:ring-sky-500 border border-slate-700"
                             >
                                 <option>Todas las Regiones</option>
-                                <option>Metropolitana</option>
+                                <option>Arica y Parinacota</option>
+                                <option>Tarapacá</option>
+                                <option>Antofagasta</option>
+                                <option>Atacama</option>
+                                <option>Coquimbo</option>
                                 <option>Valparaíso</option>
+                                <option>Metropolitana</option>
+                                <option>O'Higgins</option>
+                                <option>Maule</option>
+                                <option>Ñuble</option>
                                 <option>Biobío</option>
                                 <option>La Araucanía</option>
+                                <option>Los Ríos</option>
+                                <option>Los Lagos</option>
+                                <option>Aysén</option>
+                                <option>Magallanes</option>
                             </select>
                         </div>
                     </div>
