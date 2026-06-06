@@ -224,30 +224,43 @@ const ShareEventModal: React.FC<ShareEventModalProps> = ({ isOpen, onClose, even
             topY += 50;
 
             // ── Tournament Title ──────────────────────────────────────────────────
+            ctx.textAlign = 'center'; // <- importante: el header dejó textAlign en 'left'
             ctx.fillStyle = '#ffffff';
-            ctx.font = '900 64px "Outfit", "Inter", sans-serif';
             ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
             ctx.shadowBlur = 10;
 
             const title = event.title.toUpperCase();
+            const maxLineWidth = 880;
+
+            // Escalar la fuente para títulos largos (palabra más ancha que el margen).
+            let titleFont = 64;
+            const fitsAt = (size: number) => {
+                ctx.font = `900 ${size}px "Outfit", "Inter", sans-serif`;
+                return event.title.toUpperCase().split(' ')
+                    .every(w => ctx.measureText(w).width <= maxLineWidth);
+            };
+            while (titleFont > 36 && !fitsAt(titleFont)) titleFont -= 4;
+            ctx.font = `900 ${titleFont}px "Outfit", "Inter", sans-serif`;
+            const lineHeight = Math.round(titleFont * 1.25);
+
             const words = title.split(' ');
             let line = '';
             let currentY = topY;
 
             for (let n = 0; n < words.length; n++) {
                 const testLine = line + words[n] + ' ';
-                if (ctx.measureText(testLine).width > 900 && n > 0) {
-                    ctx.fillText(line, 540, currentY);
+                if (ctx.measureText(testLine).width > maxLineWidth && n > 0) {
+                    ctx.fillText(line.trim(), 540, currentY);
                     line = words[n] + ' ';
-                    currentY += 80;
+                    currentY += lineHeight;
                 } else {
                     line = testLine;
                 }
             }
-            ctx.fillText(line, 540, currentY);
+            ctx.fillText(line.trim(), 540, currentY);
 
             // ── Format Badge ──────────────────────────────────────────────────────
-            const badgeY = currentY + 100;
+            const badgeY = currentY + 90;
             const badgeText = event.format.toUpperCase();
             ctx.font = '900 36px "Outfit", "Inter", sans-serif';
             ctx.shadowBlur = 0;
@@ -262,7 +275,9 @@ const ShareEventModal: React.FC<ShareEventModalProps> = ({ isOpen, onClose, even
             ctx.stroke();
 
             ctx.fillStyle = '#38bdf8';
-            ctx.fillText(badgeText, 540, badgeY - 2);
+            ctx.textBaseline = 'middle';
+            ctx.fillText(badgeText, 540, badgeY - 15);
+            ctx.textBaseline = 'alphabetic';
 
             // ── Details Block ─────────────────────────────────────────────────────
             let infoY = badgeY + 120;
@@ -365,7 +380,7 @@ const ShareEventModal: React.FC<ShareEventModalProps> = ({ isOpen, onClose, even
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
-            <div className="bg-slate-900 border border-slate-700/60 rounded-[2.5rem] shadow-2xl max-w-5xl w-full max-h-[92vh] overflow-y-auto custom-scrollbar flex flex-col md:flex-row relative">
+            <div className="bg-slate-900 border border-slate-700/60 rounded-[2.5rem] shadow-2xl max-w-5xl w-full max-h-[92vh] overflow-y-auto custom-scrollbar flex flex-col relative">
 
                 {/* Close */}
                 <button
@@ -375,6 +390,18 @@ const ShareEventModal: React.FC<ShareEventModalProps> = ({ isOpen, onClose, even
                 >
                     <X className="w-5 h-5" />
                 </button>
+
+                {/* ── Header (arriba, centrado) ── */}
+                <div className="px-8 pt-8 pb-6 text-center border-b border-white/5">
+                    <span className="px-3 py-1 bg-sky-500/10 text-sky-400 border border-sky-500/30 rounded-lg text-[9px] font-black uppercase tracking-widest">
+                        ¡Evento Agendado Exitosamente!
+                    </span>
+                    <h2 className="text-3xl md:text-4xl font-black text-white tracking-tighter uppercase mt-3">Difundir Torneo</h2>
+                    <p className="text-xs text-slate-400 font-medium mt-1">Usa el flyer y la descripción para promocionar el evento en tus redes.</p>
+                </div>
+
+                {/* ── Body: dos columnas ── */}
+                <div className="flex flex-col md:flex-row">
 
                 {/* ── Left: Flyer Preview ── */}
                 <div className="flex-1 p-8 bg-slate-950/50 border-r border-white/5 flex flex-col items-center justify-start min-h-[350px]">
@@ -494,14 +521,6 @@ const ShareEventModal: React.FC<ShareEventModalProps> = ({ isOpen, onClose, even
                 {/* ── Right: Text & Share ── */}
                 <div className="flex-1 p-8 space-y-6 flex flex-col justify-between">
                     <div className="space-y-4">
-                        <div>
-                            <span className="px-3 py-1 bg-sky-500/10 text-sky-400 border border-sky-500/30 rounded-lg text-[9px] font-black uppercase tracking-widest">
-                                ¡Evento Agendado Exitosamente!
-                            </span>
-                            <h2 className="text-3xl font-black text-white tracking-tighter uppercase mt-2">Difundir Torneo</h2>
-                            <p className="text-xs text-slate-400 font-medium">Usa el flyer y la descripción para promocionar el evento en tus redes.</p>
-                        </div>
-
                         {/* Copyable text */}
                         <div>
                             <div className="flex justify-between items-center mb-2">
@@ -558,6 +577,8 @@ const ShareEventModal: React.FC<ShareEventModalProps> = ({ isOpen, onClose, even
                         </p>
                     </div>
                 </div>
+
+                </div>{/* fin body dos columnas */}
 
             </div>
         </div>

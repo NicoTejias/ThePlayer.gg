@@ -62,10 +62,12 @@ function buildPrompt({ title, format, storeName, gameType }: FlyerRequest): stri
     else if (game === 'lorcana') gameDesc = 'Disney Lorcana'
     else if (game === 'flesh_blood') gameDesc = 'Flesh and Blood'
 
-    return `Create a vertical 1:1 epic competitive tournament poster artwork for a ${gameDesc} event. ` +
+    return `Create a square 1:1 epic competitive tournament poster artwork for a ${gameDesc} event. ` +
         `Tournament name: "${title}". Format: ${format}. Hosted at the game store "${storeName}". ` +
         `Style: dramatic cinematic fantasy illustration, dark mystical atmosphere, glowing magical energy and arcane effects, ` +
         `vibrant saturated colors, championship trophy, competitive gaming arena, professional esports key art. ` +
+        `IMPORTANT: full-bleed composition that fills the ENTIRE square frame edge to edge. ` +
+        `No white border, no frame, no margins, no padding, no passe-partout. ` +
         `No text, no letters, no words in the image — only illustration. High detail, dynamic composition.`
 }
 
@@ -86,7 +88,9 @@ serve(async (req) => {
         const supabase = createClient(SUPABASE_URL, SERVICE_ROLE_KEY)
 
         // Clave de caché: mismo torneo (título+formato+tienda) → misma imagen.
-        const key = await hashKey(`${body.title}|${body.format}|${body.storeName}|${body.gameType || 'mtg'}`)
+        // El sufijo de versión invalida el caché cuando cambia el prompt.
+        const PROMPT_VERSION = 'v2'
+        const key = await hashKey(`${PROMPT_VERSION}|${body.title}|${body.format}|${body.storeName}|${body.gameType || 'mtg'}`)
         const path = `${key}.png`
 
         // ¿Ya existe? → devolver la URL cacheada (caso recurrente).
