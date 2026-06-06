@@ -257,7 +257,7 @@ const AppContent: React.FC = () => {
             <Route path="/hall-of-fame" element={<HallOfFamePage />} />
             <Route path="/soporte" element={<SupportPage />} />
             <Route path="/equipo/:teamId" element={<TeamProfilePage />} />
-            <Route path="/eventos" element={<EventsPage events={communityEvents} finishedTournaments={tournamentResults} userRole={userRole} userId={userProfile?.id} />} />
+            <Route path="/eventos" element={<EventsPage events={communityEvents} finishedTournaments={tournamentResults} userRole={userRole} userId={userProfile?.id} storeLogo={userProfile?.avatar_url} storeName={userProfile?.username} />} />
             <Route path="/torneos" element={<TournamentsListPage tournaments={tournamentResults} />} />
             <Route path="/torneos/:tournamentId" element={<TournamentStandingsPage userRole={userRole} userId={userProfile?.id} />} />
             <Route path="/mercado" element={<MarketplacePage />} />

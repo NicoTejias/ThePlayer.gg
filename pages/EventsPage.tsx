@@ -17,6 +17,8 @@ interface EventsPageProps {
     finishedTournaments?: TournamentResult[]; // Torneos subidos desde el panel de tienda
     userRole?: 'player' | 'store' | 'admin' | null;
     userId?: string; // ID del usuario actual
+    storeLogo?: string;
+    storeName?: string;
 }
 
 const EVENT_TYPES_CONFIG = [
@@ -68,7 +70,7 @@ const getWeekNumber = (d: Date) => {
 
 
 
-const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [], userRole, userId }) => {
+const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [], userRole, userId, storeLogo, storeName }) => {
     const navigate = useNavigate();
     // State for expanded past tournament view
     const [expandedEventId, setExpandedEventId] = React.useState<string | null>(null);
@@ -1126,14 +1128,15 @@ const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [
 
             {/* Social Share Event Modal */}
             {shareModalEvent && (
-                <ShareEventModal 
-                    isOpen={!!shareModalEvent} 
+                <ShareEventModal
+                    isOpen={!!shareModalEvent}
                     onClose={() => {
                         setShareModalEvent(null);
                         window.location.reload();
-                    }} 
+                    }}
                     event={shareModalEvent}
-                    storeLogoUrl={userRole === 'store' ? undefined : undefined} // Handled dynamically if needed or resolved
+                    storeLogoUrl={storeLogo}
+                    storeNameDisplay={storeName}
                 />
             )}
         </div>
