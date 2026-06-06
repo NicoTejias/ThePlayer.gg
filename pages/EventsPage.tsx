@@ -481,13 +481,7 @@ const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [
         setProcessingEventId(eventId);
 
         try {
-            // 1. Eliminar primero las inscripciones para evitar errores de llave foránea
-            await supabase
-                .from('event_registrations')
-                .delete()
-                .eq('event_id', eventId);
-
-            // 2. Eliminar el evento
+            // Eliminar el evento (las inscripciones se eliminan en cascada a nivel BD)
             const { error } = await supabase
                 .from('scheduled_events')
                 .delete()
