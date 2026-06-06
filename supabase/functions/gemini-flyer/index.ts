@@ -89,7 +89,7 @@ serve(async (req) => {
 
         // Clave de caché: mismo torneo (título+formato+tienda) → misma imagen.
         // El sufijo de versión invalida el caché cuando cambia el prompt.
-        const PROMPT_VERSION = 'v2'
+        const PROMPT_VERSION = 'v3'
         const key = await hashKey(`${PROMPT_VERSION}|${body.title}|${body.format}|${body.storeName}|${body.gameType || 'mtg'}`)
         const path = `${key}.png`
 

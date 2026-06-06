@@ -270,48 +270,58 @@ const ShareEventModal: React.FC<ShareEventModalProps> = ({ isOpen, onClose, even
     };
 
     // Pinta una imagen de fondo cubriendo el canvas (cover).
+    // Detecta y recorta automáticamente bordes blancos/claros baked-in (Gemini los añade).
     const drawCoverBackground = (ctx: CanvasRenderingContext2D, img: HTMLImageElement) => {
         ctx.fillStyle = '#0f172a';
         ctx.fillRect(0, 0, 1080, 1080);
         if (!img.complete || img.naturalWidth === 0) return;
 
-        // Detectar y recortar bordes blancos/claros baked-in de la imagen IA.
-        // Dibujamos la imagen en un canvas auxiliar y escaneamos sus bordes.
-        const aux = document.createElement('canvas');
-        aux.width = img.naturalWidth;
-        aux.height = img.naturalHeight;
-        const ax = aux.getContext('2d')!;
-        ax.drawImage(img, 0, 0);
-
         const W = img.naturalWidth;
         const H = img.naturalHeight;
-        const data = ax.getImageData(0, 0, W, H).data;
+        let left = 0, top = 0, right = W, bottom = H;
 
-        const isLight = (x: number, y: number) => {
-            const i = (y * W + x) * 4;
-            return data[i] > 230 && data[i + 1] > 230 && data[i + 2] > 230;
-        };
+        try {
+            const aux = document.createElement('canvas');
+            aux.width = W;
+            aux.height = H;
+            const ax = aux.getContext('2d')!;
+            ax.drawImage(img, 0, 0);
+            const data = ax.getImageData(0, 0, W, H).data;
 
-        const THRESHOLD = 0.85; // si >85% de los píxeles del borde son claros, recortar
-        const rowLightRatio = (y: number) => {
-            let count = 0;
-            for (let x = 0; x < W; x++) if (isLight(x, y)) count++;
-            return count / W;
-        };
-        const colLightRatio = (x: number) => {
-            let count = 0;
-            for (let y = 0; y < H; y++) if (isLight(x, y)) count++;
-            return count / H;
-        };
+            // Considera "claro" cualquier pixel con R,G,B > 235 (casi blanco)
+            const isLight = (x: number, y: number) => {
+                const i = (y * W + x) * 4;
+                return data[i] > 235 && data[i + 1] > 235 && data[i + 2] > 235;
+            };
+            // Una fila/columna es "borde" si >70% de sus píxeles son claros
+            const rowIsBorder = (y: number) => {
+                let n = 0;
+                for (let x = 0; x < W; x++) if (isLight(x, y)) n++;
+                return n / W > 0.70;
+            };
+            const colIsBorder = (x: number) => {
+                let n = 0;
+                for (let y = 0; y < H; y++) if (isLight(x, y)) n++;
+                return n / H > 0.70;
+            };
 
-        let top = 0, bottom = H, left = 0, right = W;
-        while (top < bottom && rowLightRatio(top) >= THRESHOLD) top++;
-        while (bottom > top && rowLightRatio(bottom - 1) >= THRESHOLD) bottom--;
-        while (left < right && colLightRatio(left) >= THRESHOLD) left++;
-        while (right > left && colLightRatio(right - 1) >= THRESHOLD) right--;
+            while (top < bottom && rowIsBorder(top)) top++;
+            while (bottom > top && rowIsBorder(bottom - 1)) bottom--;
+            while (left < right && colIsBorder(left)) left++;
+            while (right > left && colIsBorder(right - 1)) right--;
+        } catch {
+            // getImageData puede fallar por CORS tainted canvas; en ese caso
+            // dibujamos sin recortar (cover simple).
+        }
 
         const sw = right - left;
         const sh = bottom - top;
+        if (sw <= 0 || sh <= 0) {
+            // fallback: cover simple sin recorte
+            const scale = Math.max(1080 / W, 1080 / H);
+            ctx.drawImage(img, (1080 - W * scale) / 2, (1080 - H * scale) / 2, W * scale, H * scale);
+            return;
+        }
         const scale = Math.max(1080 / sw, 1080 / sh);
         const dx = (1080 - sw * scale) / 2;
         const dy = (1080 - sh * scale) / 2;
@@ -452,6 +462,11 @@ const ShareEventModal: React.FC<ShareEventModalProps> = ({ isOpen, onClose, even
                         </button>
                     </div>
 
+                    {/* Canvases siempre montados (ocultos) para que los refs estén disponibles
+                        independientemente del tab activo al momento de generar */}
+                    <canvas ref={canvasRef} className="hidden" aria-hidden="true" />
+                    <canvas ref={aiCanvasRef} className="hidden" aria-hidden="true" />
+
                     {/* ── Classic Tab ── */}
                     {activeTab === 'classic' && (
                         <>
@@ -470,7 +485,6 @@ const ShareEventModal: React.FC<ShareEventModalProps> = ({ isOpen, onClose, even
                             ) : (
                                 <p className="text-red-400 text-sm">No se pudo generar la vista previa.</p>
                             )}
-                            <canvas ref={canvasRef} className="hidden" />
                             {flyerUrl && (
                                 <button
                                     onClick={handleDownloadClassic}
@@ -517,7 +531,6 @@ const ShareEventModal: React.FC<ShareEventModalProps> = ({ isOpen, onClose, even
                                     />
                                 )}
                             </div>
-                            <canvas ref={aiCanvasRef} className="hidden" />
 
                             <button
                                 onClick={handleDownloadAi}
