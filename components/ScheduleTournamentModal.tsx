@@ -2,14 +2,17 @@ import React, { useState, useEffect } from 'react';
 import { useGame } from '../context/GameContext';
 import { GAME_LABELS } from '../types';
 import { supabase } from '../supabaseClient';
+import ImageUpload from './cms/ImageUpload';
 
 interface ScheduleTournamentModalProps {
     isOpen: boolean;
     onClose: () => void;
     onSchedule: (eventData: any) => void;
+    editingEvent?: any;
+    onUpdate?: (eventId: string, eventData: any) => void;
 }
 
-const ScheduleTournamentModal: React.FC<ScheduleTournamentModalProps> = ({ isOpen, onClose, onSchedule }) => {
+const ScheduleTournamentModal: React.FC<ScheduleTournamentModalProps> = ({ isOpen, onClose, onSchedule, editingEvent, onUpdate }) => {
     // Game options with their formats
     const GAME_FORMAT_OPTIONS: Record<string, string[]> = {
         mtg: ['Standard', 'Modern', 'Pioneer', 'Legacy', 'Pauper', 'Premodern', 'Commander', 'Draft', 'Sealed', 'Store Championship', 'RCQ'],
@@ -39,7 +42,8 @@ const ScheduleTournamentModal: React.FC<ScheduleTournamentModalProps> = ({ isOpe
         recurrenceEnd: '',
         description: '',
         entry_fee: '', // Added entry_fee
-        game_type: currentGame
+        game_type: currentGame,
+        image_url: ''
     });
 
     // Fetch user profile on mount or open
@@ -51,7 +55,7 @@ const ScheduleTournamentModal: React.FC<ScheduleTournamentModalProps> = ({ isOpe
                 if (data) {
                     setUserProfile(data);
                     // If user is a store, auto-fill and lock store name
-                    if (data.role === 'store') {
+                    if (data.role === 'store' && !editingEvent) {
                         setFormData(prev => ({
                             ...prev,
                             storeName: data.name || data.username || '', // FIXED: Use username if name is missing
@@ -62,15 +66,36 @@ const ScheduleTournamentModal: React.FC<ScheduleTournamentModalProps> = ({ isOpe
             }
         };
         if (isOpen) fetchProfile();
-    }, [isOpen]);
+    }, [isOpen, editingEvent]);
 
+    // Populate editing values
+    useEffect(() => {
+        if (isOpen && editingEvent) {
+            setFormData({
+                title: editingEvent.title || '',
+                date: editingEvent.date || '',
+                time: editingEvent.time || '19:00',
+                format: editingEvent.format || 'Standard',
+                storeName: editingEvent.storeName || editingEvent.store_name || '',
+                storeId: editingEvent.createdBy || editingEvent.created_by || '',
+                maxPlayers: editingEvent.maxPlayers || editingEvent.max_players || 64,
+                recurring: false,
+                recurrenceType: 'weekly',
+                recurrenceEnd: '',
+                description: editingEvent.description || '',
+                entry_fee: editingEvent.entryFee || editingEvent.entry_fee || '',
+                game_type: editingEvent.gameType || editingEvent.game_type || currentGame,
+                image_url: editingEvent.imageUrl || editingEvent.image_url || ''
+            });
+        }
+    }, [isOpen, editingEvent]);
 
     // Update game_type when modal opens or context changes (only if it matches the current game)
     useEffect(() => {
-        if (isOpen) {
+        if (isOpen && !editingEvent) {
             setFormData(prev => ({ ...prev, game_type: currentGame }));
         }
-    }, [currentGame, isOpen]);
+    }, [currentGame, isOpen, editingEvent]);
 
     // Update format when game_type changes to a valid default for that game
     useEffect(() => {
@@ -84,7 +109,11 @@ const ScheduleTournamentModal: React.FC<ScheduleTournamentModalProps> = ({ isOpe
         e.preventDefault();
         setLoading(true);
         try {
-            await onSchedule(formData);
+            if (editingEvent && onUpdate) {
+                await onUpdate(editingEvent.id, formData);
+            } else {
+                await onSchedule(formData);
+            }
             onClose();
             // Reset form
             setFormData({
@@ -100,10 +129,11 @@ const ScheduleTournamentModal: React.FC<ScheduleTournamentModalProps> = ({ isOpe
                 recurrenceEnd: '',
                 description: '',
                 entry_fee: '',
-                game_type: currentGame
+                game_type: currentGame,
+                image_url: ''
             });
         } catch (error) {
-            console.error('Error scheduling tournament:', error);
+            console.error('Error scheduling/updating tournament:', error);
         } finally {
             setLoading(false);
         }
@@ -116,7 +146,9 @@ const ScheduleTournamentModal: React.FC<ScheduleTournamentModalProps> = ({ isOpe
             <div className="bg-slate-800 rounded-xl shadow-2xl border border-slate-700 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
                 {/* Header */}
                 <div className="sticky top-0 bg-slate-800 border-b border-slate-700 px-6 py-4 flex justify-between items-center z-10">
-                    <h2 className="text-2xl font-bold text-white">Agendar Torneo</h2>
+                    <h2 className="text-2xl font-bold text-white">
+                        {editingEvent ? 'Editar Torneo' : 'Agendar Torneo'}
+                    </h2>
                     <button
                         onClick={onClose}
                         title="Cerrar"
@@ -264,55 +296,73 @@ const ScheduleTournamentModal: React.FC<ScheduleTournamentModalProps> = ({ isOpe
                         />
                     </div>
 
-                    {/* Evento Recurrente */}
-                    <div className="border-t border-slate-700 pt-6">
-                        <div className="flex items-center gap-3 mb-4">
-                            <input
-                                type="checkbox"
-                                id="recurring"
-                                checked={formData.recurring}
-                                onChange={(e) => setFormData({ ...formData, recurring: e.target.checked })}
-                                className="w-5 h-5 bg-slate-900 border-slate-700 rounded text-green-600 focus:ring-2 focus:ring-green-500"
-                            />
-                            <label htmlFor="recurring" className="text-sm font-medium text-slate-300">
-                                Este es un evento recurrente
-                            </label>
-                        </div>
-
-                        {formData.recurring && (
-                            <div className="space-y-4 pl-8">
-                                <div>
-                                    <label htmlFor="recurrenceType" className="block text-sm font-medium text-slate-300 mb-2">
-                                        Frecuencia
-                                    </label>
-                                    <select
-                                        id="recurrenceType"
-                                        value={formData.recurrenceType}
-                                        onChange={(e) => setFormData({ ...formData, recurrenceType: e.target.value })}
-                                        className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-green-500"
-                                    >
-                                        <option value="weekly">Semanal (mismo día de la semana)</option>
-                                        <option value="biweekly">Quincenal</option>
-                                        <option value="monthly">Mensual (mismo día del mes)</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label htmlFor="recurrenceEnd" className="block text-sm font-medium text-slate-300 mb-2">
-                                        Repetir hasta
-                                    </label>
-                                    <input
-                                        id="recurrenceEnd"
-                                        type="date"
-                                        value={formData.recurrenceEnd}
-                                        onChange={(e) => setFormData({ ...formData, recurrenceEnd: e.target.value })}
-                                        className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-green-500"
-                                    />
-                                    <p className="text-xs text-slate-500 mt-1">
-                                        Deja vacío para que se repita indefinidamente
-                                    </p>
-                                </div>
+                    {/* Evento Recurrente (Only visible when creating, not editing) */}
+                    {!editingEvent && (
+                        <div className="border-t border-slate-700 pt-6">
+                            <div className="flex items-center gap-3 mb-4">
+                                <input
+                                    type="checkbox"
+                                    id="recurring"
+                                    checked={formData.recurring}
+                                    onChange={(e) => setFormData({ ...formData, recurring: e.target.checked })}
+                                    className="w-5 h-5 bg-slate-900 border-slate-700 rounded text-green-600 focus:ring-2 focus:ring-green-500"
+                                />
+                                <label htmlFor="recurring" className="text-sm font-medium text-slate-300">
+                                    Este es un evento recurrente
+                                </label>
                             </div>
-                        )}
+
+                            {formData.recurring && (
+                                <div className="space-y-4 pl-8">
+                                    <div>
+                                        <label htmlFor="recurrenceType" className="block text-sm font-medium text-slate-300 mb-2">
+                                            Frecuencia
+                                        </label>
+                                        <select
+                                            id="recurrenceType"
+                                            value={formData.recurrenceType}
+                                            onChange={(e) => setFormData({ ...formData, recurrenceType: e.target.value })}
+                                            className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-green-500"
+                                        >
+                                            <option value="weekly">Semanal (mismo día de la semana)</option>
+                                            <option value="biweekly">Quincenal</option>
+                                            <option value="monthly">Mensual (mismo día del mes)</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label htmlFor="recurrenceEnd" className="block text-sm font-medium text-slate-300 mb-2">
+                                            Repetir hasta
+                                        </label>
+                                        <input
+                                            id="recurrenceEnd"
+                                            type="date"
+                                            value={formData.recurrenceEnd}
+                                            onChange={(e) => setFormData({ ...formData, recurrenceEnd: e.target.value })}
+                                            className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-green-500"
+                                        />
+                                        <p className="text-xs text-slate-500 mt-1">
+                                            Deja vacío para que se repita indefinidamente
+                                        </p>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    {/* Imagen del Evento */}
+                    <div>
+                        <label className="block text-sm font-medium text-slate-300 mb-2">
+                            Imagen del Evento (Opcional)
+                        </label>
+                        <ImageUpload
+                            currentImageUrl={formData.image_url}
+                            onImageUploaded={(url) => setFormData({ ...formData, image_url: url })}
+                            bucket="article-images"
+                            folder="events"
+                        />
+                        <p className="text-xs text-slate-500 mt-1 font-medium">
+                            Si no subes una imagen, el sistema cargará automáticamente el arte crop de una carta icónica según tu formato de Magic (ej: Mightform Harmonizer en Standard, Survival of the Fittest en Premodern, Command Tower en Commander).
+                        </p>
                     </div>
 
                     {/* Descripción */}
@@ -344,7 +394,9 @@ const ScheduleTournamentModal: React.FC<ScheduleTournamentModalProps> = ({ isOpe
                             disabled={loading}
                             className={`flex-1 px-4 py-2 bg-green-600 hover:bg-green-500 text-white font-bold rounded-lg transition-colors shadow-lg ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
                         >
-                            {loading ? 'Agendando...' : 'Agendar Torneo'}
+                            {loading 
+                                ? (editingEvent ? 'Guardando...' : 'Agendando...') 
+                                : (editingEvent ? 'Guardar Cambios' : 'Agendar Torneo')}
                         </button>
                     </div>
                 </form>

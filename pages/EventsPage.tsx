@@ -9,6 +9,8 @@ import ScheduleTournamentModal from '../components/ScheduleTournamentModal';
 import { supabase } from '../supabaseClient';
 import { toast } from 'sonner';
 import SEO from '../components/SEO';
+import { Edit, Trash2 } from 'lucide-react';
+import ShareEventModal, { getEventImageUrl } from '../components/ShareEventModal';
 
 interface EventsPageProps {
     events: CommunityEvent[];
@@ -80,6 +82,9 @@ const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [
     const [selectedCalendarEvent, setSelectedCalendarEvent] = React.useState<CommunityEvent | null>(null);
     // State for loading actions
     const [processingEventId, setProcessingEventId] = React.useState<string | null>(null);
+    // State for editing and sharing events
+    const [editingEvent, setEditingEvent] = React.useState<any>(null);
+    const [shareModalEvent, setShareModalEvent] = React.useState<any>(null);
 
     // State for filtering
     const [selectedFormat, setSelectedFormat] = React.useState('Todos los Formatos');
@@ -339,7 +344,8 @@ const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [
                         description: eventData.description || null,
                         game_type: eventData.game_type || 'mtg',
                         entry_fee: eventData.entry_fee || null,
-                        created_by: userId
+                        created_by: userId,
+                        image_url: eventData.image_url || null
                     });
 
                     // Calcular siguiente fecha según tipo de recurrencia
@@ -363,14 +369,16 @@ const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [
                     description: eventData.description || null,
                     game_type: eventData.game_type || 'mtg',
                     entry_fee: eventData.entry_fee || null,
-                    created_by: userId
+                    created_by: userId,
+                    image_url: eventData.image_url || null
                 });
             }
 
             // Guardar en Supabase
-            const { error } = await supabase
+            const { data, error } = await supabase
                 .from('scheduled_events')
-                .insert(eventsToCreate);
+                .insert(eventsToCreate)
+                .select();
 
             if (error) {
                 console.error('Error al guardar eventos:', error);
@@ -385,13 +393,81 @@ const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [
                 description: `Se ${eventsToCreate.length === 1 ? 'agendó 1 evento' : `agendaron ${eventsToCreate.length} eventos`} correctamente`
             });
 
-            // Recargar la página para mostrar los nuevos eventos
-            window.location.reload();
+            // Set share modal event
+            if (data && data.length > 0) {
+                const createdEvent = data[0];
+                setShareModalEvent({
+                    id: createdEvent.id,
+                    title: createdEvent.title,
+                    date: createdEvent.date,
+                    time: createdEvent.time,
+                    format: createdEvent.format,
+                    storeName: createdEvent.store_name,
+                    maxPlayers: createdEvent.max_players,
+                    entry_fee: createdEvent.entry_fee,
+                    description: createdEvent.description,
+                    imageUrl: createdEvent.image_url,
+                    game_type: createdEvent.game_type
+                });
+            } else {
+                window.location.reload();
+            }
 
         } catch (error: any) {
             console.error('Error al agendar torneo:', error);
             toast.error('Error inesperado', {
                 description: error.message || 'No se pudo agendar el torneo'
+            });
+        }
+    };
+
+    // Handler para editar/actualizar torneo
+    const handleUpdateTournament = async (eventId: string, eventData: any) => {
+        try {
+            const { error } = await supabase
+                .from('scheduled_events')
+                .update({
+                    title: eventData.title,
+                    date: eventData.date,
+                    time: eventData.time,
+                    format: eventData.format,
+                    store_name: eventData.storeName,
+                    max_players: eventData.maxPlayers,
+                    description: eventData.description || null,
+                    game_type: eventData.game_type || 'mtg',
+                    entry_fee: eventData.entry_fee || null,
+                    image_url: eventData.image_url || null
+                })
+                .eq('id', eventId);
+
+            if (error) {
+                console.error('Error al actualizar evento:', error);
+                toast.error('Error al actualizar torneo', {
+                    description: error.message
+                });
+                return;
+            }
+
+            toast.success('¡Torneo actualizado!');
+
+            setShareModalEvent({
+                id: eventId,
+                title: eventData.title,
+                date: eventData.date,
+                time: eventData.time,
+                format: eventData.format,
+                storeName: eventData.storeName,
+                maxPlayers: eventData.maxPlayers,
+                entry_fee: eventData.entry_fee,
+                description: eventData.description,
+                imageUrl: eventData.image_url,
+                game_type: eventData.game_type
+            });
+
+        } catch (error: any) {
+            console.error('Error al actualizar torneo:', error);
+            toast.error('Error inesperado', {
+                description: error.message || 'No se pudo actualizar el torneo'
             });
         }
     };
@@ -791,8 +867,44 @@ const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [
                                     const isFull = (event.playerCount || 0) >= (event.maxPlayers || 64);
                                     return (
                                         <div key={event.id} className="bg-slate-800 rounded-2xl border border-slate-700 overflow-hidden hover:border-sky-500/50 transition-all duration-300 group flex flex-col relative">
-                                            <div className={`absolute top-4 right-4 z-10 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-[0.2em] shadow-lg ${details.multiplier === 'x4' ? 'bg-red-500 text-white' : details.multiplier === 'x3' ? 'bg-yellow-500 text-slate-950' : 'bg-sky-500 text-white'}`}>
-                                                Points {details.multiplier}
+                                            {/* Header Image */}
+                                            <div className="h-36 w-full relative overflow-hidden border-b border-slate-700/50 bg-slate-950">
+                                                <img 
+                                                    src={getEventImageUrl(event)} 
+                                                    alt={event.title} 
+                                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+                                                />
+                                                <div className="absolute inset-0 bg-gradient-to-t from-slate-800 to-transparent"></div>
+                                                <div className={`absolute top-4 right-4 z-10 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-[0.2em] shadow-lg ${details.multiplier === 'x4' ? 'bg-red-500 text-white' : details.multiplier === 'x3' ? 'bg-yellow-500 text-slate-950' : 'bg-sky-500 text-white'}`}>
+                                                    Points {details.multiplier}
+                                                </div>
+
+                                                {/* Edit/Delete Admin/Owner controls */}
+                                                {(userRole === 'admin' || (userRole === 'store' && event.createdBy === userId)) && (
+                                                    <div className="absolute top-4 left-4 flex gap-2">
+                                                        <button
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                setEditingEvent(event);
+                                                            }}
+                                                            title="Editar Evento"
+                                                            className="p-2 bg-slate-900/80 hover:bg-sky-600 text-white hover:text-white rounded-lg backdrop-blur-sm transition-all"
+                                                        >
+                                                            <Edit className="w-3.5 h-3.5" />
+                                                        </button>
+                                                        <button
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                handleDeleteEvent(event.id, event.title);
+                                                            }}
+                                                            disabled={processingEventId === event.id}
+                                                            title="Eliminar Evento"
+                                                            className="p-2 bg-slate-900/80 hover:bg-red-600 text-white hover:text-white rounded-lg backdrop-blur-sm transition-all"
+                                                        >
+                                                            <Trash2 className="w-3.5 h-3.5" />
+                                                        </button>
+                                                    </div>
+                                                )}
                                             </div>
                                             <div className="p-6 flex flex-col h-full space-y-4">
                                                 <div className="flex-1">
@@ -940,6 +1052,16 @@ const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [
                             <button onClick={() => setShowEventDetailsModal(false)} className="text-white hover:text-slate-200" aria-label="Cerrar detalles" title="Cerrar"><svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg></button>
                         </div>
                         <div className="p-6 space-y-6">
+                            {/* Visual Image Header */}
+                            <div className="h-44 w-full rounded-xl overflow-hidden bg-slate-950 border border-slate-700 relative">
+                                <img 
+                                    src={getEventImageUrl(selectedCalendarEvent)} 
+                                    alt={selectedCalendarEvent.title} 
+                                    className="w-full h-full object-cover" 
+                                />
+                                <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/40 to-transparent"></div>
+                            </div>
+
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="bg-slate-900/50 p-3 rounded-xl border border-slate-700/50">
                                     <p className="text-[10px] text-slate-500 uppercase font-black mb-1">Fecha y Hora</p>
@@ -965,9 +1087,60 @@ const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [
                                     <button onClick={() => handleRegisterClick(selectedCalendarEvent)} className="flex-1 px-4 py-3 bg-sky-600 hover:bg-sky-500 text-white font-bold rounded-xl shadow-lg">Inscribirse</button>
                                 )}
                             </div>
+
+                            {/* Admin/Owner controls in calendar modal */}
+                            {(userRole === 'admin' || (userRole === 'store' && selectedCalendarEvent.createdBy === userId)) && (
+                                <div className="flex gap-3 pt-4 border-t border-slate-700/50">
+                                    <button
+                                        onClick={() => {
+                                            setShowEventDetailsModal(false);
+                                            setEditingEvent(selectedCalendarEvent);
+                                        }}
+                                        className="flex-1 py-3 px-4 bg-sky-600/10 border border-sky-500/20 hover:bg-sky-600 hover:text-white rounded-xl text-sky-400 font-bold text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2"
+                                    >
+                                        <Edit className="w-4 h-4" />
+                                        Editar Evento
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            setShowEventDetailsModal(false);
+                                            handleDeleteEvent(selectedCalendarEvent.id, selectedCalendarEvent.title);
+                                        }}
+                                        disabled={processingEventId === selectedCalendarEvent.id}
+                                        className="flex-1 py-3 px-4 bg-red-600/10 border border-red-500/20 hover:bg-red-600 hover:text-white rounded-xl text-red-400 font-bold text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2"
+                                    >
+                                        <Trash2 className="w-4 h-4" />
+                                        Eliminar Evento
+                                    </button>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>
+            )}
+            
+            {/* Edit Event Modal */}
+            {editingEvent && (
+                <ScheduleTournamentModal 
+                    isOpen={!!editingEvent} 
+                    onClose={() => setEditingEvent(null)} 
+                    onSchedule={handleScheduleTournament} 
+                    editingEvent={editingEvent}
+                    onUpdate={handleUpdateTournament}
+                />
+            )}
+
+            {/* Social Share Event Modal */}
+            {shareModalEvent && (
+                <ShareEventModal 
+                    isOpen={!!shareModalEvent} 
+                    onClose={() => {
+                        setShareModalEvent(null);
+                        window.location.reload();
+                    }} 
+                    event={shareModalEvent}
+                    storeLogoUrl={userRole === 'store' ? undefined : undefined} // Handled dynamically if needed or resolved
+                />
             )}
         </div>
     );
