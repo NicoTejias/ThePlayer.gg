@@ -122,7 +122,7 @@ const Header: React.FC<HeaderProps> = ({
     return (
       <div className="flex items-center gap-2">
         <span className="text-xl">{logoInfo?.emoji || '🎮'}</span>
-        <span className="font-bold text-white tracking-wider" style={{ fontFamily: 'Cinzel, serif', fontSize: '0.85rem' }}>
+        <span className="font-bold text-white tracking-wider" style={{ fontFamily: 'Cinzel, serif', fontSize: '0.95rem' }}>
           {GAME_LABELS[currentGame]}
         </span>
       </div>
@@ -173,10 +173,10 @@ const Header: React.FC<HeaderProps> = ({
                   )}
                 </div>
                 <div className="flex flex-col min-w-0">
-                  <span style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: 600, letterSpacing: '0.05em', fontSize: '0.65rem', textTransform: 'uppercase', color: 'var(--text-secondary)' }}>
+                  <span style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: 600, letterSpacing: '0.05em', fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-secondary)' }}>
                     {t('cambiar_juego')}
                   </span>
-                  <span style={{ fontFamily: 'Cinzel, serif', fontWeight: 700, fontSize: '0.78rem', color: 'var(--color-accent)', letterSpacing: '0.04em' }}>
+                  <span style={{ fontFamily: 'Cinzel, serif', fontWeight: 700, fontSize: '0.9rem', color: 'var(--color-accent)', letterSpacing: '0.04em' }}>
                     {GAME_LABELS[currentGame]}
                   </span>
                 </div>
@@ -198,7 +198,7 @@ const Header: React.FC<HeaderProps> = ({
               {isLiveSignal && (
                 <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg" style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.25)' }}>
                   <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
-                  <span style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: 700, letterSpacing: '0.12em', fontSize: '0.6rem', textTransform: 'uppercase', color: '#f87171' }}>
+                  <span style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: 700, letterSpacing: '0.12em', fontSize: '0.75rem', textTransform: 'uppercase', color: '#f87171' }}>
                     Live
                   </span>
                 </div>

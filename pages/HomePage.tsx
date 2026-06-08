@@ -143,7 +143,7 @@ const HomePage: React.FC<HomePageProps> = ({ players, events, session, userRole,
       <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--bg-base)' }}>
         <div className="flex flex-col items-center gap-4">
           <div className="w-12 h-12 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: 'var(--color-accent)', borderTopColor: 'transparent' }} />
-          <p className="text-xs uppercase tracking-widest" style={{ fontFamily: 'Rajdhani, sans-serif', color: 'var(--text-secondary)', letterSpacing: '0.25em' }}>
+          <p className="text-sm uppercase tracking-widest" style={{ fontFamily: 'Rajdhani, sans-serif', color: 'var(--text-secondary)', letterSpacing: '0.25em' }}>
             Cargando Arena
           </p>
         </div>
@@ -232,14 +232,14 @@ const HomePage: React.FC<HomePageProps> = ({ players, events, session, userRole,
             <div className="flex items-center gap-3 pt-2 animate-fade-in-up stagger-4" style={{ opacity: 0 }}>
               <Link
                 to="/eventos"
-                className="btn-accent px-7 py-3.5 rounded-xl text-xs"
+                className="btn-accent px-7 py-3.5 rounded-xl text-sm"
                 style={{ letterSpacing: '0.12em' }}
               >
                 {t('jugar')}
               </Link>
               <Link
                 to="/quienes-somos"
-                className="px-6 py-3.5 rounded-xl text-xs font-bold uppercase transition-all duration-300 hover:bg-white/8"
+                className="px-6 py-3.5 rounded-xl text-sm font-bold uppercase transition-all duration-300 hover:bg-white/8"
                 style={{
                   fontFamily: 'Rajdhani, sans-serif',
                   letterSpacing: '0.12em',
@@ -327,7 +327,7 @@ const HomePage: React.FC<HomePageProps> = ({ players, events, session, userRole,
           <h2 className="section-title text-xl">Próximos Eventos</h2>
           <Link
             to="/eventos"
-            className="text-xs font-bold uppercase tracking-widest transition-all hover:opacity-80 flex items-center gap-1.5"
+            className="text-sm font-bold uppercase tracking-widest transition-all hover:opacity-80 flex items-center gap-1.5"
             style={{ fontFamily: 'Rajdhani, sans-serif', color: 'var(--color-accent)', letterSpacing: '0.15em' }}
           >
             {t('ver_mas')}
@@ -359,7 +359,7 @@ const HomePage: React.FC<HomePageProps> = ({ players, events, session, userRole,
                     <div className="absolute inset-0 bg-gradient-to-t from-slate-800 via-slate-800/20 to-transparent" />
                     {/* Player count badge */}
                     <div
-                      className="absolute top-3 right-3 px-2.5 py-1 rounded-full text-[10px] font-bold tracking-widest"
+                      className="absolute top-3 right-3 px-2.5 py-1 rounded-full text-xs font-bold tracking-widest"
                       style={{ fontFamily: 'Rajdhani, sans-serif', background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.8)' }}
                     >
                       {event.playerCount || 0}/{event.maxPlayers || 64}
@@ -370,7 +370,7 @@ const HomePage: React.FC<HomePageProps> = ({ players, events, session, userRole,
                   <div className="p-4 flex flex-col gap-3">
                     <div>
                       <span
-                        className="inline-block text-[10px] font-black uppercase tracking-widest px-2.5 py-0.5 rounded mb-2"
+                        className="inline-block text-xs font-black uppercase tracking-widest px-2.5 py-0.5 rounded mb-2"
                         style={{ fontFamily: 'Rajdhani, sans-serif', background: 'var(--color-accent)', color: '#fff', letterSpacing: '0.12em' }}
                       >
                         {event.format}
@@ -406,7 +406,7 @@ const HomePage: React.FC<HomePageProps> = ({ players, events, session, userRole,
                       <button
                         onClick={() => { setSelectedEvent(event); setShowRegModal(true); }}
                         disabled={isFull || isRegistered}
-                        className={`px-3 py-1.5 rounded-lg text-xs font-black uppercase tracking-widest transition-all ${isRegistered ? 'bg-green-900/30 text-green-400 border border-green-700/30' : isFull ? 'bg-slate-700 text-slate-500 cursor-not-allowed' : 'bg-sky-600 hover:bg-sky-500 text-white shadow-lg shadow-sky-900/30'}`}
+                        className={`px-3 py-1.5 rounded-lg text-sm font-black uppercase tracking-widest transition-all ${isRegistered ? 'bg-green-900/30 text-green-400 border border-green-700/30' : isFull ? 'bg-slate-700 text-slate-500 cursor-not-allowed' : 'bg-sky-600 hover:bg-sky-500 text-white shadow-lg shadow-sky-900/30'}`}
                       >
                         {isRegistered ? 'Inscrito' : isFull ? 'Completo' : 'Inscribirse'}
                       </button>
@@ -417,7 +417,7 @@ const HomePage: React.FC<HomePageProps> = ({ players, events, session, userRole,
             })
           ) : (
             <p
-              className="col-span-full py-16 text-center text-xs uppercase tracking-widest"
+              className="col-span-full py-16 text-center text-sm uppercase tracking-widest"
               style={{ fontFamily: 'Rajdhani, sans-serif', color: 'var(--text-secondary)', letterSpacing: '0.25em' }}
             >
               {t('no_eventos')}
@@ -461,7 +461,7 @@ const HomePage: React.FC<HomePageProps> = ({ players, events, session, userRole,
               </Link>
             </div>
             <p
-              className="mt-1.5 text-xs uppercase tracking-widest"
+              className="mt-1.5 text-sm uppercase tracking-widest"
               style={{ fontFamily: 'Rajdhani, sans-serif', color: 'var(--text-secondary)', letterSpacing: '0.2em' }}
             >
               {t('clasificacion_temporada')}{' '}
@@ -490,7 +490,7 @@ const HomePage: React.FC<HomePageProps> = ({ players, events, session, userRole,
                           style={{
                             fontFamily: 'Rajdhani, sans-serif',
                             fontWeight: 700,
-                            fontSize: isCurrent ? '1rem' : '0.9rem',
+                            fontSize: isCurrent ? '1.1rem' : '1rem',
                             color: isCurrent ? 'var(--color-accent)' : 'var(--text-primary)',
                             letterSpacing: '0.03em',
                           }}
@@ -502,7 +502,7 @@ const HomePage: React.FC<HomePageProps> = ({ players, events, session, userRole,
                       </div>
                       {player.team !== '-' && (
                         <p
-                          className="text-[10px] uppercase tracking-widest mt-0.5"
+                          className="text-xs uppercase tracking-widest mt-0.5"
                           style={{ fontFamily: 'Rajdhani, sans-serif', color: 'var(--text-secondary)', letterSpacing: '0.2em' }}
                         >
                           {player.team}
@@ -513,13 +513,13 @@ const HomePage: React.FC<HomePageProps> = ({ players, events, session, userRole,
 
                   <div className="flex items-baseline gap-1.5">
                     <span
-                      className="text-lg font-bold tabular-nums"
+                      className="text-xl font-bold tabular-nums"
                       style={{ fontFamily: 'Cinzel, serif', color: 'var(--text-primary)', letterSpacing: '0.02em' }}
                     >
                       {player.points.toLocaleString()}
                     </span>
                     <span
-                      className="text-[9px] uppercase font-bold"
+                      className="text-[11px] uppercase font-bold"
                       style={{ fontFamily: 'Rajdhani, sans-serif', color: 'var(--color-accent)', letterSpacing: '0.15em' }}
                     >
                       {t('puntos')}
@@ -591,7 +591,7 @@ const HomePage: React.FC<HomePageProps> = ({ players, events, session, userRole,
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                     />
                     <div
-                      className="absolute top-1.5 left-1.5 px-1.5 py-0.5 rounded text-[8px] font-bold uppercase tracking-wide"
+                      className="absolute top-1.5 left-1.5 px-1.5 py-0.5 rounded text-[11px] font-bold uppercase tracking-wide"
                       style={{ fontFamily: 'Rajdhani, sans-serif', background: 'var(--color-accent)', color: '#fff', letterSpacing: '0.1em' }}
                     >
                       {article.category || 'TCG'}
@@ -601,16 +601,16 @@ const HomePage: React.FC<HomePageProps> = ({ players, events, session, userRole,
                     <div>
                       <h4
                         className="font-bold line-clamp-2 leading-snug transition-colors group-hover:opacity-80"
-                        style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: 700, fontSize: '0.9rem', color: 'var(--text-primary)', letterSpacing: '0.02em' }}
+                        style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: 700, fontSize: '1.05rem', color: 'var(--text-primary)', letterSpacing: '0.02em' }}
                       >
                         {article.title}
                       </h4>
-                      <p className="text-xs line-clamp-2 mt-1 leading-relaxed" style={{ color: 'var(--text-secondary)', fontFamily: 'Rajdhani, sans-serif' }}>
+                      <p className="text-sm line-clamp-2 mt-1 leading-relaxed" style={{ color: 'var(--text-secondary)', fontFamily: 'Rajdhani, sans-serif' }}>
                         {article.excerpt || (article.content?.substring(0, 100) + '...')}
                       </p>
                     </div>
                     <div
-                      className="flex items-center justify-between text-[10px] border-t pt-2 mt-2"
+                      className="flex items-center justify-between text-xs border-t pt-2 mt-2"
                       style={{ borderColor: 'rgba(255,255,255,0.06)', color: 'var(--text-secondary)', fontFamily: 'Rajdhani, sans-serif', fontWeight: 600, letterSpacing: '0.05em' }}
                     >
                       <span>{t('por')} {article.author || 'ThePlayer'}</span>
@@ -620,7 +620,7 @@ const HomePage: React.FC<HomePageProps> = ({ players, events, session, userRole,
                 </Link>
               ))
             ) : (
-              <p className="text-xs py-10 uppercase tracking-widest text-center" style={{ fontFamily: 'Rajdhani, sans-serif', color: 'var(--text-secondary)', letterSpacing: '0.2em' }}>
+              <p className="text-sm py-10 uppercase tracking-widest text-center" style={{ fontFamily: 'Rajdhani, sans-serif', color: 'var(--text-secondary)', letterSpacing: '0.2em' }}>
                 {t('no_noticias')}
               </p>
             )}
@@ -666,7 +666,7 @@ const HomePage: React.FC<HomePageProps> = ({ players, events, session, userRole,
                       </div>
                     </div>
                     <div
-                      className="absolute top-1.5 left-1.5 px-1.5 py-0.5 rounded text-[8px] font-bold uppercase"
+                      className="absolute top-1.5 left-1.5 px-1.5 py-0.5 rounded text-[11px] font-bold uppercase"
                       style={{ fontFamily: 'Rajdhani, sans-serif', background: 'var(--color-accent)', color: '#fff', letterSpacing: '0.1em' }}
                     >
                       Video
@@ -676,16 +676,16 @@ const HomePage: React.FC<HomePageProps> = ({ players, events, session, userRole,
                     <div>
                       <h4
                         className="font-bold line-clamp-2 leading-snug"
-                        style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: 700, fontSize: '0.9rem', color: 'var(--text-primary)', letterSpacing: '0.02em' }}
+                        style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: 700, fontSize: '1.05rem', color: 'var(--text-primary)', letterSpacing: '0.02em' }}
                       >
                         {video.title}
                       </h4>
-                      <p className="text-xs line-clamp-1 mt-1" style={{ color: 'var(--text-secondary)', fontFamily: 'Rajdhani, sans-serif' }}>
+                      <p className="text-sm line-clamp-1 mt-1" style={{ color: 'var(--text-secondary)', fontFamily: 'Rajdhani, sans-serif' }}>
                         {video.description || 'Video destacado de la comunidad'}
                       </p>
                     </div>
                     <div
-                      className="flex items-center justify-between text-[10px] border-t pt-2 mt-2"
+                      className="flex items-center justify-between text-xs border-t pt-2 mt-2"
                       style={{ borderColor: 'rgba(255,255,255,0.06)', color: 'var(--text-secondary)', fontFamily: 'Rajdhani, sans-serif', fontWeight: 600, letterSpacing: '0.05em' }}
                     >
                       <span>YouTube</span>
@@ -695,7 +695,7 @@ const HomePage: React.FC<HomePageProps> = ({ players, events, session, userRole,
                 </a>
               ))
             ) : (
-              <p className="text-xs py-10 uppercase tracking-widest text-center" style={{ fontFamily: 'Rajdhani, sans-serif', color: 'var(--text-secondary)', letterSpacing: '0.2em' }}>
+              <p className="text-sm py-10 uppercase tracking-widest text-center" style={{ fontFamily: 'Rajdhani, sans-serif', color: 'var(--text-secondary)', letterSpacing: '0.2em' }}>
                 {t('no_videos')}
               </p>
             )}

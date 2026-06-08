@@ -345,7 +345,7 @@ body {
   color: var(--text-primary);
   overflow-x: hidden;
   transition: background-color 0.3s ease, color 0.3s ease;
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 500;
   letter-spacing: 0.01em;
 }
@@ -760,7 +760,7 @@ h1, h2, h3, h4, h5, h6 {
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  font-size: 0.75rem;
+  font-size: 0.85rem;
   color: var(--text-secondary);
   transition: color 0.2s ease;
   position: relative;
@@ -837,7 +837,7 @@ h1, h2, h3, h4, h5, h6 {
   font-weight: 700;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  font-size: 0.65rem;
+  font-size: 0.75rem;
   border: 1px solid var(--color-accent);
   color: var(--color-accent);
   background: rgba(0,0,0,0.3);
@@ -866,7 +866,7 @@ h1, h2, h3, h4, h5, h6 {
 .stat-number {
   font-family: 'Cinzel', Georgia, serif;
   font-weight: 700;
-  font-size: 2.25rem;
+  font-size: 2.5rem;
   line-height: 1;
   background: linear-gradient(135deg, #fff 0%, rgba(255,255,255,0.7) 100%);
   -webkit-background-clip: text;
@@ -878,7 +878,7 @@ h1, h2, h3, h4, h5, h6 {
   font-family: 'Rajdhani', sans-serif;
   font-weight: 600;
   letter-spacing: 0.25em;
-  font-size: 0.6rem;
+  font-size: 0.75rem;
   text-transform: uppercase;
   color: var(--text-secondary);
 }
@@ -925,7 +925,7 @@ h1, h2, h3, h4, h5, h6 {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.8rem;
+  font-size: 0.9rem;
   flex-shrink: 0;
 }
 
