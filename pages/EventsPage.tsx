@@ -264,7 +264,7 @@ const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [
 
     // State for upcoming events pagination
     const [upcomingPage, setUpcomingPage] = React.useState(0);
-    const EVENTS_PER_PAGE = 5;
+    const EVENTS_PER_PAGE = 15;
 
     // Filter upcoming events (incluye eventos de hoy que no han pasado)
     const now = new Date();
@@ -915,14 +915,14 @@ const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [
                                     return (
                                         <div key={event.id} className="bg-slate-800 rounded-2xl border border-slate-700 overflow-hidden hover:border-sky-500/50 transition-all duration-300 group flex flex-col relative">
                                             {/* Header Image */}
-                                            <div className="h-36 w-full relative overflow-hidden border-b border-slate-700/50 bg-slate-950">
+                                            <div className="h-52 w-full relative overflow-hidden border-b border-slate-700/50 bg-slate-950">
                                                 <img
                                                     src={getEventImageUrl(event)}
                                                     alt={event.title}
-                                                    style={{ objectPosition: event.imagePosition || '50% 50%' }}
-                                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                                    style={{ objectPosition: event.imagePosition || '50% 30%' }}
+                                                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                                                 />
-                                                <div className="absolute inset-0 bg-gradient-to-t from-slate-800 to-transparent"></div>
+                                                <div className="absolute inset-0 bg-gradient-to-t from-slate-800 via-slate-800/20 to-transparent"></div>
                                                 <div className={`absolute top-4 right-4 z-10 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-[0.2em] shadow-lg ${details.multiplier === 'x4' ? 'bg-red-500 text-white' : details.multiplier === 'x3' ? 'bg-yellow-500 text-slate-950' : 'bg-sky-500 text-white'}`}>
                                                     Points {details.multiplier}
                                                 </div>
@@ -954,14 +954,14 @@ const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [
                                                     </div>
                                                 )}
                                             </div>
-                                            <div className="p-6 flex flex-col h-full space-y-4">
-                                                <div className="flex-1">
-                                                    <div className="flex items-center gap-2 mb-1 text-[10px] font-black uppercase tracking-widest text-sky-400">
+                                            <div className="p-4 flex flex-col gap-3">
+                                                <div>
+                                                    <div className="flex items-center gap-2 mb-1.5 text-[10px] font-black uppercase tracking-widest text-sky-400">
                                                         <span>{event.format}</span>
                                                         <span className="w-1 h-1 rounded-full bg-slate-600"></span>
                                                         <span className="text-slate-500">{details.type}</span>
                                                     </div>
-                                                    <h3 className="text-xl font-bold text-white group-hover:text-sky-400 transition-colors truncate">{event.title}</h3>
+                                                    <h3 className="text-lg font-bold text-white group-hover:text-sky-400 transition-colors" style={{ fontFamily: 'Cinzel, serif' }}>{event.title}</h3>
                                                 </div>
                                                 <div className="bg-slate-900/50 rounded-xl p-3 border border-slate-700/50 space-y-2">
                                                     <div className="flex items-center justify-between text-sm">
@@ -969,21 +969,21 @@ const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [
                                                             <CalendarIcon className="w-4 h-4 text-slate-500" />
                                                             {event.date}
                                                         </div>
-                                                        <span className="text-slate-400">{event.time || "19:00"}</span>
+                                                        <span className="text-slate-400 font-semibold">{event.time || "19:00"}</span>
                                                     </div>
                                                     <div className="flex items-center gap-2 text-sm text-slate-300">
                                                         <MapPinIcon className="w-4 h-4 text-slate-500" />
-                                                        <span className="truncate">{event.storeName}</span>
+                                                        <span className="truncate font-medium">{event.storeName}</span>
                                                     </div>
                                                 </div>
-                                                <div className="pt-4 mt-auto border-t border-slate-700/50 flex items-center justify-between">
+                                                <div className="pt-2 border-t border-slate-700/50 flex items-center justify-between">
                                                     <span className={`text-xs font-black uppercase ${isFull ? 'text-red-400' : 'text-emerald-400'}`}>
                                                         {event.playerCount || 0}/{event.maxPlayers || 64} JUGADORES
                                                     </span>
                                                     <button
                                                         onClick={() => handleRegisterClick(event)}
                                                         disabled={isFull || event.isUserRegistered}
-                                                        className={`px-4 py-2 rounded-lg text-xs font-black uppercase tracking-widest transition-all ${event.isUserRegistered ? 'bg-green-900/30 text-green-400 border border-green-700/30' : 'bg-sky-600 hover:bg-sky-500 text-white'}`}
+                                                        className={`px-4 py-2 rounded-lg text-xs font-black uppercase tracking-widest transition-all ${event.isUserRegistered ? 'bg-green-900/30 text-green-400 border border-green-700/30' : isFull ? 'bg-slate-700 text-slate-500 cursor-not-allowed' : 'bg-sky-600 hover:bg-sky-500 text-white shadow-lg shadow-sky-900/30'}`}
                                                     >
                                                         {event.isUserRegistered ? 'Inscrito' : isFull ? 'Completo' : 'Inscribirse'}
                                                     </button>
@@ -994,6 +994,38 @@ const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [
                                 })
                             )}
                         </div>
+
+                        {/* Bottom Pagination */}
+                        {allUpcomingEvents.length > EVENTS_PER_PAGE && (
+                            <div className="flex items-center justify-center gap-4 mt-8">
+                                <button
+                                    onClick={goToPreviousEvents}
+                                    disabled={upcomingPage === 0}
+                                    className="flex items-center gap-2 px-6 py-3 bg-slate-700 hover:bg-slate-600 text-white font-bold rounded-xl transition-all disabled:opacity-40 disabled:cursor-not-allowed border border-slate-600 hover:border-slate-500"
+                                >
+                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                                    </svg>
+                                    Página Anterior
+                                </button>
+                                <div className="flex items-center gap-2 px-5 py-3 bg-slate-800 rounded-xl border border-slate-700">
+                                    <span className="text-slate-400 text-sm font-medium">Página</span>
+                                    <span className="text-white font-black text-lg">{upcomingPage + 1}</span>
+                                    <span className="text-slate-500 text-sm">de</span>
+                                    <span className="text-slate-300 font-bold text-lg">{totalUpcomingPages}</span>
+                                </div>
+                                <button
+                                    onClick={goToNextEvents}
+                                    disabled={upcomingPage >= totalUpcomingPages - 1}
+                                    className="flex items-center gap-2 px-6 py-3 bg-sky-600 hover:bg-sky-500 text-white font-bold rounded-xl transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-lg shadow-sky-900/30"
+                                >
+                                    Siguiente Página
+                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                    </svg>
+                                </button>
+                            </div>
+                        )}
                     </div>
                 </div>
             ) : (
