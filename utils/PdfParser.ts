@@ -2,9 +2,9 @@
 
 import * as pdfjsLib from 'pdfjs-dist';
 
-// Configure worker (mandatory for pdfjs-dist)
-// Using CDN for reliability across different environments
-pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.js`;
+// Use the locally bundled worker (copied to /pdf-worker/ by vite-plugin-static-copy)
+// to avoid CSP violations from loading scripts from unpkg.com
+pdfjsLib.GlobalWorkerOptions.workerSrc = '/pdf-worker/pdf.worker.min.js';
 
 export interface ParsedRow {
     rank: number;
@@ -24,9 +24,9 @@ export const parseEventLinkPdf = async (file: File): Promise<ParserResult> => {
     const arrayBuffer = await file.arrayBuffer();
     const loadingTask = pdfjsLib.getDocument({
         data: new Uint8Array(arrayBuffer),
-        cMapUrl: `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/cmaps/`,
+        cMapUrl: '/pdf-worker/cmaps/',
         cMapPacked: true,
-        standardFontDataUrl: `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/standard_fonts/`
+        standardFontDataUrl: '/pdf-worker/standard_fonts/'
     });
     const doc = await loadingTask.promise;
 

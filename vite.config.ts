@@ -17,6 +17,14 @@ export default defineConfig(({ mode }) => {
           {
             src: 'node_modules/pdfjs-dist/build/pdf.worker.min.js',
             dest: 'pdf-worker'
+          },
+          {
+            src: 'node_modules/pdfjs-dist/cmaps',
+            dest: 'pdf-worker'
+          },
+          {
+            src: 'node_modules/pdfjs-dist/standard_fonts',
+            dest: 'pdf-worker'
           }
         ]
       })

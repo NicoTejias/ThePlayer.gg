@@ -253,7 +253,7 @@ const AppContent: React.FC = () => {
             <Route path="/universe-selection" element={<UniverseSelectionPage />} />
             <Route path="/envivo" element={<LiveStreamPage />} />
             <Route path="/pls" element={<PLSPage />} />
-            <Route path="/ranking" element={<RankingsPage players={players} teams={teams} />} />
+            <Route path="/ranking" element={<RankingsPage players={players} teams={teams} tournaments={tournamentResults} />} />
             <Route path="/hall-of-fame" element={<HallOfFamePage />} />
             <Route path="/soporte" element={<SupportPage />} />
             <Route path="/equipo/:teamId" element={<TeamProfilePage />} />
