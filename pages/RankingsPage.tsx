@@ -20,13 +20,13 @@ interface RankingsPageProps {
 
 const RankingsPage: React.FC<RankingsPageProps> = ({ players, teams, tournaments }) => {
     const { currentGame } = useGame();
-    const [activeTab, setActiveTab] = useState<'individual' | 'team'>('individual');
+    const [activeTab, setActiveTab] = useState<'individual' | 'completo' | 'team'>('individual');
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedRegion, setSelectedRegion] = useState('');
     const [selectedFormat, setSelectedFormat] = useState('');
     const [selectedStore, setSelectedStore] = useState('');
 
-    // Filtered ranking state (used when format or store filter is active)
+    // Filtered ranking state (used when format or store filter is active, or completo tab)
     const [filteredPlayers, setFilteredPlayers] = useState<PlayerProfile[] | null>(null);
     const [isLoadingFiltered, setIsLoadingFiltered] = useState(false);
 
@@ -51,9 +51,9 @@ const RankingsPage: React.FC<RankingsPageProps> = ({ players, teams, tournaments
         return Array.from(uniqueRegions).sort();
     }, [players]);
 
-    // Fetch filtered ranking when format or store changes
+    // Fetch filtered ranking when format/store changes, or when 'completo' tab is active
     useEffect(() => {
-        if (!selectedFormat && !selectedStore) {
+        if (!selectedFormat && !selectedStore && activeTab !== 'completo') {
             setFilteredPlayers(null);
             return;
         }
@@ -61,7 +61,8 @@ const RankingsPage: React.FC<RankingsPageProps> = ({ players, teams, tournaments
         const fetch = async () => {
             setIsLoadingFiltered(true);
             try {
-                const { data, error } = await supabase.rpc('get_game_ranking_filtered', {
+                const rpcName = activeTab === 'completo' ? 'get_complete_ranking' : 'get_game_ranking_filtered';
+                const { data, error } = await supabase.rpc(rpcName, {
                     p_game_type: currentGame,
                     p_format: selectedFormat || null,
                     p_store_name: selectedStore || null,
@@ -69,15 +70,22 @@ const RankingsPage: React.FC<RankingsPageProps> = ({ players, teams, tournaments
                 if (cancelled) return;
                 if (error) throw error;
                 if (data) {
-                    setFilteredPlayers(data.map((p: any) => ({
-                        ...p,
-                        name: p.username || (p.first_name ? `${p.first_name} ${p.last_name || ''}`.trim() : 'Jugador Sin Nombre'),
-                        points: p.pwp,
-                        tournaments_played: Number(p.tournaments_played),
-                    })));
+                    setFilteredPlayers(data.map((p: any) => {
+                        const totalMatches = Number(p.matches_won || 0) + Number(p.matches_lost || 0) + Number(p.matches_drew || 0);
+                        const winRate = totalMatches > 0 ? Math.round((Number(p.matches_won || 0) / totalMatches) * 100) : undefined;
+                        return {
+                            ...p,
+                            id: p.id || p.player_key, // fallback for unregistered keys
+                            name: p.player_name || p.username || (p.first_name ? `${p.first_name} ${p.last_name || ''}`.trim() : 'Jugador Sin Nombre'),
+                            points: p.pwp,
+                            tournaments_played: Number(p.tournaments_played),
+                            is_registered: p.is_registered ?? true,
+                            win_rate: p.win_rate ?? winRate,
+                        };
+                    }));
                 }
             } catch (e) {
-                console.error('Error al cargar ranking filtrado:', e);
+                console.error('Error al cargar ranking:', e);
                 setFilteredPlayers(null);
             } finally {
                 if (!cancelled) setIsLoadingFiltered(false);
@@ -85,10 +93,10 @@ const RankingsPage: React.FC<RankingsPageProps> = ({ players, teams, tournaments
         };
         fetch();
         return () => { cancelled = true; };
-    }, [selectedFormat, selectedStore, currentGame]);
+    }, [selectedFormat, selectedStore, currentGame, activeTab]);
 
-    // Reset page when any filter changes
-    useEffect(() => { setCurrentPage(1); }, [searchQuery, selectedRegion, selectedFormat, selectedStore]);
+    // Reset page when any filter or tab changes
+    useEffect(() => { setCurrentPage(1); }, [searchQuery, selectedRegion, selectedFormat, selectedStore, activeTab]);
 
     const activePlayers = filteredPlayers ?? players;
 
@@ -204,7 +212,13 @@ const RankingsPage: React.FC<RankingsPageProps> = ({ players, teams, tournaments
                                 onClick={() => setActiveTab('individual')}
                                 className={`flex-1 lg:flex-none py-3 px-8 rounded-xl text-xs font-black uppercase tracking-widest transition-all duration-300 flex items-center justify-center gap-2 ${activeTab === 'individual' ? 'bg-sky-500 text-white shadow-lg shadow-sky-500/25' : 'text-slate-500 hover:text-slate-300'}`}
                             >
-                                <span className="text-base">👤</span> Individual
+                                <span className="text-base">👤</span> Registrados
+                            </button>
+                            <button
+                                onClick={() => setActiveTab('completo')}
+                                className={`flex-1 lg:flex-none py-3 px-8 rounded-xl text-xs font-black uppercase tracking-widest transition-all duration-300 flex items-center justify-center gap-2 ${activeTab === 'completo' ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/25' : 'text-slate-500 hover:text-slate-300'}`}
+                            >
+                                <span className="text-base">🌐</span> General Completo
                             </button>
                             <button
                                 onClick={() => setActiveTab('team')}
@@ -214,7 +228,7 @@ const RankingsPage: React.FC<RankingsPageProps> = ({ players, teams, tournaments
                             </button>
                         </div>
 
-                        {activeTab === 'individual' && (
+                        {(activeTab === 'individual' || activeTab === 'completo') && (
                             <div className="relative flex-grow max-w-md w-full">
                                 <input
                                     type="text"
@@ -233,7 +247,7 @@ const RankingsPage: React.FC<RankingsPageProps> = ({ players, teams, tournaments
                     </div>
 
                     {/* Filter row: format, store, region */}
-                    {activeTab === 'individual' && (
+                    {(activeTab === 'individual' || activeTab === 'completo') && (
                         <div className="flex flex-wrap gap-3 items-center">
                             <select
                                 value={selectedFormat}
@@ -293,8 +307,7 @@ const RankingsPage: React.FC<RankingsPageProps> = ({ players, teams, tournaments
                     )}
                 </div>
 
-                {/* Table Content */}
-                {activeTab === 'individual' ? (
+                {activeTab === 'individual' || activeTab === 'completo' ? (
                     <div className="space-y-6 animate-fade-in-up">
                         <div className="flex flex-col md:flex-row items-center justify-between px-6">
                             <h2 className="text-3xl font-black text-white uppercase tracking-tighter italic">
@@ -330,10 +343,11 @@ const RankingsPage: React.FC<RankingsPageProps> = ({ players, teams, tournaments
                                         {displayedPlayers.map((player) => {
                                             const index = player.globalRank - 1;
                                             const isTop3 = index < 3;
+                                            const isRegistered = player.is_registered !== false;
                                             return (
                                                 <tr
                                                     key={player.id}
-                                                    className={`group transition-all duration-300 hover:bg-white/[0.02] ${player.is_pro ? 'bg-sky-500/[0.02]' : ''}`}
+                                                    className={`group transition-all duration-300 hover:bg-white/[0.02] ${player.is_pro && isRegistered ? 'bg-sky-500/[0.02]' : ''}`}
                                                 >
                                                     <td className="px-6 py-6">
                                                         <div className="flex justify-center">
@@ -349,10 +363,10 @@ const RankingsPage: React.FC<RankingsPageProps> = ({ players, teams, tournaments
                                                     <td className="px-6 py-6">
                                                         <div className="flex items-center gap-4">
                                                             <div className="relative group/avatar">
-                                                                <div className={`w-12 h-12 rounded-xl border border-white/10 flex items-center justify-center overflow-hidden transition-transform group-hover/avatar:scale-110 ${player.is_pro ? 'bg-gradient-to-br from-sky-500 to-indigo-600' : 'bg-slate-900'}`}>
+                                                                <div className={`w-12 h-12 rounded-xl border border-white/10 flex items-center justify-center overflow-hidden transition-transform group-hover/avatar:scale-110 ${player.is_pro && isRegistered ? 'bg-gradient-to-br from-sky-500 to-indigo-600' : 'bg-slate-900'}`}>
                                                                     <span className="text-white font-black text-lg">{(player.name || '?')[0]}</span>
                                                                 </div>
-                                                                {player.is_pro && (
+                                                                {player.is_pro && isRegistered && (
                                                                     <div className="absolute -top-2 -right-2 p-1 bg-sky-500 rounded-full border-2 border-slate-950 shadow-lg" title="Pro Member">
                                                                         <SparklesIcon className="w-3 h-3 text-white" />
                                                                     </div>
@@ -370,9 +384,20 @@ const RankingsPage: React.FC<RankingsPageProps> = ({ players, teams, tournaments
                                                                     </div>
                                                                 </div>
                                                                 <div className="flex items-center gap-2 mt-1">
-                                                                    <TierBadge points={player.points} size="sm" />
-                                                                    {player.is_content_creator && (
-                                                                        <span className="px-2 py-0.5 rounded-full bg-pink-500/10 text-pink-500 text-xs font-black uppercase tracking-widest border border-pink-500/20">CREATOR</span>
+                                                                    {isRegistered ? (
+                                                                        <>
+                                                                            <TierBadge points={player.points} size="sm" />
+                                                                            {player.is_content_creator && (
+                                                                                <span className="px-2 py-0.5 rounded-full bg-pink-500/10 text-pink-500 text-xs font-black uppercase tracking-widest border border-pink-500/20">CREATOR</span>
+                                                                            )}
+                                                                        </>
+                                                                    ) : (
+                                                                        <span
+                                                                            title="Jugador no registrado. ¡Crea tu cuenta para reclamar tus puntos y subir de nivel!"
+                                                                            className="px-2.5 py-0.5 rounded-lg bg-slate-800/80 border border-slate-700/50 text-slate-400 text-xs font-black uppercase tracking-wider cursor-help"
+                                                                        >
+                                                                            Invitado
+                                                                        </span>
                                                                     )}
                                                                 </div>
                                                             </div>
@@ -382,7 +407,7 @@ const RankingsPage: React.FC<RankingsPageProps> = ({ players, teams, tournaments
                                                         <span className="text-xs text-slate-500 font-bold uppercase tracking-widest">{player.region || '-'}</span>
                                                     </td>
                                                     <td className="hidden md:table-cell px-6 py-6 font-mono text-xs">
-                                                        {player.teamId || player.team_id ? (
+                                                        {isRegistered && (player.teamId || player.team_id) ? (
                                                             <Link to={`/equipo/${player.teamId || player.team_id}`} className="inline-flex px-3 py-1 rounded-lg bg-white/5 text-slate-400 border border-white/5 hover:border-violet-500/50 hover:text-violet-400 transition-all font-black uppercase tracking-tighter">
                                                                 {player.teamData?.name || player.team || '-'}
                                                             </Link>

@@ -39,6 +39,7 @@ export interface PlayerProfile {
   instagram_url?: string;
   whatsapp_number?: string;
   public_email?: string;
+  is_registered?: boolean;
 }
 
 // FIX: Add RankingEntry type used in HomePage.tsx
@@ -129,6 +130,7 @@ export interface Store {
   requestDate: string;
   subscription_tier?: 'free' | 'basic' | 'medium' | 'premium';
   subscription_expires_at?: string;
+  city?: string;
 }
 
 
