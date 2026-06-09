@@ -16,9 +16,10 @@ interface RankingsPageProps {
     players: PlayerProfile[];
     teams: Team[];
     tournaments: TournamentResult[];
+    userRole?: string;
 }
 
-const RankingsPage: React.FC<RankingsPageProps> = ({ players, teams, tournaments }) => {
+const RankingsPage: React.FC<RankingsPageProps> = ({ players, teams, tournaments, userRole }) => {
     const { currentGame } = useGame();
     const [activeTab, setActiveTab] = useState<'individual' | 'completo' | 'team'>('individual');
     const [searchQuery, setSearchQuery] = useState('');
@@ -32,6 +33,13 @@ const RankingsPage: React.FC<RankingsPageProps> = ({ players, teams, tournaments
 
     const ITEMS_PER_PAGE = 50;
     const [currentPage, setCurrentPage] = useState(1);
+
+    // Guard complete tab for admin only
+    useEffect(() => {
+        if (activeTab === 'completo' && userRole !== 'admin') {
+            setActiveTab('individual');
+        }
+    }, [activeTab, userRole]);
 
     // Derive available filter options from tournament data
     // Raw DB rows use snake_case; mapped rows use camelCase — handle both
@@ -214,12 +222,14 @@ const RankingsPage: React.FC<RankingsPageProps> = ({ players, teams, tournaments
                             >
                                 <span className="text-base">👤</span> Registrados
                             </button>
-                            <button
-                                onClick={() => setActiveTab('completo')}
-                                className={`flex-1 lg:flex-none py-3 px-8 rounded-xl text-xs font-black uppercase tracking-widest transition-all duration-300 flex items-center justify-center gap-2 ${activeTab === 'completo' ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/25' : 'text-slate-500 hover:text-slate-300'}`}
-                            >
-                                <span className="text-base">🌐</span> General Completo
-                            </button>
+                            {userRole === 'admin' && (
+                                <button
+                                    onClick={() => setActiveTab('completo')}
+                                    className={`flex-1 lg:flex-none py-3 px-8 rounded-xl text-xs font-black uppercase tracking-widest transition-all duration-300 flex items-center justify-center gap-2 ${activeTab === 'completo' ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/25' : 'text-slate-500 hover:text-slate-300'}`}
+                                >
+                                    <span className="text-base">🌐</span> General Completo
+                                </button>
+                            )}
                             <button
                                 onClick={() => setActiveTab('team')}
                                 className={`flex-1 lg:flex-none py-3 px-8 rounded-xl text-xs font-black uppercase tracking-widest transition-all duration-300 flex items-center justify-center gap-2 ${activeTab === 'team' ? 'bg-violet-500 text-white shadow-lg shadow-violet-500/25' : 'text-slate-500 hover:text-slate-300'}`}
