@@ -4,6 +4,16 @@
 :root {
   color-scheme: dark;
 
+  /* ─── Typography scale ─────────────────────────────────────────────────────
+     Increase --font-scale to make the entire site larger.
+     1.0 = default (Tailwind base sizes)
+     1.1 = 10% larger across the board
+     Works by multiplying the <html> font-size, which rem-based Tailwind classes
+     inherit automatically. Arbitrary pixel sizes (text-[Npx]) don't scale with
+     this variable — those are fixed below in the overrides section.
+  ─────────────────────────────────────────────────────────────────────────── */
+  --font-scale: 1.08;
+
   /* Default Theme (MTG) - Deep Plum & Rose (inspired by premium dashboard) */
   --bg-base: #130712;
   --bg-secondary: #220e1e;
@@ -338,6 +348,11 @@
   opacity: 0.12 !important;
 }
 
+html {
+  /* Scales all rem-based sizes (Tailwind text-sm, text-base, text-lg…) */
+  font-size: calc(16px * var(--font-scale));
+}
+
 body {
   margin: 0;
   font-family: 'Rajdhani', system-ui, -apple-system, sans-serif;
@@ -345,10 +360,21 @@ body {
   color: var(--text-primary);
   overflow-x: hidden;
   transition: background-color 0.3s ease, color 0.3s ease;
-  font-size: 18px;
+  font-size: 1.125rem; /* ~18px at scale 1.0, scales with --font-scale */
   font-weight: 500;
   letter-spacing: 0.01em;
 }
+
+/* ─── Minimum readable size for all arbitrary-px text classes ────────────────
+   Tailwind's text-[Npx] classes bypass rem scaling, so we lift them here.
+   text-[8px]  → ~11px  |  text-[9px]  → ~12px  |  text-[10px] → ~13px
+   text-[11px] → ~13px  |  text-[12px] stays at 12px (text-xs is fine)
+   These are lower bounds — components can always set larger sizes.
+─────────────────────────────────────────────────────────────────────────── */
+.text-\[8px\]  { font-size: 0.72rem !important; }  /* ~11.5px */
+.text-\[9px\]  { font-size: 0.78rem !important; }  /* ~12.5px */
+.text-\[10px\] { font-size: 0.84rem !important; }  /* ~13.5px */
+.text-\[11px\] { font-size: 0.84rem !important; }  /* ~13.5px */
 
 h1, h2, h3, h4, h5, h6 {
   font-family: 'Cinzel', Georgia, serif;

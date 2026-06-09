@@ -172,7 +172,7 @@ const RankingsPage: React.FC<RankingsPageProps> = ({ players, teams, tournaments
                 description={`Ranking oficial de ${currentGame} en Chile. Revisa los mejores jugadores de la temporada, sus puntos y estadísticas.`}
             />
             <div className="text-center space-y-4 pt-8">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-500/10 border border-sky-500/20 text-sky-400 text-[10px] font-black uppercase tracking-[0.2em] animate-fade-in">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-500/10 border border-sky-500/20 text-sky-400 text-xs font-black uppercase tracking-[0.2em] animate-fade-in">
                     <SparklesIcon className="w-3 h-3" />
                     Resultados Oficiales de Temporada
                 </div>
@@ -281,7 +281,7 @@ const RankingsPage: React.FC<RankingsPageProps> = ({ players, teams, tournaments
                             )}
 
                             {(selectedFormat || selectedStore) && (
-                                <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-sky-500/10 border border-sky-500/20 text-sky-400 text-[10px] font-black uppercase tracking-wider">
+                                <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-sky-500/10 border border-sky-500/20 text-sky-400 text-xs font-black uppercase tracking-wider">
                                     {isLoadingFiltered ? (
                                         <span className="animate-pulse">Calculando ranking...</span>
                                     ) : (
@@ -300,7 +300,7 @@ const RankingsPage: React.FC<RankingsPageProps> = ({ players, teams, tournaments
                             <h2 className="text-3xl font-black text-white uppercase tracking-tighter italic">
                                 {getRankingTitle()}
                             </h2>
-                            <div className="flex items-center gap-2 text-slate-500 text-[10px] font-black uppercase tracking-[0.2em] pt-2 md:pt-0">
+                            <div className="flex items-center gap-2 text-slate-500 text-xs font-black uppercase tracking-[0.2em] pt-2 md:pt-0">
                                 <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
                                 Mostrando {displayedPlayers.length} de {filteredRanking.length} jugadores
                             </div>
@@ -317,7 +317,7 @@ const RankingsPage: React.FC<RankingsPageProps> = ({ players, teams, tournaments
                             ) : (
                                 <table className="min-w-full border-collapse">
                                     <thead>
-                                        <tr className="bg-slate-950/40 border-b border-white/5 text-[10px] sm:text-xs">
+                                        <tr className="bg-slate-950/40 border-b border-white/5 text-xs sm:text-xs">
                                             <th className="px-6 py-6 text-left font-black text-slate-500 uppercase tracking-[0.2em] w-24 text-center">Rango</th>
                                             <th className="px-6 py-6 text-left font-black text-slate-500 uppercase tracking-[0.2em]">Jugador</th>
                                             <th className="hidden lg:table-cell px-6 py-6 text-left font-black text-slate-500 uppercase tracking-[0.2em]">Territorio</th>
@@ -372,7 +372,7 @@ const RankingsPage: React.FC<RankingsPageProps> = ({ players, teams, tournaments
                                                                 <div className="flex items-center gap-2 mt-1">
                                                                     <TierBadge points={player.points} size="sm" />
                                                                     {player.is_content_creator && (
-                                                                        <span className="px-2 py-0.5 rounded-full bg-pink-500/10 text-pink-500 text-[8px] font-black uppercase tracking-widest border border-pink-500/20">CREATOR</span>
+                                                                        <span className="px-2 py-0.5 rounded-full bg-pink-500/10 text-pink-500 text-xs font-black uppercase tracking-widest border border-pink-500/20">CREATOR</span>
                                                                     )}
                                                                 </div>
                                                             </div>
@@ -395,7 +395,7 @@ const RankingsPage: React.FC<RankingsPageProps> = ({ players, teams, tournaments
                                                             <span className={`text-sm font-black font-mono ${Number(player.win_rate || 0) >= 60 ? 'text-emerald-400' : 'text-slate-400'}`}>
                                                                 {player.win_rate ? `${player.win_rate}%` : '-'}
                                                             </span>
-                                                            <span className="text-[8px] text-slate-700 font-black uppercase tracking-widest">{player.tournaments_played || 0} Tours</span>
+                                                            <span className="text-xs text-slate-700 font-black uppercase tracking-widest">{player.tournaments_played || 0} Tours</span>
                                                         </div>
                                                     </td>
                                                     <td className="px-6 py-6 text-right">
@@ -403,7 +403,7 @@ const RankingsPage: React.FC<RankingsPageProps> = ({ players, teams, tournaments
                                                             <span className={`text-2xl font-black italic tracking-tighter leading-none tabular-nums ${isTop3 ? 'text-sky-400 drop-shadow-[0_0_12px_rgba(56,189,248,0.5)]' : 'text-white'}`}>
                                                                 {(player.points || 0).toLocaleString()}
                                                             </span>
-                                                            <span className="text-[10px] text-slate-600 font-black uppercase tracking-widest mt-1">{getPointsLabel()}</span>
+                                                            <span className="text-xs text-slate-600 font-black uppercase tracking-widest mt-1">{getPointsLabel()}</span>
                                                         </div>
                                                     </td>
                                                 </tr>
@@ -450,7 +450,7 @@ const RankingsPage: React.FC<RankingsPageProps> = ({ players, teams, tournaments
                         <div className="glass-premium rounded-[2.5rem] border border-white/5 shadow-2xl overflow-hidden overflow-x-auto">
                             <table className="min-w-full border-collapse">
                                 <thead>
-                                    <tr className="bg-slate-950/40 border-b border-white/5 text-[10px] sm:text-xs">
+                                    <tr className="bg-slate-950/40 border-b border-white/5 text-xs sm:text-xs">
                                         <th className="px-6 py-6 text-left font-black text-slate-500 uppercase tracking-[0.2em] w-24 text-center">Pos</th>
                                         <th className="px-6 py-6 text-left font-black text-slate-500 uppercase tracking-[0.2em]">Comunidad</th>
                                         <th className="px-6 py-6 text-center font-black text-slate-500 uppercase tracking-[0.2em]">Poderío (M)</th>
@@ -482,7 +482,7 @@ const RankingsPage: React.FC<RankingsPageProps> = ({ players, teams, tournaments
                                                         <span className="text-xl font-black text-white group-hover/item:text-violet-400 transition-colors block leading-none">
                                                             {team.name}
                                                         </span>
-                                                        <p className="text-[10px] text-slate-600 font-bold uppercase tracking-wider mt-1.5 truncate max-w-[200px]">
+                                                        <p className="text-xs text-slate-600 font-bold uppercase tracking-wider mt-1.5 truncate max-w-[200px]">
                                                             {team.description || 'Comunidad establecida'}
                                                         </p>
                                                     </div>
@@ -499,7 +499,7 @@ const RankingsPage: React.FC<RankingsPageProps> = ({ players, teams, tournaments
                                                     <span className="text-2xl font-black italic tracking-tighter text-violet-400 drop-shadow-[0_0_12px_rgba(167,139,250,0.5)] leading-none tabular-nums">
                                                         {(team.totalPoints || 0).toLocaleString()}
                                                     </span>
-                                                    <span className="text-[10px] text-slate-600 font-black uppercase tracking-widest mt-1">Sumatoria Pts</span>
+                                                    <span className="text-xs text-slate-600 font-black uppercase tracking-widest mt-1">Sumatoria Pts</span>
                                                 </div>
                                             </td>
                                         </tr>

@@ -484,10 +484,10 @@ const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpl
                         <div className="space-y-2">
                             <h1 className="text-5xl sm:text-7xl font-black text-white tracking-tighter uppercase leading-[0.85]">{storeName || 'Mi Tienda'}</h1>
                             <div className="flex flex-wrap items-center gap-3">
-                                <span className="px-3 py-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 rounded-lg text-[10px] font-black uppercase tracking-widest shadow-[0_0_15px_rgba(16,185,129,0.1)]">
+                                <span className="px-3 py-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 rounded-lg text-xs font-black uppercase tracking-widest shadow-[0_0_15px_rgba(16,185,129,0.1)]">
                                     Tienda Verificada
                                 </span>
-                                <span className="px-3 py-1 bg-white/5 text-slate-400 border border-white/10 rounded-lg text-[10px] font-black uppercase tracking-widest">
+                                <span className="px-3 py-1 bg-white/5 text-slate-400 border border-white/10 rounded-lg text-xs font-black uppercase tracking-widest">
                                     Socio Oficial
                                 </span>
                             </div>
@@ -498,12 +498,12 @@ const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpl
                 <div className="flex items-center gap-4">
                     <div className="glass-premium px-8 py-5 rounded-3xl border border-white/10 shadow-2xl relative overflow-hidden group min-w-[160px]">
                         <div className="absolute top-0 right-0 w-16 h-16 bg-white/5 blur-2xl rounded-full -translate-x-1/2 -translate-y-1/2 group-hover:bg-white/10 transition-colors"></div>
-                        <p className="text-[10px] text-slate-500 font-black uppercase tracking-[0.2em] mb-2 relative z-10">Total Torneos</p>
+                        <p className="text-xs text-slate-500 font-black uppercase tracking-[0.2em] mb-2 relative z-10">Total Torneos</p>
                         <p className="text-4xl font-black text-white leading-none tracking-tighter relative z-10">{tournaments.length}</p>
                     </div>
                     <div className="glass-premium px-8 py-5 rounded-3xl border border-white/10 shadow-2xl relative overflow-hidden group min-w-[160px]">
                         <div className="absolute top-0 right-0 w-16 h-16 bg-sky-500/5 blur-2xl rounded-full -translate-x-1/2 -translate-y-1/2 group-hover:bg-sky-500/10 transition-colors"></div>
-                        <p className="text-[10px] text-slate-500 font-black uppercase tracking-[0.2em] mb-2 relative z-10">Ligas Activas</p>
+                        <p className="text-xs text-slate-500 font-black uppercase tracking-[0.2em] mb-2 relative z-10">Ligas Activas</p>
                         <p className="text-4xl font-black text-sky-400 leading-none tracking-tighter relative z-10 text-glow-blue">{leagues.length}</p>
                     </div>
                 </div>
@@ -523,7 +523,7 @@ const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpl
                         <button
                             key={tab.key}
                             onClick={() => setActiveTab(tab.key)}
-                            className={`flex-1 min-w-[140px] flex items-center justify-center gap-2 py-3.5 px-5 rounded-xl text-[11px] font-black uppercase tracking-[0.15em] transition-all active:scale-95 ${isActive
+                            className={`flex-1 min-w-[140px] flex items-center justify-center gap-2 py-3.5 px-5 rounded-xl text-xs font-black uppercase tracking-[0.15em] transition-all active:scale-95 ${isActive
                                 ? 'bg-sky-600 text-white shadow-lg shadow-sky-900/40'
                                 : 'text-slate-400 hover:text-white hover:bg-white/5'}`}
                         >
@@ -552,7 +552,7 @@ const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpl
                     <div className="flex justify-end">
                         <button
                             onClick={() => setIsCreatingLeague(v => !v)}
-                            className="px-5 py-3 bg-violet-600 hover:bg-violet-500 text-white font-black text-[10px] uppercase tracking-[0.2em] rounded-xl shadow-lg shadow-violet-900/40 transition-all active:scale-95"
+                            className="px-5 py-3 bg-violet-600 hover:bg-violet-500 text-white font-black text-xs uppercase tracking-[0.2em] rounded-xl shadow-lg shadow-violet-900/40 transition-all active:scale-95"
                         >
                             {isCreatingLeague ? 'Cerrar' : '+ Nueva Liga'}
                         </button>
@@ -627,26 +627,26 @@ const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpl
                                             <Trophy className="w-6 h-6 text-violet-400" />
                                         </div>
                                         {league.is_private ? (
-                                            <span className="text-[9px] font-black uppercase tracking-widest bg-slate-900 text-slate-500 px-3 py-1 rounded-full border border-slate-700">Privada</span>
+                                            <span className="text-xs font-black uppercase tracking-widest bg-slate-900 text-slate-500 px-3 py-1 rounded-full border border-slate-700">Privada</span>
                                         ) : (
-                                            <span className="text-[9px] font-black uppercase tracking-widest bg-emerald-500/10 text-emerald-400 px-3 py-1 rounded-full border border-emerald-500/20">Pública</span>
+                                            <span className="text-xs font-black uppercase tracking-widest bg-emerald-500/10 text-emerald-400 px-3 py-1 rounded-full border border-emerald-500/20">Pública</span>
                                         )}
                                     </div>
 
                                     <div>
                                         <h3 className="text-xl font-black text-white tracking-tighter group-hover:text-violet-400 transition-colors">{league.name}</h3>
-                                        <div className="bg-white/5 rounded-lg px-2 py-0.5 inline-block text-[10px] font-black uppercase tracking-widest text-slate-400 mt-2">{league.format}</div>
+                                        <div className="bg-white/5 rounded-lg px-2 py-0.5 inline-block text-xs font-black uppercase tracking-widest text-slate-400 mt-2">{league.format}</div>
                                     </div>
 
                                     <div className="mt-8 flex gap-3">
                                         <button
                                             onClick={() => window.open(`/#/leagues/${league.id}`, '_blank')}
-                                            className="flex-1 py-3 bg-white/5 hover:bg-white/10 text-white text-[10px] font-black uppercase tracking-widest rounded-xl border border-white/10 transition-all">
+                                            className="flex-1 py-3 bg-white/5 hover:bg-white/10 text-white text-xs font-black uppercase tracking-widest rounded-xl border border-white/10 transition-all">
                                             Resultados
                                         </button>
                                         <button
                                             onClick={() => setEditingLeague(league)}
-                                            className="px-4 py-3 bg-violet-600/10 hover:bg-violet-600/20 text-violet-400 text-[10px] font-black uppercase tracking-widest rounded-xl border border-violet-500/20 transition-all">
+                                            className="px-4 py-3 bg-violet-600/10 hover:bg-violet-600/20 text-violet-400 text-xs font-black uppercase tracking-widest rounded-xl border border-violet-500/20 transition-all">
                                             Config
                                         </button>
                                     </div>
@@ -755,14 +755,14 @@ const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpl
                 <section id="upload-section" className="max-w-2xl mx-auto space-y-6">
                     {step === 'upload' && (
                         <div className="animate-fade-in space-y-6">
-                            <h2 className="text-xs font-black text-slate-500 uppercase tracking-[0.3em] inline-flex items-center gap-2">
+                            <h2 className="text-sm font-black text-slate-500 uppercase tracking-[0.3em] inline-flex items-center gap-2">
                                 <span className="w-2 h-2 rounded-full bg-sky-500 animate-pulse"></span> Sistema de Reporte
                             </h2>
                             <div className="glass-premium p-8 rounded-[2rem] border border-white/5 shadow-2xl relative overflow-hidden group">
                                 <div className="absolute -top-24 -left-24 w-48 h-48 bg-sky-500/10 blur-[80px] rounded-full"></div>
                                 <div className="relative z-10 space-y-8">
                                     <div>
-                                        <label htmlFor="tournament-type" className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3">Tipo de Torneo</label>
+                                        <label htmlFor="tournament-type" className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-3">Tipo de Torneo</label>
                                         <select
                                             id="tournament-type"
                                             value={tournamentType}
@@ -780,7 +780,7 @@ const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpl
 
                                     {leagues.length > 0 && (
                                         <div>
-                                            <label htmlFor="league-select" className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3">Asignar a Liga (Opcional)</label>
+                                            <label htmlFor="league-select" className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-3">Asignar a Liga (Opcional)</label>
                                             <select
                                                 id="league-select"
                                                 value={selectedLeagueId}
@@ -797,11 +797,11 @@ const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpl
 
                                     <div className="grid grid-cols-2 gap-4">
                                         <div>
-                                            <label htmlFor="tournament-date" className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3">Fecha</label>
+                                            <label htmlFor="tournament-date" className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-3">Fecha</label>
                                             <input id="tournament-date" type="date" value={tournamentDate} onChange={e => setTournamentDate(e.target.value)} className="w-full px-5 py-4 bg-slate-900 border border-white/5 rounded-2xl focus:outline-none focus:ring-2 focus:ring-sky-500 text-white font-bold shadow-inner" />
                                         </div>
                                         <div>
-                                            <label htmlFor="total-rounds" className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3">Rondas</label>
+                                            <label htmlFor="total-rounds" className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-3">Rondas</label>
                                             <input
                                                 id="total-rounds"
                                                 type="number"
@@ -818,7 +818,7 @@ const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpl
                                     </div>
 
                                     <div>
-                                        <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3">Archivo de Resultados</label>
+                                        <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-3">Archivo de Resultados</label>
                                         <div className={`relative border-2 border-dashed rounded-[2rem] p-10 text-center transition-all duration-500 ${selectedFile ? 'border-sky-500 bg-sky-500/5 shadow-lg shadow-sky-500/10' : 'border-white/10 hover:border-white/20 bg-slate-900 group-hover:bg-slate-900/50'}`}>
                                             <input
                                                 type="file"
@@ -855,7 +855,7 @@ const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpl
                                     <button
                                         onClick={handleProcessFile}
                                         disabled={isProcessing}
-                                        className="w-full py-5 bg-sky-600 hover:bg-sky-500 disabled:bg-slate-800 text-white font-black uppercase tracking-[0.2em] text-xs rounded-2xl transition-all shadow-xl shadow-sky-900/20 active:scale-95 flex items-center justify-center gap-3"
+                                        className="w-full py-5 bg-sky-600 hover:bg-sky-500 disabled:bg-slate-800 text-white font-black uppercase tracking-[0.2em] text-sm rounded-2xl transition-all shadow-xl shadow-sky-900/20 active:scale-95 flex items-center justify-center gap-3"
                                     >
                                         {isProcessing ? (
                                             <>
@@ -873,18 +873,18 @@ const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpl
 
                     {step === 'confirm' && (
                         <div className="animate-fade-in space-y-6">
-                            <h2 className="text-xs font-black text-emerald-500 uppercase tracking-[0.3em] inline-flex items-center gap-2">
+                            <h2 className="text-sm font-black text-emerald-500 uppercase tracking-[0.3em] inline-flex items-center gap-2">
                                 <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Confirmación Final
                             </h2>
                             <div className="glass-premium p-8 rounded-[2rem] border border-white/5 shadow-2xl relative overflow-hidden">
                                 <div className="space-y-8 relative z-10">
                                     <div className="grid grid-cols-2 gap-4">
                                         <div className="bg-slate-900/50 p-5 rounded-2xl border border-white/5">
-                                            <p className="text-[9px] text-slate-500 font-black uppercase tracking-widest mb-1">Tipo</p>
+                                            <p className="text-xs text-slate-500 font-black uppercase tracking-widest mb-1">Tipo</p>
                                             <p className="text-white font-black text-lg truncate">{tournamentTypes.find(t => t.value === tournamentType)?.label}</p>
                                         </div>
                                         <div className="bg-slate-900/50 p-5 rounded-2xl border border-white/5">
-                                            <p className="text-[9px] text-slate-500 font-black uppercase tracking-widest mb-1">Fecha</p>
+                                            <p className="text-xs text-slate-500 font-black uppercase tracking-widest mb-1">Fecha</p>
                                             <p className="text-white font-black text-lg">{tournamentDate}</p>
                                         </div>
                                     </div>
@@ -894,8 +894,8 @@ const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpl
                                             <table className="min-w-full text-left">
                                                 <thead className="sticky top-0 bg-slate-900 relative z-20">
                                                     <tr>
-                                                        <th className="px-6 py-4 text-[9px] font-black text-slate-500 uppercase tracking-widest">Jugador</th>
-                                                        <th className="px-6 py-4 text-right text-[9px] font-black font-sky-500 uppercase tracking-widest">Pts</th>
+                                                        <th className="px-6 py-4 text-xs font-black text-slate-500 uppercase tracking-widest">Jugador</th>
+                                                        <th className="px-6 py-4 text-right text-xs font-black font-sky-500 uppercase tracking-widest">Pts</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody className="divide-y divide-white/5">
@@ -910,7 +910,7 @@ const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpl
                                                                     onChange={(e) => handlePlayerNameChange(index, e.target.value)}
                                                                     className="bg-transparent text-white font-black text-sm w-full focus:outline-none focus:text-sky-400 transition-colors"
                                                                 />
-                                                                <p className="text-[10px] text-slate-500 font-bold font-mono">{player.matchRecord}</p>
+                                                                <p className="text-xs text-slate-500 font-bold font-mono">{player.matchRecord}</p>
                                                             </td>
                                                             <td className="px-6 py-4 text-right">
                                                                 <span className="text-xl font-black text-sky-400">+{player.pointsEarned}</span>
@@ -924,22 +924,22 @@ const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpl
 
                                     {warnings.length > 0 && (
                                         <div className="p-5 bg-amber-500/10 border border-amber-500/20 rounded-3xl space-y-3">
-                                            <p className="text-[10px] font-black text-amber-400 uppercase tracking-widest flex items-center gap-2">
+                                            <p className="text-xs font-black text-amber-400 uppercase tracking-widest flex items-center gap-2">
                                                 ⚠️ Protocolo de Integridad
                                             </p>
                                             <ul className="space-y-2">
                                                 {warnings.map((w, i) => (
-                                                    <li key={i} className="text-[11px] text-amber-200/70 font-medium leading-relaxed">• {w.message}</li>
+                                                    <li key={i} className="text-sm text-amber-200/70 font-medium leading-relaxed">• {w.message}</li>
                                                 ))}
                                             </ul>
                                         </div>
                                     )}
 
                                     <div className="grid grid-cols-2 gap-4">
-                                        <button onClick={handleCancel} disabled={isUploading} className="py-4 bg-white/5 hover:bg-white/10 text-white font-black text-xs uppercase tracking-widest rounded-2xl border border-white/10 transition-all">
+                                        <button onClick={handleCancel} disabled={isUploading} className="py-4 bg-white/5 hover:bg-white/10 text-white font-black text-sm uppercase tracking-widest rounded-2xl border border-white/10 transition-all">
                                             Cancelar
                                         </button>
-                                        <button onClick={handleConfirm} disabled={isUploading} className="py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs uppercase tracking-widest rounded-2xl shadow-xl shadow-emerald-900/30 transition-all active:scale-95">
+                                        <button onClick={handleConfirm} disabled={isUploading} className="py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-black text-sm uppercase tracking-widest rounded-2xl shadow-xl shadow-emerald-900/30 transition-all active:scale-95">
                                             {isUploading ? 'Sincronizando...' : 'Publicar Ahora'}
                                         </button>
                                     </div>
