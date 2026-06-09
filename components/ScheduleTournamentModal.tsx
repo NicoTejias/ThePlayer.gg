@@ -295,8 +295,11 @@ const ScheduleTournamentModal: React.FC<ScheduleTournamentModalProps> = ({ isOpe
                             type="number"
                             min="4"
                             max="256"
-                            value={formData.maxPlayers}
-                            onChange={(e) => setFormData({ ...formData, maxPlayers: parseInt(e.target.value) })}
+                            value={isNaN(formData.maxPlayers) ? '' : formData.maxPlayers}
+                            onChange={(e) => {
+                                const val = parseInt(e.target.value);
+                                setFormData({ ...formData, maxPlayers: isNaN(val) ? 0 : val });
+                            }}
                             className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-green-500"
                         />
                     </div>

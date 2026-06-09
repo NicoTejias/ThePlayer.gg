@@ -344,6 +344,31 @@ const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpl
                 });
 
                 setParsedData(finalResults);
+                if (detectedDate) {
+                    const parts = detectedDate.split(/[-/]/);
+                    if (parts.length === 3) {
+                        let yyyy = '', mm = '', dd = '';
+                        if (parts[2].length === 4) {
+                            // Format: DD-MM-YYYY -> Convert to YYYY-MM-DD
+                            dd = parts[0].padStart(2, '0');
+                            mm = parts[1].padStart(2, '0');
+                            yyyy = parts[2];
+                        } else if (parts[0].length === 4) {
+                            // Format: YYYY-MM-DD
+                            yyyy = parts[0];
+                            mm = parts[1].padStart(2, '0');
+                            dd = parts[2].padStart(2, '0');
+                        }
+                        if (yyyy && mm && dd) {
+                            setTournamentDate(`${yyyy}-${mm}-${dd}`);
+                        }
+                    } else {
+                        const parsedDate = new Date(detectedDate);
+                        if (!isNaN(parsedDate.getTime())) {
+                            setTournamentDate(parsedDate.toISOString().split('T')[0]);
+                        }
+                    }
+                }
                 await processIntegrity(finalResults, detectedDate);
                 setStep('confirm');
 
@@ -782,8 +807,11 @@ const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpl
                                                 type="number"
                                                 min="1"
                                                 max="15"
-                                                value={totalRounds}
-                                                onChange={e => setTotalRounds(parseInt(e.target.value))}
+                                                value={isNaN(totalRounds) ? '' : totalRounds}
+                                                onChange={e => {
+                                                    const val = parseInt(e.target.value);
+                                                    setTotalRounds(isNaN(val) ? 0 : val);
+                                                }}
                                                 className="w-full px-5 py-4 bg-slate-900 border border-white/5 rounded-2xl focus:outline-none focus:ring-2 focus:ring-sky-500 text-white font-bold shadow-inner"
                                             />
                                         </div>
