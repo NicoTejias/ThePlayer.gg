@@ -30,12 +30,14 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, isLoggedIn, userRole
         };
     }, [isOpen, isInline]);
 
-    // Close sidebar on route change
+    // Close sidebar on route change (exclude onClose from deps to avoid closing on every render)
+    const onCloseRef = useRef(onClose);
+    onCloseRef.current = onClose;
     useEffect(() => {
         if (!isInline) {
-            onClose();
+            onCloseRef.current();
         }
-    }, [location.pathname, isInline, onClose]);
+    }, [location.pathname, isInline]);
 
     const NavItem: React.FC<{ item: { name: string; path: string; icon: string; isSpecial?: boolean } }> = ({ item }) => (
         <NavLink

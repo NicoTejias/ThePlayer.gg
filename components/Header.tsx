@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import UserCircleIcon from './icons/UserCircleIcon';
 import CogIcon from './icons/CogIcon';
@@ -70,6 +70,7 @@ const Header: React.FC<HeaderProps> = ({
   const [isProfileMenuOpen, setProfileMenuOpen] = useState(false);
   const [isLangMenuOpen, setLangMenuOpen] = useState(false);
   const [isSidebarOpen, setSidebarOpen] = useState(false);
+  const closeSidebar = useCallback(() => setSidebarOpen(false), []);
   const [imgError, setImgError] = useState(false);
   const [headerImgError, setHeaderImgError] = useState(false);
   const profileMenuRef = useRef<HTMLDivElement>(null);
@@ -382,7 +383,7 @@ const Header: React.FC<HeaderProps> = ({
 
       <Sidebar
         isOpen={isSidebarOpen}
-        onClose={() => setSidebarOpen(false)}
+        onClose={closeSidebar}
         isLoggedIn={isLoggedIn}
         userRole={userRole}
         isContentCreator={userProfile?.is_content_creator || userProfile?.role === 'content_creator'}

@@ -164,7 +164,6 @@ const HomePage: React.FC<HomePageProps> = ({ players, events, session, userRole,
       <div
         className="relative rounded-3xl overflow-hidden group noise-overlay"
         style={{
-          minHeight: '480px',
           background: 'linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-base) 60%, var(--bg-secondary) 100%)',
           border: '1px solid rgba(255,255,255,0.06)',
           boxShadow: '0 20px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.04)',
@@ -176,73 +175,51 @@ const HomePage: React.FC<HomePageProps> = ({ players, events, session, userRole,
           style={{ background: 'radial-gradient(ellipse 60% 80% at 80% 50%, var(--color-accent), transparent)' }}
         />
 
-        {/* Background image */}
-        <div
-          className="absolute inset-0 bg-contain bg-no-repeat transition-transform duration-700 group-hover:scale-[1.02]"
-          style={{
-            backgroundImage: `url('/images/jace_banner.png')`,
-            backgroundPosition: 'right center',
-            opacity: 0.85,
-          }}
-        />
-
-        {/* Left vignette */}
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{ background: 'linear-gradient(to right, var(--bg-secondary) 0%, var(--bg-secondary) 18%, rgba(0,0,0,0.5) 55%, transparent 100%)' }}
-        />
-        {/* Bottom vignette */}
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{ background: 'linear-gradient(to top, var(--bg-base) 0%, transparent 50%)', opacity: 0.7 }}
-        />
-
-        {/* Decorative corner geometry */}
-        <div
-          className="absolute top-0 left-0 w-48 h-48 pointer-events-none opacity-10"
-          style={{
-            background: 'conic-gradient(from 0deg at 0% 0%, var(--color-accent), transparent 50%)',
-          }}
-        />
-
-        <div className="relative z-10 flex flex-col justify-center p-8 lg:p-14" style={{ minHeight: '480px' }}>
-          <div className="max-w-2xl space-y-5">
-            {/* Badge */}
+        {/* Mobile layout: image on top, text below */}
+        <div className="flex flex-col lg:hidden">
+          <div className="relative w-full overflow-hidden" style={{ maxHeight: '260px' }}>
+            <img
+              src="/images/jace_banner.png"
+              alt="Jace Beleren"
+              className="w-full object-cover object-top transition-transform duration-700 group-hover:scale-105"
+              style={{ height: '260px' }}
+            />
+            {/* Bottom fade into content area */}
+            <div
+              className="absolute inset-0 pointer-events-none"
+              style={{ background: 'linear-gradient(to top, var(--bg-base) 0%, transparent 50%)' }}
+            />
+          </div>
+          <div className="relative z-10 p-6 space-y-4">
             <div className="hero-badge animate-fade-in-up stagger-1" style={{ opacity: 0 }}>
               <span>{t('popular')}</span>
             </div>
-
-            {/* Title */}
             <h1
-              className="hero-title text-4xl sm:text-6xl text-white animate-fade-in-up stagger-2"
+              className="hero-title text-3xl text-white animate-fade-in-up stagger-2"
               style={{ opacity: 0 }}
             >
               {t('jace_title')}
             </h1>
-
-            {/* Description */}
             <p
-              className="text-base sm:text-lg leading-relaxed animate-fade-in-up stagger-3"
-              style={{ opacity: 0, color: 'rgba(255,255,255,0.65)', fontFamily: 'Rajdhani, sans-serif', fontWeight: 500, maxWidth: '480px' }}
+              className="text-sm leading-relaxed animate-fade-in-up stagger-3"
+              style={{ opacity: 0, color: 'rgba(255,255,255,0.65)', fontFamily: 'Rajdhani, sans-serif', fontWeight: 500 }}
             >
               {t('jace_desc')}
             </p>
-
-            {/* CTAs */}
-            <div className="flex items-center gap-3 pt-2 animate-fade-in-up stagger-4" style={{ opacity: 0 }}>
+            <div className="flex items-center gap-3 pt-1 animate-fade-in-up stagger-4" style={{ opacity: 0 }}>
               <Link
                 to="/eventos"
-                className="btn-accent px-7 py-3.5 rounded-xl text-sm"
-                style={{ letterSpacing: '0.12em' }}
+                className="btn-accent px-5 py-3 rounded-xl text-sm flex-1 text-center"
+                style={{ letterSpacing: '0.08em' }}
               >
                 {t('jugar')}
               </Link>
               <Link
                 to="/quienes-somos"
-                className="px-6 py-3.5 rounded-xl text-sm font-bold uppercase transition-all duration-300 hover:bg-white/8"
+                className="px-4 py-3 rounded-xl text-sm font-bold uppercase transition-all duration-300 flex-1 text-center"
                 style={{
                   fontFamily: 'Rajdhani, sans-serif',
-                  letterSpacing: '0.12em',
+                  letterSpacing: '0.08em',
                   background: 'rgba(255,255,255,0.05)',
                   border: '1px solid rgba(255,255,255,0.1)',
                   color: 'rgba(255,255,255,0.8)',
@@ -250,6 +227,75 @@ const HomePage: React.FC<HomePageProps> = ({ players, events, session, userRole,
               >
                 {t('detalles')}
               </Link>
+            </div>
+          </div>
+        </div>
+
+        {/* Desktop layout: image as background right, text left */}
+        <div className="hidden lg:block">
+          {/* Background image */}
+          <div
+            className="absolute inset-0 bg-contain bg-no-repeat transition-transform duration-700 group-hover:scale-[1.02]"
+            style={{
+              backgroundImage: `url('/images/jace_banner.png')`,
+              backgroundPosition: 'right center',
+              opacity: 0.85,
+            }}
+          />
+          {/* Left vignette */}
+          <div
+            className="absolute inset-0 pointer-events-none"
+            style={{ background: 'linear-gradient(to right, var(--bg-secondary) 0%, var(--bg-secondary) 18%, rgba(0,0,0,0.5) 55%, transparent 100%)' }}
+          />
+          {/* Bottom vignette */}
+          <div
+            className="absolute inset-0 pointer-events-none"
+            style={{ background: 'linear-gradient(to top, var(--bg-base) 0%, transparent 50%)', opacity: 0.7 }}
+          />
+          {/* Decorative corner geometry */}
+          <div
+            className="absolute top-0 left-0 w-48 h-48 pointer-events-none opacity-10"
+            style={{ background: 'conic-gradient(from 0deg at 0% 0%, var(--color-accent), transparent 50%)' }}
+          />
+          <div className="relative z-10 flex flex-col justify-center p-14" style={{ minHeight: '480px' }}>
+            <div className="max-w-2xl space-y-5">
+              <div className="hero-badge animate-fade-in-up stagger-1" style={{ opacity: 0 }}>
+                <span>{t('popular')}</span>
+              </div>
+              <h1
+                className="hero-title text-6xl text-white animate-fade-in-up stagger-2"
+                style={{ opacity: 0 }}
+              >
+                {t('jace_title')}
+              </h1>
+              <p
+                className="text-lg leading-relaxed animate-fade-in-up stagger-3"
+                style={{ opacity: 0, color: 'rgba(255,255,255,0.65)', fontFamily: 'Rajdhani, sans-serif', fontWeight: 500, maxWidth: '480px' }}
+              >
+                {t('jace_desc')}
+              </p>
+              <div className="flex items-center gap-3 pt-2 animate-fade-in-up stagger-4" style={{ opacity: 0 }}>
+                <Link
+                  to="/eventos"
+                  className="btn-accent px-7 py-3.5 rounded-xl text-sm"
+                  style={{ letterSpacing: '0.12em' }}
+                >
+                  {t('jugar')}
+                </Link>
+                <Link
+                  to="/quienes-somos"
+                  className="px-6 py-3.5 rounded-xl text-sm font-bold uppercase transition-all duration-300 hover:bg-white/8"
+                  style={{
+                    fontFamily: 'Rajdhani, sans-serif',
+                    letterSpacing: '0.12em',
+                    background: 'rgba(255,255,255,0.05)',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    color: 'rgba(255,255,255,0.8)',
+                  }}
+                >
+                  {t('detalles')}
+                </Link>
+              </div>
             </div>
           </div>
         </div>
