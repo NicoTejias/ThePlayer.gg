@@ -1052,3 +1052,60 @@ h1, h2, h3, h4, h5, h6 {
 .stagger-4 { animation-delay: 0.2s; }
 .stagger-5 { animation-delay: 0.25s; }
 .stagger-6 { animation-delay: 0.3s; }
+
+/* =========================================================================
+   MOBILE / TOUCH IMPROVEMENTS
+   ========================================================================= */
+
+/* Prevent double-tap zoom and reduce tap delay on all interactive elements */
+button,
+a,
+[role="button"],
+input,
+select,
+textarea {
+  touch-action: manipulation;
+}
+
+/* Prevent iOS font size auto-adjustment on orientation change */
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+/* Prevent inputs from zooming on iOS (requires font-size >= 16px) */
+@media screen and (max-width: 768px) {
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="number"],
+  input[type="search"],
+  input[type="tel"],
+  input[type="url"],
+  textarea,
+  select {
+    font-size: 16px !important;
+  }
+}
+
+/* Safe area insets for notch/home indicator on iOS */
+.safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* FAB safe area on mobile */
+@media screen and (max-width: 1024px) {
+  .fab-safe {
+    bottom: calc(1.5rem + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+/* Ensure the sidebar drawer goes behind any system UI chrome */
+@media screen and (max-width: 1024px) {
+  .header-glass {
+    position: sticky;
+    top: 0;
+    /* Use safe-area-inset-top for devices with notch */
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+}
