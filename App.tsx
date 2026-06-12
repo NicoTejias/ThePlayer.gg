@@ -17,9 +17,7 @@ import { ThemeProvider } from './context/ThemeContext';
 const HomePage = lazy(() => import('./pages/HomePage'));
 const RankingsPage = lazy(() => import('./pages/RankingsPage'));
 const EventsPage = lazy(() => import('./pages/EventsPage'));
-const MarketplacePage = lazy(() => import('./pages/MarketplacePage'));
-const MyListingsPage = lazy(() => import('./pages/MyListingsPage'));
-const MarketplaceDetailPage = lazy(() => import('./pages/MarketplaceDetailPage'));
+
 const CommanderPage = lazy(() => import('./pages/CommanderPage'));
 const PauperPage = lazy(() => import('./pages/PauperPage'));
 const PremodernPage = lazy(() => import('./pages/PremodernPage'));
@@ -37,7 +35,7 @@ const IntegrityReviewPanel = lazy(() => import('./pages/admin/IntegrityReviewPan
 const TournamentEditPage = lazy(() => import('./pages/admin/TournamentEditPage'));
 const SubscriptionManagementPage = lazy(() => import('./pages/admin/SubscriptionManagementPage'));
 const ContentCreatorsAdminPage = lazy(() => import('./pages/admin/ContentCreatorsAdminPage'));
-const MarketplaceAdminPage = lazy(() => import('./pages/admin/MarketplaceAdminPage'));
+
 const NotificationsPage = lazy(() => import('./pages/NotificationsPage'));
 const FavoritesPage = lazy(() => import('./pages/FavoritesPage'));
 const SellerProfilePage = lazy(() => import('./pages/SellerProfilePage'));
@@ -260,9 +258,7 @@ const AppContent: React.FC = () => {
             <Route path="/eventos" element={<EventsPage events={communityEvents} finishedTournaments={tournamentResults} userRole={userRole} userId={userProfile?.id} storeLogo={userProfile?.avatar_url} storeName={userProfile?.username} />} />
             <Route path="/torneos" element={<TournamentsListPage tournaments={tournamentResults} />} />
             <Route path="/torneos/:tournamentId" element={<TournamentStandingsPage userRole={userRole} userId={userProfile?.id} />} />
-            <Route path="/mercado" element={<MarketplacePage />} />
-            <Route path="/mercado/:id" element={<MarketplaceDetailPage />} />
-            <Route path="/mis-anuncios" element={<MyListingsPage />} />
+
             <Route path="/commander" element={<CommanderPage />} />
             <Route path="/pauper" element={<PauperPage />} />
             <Route path="/premodern" element={<PremodernPage />} />
@@ -295,7 +291,7 @@ const AppContent: React.FC = () => {
             <Route path="/admin/tournaments/edit" element={<TournamentEditPage />} />
             <Route path="/admin/subscriptions" element={<SubscriptionManagementPage />} />
             <Route path="/admin/creators" element={<ContentCreatorsAdminPage />} />
-            <Route path="/admin/marketplace" element={<MarketplaceAdminPage />} />
+
             <Route path="/admin/cms" element={<AdminCMSPage />} />
             <Route path="/admin/foro" element={<AdminForumPage />} />
             <Route path="/notifications" element={<NotificationsPage />} />
