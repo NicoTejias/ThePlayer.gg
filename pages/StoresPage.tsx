@@ -1,6 +1,23 @@
 import React, { useState, useEffect, useRef } from 'react';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+import markerIcon from 'leaflet/dist/images/marker-icon.png';
+import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
+import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 import { supabase } from '../supabaseClient';
 import type { Store } from '../types';
+
+// Fix Leaflet's default marker icons when bundled by Vite
+const defaultIcon = L.icon({
+    iconUrl: markerIcon,
+    iconRetinaUrl: markerIcon2x,
+    shadowUrl: markerShadow,
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+    shadowSize: [41, 41],
+});
+L.Marker.prototype.options.icon = defaultIcon;
 import MapPinIcon from '../components/icons/MapPinIcon';
 import GlobeAltIcon from '../components/icons/GlobeAltIcon';
 import PricingCard from '../components/PricingCard';
@@ -140,8 +157,7 @@ const StoresPage: React.FC = () => {
         };
 
         const initMap = async () => {
-            const L = (window as any).L;
-            if (!mapContainerRef.current || !L) return;
+            if (!mapContainerRef.current) return;
 
             // Remove existing map if any
             if (mapRef.current) {
@@ -187,23 +203,7 @@ const StoresPage: React.FC = () => {
             }
         };
 
-        // Load Leaflet assets dynamically if not present
-        const L = (window as any).L;
-        if (!L) {
-            const link = document.createElement('link');
-            link.rel = 'stylesheet';
-            link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
-            document.head.appendChild(link);
-
-            const script = document.createElement('script');
-            script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
-            script.onload = () => {
-                if (isMounted) initMap();
-            };
-            document.head.appendChild(script);
-        } else {
-            initMap();
-        }
+        initMap();
 
         return () => {
             isMounted = false;
