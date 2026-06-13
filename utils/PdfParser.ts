@@ -1,6 +1,7 @@
 
 
 import * as pdfjsLib from 'pdfjs-dist';
+import { sanitizePlayerName } from './CSVParser';
 
 // Use the locally bundled worker (copied to /pdf-worker/ by vite-plugin-static-copy)
 // to avoid CSP violations from loading scripts from unpkg.com
@@ -100,12 +101,17 @@ export const parseEventLinkPdf = async (file: File): Promise<ParserResult> => {
                     // points is at index 3 in numbersAtEnd.
 
                     const points = parseInt(numbersAtEnd[numbersAtEnd.length - 1]);
-                    const name = parts.slice(1, j + 1).join(' ').trim();
+                    const rawName = parts.slice(1, j + 1).join(' ').trim();
 
-                    if (name &&
-                        !name.toLowerCase().includes("nombre") &&
-                        !name.toLowerCase().includes("reportar") &&
-                        !name.toLowerCase().includes("puesto")) {
+                    if (rawName &&
+                        !rawName.toLowerCase().includes("nombre") &&
+                        !rawName.toLowerCase().includes("reportar") &&
+                        !rawName.toLowerCase().includes("puesto")) {
+
+                        const name = sanitizePlayerName(rawName);
+
+                        // Skip if name is empty after sanitization
+                        if (!name) continue;
 
                         // Estimation of record
                         const wins = Math.floor(points / 3);

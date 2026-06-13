@@ -20,6 +20,37 @@ export interface ParserResult {
     detectedDate?: string;
 }
 
+export const sanitizePlayerName = (rawName: string): string => {
+    let name = rawName.replace(/"/g, '').trim();
+
+    // 1. Apellido, Nombre -> Nombre Apellido
+    if (name.includes(',')) {
+        const parts = name.split(',').map(s => s.trim());
+        if (parts.length === 2) {
+            name = `${parts[1]} ${parts[0]}`;
+        }
+    }
+
+    // 2. Quitar corchetes de equipo (ej: [PRO] Nicolás Tejías -> Nicolás Tejías)
+    name = name.replace(/^\[[^\]]+\]\s*/i, '');
+    name = name.replace(/\s*\[[^\]]+\]$/i, '');
+
+    // 3. Quitar paréntesis de equipo (ej: (TAG) Nicolás -> Nicolás)
+    name = name.replace(/^\([^\)]+\)\s*/i, '');
+    name = name.replace(/\s*\([^\)]+\)$/i, '');
+
+    // 4. Quitar prefijos de patrocinador con barra vertical (ej: Sponsor | Nombre)
+    name = name.replace(/^[a-zA-Z0-9_\-\s]+\s*\|\s*/i, '');
+
+    // 5. Quitar pronombres comunes al final
+    name = name.replace(/\s+(He\/Him|She\/Her|They\/Them|he\/him|she\/her|they\/them)\s*$/i, '');
+
+    // 6. Normalizar múltiples espacios intermedios
+    name = name.replace(/\s+/g, ' ');
+
+    return name.trim();
+};
+
 export const parseMeleeCSV = (csvText: string): ParserResult => {
     const rows: ParsedRow[] = [];
     let detectedDate: string | undefined;
@@ -100,24 +131,17 @@ export const parseMeleeCSV = (csvText: string): ParserResult => {
         const rank = parseInt(parts[rankIdx]);
         if (isNaN(rank)) continue;
 
-        // Parse player name
-        let name = '';
+        // Parse player name and sanitize
+        let rawName = '';
         if (useFirstLastName) {
             const firstName = parts[firstNameIdx]?.replace(/"/g, '').trim() || '';
             const lastName = parts[lastNameIdx]?.replace(/"/g, '').trim() || '';
-            name = `${firstName} ${lastName}`.trim();
+            rawName = `${firstName} ${lastName}`.trim();
         } else {
-            name = parts[playerNameIdx]?.replace(/"/g, '').trim() || '';
-
-            // El formato de Melee suele ser "Apellido, Nombre" - convertir a "Nombre Apellido"
-            if (name.includes(',')) {
-                const [lastName, firstName] = name.split(',').map(s => s.trim());
-                name = `${firstName} ${lastName}`.trim();
-            }
+            rawName = parts[playerNameIdx] || '';
         }
 
-        // Remover pronombres si están al final
-        name = name.replace(/\s+(He\/Him|She\/Her|They\/Them|he\/him|she\/her|they\/them)\s*$/i, '').trim();
+        const name = sanitizePlayerName(rawName);
 
         // Skip si no hay nombre
         if (!name) continue;
@@ -135,13 +159,25 @@ export const parseMeleeCSV = (csvText: string): ParserResult => {
         const losses = parseInt(recordMatch[2]);
         const draws = parseInt(recordMatch[3]);
 
-        // Parse points (or calculate if not present)
-        let points = 0;
-        if (pointsIdx !== -1 && parts[pointsIdx]) {
-            points = parseInt(parts[pointsIdx].replace(/"/g, ''));
+        // Validaciones del récord de rondas
+        if (wins < 0 || losses < 0 || draws < 0) {
+            console.warn(`⚠️ Row ${i}: Valores de record negativos no permitidos.`);
+            continue;
         }
-        if (isNaN(points) || points === 0) {
-            points = (wins * 3) + draws;
+        if (wins > 15 || losses > 15 || draws > 15) {
+            console.warn(`⚠️ Row ${i}: El récord excede el límite razonable de 15 rondas.`);
+            continue;
+        }
+
+        // Validar e imponer consistencia de puntos: puntos = (wins * 3) + (draws * 1)
+        const expectedPoints = (wins * 3) + draws;
+        let points = expectedPoints;
+
+        if (pointsIdx !== -1 && parts[pointsIdx]) {
+            const rawPoints = parseInt(parts[pointsIdx].replace(/"/g, ''));
+            if (!isNaN(rawPoints) && rawPoints !== expectedPoints) {
+                console.warn(`⚠️ Row ${i}: Puntos del CSV (${rawPoints}) inconsistentes con el récord (${expectedPoints}). Forzando consistencia.`);
+            }
         }
 
         // Detect date if not already found
