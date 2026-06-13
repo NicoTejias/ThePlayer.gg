@@ -7,10 +7,12 @@
 -- =============================================================================
 
 DROP FUNCTION IF EXISTS public.get_game_ranking_filtered(TEXT, TEXT, TEXT);
+DROP FUNCTION IF EXISTS public.get_game_ranking_filtered(TEXT, TEXT[], TEXT);
 
+-- p_formats: lista de formatos de juego a incluir. NULL o vacío = todos.
 CREATE OR REPLACE FUNCTION public.get_game_ranking_filtered(
     p_game_type  TEXT,
-    p_format     TEXT DEFAULT NULL,
+    p_formats    TEXT[] DEFAULT NULL,
     p_store_name TEXT DEFAULT NULL
 )
 RETURNS TABLE (
@@ -55,12 +57,12 @@ BEGIN
     WHERE
         t.game_type::TEXT = p_game_type
         AND tr.player_id IS NOT NULL
-        AND tr.claimed = true
         AND EXISTS (
             SELECT 1 FROM player_aliases pa WHERE pa.player_id = p.id
         )
         -- Filtros opcionales
-        AND (p_format     IS NULL OR t.format::TEXT      ILIKE p_format)
+        AND (p_formats    IS NULL OR array_length(p_formats, 1) IS NULL
+             OR t.format::TEXT ILIKE ANY (p_formats))
         AND (p_store_name IS NULL OR t.store_name::TEXT  ILIKE p_store_name)
     GROUP BY p.id
     HAVING
@@ -70,7 +72,7 @@ BEGIN
 END;
 $$;
 
-GRANT EXECUTE ON FUNCTION public.get_game_ranking_filtered(TEXT, TEXT, TEXT) TO anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.get_game_ranking_filtered(TEXT, TEXT[], TEXT) TO anon, authenticated;
 
 -- =============================================================================
 -- FUNCIÓN AUXILIAR: listar formatos y tiendas disponibles para un juego

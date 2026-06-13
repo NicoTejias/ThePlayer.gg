@@ -19,6 +19,19 @@ interface RankingsPageProps {
     userRole?: string;
 }
 
+// Formatos de juego fijos por tipo de juego.
+// Cada opción mapea a la lista de valores `format` (del torneo) que abarca,
+// permitiendo agrupar varios formatos en una sola opción (ej: "Competitivo").
+// Los juegos sin entrada aquí solo muestran "Todos los formatos".
+const GAME_FORMATS: Record<string, { label: string; values: string[] }[]> = {
+    mtg: [
+        { label: 'Competitivo', values: ['Standard', 'Modern', 'Pioneer', 'Draft', 'Sellado', 'Sealed', 'Premier', 'Rcq', 'RCQ'] },
+        { label: 'Premodern', values: ['Premodern'] },
+        { label: 'Pauper', values: ['Pauper'] },
+        { label: 'Commander', values: ['Commander', 'EDH'] },
+    ],
+};
+
 const RankingsPage: React.FC<RankingsPageProps> = ({ players, teams, tournaments, userRole }) => {
     const { currentGame } = useGame();
     const [searchParams] = useSearchParams();
@@ -43,17 +56,14 @@ const RankingsPage: React.FC<RankingsPageProps> = ({ players, teams, tournaments
         }
     }, [activeTab, userRole]);
 
-    // Derive available filter options from tournament data
-    // Raw DB rows use snake_case; mapped rows use camelCase — handle both
+    // Formatos: lista fija por juego (labels). Las tiendas se derivan de los torneos.
     const filterOptions = useMemo(() => {
-        const formats = Array.from(new Set(
-            tournaments.map(t => t.format).filter(Boolean)
-        )).sort() as string[];
+        const formats = (GAME_FORMATS[currentGame] || []).map(f => f.label);
         const stores = Array.from(new Set(
             tournaments.map(t => (t as any).store_name || t.storeName).filter(Boolean)
         )).sort() as string[];
         return { formats, stores };
-    }, [tournaments]);
+    }, [tournaments, currentGame]);
 
     const regions = useMemo(() => {
         const uniqueRegions = new Set<string>();
@@ -72,9 +82,13 @@ const RankingsPage: React.FC<RankingsPageProps> = ({ players, teams, tournaments
             setIsLoadingFiltered(true);
             try {
                 const rpcName = activeTab === 'completo' ? 'get_complete_ranking' : 'get_game_ranking_filtered';
+                // Expandir el formato seleccionado (label) a su lista de valores reales
+                const formatValues = selectedFormat
+                    ? (GAME_FORMATS[currentGame] || []).find(f => f.label === selectedFormat)?.values ?? [selectedFormat]
+                    : null;
                 const { data, error } = await supabase.rpc(rpcName, {
                     p_game_type: currentGame,
-                    p_format: selectedFormat || null,
+                    p_formats: formatValues,
                     p_store_name: selectedStore || null,
                 });
                 if (cancelled) return;
@@ -107,6 +121,9 @@ const RankingsPage: React.FC<RankingsPageProps> = ({ players, teams, tournaments
 
     // Reset page when any filter or tab changes
     useEffect(() => { setCurrentPage(1); }, [searchQuery, selectedRegion, selectedFormat, selectedStore, activeTab]);
+
+    // Al cambiar de juego, limpiar el formato (sus opciones cambian por juego)
+    useEffect(() => { setSelectedFormat(''); }, [currentGame]);
 
     const activePlayers = filteredPlayers ?? players;
 
