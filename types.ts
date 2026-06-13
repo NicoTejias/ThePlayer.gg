@@ -128,7 +128,7 @@ export interface Store {
   logoUrl: string;
   status: 'Aprobada' | 'Suspendida' | 'Pendiente';
   requestDate: string;
-  subscription_tier?: 'free' | 'basic' | 'medium' | 'premium';
+  subscription_tier?: 'free' | 'basic' | 'premium';
   subscription_expires_at?: string;
   city?: string;
 }

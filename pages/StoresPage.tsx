@@ -22,7 +22,7 @@ const StoresPage: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [followedStores, setFollowedStores] = React.useState<string[]>([]);
     const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
-    const [selectedPlan, setSelectedPlan] = useState<'basic' | 'medium' | 'premium'>('medium');
+    const [selectedPlan, setSelectedPlan] = useState<'basic' | 'premium'>('basic');
     const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('monthly');
     const [searchTerm, setSearchTerm] = useState('');
     const [regionFilter, setRegionFilter] = useState('Todas las Regiones');
@@ -62,7 +62,7 @@ const StoresPage: React.FC = () => {
         );
     };
 
-    const handleSubscribe = (plan: 'basic' | 'medium' | 'premium') => {
+    const handleSubscribe = (plan: 'basic' | 'premium') => {
         setSelectedPlan(plan);
         setShowSubscriptionModal(true);
     };
@@ -208,55 +208,34 @@ const StoresPage: React.FC = () => {
                 </div>
 
                 {/* Pricing Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto relative z-10">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto relative z-10">
                     <PricingCard
                         title={t('plan_basico')}
-                        price={billingCycle === 'monthly' ? "25.000" : "250.000"}
+                        price={billingCycle === 'monthly' ? "15.000" : "150.000"}
                         period={billingCycle === 'monthly' ? "/mes" : "/año"}
                         features={[
-                            'Puntos PLS oficiales en torneos',
-                            'Torneos en calendario ThePlayer',
-                            'Perfil de tienda completo',
-                            'Gestión de eventos desde dashboard',
-                            'Estadísticas básicas de asistencia'
+                            'Gestión de hasta 4 torneos/ligas al mes',
+                            'Tus torneos suman puntos estándar al ranking nacional',
+                            'Presencia en el mapa y directorio público de tiendas',
+                            'Perfil de tienda completo y soporte estándar'
                         ]}
                         ctaText={t('elegir_plan')}
                         onCTAClick={() => handleSubscribe('basic')}
                     />
 
                     <PricingCard
-                        title={t('plan_medio')}
-                        price={billingCycle === 'monthly' ? "50.000" : "500.000"}
+                        title="Plan Pro (Premium)"
+                        price={billingCycle === 'monthly' ? "35.000" : "350.000"}
                         period={billingCycle === 'monthly' ? "/mes" : "/año"}
-                        badge="Más Popular"
+                        badge="Recomendado"
                         highlighted={true}
                         features={[
-                            'Todo lo del Plan Básico',
-                            'Mención destacada en Home',
-                            'Clasificatorio directo al Nacional',
-                            'Transmisión incluida',
-                            'Badge "Tienda Verificada"',
-                            'Prioridad en búsquedas',
-                            'Estadísticas avanzadas'
-                        ]}
-                        ctaText={t('elegir_plan')}
-                        onCTAClick={() => handleSubscribe('medium')}
-                    />
-
-                    <PricingCard
-                        title={t('plan_premium')}
-                        price={billingCycle === 'monthly' ? "100.000" : "1.000.000"}
-                        period={billingCycle === 'monthly' ? "/mes" : "/año"}
-                        badge="Mejor Valor"
-                        features={[
-                            'Todo lo del Plan Medio',
-                            'Publicidad en redes sociales',
-                            'Badge "Tienda Premium"',
-                            'Destacado visual exclusivo',
-                            'Sección exclusiva en Home',
-                            'Reportes mensuales personalizados',
-                            'Soporte prioritario',
-                            'Co-branding en eventos'
+                            'Creación ilimitada de eventos, torneos y ligas',
+                            'Tus torneos otorgan multiplicador de puntos de ranking',
+                            'Notificaciones automáticas a jugadores locales',
+                            'Sección de anuncios destacados en la plataforma',
+                            'Estadísticas avanzadas de asistencia y retención',
+                            'Badge "Tienda Premium/Partner" y co-branding'
                         ]}
                         ctaText={t('elegir_plan')}
                         onCTAClick={() => handleSubscribe('premium')}

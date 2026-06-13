@@ -305,7 +305,7 @@ const AppContent: React.FC = () => {
             <Route path="/calendario" element={<CalendarPage />} />
             <Route path="/stats" element={<PlayerStatsPage />} />
             <Route path="/torneos/inscribir" element={<TournamentJoinPage />} />
-            <Route path="/dashboard/tienda" element={<StoreDashboardPage onTournamentUpload={handleTournamentUpload} onDeleteTournament={handleDeleteTournament} userRole={userRole} tournaments={tournamentResults} storeStatus={userProfile?.status} storeName={userProfile?.username} storeLogo={userProfile?.avatar_url} players={players} />} />
+            <Route path="/dashboard/tienda" element={<StoreDashboardPage onTournamentUpload={handleTournamentUpload} onDeleteTournament={handleDeleteTournament} userRole={userRole} tournaments={tournamentResults} storeStatus={userProfile?.status} storeName={userProfile?.username} storeLogo={userProfile?.avatar_url} players={players} subscriptionTier={userProfile?.subscription_tier} />} />
             <Route path="/dashboard/jugador" element={<PlayerDashboardPage profile={userProfile} showAliasReminder={isLoggedIn && userRole === 'player' && !hasAlias} />} />
             <Route path="/dashboard/creador" element={<CreatorDashboardPage profile={userProfile} />} />
             <Route path="*" element={<NotFoundPage />} />

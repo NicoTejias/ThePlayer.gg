@@ -7,11 +7,11 @@ import { sanitizeText } from '../utils/sanitize';
 interface StoreSubscriptionModalProps {
     isOpen: boolean;
     onClose: () => void;
-    selectedPlan?: 'basic' | 'medium' | 'premium';
+    selectedPlan?: 'basic' | 'premium';
     billingCycle?: 'monthly' | 'annual';
 }
 
-const StoreSubscriptionModal: React.FC<StoreSubscriptionModalProps> = ({ isOpen, onClose, selectedPlan = 'medium', billingCycle = 'monthly' }) => {
+const StoreSubscriptionModal: React.FC<StoreSubscriptionModalProps> = ({ isOpen, onClose, selectedPlan = 'basic', billingCycle = 'monthly' }) => {
     const [formData, setFormData] = useState({
         storeName: '',
         contactName: '',
@@ -105,11 +105,10 @@ const StoreSubscriptionModal: React.FC<StoreSubscriptionModalProps> = ({ isOpen,
 
     if (!isOpen) return null;
 
-    const getPlanPrice = (plan: 'basic' | 'medium' | 'premium', cycle: 'monthly' | 'annual') => {
+    const getPlanPrice = (plan: 'basic' | 'premium', cycle: 'monthly' | 'annual') => {
         const prices = {
-            basic: { monthly: '25.000', annual: '250.000' },
-            medium: { monthly: '50.000', annual: '500.000' },
-            premium: { monthly: '100.000', annual: '1.000.000' }
+            basic: { monthly: '15.000', annual: '150.000' },
+            premium: { monthly: '35.000', annual: '350.000' }
         };
         return prices[plan][cycle];
     };
@@ -118,8 +117,7 @@ const StoreSubscriptionModal: React.FC<StoreSubscriptionModalProps> = ({ isOpen,
 
     const planNames = {
         basic: `Plan Básico - $${getPlanPrice('basic', formData.billingCycle)}${periodLabel}`,
-        medium: `Plan Medio - $${getPlanPrice('medium', formData.billingCycle)}${periodLabel}`,
-        premium: `Plan Premium - $${getPlanPrice('premium', formData.billingCycle)}${periodLabel}`
+        premium: `Plan Premium/Pro - $${getPlanPrice('premium', formData.billingCycle)}${periodLabel}`
     };
 
     return (
@@ -155,7 +153,6 @@ const StoreSubscriptionModal: React.FC<StoreSubscriptionModalProps> = ({ isOpen,
                                 className="w-full bg-slate-900 text-white rounded-lg px-4 py-3 border border-slate-700 focus:border-sky-500 focus:outline-none"
                             >
                                 <option value="basic">{planNames.basic}</option>
-                                <option value="medium">{planNames.medium}</option>
                                 <option value="premium">{planNames.premium}</option>
                             </select>
                         </div>

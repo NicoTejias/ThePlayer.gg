@@ -9,7 +9,7 @@ interface SubscriptionRequest {
     email: string;
     phone: string;
     region: string;
-    plan_type: 'basic' | 'medium' | 'premium';
+    plan_type: 'basic' | 'premium';
     message: string;
     status: 'pending' | 'approved' | 'rejected' | 'contacted';
     created_at: string;
@@ -66,9 +66,8 @@ const SubscriptionManagementPage: React.FC = () => {
     };
 
     const planNames = {
-        basic: 'Básico ($25.000)',
-        medium: 'Medio ($50.000)',
-        premium: 'Premium ($100.000)'
+        basic: 'Básico ($15.000)',
+        premium: 'Pro/Premium ($35.000)'
     };
 
     const statusColors = {

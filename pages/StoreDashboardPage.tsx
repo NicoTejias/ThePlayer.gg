@@ -22,9 +22,10 @@ interface StoreDashboardPageProps {
     storeName?: string; // Nombre de la tienda
     storeLogo?: string;
     players: PlayerProfile[];
+    subscriptionTier?: 'free' | 'basic' | 'premium';
 }
 
-const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpload, onDeleteTournament, userRole, tournaments, storeStatus, storeName, storeLogo, players }) => {
+const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpload, onDeleteTournament, userRole, tournaments, storeStatus, storeName, storeLogo, players, subscriptionTier }) => {
     const { currentGame } = useGame();
     const [step, setStep] = useState<'upload' | 'confirm'>('upload');
     const [uploadMethod, setUploadMethod] = useState<'text'>('text');
@@ -40,6 +41,47 @@ const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpl
     const [warnings, setWarnings] = useState<IntegrityWarning[]>([]);
     const [isUploading, setIsUploading] = useState(false);
     const [isDeleting, setIsDeleting] = useState<string | null>(null);
+
+    const isSubscriptionActive = subscriptionTier && subscriptionTier !== 'free';
+
+    const renderLockedSubscriptionView = () => (
+        <div className="flex flex-col items-center justify-center p-12 bg-slate-950/40 rounded-[2rem] border border-white/5 text-center max-w-2xl mx-auto space-y-6 animate-fade-in shadow-2xl relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-sky-500/5 blur-3xl rounded-full"></div>
+            <div className="w-16 h-16 bg-slate-900 rounded-3xl flex items-center justify-center border border-white/10 text-sky-400">
+                <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+            </div>
+            <div className="space-y-2">
+                <h3 className="text-2xl font-black text-white uppercase tracking-tight">Suscripción Requerida</h3>
+                <p className="text-slate-400 text-sm leading-relaxed max-w-md mx-auto">
+                    Para subir reportes de torneos y correr eventos oficiales que sumen puntos al ranking nacional de ThePlayer.gg, tu tienda debe contar con una suscripción activa.
+                </p>
+            </div>
+            
+            <div className="bg-slate-900/50 p-6 rounded-2xl border border-white/5 w-full text-left space-y-3">
+                <h4 className="text-xs font-black text-slate-500 uppercase tracking-wider">Beneficios de Suscribirte:</h4>
+                <ul className="space-y-2 text-xs text-slate-350 font-medium">
+                    <li className="flex items-center gap-2">
+                        <span className="text-sky-400 font-bold">✔</span> Subida ilimitada o mensual de resultados.
+                    </li>
+                    <li className="flex items-center gap-2">
+                        <span className="text-sky-400 font-bold">✔</span> Tus torneos otorgan puntos oficiales al ranking nacional.
+                    </li>
+                    <li className="flex items-center gap-2">
+                        <span className="text-sky-400 font-bold">✔</span> Mayor visibilidad en el mapa interactivo y directorio.
+                    </li>
+                </ul>
+            </div>
+
+            <a
+                href="/#/premium"
+                className="inline-flex items-center justify-center bg-gradient-to-r from-sky-600 to-blue-600 hover:from-sky-500 hover:to-blue-500 text-white font-black text-xs uppercase tracking-widest px-8 py-4 rounded-xl shadow-xl shadow-sky-950/30 transition-all active:scale-95"
+            >
+                Ver Planes de Suscripción
+            </a>
+        </div>
+    );
 
     // League State
     const [leagues, setLeagues] = useState<any[]>([]);
@@ -536,14 +578,16 @@ const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpl
 
             {/* RUN TOURNAMENT TAB */}
             {activeTab === 'correr' && (
-                <TournamentManager
-                    players={players}
-                    currentGame={currentGame}
-                    storeName={storeName || 'Tienda Oficial'}
-                    leagues={leagues}
-                    onTournamentUpload={onTournamentUpload}
-                    onCancel={() => setActiveTab('historial')}
-                />
+                !isSubscriptionActive ? renderLockedSubscriptionView() : (
+                    <TournamentManager
+                        players={players}
+                        currentGame={currentGame}
+                        storeName={storeName || 'Tienda Oficial'}
+                        leagues={leagues}
+                        onTournamentUpload={onTournamentUpload}
+                        onCancel={() => setActiveTab('historial')}
+                    />
+                )
             )}
 
             {/* LEAGUES TAB */}
@@ -752,7 +796,8 @@ const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpl
 
             {/* REPORT TAB */}
             {activeTab === 'reporte' && (
-                <section id="upload-section" className="max-w-2xl mx-auto space-y-6">
+                !isSubscriptionActive ? renderLockedSubscriptionView() : (
+                    <section id="upload-section" className="max-w-2xl mx-auto space-y-6">
                     {step === 'upload' && (
                         <div className="animate-fade-in space-y-6">
                             <h2 className="text-sm font-black text-slate-500 uppercase tracking-[0.3em] inline-flex items-center gap-2">
@@ -948,7 +993,7 @@ const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpl
                         </div>
                     )}
                 </section>
-            )}
+            ))}
 
             {/* HISTORY TAB */}
             {activeTab === 'historial' && (
