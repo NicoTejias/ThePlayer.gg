@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import type { PlayerProfile, Team, TournamentResult } from '../types';
 import TrophyIcon from '../components/icons/TrophyIcon';
 import SparklesIcon from '../components/icons/SparklesIcon';
@@ -21,7 +21,9 @@ interface RankingsPageProps {
 
 const RankingsPage: React.FC<RankingsPageProps> = ({ players, teams, tournaments, userRole }) => {
     const { currentGame } = useGame();
-    const [activeTab, setActiveTab] = useState<'individual' | 'completo' | 'team'>('individual');
+    const [searchParams] = useSearchParams();
+    const initialTab = searchParams.get('tab') === 'completo' && userRole === 'admin' ? 'completo' : 'individual';
+    const [activeTab, setActiveTab] = useState<'individual' | 'completo' | 'team'>(initialTab);
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedRegion, setSelectedRegion] = useState('');
     const [selectedFormat, setSelectedFormat] = useState('');

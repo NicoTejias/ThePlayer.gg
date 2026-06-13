@@ -242,6 +242,16 @@ const AdminDashboardPage: React.FC = () => {
             <section>
                 <h2 className="text-3xl font-bold text-white uppercase tracking-wider mb-6">Herramientas Administrativas</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <Link to="/ranking?tab=completo" className="group bg-slate-800 hover:bg-slate-700 p-6 rounded-lg border border-slate-700 hover:border-indigo-500 transition-all shadow-lg">
+                        <div className="flex items-center gap-4 mb-3">
+                            <div className="p-3 bg-indigo-900/40 rounded-lg group-hover:bg-indigo-800/60 transition-colors">
+                                <TrophyIcon className="w-6 h-6 text-indigo-300" />
+                            </div>
+                            <h3 className="text-lg font-bold text-white">Ranking Completo</h3>
+                        </div>
+                        <p className="text-slate-400 text-sm">Todos los jugadores, inscritos y no inscritos. Verifica la suma de puntos.</p>
+                    </Link>
+
                     <Link to="/admin/users" className="group bg-slate-800 hover:bg-slate-700 p-6 rounded-lg border border-slate-700 hover:border-sky-500 transition-all shadow-lg">
                         <div className="flex items-center gap-4 mb-3">
                             <div className="p-3 bg-purple-900/40 rounded-lg group-hover:bg-purple-800/60 transition-colors">
