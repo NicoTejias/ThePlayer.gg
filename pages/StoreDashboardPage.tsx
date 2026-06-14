@@ -42,7 +42,8 @@ const StoreDashboardPage: React.FC<StoreDashboardPageProps> = ({ onTournamentUpl
     const [isUploading, setIsUploading] = useState(false);
     const [isDeleting, setIsDeleting] = useState<string | null>(null);
 
-    const isSubscriptionActive = subscriptionTier && subscriptionTier !== 'free';
+    // Los admins tienen suscripción ilimitada: siempre pueden correr/reportar torneos.
+    const isSubscriptionActive = userRole === 'admin' || (subscriptionTier && subscriptionTier !== 'free');
 
     const renderLockedSubscriptionView = () => (
         <div className="flex flex-col items-center justify-center p-12 bg-slate-950/40 rounded-[2rem] border border-white/5 text-center max-w-2xl mx-auto space-y-6 animate-fade-in shadow-2xl relative overflow-hidden">
