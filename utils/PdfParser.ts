@@ -1,10 +1,11 @@
 
 
 import * as pdfjsLib from 'pdfjs-dist';
+import { sanitizePlayerName } from './CSVParser';
 
-// Configure worker (mandatory for pdfjs-dist)
-// Using CDN for reliability across different environments
-pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.js`;
+// Use the locally bundled worker (copied to /pdf-worker/ by vite-plugin-static-copy)
+// to avoid CSP violations from loading scripts from unpkg.com
+pdfjsLib.GlobalWorkerOptions.workerSrc = '/pdf-worker/pdf.worker.min.js';
 
 export interface ParsedRow {
     rank: number;
@@ -24,9 +25,9 @@ export const parseEventLinkPdf = async (file: File): Promise<ParserResult> => {
     const arrayBuffer = await file.arrayBuffer();
     const loadingTask = pdfjsLib.getDocument({
         data: new Uint8Array(arrayBuffer),
-        cMapUrl: `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/cmaps/`,
+        cMapUrl: '/pdf-worker/cmaps/',
         cMapPacked: true,
-        standardFontDataUrl: `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/standard_fonts/`
+        standardFontDataUrl: '/pdf-worker/standard_fonts/'
     });
     const doc = await loadingTask.promise;
 
@@ -100,12 +101,17 @@ export const parseEventLinkPdf = async (file: File): Promise<ParserResult> => {
                     // points is at index 3 in numbersAtEnd.
 
                     const points = parseInt(numbersAtEnd[numbersAtEnd.length - 1]);
-                    const name = parts.slice(1, j + 1).join(' ').trim();
+                    const rawName = parts.slice(1, j + 1).join(' ').trim();
 
-                    if (name &&
-                        !name.toLowerCase().includes("nombre") &&
-                        !name.toLowerCase().includes("reportar") &&
-                        !name.toLowerCase().includes("puesto")) {
+                    if (rawName &&
+                        !rawName.toLowerCase().includes("nombre") &&
+                        !rawName.toLowerCase().includes("reportar") &&
+                        !rawName.toLowerCase().includes("puesto")) {
+
+                        const name = sanitizePlayerName(rawName);
+
+                        // Skip if name is empty after sanitization
+                        if (!name) continue;
 
                         // Estimation of record
                         const wins = Math.floor(points / 3);

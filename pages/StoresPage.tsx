@@ -1,6 +1,23 @@
 import React, { useState, useEffect, useRef } from 'react';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+import markerIcon from 'leaflet/dist/images/marker-icon.png';
+import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
+import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 import { supabase } from '../supabaseClient';
 import type { Store } from '../types';
+
+// Fix Leaflet's default marker icons when bundled by Vite
+const defaultIcon = L.icon({
+    iconUrl: markerIcon,
+    iconRetinaUrl: markerIcon2x,
+    shadowUrl: markerShadow,
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+    shadowSize: [41, 41],
+});
+L.Marker.prototype.options.icon = defaultIcon;
 import MapPinIcon from '../components/icons/MapPinIcon';
 import GlobeAltIcon from '../components/icons/GlobeAltIcon';
 import PricingCard from '../components/PricingCard';
@@ -22,7 +39,7 @@ const StoresPage: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [followedStores, setFollowedStores] = React.useState<string[]>([]);
     const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
-    const [selectedPlan, setSelectedPlan] = useState<'basic' | 'medium' | 'premium'>('medium');
+    const [selectedPlan, setSelectedPlan] = useState<'basic' | 'premium'>('basic');
     const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('monthly');
     const [searchTerm, setSearchTerm] = useState('');
     const [regionFilter, setRegionFilter] = useState('Todas las Regiones');
@@ -62,7 +79,7 @@ const StoresPage: React.FC = () => {
         );
     };
 
-    const handleSubscribe = (plan: 'basic' | 'medium' | 'premium') => {
+    const handleSubscribe = (plan: 'basic' | 'premium') => {
         setSelectedPlan(plan);
         setShowSubscriptionModal(true);
     };
@@ -79,9 +96,68 @@ const StoresPage: React.FC = () => {
         let isMounted = true;
         let leafletMap: any = null;
 
-        const initMap = () => {
-            const L = (window as any).L;
-            if (!mapContainerRef.current || !L) return;
+        // Coordinates for Chilean cities/regions (fallback if geocoding fails)
+        const CITY_COORDS: Record<string, [number, number]> = {
+            "Santiago": [-33.4489, -70.6693],
+            "Metropolitana": [-33.4489, -70.6693],
+            "Valparaíso": [-33.0472, -71.6127],
+            "Concepción": [-36.8201, -73.0444],
+            "Biobío": [-36.8201, -73.0444],
+            "La Serena": [-29.9027, -71.2519],
+            "Coquimbo": [-29.9533, -71.3436],
+            "Antofagasta": [-23.6509, -70.3975],
+            "Temuco": [-38.7359, -72.5904],
+            "La Araucanía": [-38.7359, -72.5904],
+            "Puerto Montt": [-41.4693, -72.9424],
+            "Los Lagos": [-41.4693, -72.9424],
+            "Iquique": [-20.2133, -70.1436],
+            "Tarapacá": [-20.2133, -70.1436],
+            "Rancagua": [-34.1708, -70.7444],
+            "O'Higgins": [-34.1708, -70.7444],
+            "Talca": [-35.4264, -71.6554],
+            "Maule": [-35.4264, -71.6554],
+            "Arica": [-18.4781, -70.3125],
+            "Arica y Parinacota": [-18.4781, -70.3125],
+            "Chillán": [-36.6066, -72.1034],
+            "Ñuble": [-36.6066, -72.1034],
+            "Osorno": [-40.5739, -73.1253],
+            "Valdivia": [-39.8142, -73.2459],
+            "Los Ríos": [-39.8142, -73.2459]
+        };
+
+        // Resolve coordinates for a store: try the city/region dictionary first,
+        // then geocode the real address via Nominatim (OpenStreetMap).
+        const fallbackCoords = (store: Store): [number, number] => {
+            const city = store.city || store.region || '';
+            if (CITY_COORDS[city]) return CITY_COORDS[city];
+            const matchedCity = Object.keys(CITY_COORDS).find(c =>
+                store.address?.toLowerCase().includes(c.toLowerCase())
+            );
+            return matchedCity ? CITY_COORDS[matchedCity] : [-33.4489, -70.6693];
+        };
+
+        const geocodeStore = async (store: Store): Promise<[number, number]> => {
+            const query = [store.address, store.city, store.region, 'Chile']
+                .filter(Boolean)
+                .join(', ');
+            if (!store.address) return fallbackCoords(store);
+            try {
+                const res = await fetch(
+                    `https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=cl&q=${encodeURIComponent(query)}`,
+                    { headers: { 'Accept-Language': 'es' } }
+                );
+                const data = await res.json();
+                if (Array.isArray(data) && data.length > 0) {
+                    return [parseFloat(data[0].lat), parseFloat(data[0].lon)];
+                }
+            } catch {
+                // ignore, fall through to fallback
+            }
+            return fallbackCoords(store);
+        };
+
+        const initMap = async () => {
+            if (!mapContainerRef.current) return;
 
             // Remove existing map if any
             if (mapRef.current) {
@@ -92,79 +168,49 @@ const StoresPage: React.FC = () => {
             // Center on Chile
             leafletMap = L.map(mapContainerRef.current, {
                 scrollWheelZoom: false
-            }).setView([-33.4489, -70.6693], 5);
+            }).setView([-35.6751, -71.5430], 4);
             mapRef.current = leafletMap;
 
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '&copy; OpenStreetMap contributors'
             }).addTo(leafletMap);
 
-            // Coordinates for Chilean cities/regions
-            const CITY_COORDS: Record<string, [number, number]> = {
-                "Santiago": [-33.4489, -70.6693],
-                "Valparaíso": [-33.0472, -71.6127],
-                "Concepción": [-36.8201, -73.0444],
-                "La Serena": [-29.9027, -71.2519],
-                "Antofagasta": [-23.6509, -70.3975],
-                "Temuco": [-38.7359, -72.5904],
-                "Puerto Montt": [-41.4693, -72.9424],
-                "Iquique": [-20.2133, -70.1436],
-                "Rancagua": [-34.1708, -70.7444],
-                "Talca": [-35.4264, -71.6554],
-                "Arica": [-18.4781, -70.3125],
-                "Chillán": [-36.6066, -72.1034],
-                "Osorno": [-40.5739, -73.1253],
-                "Valdivia": [-39.8142, -73.2459]
-            };
+            // Ensure tiles render correctly once the container has its real size
+            setTimeout(() => leafletMap && leafletMap.invalidateSize(), 200);
 
-            filteredStores.forEach(store => {
-                const city = store.city || store.region || '';
-                let coords = CITY_COORDS[city];
-                
-                if (!coords) {
-                    // Try to match city from address
-                    const matchedCity = Object.keys(CITY_COORDS).find(c => 
-                        store.address?.toLowerCase().includes(c.toLowerCase())
-                    );
-                    coords = matchedCity ? CITY_COORDS[matchedCity] : [-33.4489, -70.6693];
-                }
+            const bounds: [number, number][] = [];
 
-                // Add tiny jitter to avoid overlapping markers in same city
-                const jitterLat = (Math.random() - 0.5) * 0.05;
-                const jitterLng = (Math.random() - 0.5) * 0.05;
+            // Geocode stores one by one (Nominatim rate-limits concurrent requests)
+            for (const store of filteredStores) {
+                if (!isMounted || !mapRef.current) break;
+                const coords = await geocodeStore(store);
 
-                const marker = L.marker([coords[0] + jitterLat, coords[1] + jitterLng]).addTo(leafletMap);
-                
+                const marker = L.marker(coords).addTo(leafletMap);
+                bounds.push(coords);
+
                 marker.bindPopup(`
                     <div style="color: #0f172a; font-family: system-ui, -apple-system, sans-serif; padding: 4px;">
                         <h4 style="margin: 0 0 4px 0; font-weight: bold; font-size: 13px; text-transform: uppercase;">${store.name}</h4>
-                        <p style="margin: 0 0 6px 0; font-size: 11px; color: #475569;">📍 ${store.address || city}</p>
+                        <p style="margin: 0 0 6px 0; font-size: 11px; color: #475569;">📍 ${store.address || store.city || store.region}</p>
                         ${store.website ? `<a href="${store.website}" target="_blank" rel="noopener noreferrer" style="display: inline-block; font-size: 11px; font-weight: bold; color: #0284c7; text-decoration: underline;">Sitio Web</a>` : ''}
                     </div>
                 `);
-            });
+            }
+
+            // Fit the map to all markers if we have any
+            if (isMounted && mapRef.current && bounds.length > 0) {
+                leafletMap.fitBounds(bounds, { padding: [50, 50], maxZoom: 12 });
+            }
         };
 
-        // Load Leaflet assets dynamically if not present
-        const L = (window as any).L;
-        if (!L) {
-            const link = document.createElement('link');
-            link.rel = 'stylesheet';
-            link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
-            document.head.appendChild(link);
-
-            const script = document.createElement('script');
-            script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
-            script.onload = () => {
-                if (isMounted) initMap();
-            };
-            document.head.appendChild(script);
-        } else {
-            initMap();
-        }
+        initMap();
 
         return () => {
             isMounted = false;
+            if (mapRef.current) {
+                mapRef.current.remove();
+                mapRef.current = null;
+            }
         };
     }, [filteredStores]);
 
@@ -174,102 +220,6 @@ const StoresPage: React.FC = () => {
                 title={t('directorio_tiendas')}
                 description="Listado oficial de tiendas asociadas a ThePlayer.gg en Chile. Encuentra tu tienda local de TCG más cercana."
             />
-            {/* Hero Section - Join ThePlayer */}
-            <div className="relative overflow-hidden rounded-3xl bg-slate-900/30 border border-white/5 p-12">
-                <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiMzYjgyZjYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDM0djItaDJWMzRoLTJ6bTAgNHYyaDJ2LTJoLTJ6bTAtOHYyaDJ2LTJoLTJ6bTAtNHYyaDJ2LTJoLTJ6bTAtNHYyaDJ2LTJoLTJ6bTAtNHYyaDJ2LTJoLTJ6bTAtNHYyaDJ2LTJoLTJ6bTAtNHYyaDJ2LTJoLTJ6bTAtNHYyaDJ2LTJoLTJ6Ii8+PC9nPjwvZz48L3N2Zz4=')] opacity-20"></div>
-
-                <div className="relative z-10 text-center mb-12">
-                    <h2 className="text-4xl font-bold text-white mb-4 uppercase tracking-tight">{t('tienes_tienda')}</h2>
-                    <p className="text-lg text-slate-350 max-w-3xl mx-auto leading-relaxed">
-                        {t('tienes_tienda_desc')}
-                    </p>
-                </div>
-
-                <div className="flex justify-center mb-10 relative z-10">
-                    <div className="bg-slate-950/40 p-1 rounded-full border border-slate-800 inline-flex relative min-w-[280px]">
-                        <div
-                            className={`absolute top-1 bottom-1 bg-sky-650 rounded-full transition-all duration-300 ease-in-out w-[calc(50%-4px)] ${billingCycle === 'annual' ? 'left-[calc(50%+2px)]' : 'left-1'}`}
-                        ></div>
-
-                        <button
-                            onClick={() => setBillingCycle('monthly')}
-                            className={`relative z-10 w-1/2 px-6 py-2 rounded-full text-xs font-black uppercase transition-colors cursor-pointer ${billingCycle === 'monthly' ? 'text-white' : 'text-slate-500 hover:text-slate-350'}`}
-                        >
-                            {t('mensual')}
-                        </button>
-                        <button
-                            onClick={() => setBillingCycle('annual')}
-                            className={`relative z-10 w-1/2 px-6 py-2 rounded-full text-xs font-black uppercase transition-colors flex items-center justify-center gap-2 cursor-pointer ${billingCycle === 'annual' ? 'text-white' : 'text-slate-500 hover:text-slate-350'}`}
-                        >
-                            {t('anual')}
-                            <span className="bg-green-600 text-white text-[9px] px-1.5 py-0.5 rounded-full">{t('ahorra_17')}</span>
-                        </button>
-                    </div>
-                </div>
-
-                {/* Pricing Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto relative z-10">
-                    <PricingCard
-                        title={t('plan_basico')}
-                        price={billingCycle === 'monthly' ? "25.000" : "250.000"}
-                        period={billingCycle === 'monthly' ? "/mes" : "/año"}
-                        features={[
-                            'Puntos PLS oficiales en torneos',
-                            'Torneos en calendario ThePlayer',
-                            'Perfil de tienda completo',
-                            'Gestión de eventos desde dashboard',
-                            'Estadísticas básicas de asistencia'
-                        ]}
-                        ctaText={t('elegir_plan')}
-                        onCTAClick={() => handleSubscribe('basic')}
-                    />
-
-                    <PricingCard
-                        title={t('plan_medio')}
-                        price={billingCycle === 'monthly' ? "50.000" : "500.000"}
-                        period={billingCycle === 'monthly' ? "/mes" : "/año"}
-                        badge="Más Popular"
-                        highlighted={true}
-                        features={[
-                            'Todo lo del Plan Básico',
-                            'Mención destacada en Home',
-                            'Clasificatorio directo al Nacional',
-                            'Transmisión incluida',
-                            'Badge "Tienda Verificada"',
-                            'Prioridad en búsquedas',
-                            'Estadísticas avanzadas'
-                        ]}
-                        ctaText={t('elegir_plan')}
-                        onCTAClick={() => handleSubscribe('medium')}
-                    />
-
-                    <PricingCard
-                        title={t('plan_premium')}
-                        price={billingCycle === 'monthly' ? "100.000" : "1.000.000"}
-                        period={billingCycle === 'monthly' ? "/mes" : "/año"}
-                        badge="Mejor Valor"
-                        features={[
-                            'Todo lo del Plan Medio',
-                            'Publicidad en redes sociales',
-                            'Badge "Tienda Premium"',
-                            'Destacado visual exclusivo',
-                            'Sección exclusiva en Home',
-                            'Reportes mensuales personalizados',
-                            'Soporte prioritario',
-                            'Co-branding en eventos'
-                        ]}
-                        ctaText={t('elegir_plan')}
-                        onCTAClick={() => handleSubscribe('premium')}
-                    />
-                </div>
-
-                <div className="text-center mt-12 relative z-10">
-                    <p className="text-slate-500 text-xs font-semibold">
-                        💡 Todos los precios son en CLP (Pesos Chilenos). {billingCycle === 'annual' ? '¡Disfruta de 2 meses gratis con el plan anual!' : 'Sin permanencia mínima.'}
-                    </p>
-                </div>
-            </div>
-
             {/* Map Section */}
             <div className="bg-slate-900/40 rounded-3xl overflow-hidden border border-white/5 shadow-2xl relative z-10">
                 <div className="p-5 bg-slate-950/20 border-b border-white/5 flex justify-between items-center">
@@ -387,9 +337,8 @@ const StoresPage: React.FC = () => {
 
                                 <div className="p-6 bg-slate-950/10 relative border-b border-white/5">
                                     <img className={`w-20 h-20 object-contain rounded-full mx-auto border-4 ${tier === 'premium' ? 'border-yellow-500 shadow-lg shadow-yellow-950/30' :
-                                        tier === 'medium' ? 'border-sky-500' :
-                                            tier === 'basic' ? 'border-emerald-500' :
-                                                'border-slate-750'
+                                        tier === 'basic' ? 'border-emerald-500' :
+                                            'border-slate-750'
                                         }`} src={store.logoUrl} alt={`${store.name} logo`} />
                                 </div>
                                 <div className="p-6 flex-grow flex flex-col items-center">
@@ -413,6 +362,81 @@ const StoresPage: React.FC = () => {
                     })}
                 </div>
             )}
+
+            {/* Hero Section - Join ThePlayer (subscription) */}
+            <div className="relative overflow-hidden rounded-3xl bg-slate-900/30 border border-white/5 p-12">
+                <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiMzYjgyZjYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDM0djItaDJWMzRoLTJ6bTAgNHYyaDJ2LTJoLTJ6bTAtOHYyaDJ2LTJoLTJ6bTAtNHYyaDJ2LTJoLTJ6bTAtNHYyaDJ2LTJoLTJ6bTAtNHYyaDJ2LTJoLTJ6bTAtNHYyaDJ2LTJoLTJ6bTAtNHYyaDJ2LTJoLTJ6bTAtNHYyaDJ2LTJoLTJ6Ii8+PC9nPjwvZz48L3N2Zz4=')] opacity-20"></div>
+
+                <div className="relative z-10 text-center mb-12">
+                    <h2 className="text-4xl font-bold text-white mb-4 uppercase tracking-tight">{t('tienes_tienda')}</h2>
+                    <p className="text-lg text-slate-350 max-w-3xl mx-auto leading-relaxed">
+                        {t('tienes_tienda_desc')}
+                    </p>
+                </div>
+
+                <div className="flex justify-center mb-10 relative z-10">
+                    <div className="bg-slate-950/40 p-1 rounded-full border border-slate-800 inline-flex relative min-w-[280px]">
+                        <div
+                            className={`absolute top-1 bottom-1 bg-sky-650 rounded-full transition-all duration-300 ease-in-out w-[calc(50%-4px)] ${billingCycle === 'annual' ? 'left-[calc(50%+2px)]' : 'left-1'}`}
+                        ></div>
+
+                        <button
+                            onClick={() => setBillingCycle('monthly')}
+                            className={`relative z-10 w-1/2 px-6 py-2 rounded-full text-xs font-black uppercase transition-colors cursor-pointer ${billingCycle === 'monthly' ? 'text-white' : 'text-slate-500 hover:text-slate-350'}`}
+                        >
+                            {t('mensual')}
+                        </button>
+                        <button
+                            onClick={() => setBillingCycle('annual')}
+                            className={`relative z-10 w-1/2 px-6 py-2 rounded-full text-xs font-black uppercase transition-colors flex items-center justify-center gap-2 cursor-pointer ${billingCycle === 'annual' ? 'text-white' : 'text-slate-500 hover:text-slate-350'}`}
+                        >
+                            {t('anual')}
+                            <span className="bg-green-600 text-white text-[9px] px-1.5 py-0.5 rounded-full">{t('ahorra_17')}</span>
+                        </button>
+                    </div>
+                </div>
+
+                {/* Pricing Cards */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto relative z-10">
+                    <PricingCard
+                        title={t('plan_basico')}
+                        price={billingCycle === 'monthly' ? "15.000" : "150.000"}
+                        period={billingCycle === 'monthly' ? "/mes" : "/año"}
+                        features={[
+                            'Gestión de hasta 4 torneos/ligas al mes',
+                            'Tus torneos suman puntos estándar al ranking nacional',
+                            'Presencia en el mapa y directorio público de tiendas',
+                            'Perfil de tienda completo y soporte estándar'
+                        ]}
+                        ctaText={t('elegir_plan')}
+                        onCTAClick={() => handleSubscribe('basic')}
+                    />
+
+                    <PricingCard
+                        title="Plan Pro (Premium)"
+                        price={billingCycle === 'monthly' ? "35.000" : "350.000"}
+                        period={billingCycle === 'monthly' ? "/mes" : "/año"}
+                        badge="Recomendado"
+                        highlighted={true}
+                        features={[
+                            'Creación ilimitada de eventos, torneos y ligas',
+                            'Tus torneos otorgan multiplicador de puntos de ranking',
+                            'Notificaciones automáticas a jugadores locales',
+                            'Sección de anuncios destacados en la plataforma',
+                            'Estadísticas avanzadas de asistencia y retención',
+                            'Badge "Tienda Premium/Partner" y co-branding'
+                        ]}
+                        ctaText={t('elegir_plan')}
+                        onCTAClick={() => handleSubscribe('premium')}
+                    />
+                </div>
+
+                <div className="text-center mt-12 relative z-10">
+                    <p className="text-slate-500 text-xs font-semibold">
+                        💡 Todos los precios son en CLP (Pesos Chilenos). {billingCycle === 'annual' ? '¡Disfruta de 2 meses gratis con el plan anual!' : 'Sin permanencia mínima.'}
+                    </p>
+                </div>
+            </div>
 
             {/* Subscription Modal */}
             <StoreSubscriptionModal

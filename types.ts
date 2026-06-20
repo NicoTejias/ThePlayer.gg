@@ -39,6 +39,7 @@ export interface PlayerProfile {
   instagram_url?: string;
   whatsapp_number?: string;
   public_email?: string;
+  is_registered?: boolean;
 }
 
 // FIX: Add RankingEntry type used in HomePage.tsx
@@ -64,6 +65,7 @@ export interface CommunityEvent {
   isUserRegistered?: boolean; // Si el usuario actual está inscrito
   gameType?: GameType;
   entryFee?: string; // Valor de la entrada
+  imagePosition?: string; // object-position CSS del arte (ej: "50% 20%")
 }
 
 export interface MediaArticle {
@@ -126,8 +128,9 @@ export interface Store {
   logoUrl: string;
   status: 'Aprobada' | 'Suspendida' | 'Pendiente';
   requestDate: string;
-  subscription_tier?: 'free' | 'basic' | 'medium' | 'premium';
+  subscription_tier?: 'free' | 'basic' | 'premium';
   subscription_expires_at?: string;
+  city?: string;
 }
 
 

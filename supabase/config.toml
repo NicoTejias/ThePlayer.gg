@@ -13,3 +13,8 @@ verify_jwt = false
 [functions.gemini-chat]
 # El chat asistente es público (visitantes sin login), no requiere JWT.
 verify_jwt = false
+
+[functions.gemini-flyer]
+# El flyer se genera al crear/editar un torneo. La tienda ya está logueada,
+# pero la función usa service role internamente; no exigimos JWT para simplificar.
+verify_jwt = false

@@ -63,4 +63,31 @@ describe('CSVParser - parseMeleeCSV', () => {
         const { detectedDate } = parseMeleeCSV(dateCsv);
         expect(detectedDate).toBe('2023-12-25');
     });
+
+    it('should sanitize team tags in brackets and parentheses', () => {
+        const header = 'Rank,MatchRecord,TeamPlayers1Name';
+        const row = '1,3-0-0,[CL] Nicolás Tejías (CL)';
+        const csv = `${header}\n${row}`;
+
+        const { results } = parseMeleeCSV(csv);
+        expect(results[0].name).toBe('Nicolás Tejías');
+    });
+
+    it('should sanitize sponsor pipe prefixes and pronouns', () => {
+        const header = 'Rank,MatchRecord,TeamPlayers1Name';
+        const row = '1,3-0-0,"Liquid | Carlos Torrico He/Him"';
+        const csv = `${header}\n${row}`;
+
+        const { results } = parseMeleeCSV(csv);
+        expect(results[0].name).toBe('Carlos Torrico');
+    });
+
+    it('should enforce points consistency based on wins and draws', () => {
+        const header = 'Rank,Points,MatchRecord,TeamPlayers1Name';
+        const row = '1,12,3-0-1,Winner Guy'; // 3 wins (9 pts) + 1 draw (1 pt) = 10 pts. CSV says 12.
+        const csv = `${header}\n${row}`;
+
+        const { results } = parseMeleeCSV(csv);
+        expect(results[0].points).toBe(10); // Should force consistency to 10
+    });
 });

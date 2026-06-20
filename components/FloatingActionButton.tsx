@@ -47,7 +47,7 @@ const FloatingActionButton: React.FC<FloatingActionButtonProps> = ({ userRole })
     return (
         <>
             {/* Dual FAB Container */}
-            <div className="fixed bottom-6 right-6 z-50 flex flex-col-reverse gap-4 items-end">
+            <div className="fixed bottom-6 right-6 fab-safe z-50 flex flex-col-reverse gap-4 items-end">
 
                 {/* BUTTON 1: REPORTS (BOTTOM) */}
                 <div className="relative flex items-center">

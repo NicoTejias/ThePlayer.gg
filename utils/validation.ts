@@ -120,7 +120,7 @@ export const StoreSubscriptionSchema = z.object({
         .min(1, 'Debes seleccionar una región'),
 
     plan: z
-        .enum(['basic', 'medium', 'premium'], {
+        .enum(['basic', 'premium'], {
             message: 'Plan inválido'
         }),
 

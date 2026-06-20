@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import UserCircleIcon from './icons/UserCircleIcon';
 import CogIcon from './icons/CogIcon';
@@ -70,6 +70,7 @@ const Header: React.FC<HeaderProps> = ({
   const [isProfileMenuOpen, setProfileMenuOpen] = useState(false);
   const [isLangMenuOpen, setLangMenuOpen] = useState(false);
   const [isSidebarOpen, setSidebarOpen] = useState(false);
+  const closeSidebar = useCallback(() => setSidebarOpen(false), []);
   const [imgError, setImgError] = useState(false);
   const [headerImgError, setHeaderImgError] = useState(false);
   const profileMenuRef = useRef<HTMLDivElement>(null);
@@ -122,7 +123,7 @@ const Header: React.FC<HeaderProps> = ({
     return (
       <div className="flex items-center gap-2">
         <span className="text-xl">{logoInfo?.emoji || '🎮'}</span>
-        <span className="font-bold text-white tracking-wider" style={{ fontFamily: 'Cinzel, serif', fontSize: '0.85rem' }}>
+        <span className="font-bold text-white tracking-wider" style={{ fontFamily: 'Cinzel, serif', fontSize: '0.95rem' }}>
           {GAME_LABELS[currentGame]}
         </span>
       </div>
@@ -141,11 +142,13 @@ const Header: React.FC<HeaderProps> = ({
             {/* LEFT: Hamburger (mobile) + Game selector (desktop) */}
             <div className="flex items-center gap-3">
               <button
+                type="button"
                 onClick={() => setSidebarOpen(true)}
-                className="p-2 rounded-lg text-slate-400 hover:text-white transition-colors lg:hidden"
+                className="p-2.5 -ml-1 rounded-xl text-slate-400 hover:text-white hover:bg-white/10 active:bg-white/15 transition-colors lg:hidden touch-manipulation"
                 aria-label="Abrir menú"
+                aria-expanded={isSidebarOpen}
               >
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
                 </svg>
               </button>
@@ -173,10 +176,10 @@ const Header: React.FC<HeaderProps> = ({
                   )}
                 </div>
                 <div className="flex flex-col min-w-0">
-                  <span style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: 600, letterSpacing: '0.05em', fontSize: '0.65rem', textTransform: 'uppercase', color: 'var(--text-secondary)' }}>
+                  <span style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: 600, letterSpacing: '0.05em', fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-secondary)' }}>
                     {t('cambiar_juego')}
                   </span>
-                  <span style={{ fontFamily: 'Cinzel, serif', fontWeight: 700, fontSize: '0.78rem', color: 'var(--color-accent)', letterSpacing: '0.04em' }}>
+                  <span style={{ fontFamily: 'Cinzel, serif', fontWeight: 700, fontSize: '0.9rem', color: 'var(--color-accent)', letterSpacing: '0.04em' }}>
                     {GAME_LABELS[currentGame]}
                   </span>
                 </div>
@@ -198,7 +201,7 @@ const Header: React.FC<HeaderProps> = ({
               {isLiveSignal && (
                 <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg" style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.25)' }}>
                   <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
-                  <span style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: 700, letterSpacing: '0.12em', fontSize: '0.6rem', textTransform: 'uppercase', color: '#f87171' }}>
+                  <span style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: 700, letterSpacing: '0.12em', fontSize: '0.75rem', textTransform: 'uppercase', color: '#f87171' }}>
                     Live
                   </span>
                 </div>
@@ -380,7 +383,7 @@ const Header: React.FC<HeaderProps> = ({
 
       <Sidebar
         isOpen={isSidebarOpen}
-        onClose={() => setSidebarOpen(false)}
+        onClose={closeSidebar}
         isLoggedIn={isLoggedIn}
         userRole={userRole}
         isContentCreator={userProfile?.is_content_creator || userProfile?.role === 'content_creator'}

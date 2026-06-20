@@ -9,12 +9,16 @@ import ScheduleTournamentModal from '../components/ScheduleTournamentModal';
 import { supabase } from '../supabaseClient';
 import { toast } from 'sonner';
 import SEO from '../components/SEO';
+import { Edit, Trash2 } from 'lucide-react';
+import ShareEventModal, { getEventImageUrl } from '../components/ShareEventModal';
 
 interface EventsPageProps {
     events: CommunityEvent[];
     finishedTournaments?: TournamentResult[]; // Torneos subidos desde el panel de tienda
     userRole?: 'player' | 'store' | 'admin' | null;
     userId?: string; // ID del usuario actual
+    storeLogo?: string;
+    storeName?: string;
 }
 
 const EVENT_TYPES_CONFIG = [
@@ -66,7 +70,7 @@ const getWeekNumber = (d: Date) => {
 
 
 
-const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [], userRole, userId }) => {
+const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [], userRole, userId, storeLogo, storeName }) => {
     const navigate = useNavigate();
     // State for expanded past tournament view
     const [expandedEventId, setExpandedEventId] = React.useState<string | null>(null);
@@ -80,9 +84,13 @@ const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [
     const [selectedCalendarEvent, setSelectedCalendarEvent] = React.useState<CommunityEvent | null>(null);
     // State for loading actions
     const [processingEventId, setProcessingEventId] = React.useState<string | null>(null);
+    // State for editing and sharing events
+    const [editingEvent, setEditingEvent] = React.useState<any>(null);
+    const [shareModalEvent, setShareModalEvent] = React.useState<any>(null);
 
     // State for filtering
     const [selectedFormat, setSelectedFormat] = React.useState('Todos los Formatos');
+    const [selectedRegion, setSelectedRegion] = React.useState('Todas las Regiones');
     const [viewMode, setViewMode] = React.useState<'list' | 'calendar'>('list');
 
     const addToGoogleCalendar = (event: CommunityEvent) => {
@@ -106,20 +114,33 @@ const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [
 
     // Derived filtered events
     const filteredEvents = React.useMemo(() => {
-        if (selectedFormat === 'Todos los Formatos') return events;
+        let result = events;
 
-        if (selectedFormat === 'Competitivo') {
-            const competitiveFormats = ['Standard', 'Pioneer', 'Modern', 'Sealed', 'Draft', 'Prerelease', 'Sellado', 'Limited'];
-            return events.filter(e =>
-                competitiveFormats.some(fmt =>
-                    e.format.toLowerCase().includes(fmt.toLowerCase()) ||
-                    e.title.toLowerCase().includes(fmt.toLowerCase())
-                )
+        if (selectedFormat !== 'Todos los Formatos') {
+            if (selectedFormat === 'Competitivo') {
+                const competitiveFormats = ['Standard', 'Pioneer', 'Modern', 'Sealed', 'Draft', 'Prerelease', 'Sellado', 'Limited'];
+                result = result.filter(e =>
+                    competitiveFormats.some(fmt =>
+                        e.format.toLowerCase().includes(fmt.toLowerCase()) ||
+                        e.title.toLowerCase().includes(fmt.toLowerCase())
+                    )
+                );
+            } else {
+                result = result.filter(e =>
+                    e.format.toLowerCase().includes(selectedFormat.toLowerCase())
+                );
+            }
+        }
+
+        if (selectedRegion !== 'Todas las Regiones') {
+            result = result.filter(e =>
+                e.storeName?.toLowerCase().includes(selectedRegion.toLowerCase()) ||
+                (e as any).region?.toLowerCase().includes(selectedRegion.toLowerCase())
             );
         }
 
-        return events.filter(e => e.format === selectedFormat);
-    }, [events, selectedFormat]);
+        return result;
+    }, [events, selectedFormat, selectedRegion]);
 
     // State for calendar navigation
     const today = new Date();
@@ -243,7 +264,7 @@ const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [
 
     // State for upcoming events pagination
     const [upcomingPage, setUpcomingPage] = React.useState(0);
-    const EVENTS_PER_PAGE = 5;
+    const EVENTS_PER_PAGE = 15;
 
     // Filter upcoming events (incluye eventos de hoy que no han pasado)
     const now = new Date();
@@ -339,7 +360,9 @@ const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [
                         description: eventData.description || null,
                         game_type: eventData.game_type || 'mtg',
                         entry_fee: eventData.entry_fee || null,
-                        created_by: userId
+                        created_by: userId,
+                        image_url: eventData.image_url || null,
+                        image_position: eventData.image_position || '50% 50%'
                     });
 
                     // Calcular siguiente fecha según tipo de recurrencia
@@ -363,14 +386,17 @@ const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [
                     description: eventData.description || null,
                     game_type: eventData.game_type || 'mtg',
                     entry_fee: eventData.entry_fee || null,
-                    created_by: userId
+                    created_by: userId,
+                    image_url: eventData.image_url || null,
+                    image_position: eventData.image_position || '50% 50%'
                 });
             }
 
             // Guardar en Supabase
-            const { error } = await supabase
+            const { data, error } = await supabase
                 .from('scheduled_events')
-                .insert(eventsToCreate);
+                .insert(eventsToCreate)
+                .select();
 
             if (error) {
                 console.error('Error al guardar eventos:', error);
@@ -385,13 +411,82 @@ const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [
                 description: `Se ${eventsToCreate.length === 1 ? 'agendó 1 evento' : `agendaron ${eventsToCreate.length} eventos`} correctamente`
             });
 
-            // Recargar la página para mostrar los nuevos eventos
-            window.location.reload();
+            // Set share modal event
+            if (data && data.length > 0) {
+                const createdEvent = data[0];
+                setShareModalEvent({
+                    id: createdEvent.id,
+                    title: createdEvent.title,
+                    date: createdEvent.date,
+                    time: createdEvent.time,
+                    format: createdEvent.format,
+                    storeName: createdEvent.store_name,
+                    maxPlayers: createdEvent.max_players,
+                    entry_fee: createdEvent.entry_fee,
+                    description: createdEvent.description,
+                    imageUrl: createdEvent.image_url,
+                    game_type: createdEvent.game_type
+                });
+            } else {
+                window.location.reload();
+            }
 
         } catch (error: any) {
             console.error('Error al agendar torneo:', error);
             toast.error('Error inesperado', {
                 description: error.message || 'No se pudo agendar el torneo'
+            });
+        }
+    };
+
+    // Handler para editar/actualizar torneo
+    const handleUpdateTournament = async (eventId: string, eventData: any) => {
+        try {
+            const { error } = await supabase
+                .from('scheduled_events')
+                .update({
+                    title: eventData.title,
+                    date: eventData.date,
+                    time: eventData.time,
+                    format: eventData.format,
+                    store_name: eventData.storeName,
+                    max_players: eventData.maxPlayers,
+                    description: eventData.description || null,
+                    game_type: eventData.game_type || 'mtg',
+                    entry_fee: eventData.entry_fee || null,
+                    image_url: eventData.image_url || null,
+                    image_position: eventData.image_position || '50% 50%'
+                })
+                .eq('id', eventId);
+
+            if (error) {
+                console.error('Error al actualizar evento:', error);
+                toast.error('Error al actualizar torneo', {
+                    description: error.message
+                });
+                return;
+            }
+
+            toast.success('¡Torneo actualizado!');
+
+            setShareModalEvent({
+                id: eventId,
+                title: eventData.title,
+                date: eventData.date,
+                time: eventData.time,
+                format: eventData.format,
+                storeName: eventData.storeName,
+                maxPlayers: eventData.maxPlayers,
+                entry_fee: eventData.entry_fee,
+                description: eventData.description,
+                imageUrl: eventData.image_url,
+                game_type: eventData.game_type
+            });
+
+        } catch (error: any) {
+            console.error('Error al actualizar torneo:', error);
+            toast.error('Error inesperado', {
+                description: error.message || 'No se pudo actualizar el torneo'
             });
         }
     };
@@ -405,13 +500,7 @@ const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [
         setProcessingEventId(eventId);
 
         try {
-            // 1. Eliminar primero las inscripciones para evitar errores de llave foránea
-            await supabase
-                .from('event_registrations')
-                .delete()
-                .eq('event_id', eventId);
-
-            // 2. Eliminar el evento
+            // Eliminar el evento (las inscripciones se eliminan en cascada a nivel BD)
             const { error } = await supabase
                 .from('scheduled_events')
                 .delete()
@@ -714,23 +803,57 @@ const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [
                                 className="bg-slate-900/80 text-white rounded-md py-2.5 px-4 w-full appearance-none focus:outline-none focus:ring-2 focus:ring-sky-500 border border-slate-700"
                             >
                                 <option>Todos los Formatos</option>
-                                <option>Competitivo</option>
-                                <option>Commander</option>
-                                <option>Pauper</option>
-                                <option>Premodern</option>
-                                <option>Legacy</option>
+                                <optgroup label="── MTG ──────────────">
+                                    <option>Competitivo</option>
+                                    <option>Standard</option>
+                                    <option>Pioneer</option>
+                                    <option>Modern</option>
+                                    <option>Legacy</option>
+                                    <option>Vintage</option>
+                                    <option>Pauper</option>
+                                    <option>Premodern</option>
+                                    <option>Commander</option>
+                                    <option>Draft</option>
+                                    <option>Sealed</option>
+                                    <option>Prerelease</option>
+                                    <option>Store Championship</option>
+                                    <option>RCQ</option>
+                                </optgroup>
+                                <optgroup label="── Otros TCG ─────────">
+                                    <option>Pokémon Standard</option>
+                                    <option>Pokémon Expanded</option>
+                                    <option>Yu-Gi-Oh! Advanced</option>
+                                    <option>One Piece Standard</option>
+                                    <option>Lorcana</option>
+                                    <option>Flesh and Blood</option>
+                                    <option>Digimon</option>
+                                </optgroup>
                             </select>
                         </div>
                         <div className="relative">
                             <select
                                 aria-label="Filtrar por región"
+                                value={selectedRegion}
+                                onChange={(e) => { setSelectedRegion(e.target.value); setUpcomingPage(0); }}
                                 className="bg-slate-900/80 text-white rounded-md py-2.5 px-4 w-full appearance-none focus:outline-none focus:ring-2 focus:ring-sky-500 border border-slate-700"
                             >
                                 <option>Todas las Regiones</option>
-                                <option>Metropolitana</option>
+                                <option>Arica y Parinacota</option>
+                                <option>Tarapacá</option>
+                                <option>Antofagasta</option>
+                                <option>Atacama</option>
+                                <option>Coquimbo</option>
                                 <option>Valparaíso</option>
+                                <option>Metropolitana</option>
+                                <option>O'Higgins</option>
+                                <option>Maule</option>
+                                <option>Ñuble</option>
                                 <option>Biobío</option>
                                 <option>La Araucanía</option>
+                                <option>Los Ríos</option>
+                                <option>Los Lagos</option>
+                                <option>Aysén</option>
+                                <option>Magallanes</option>
                             </select>
                         </div>
                     </div>
@@ -791,17 +914,54 @@ const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [
                                     const isFull = (event.playerCount || 0) >= (event.maxPlayers || 64);
                                     return (
                                         <div key={event.id} className="bg-slate-800 rounded-2xl border border-slate-700 overflow-hidden hover:border-sky-500/50 transition-all duration-300 group flex flex-col relative">
-                                            <div className={`absolute top-4 right-4 z-10 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-[0.2em] shadow-lg ${details.multiplier === 'x4' ? 'bg-red-500 text-white' : details.multiplier === 'x3' ? 'bg-yellow-500 text-slate-950' : 'bg-sky-500 text-white'}`}>
-                                                Points {details.multiplier}
+                                            {/* Header Image */}
+                                            <div className="h-52 w-full relative overflow-hidden border-b border-slate-700/50 bg-slate-950">
+                                                <img
+                                                    src={getEventImageUrl(event)}
+                                                    alt={event.title}
+                                                    style={{ objectPosition: event.imagePosition || '50% 30%' }}
+                                                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                                                />
+                                                <div className="absolute inset-0 bg-gradient-to-t from-slate-800 via-slate-800/20 to-transparent"></div>
+                                                <div className={`absolute top-4 right-4 z-10 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-[0.2em] shadow-lg ${details.multiplier === 'x4' ? 'bg-red-500 text-white' : details.multiplier === 'x3' ? 'bg-yellow-500 text-slate-950' : 'bg-sky-500 text-white'}`}>
+                                                    Points {details.multiplier}
+                                                </div>
+
+                                                {/* Edit/Delete Admin/Owner controls */}
+                                                {(userRole === 'admin' || (userRole === 'store' && event.createdBy === userId)) && (
+                                                    <div className="absolute top-4 left-4 flex gap-2">
+                                                        <button
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                setEditingEvent(event);
+                                                            }}
+                                                            title="Editar Evento"
+                                                            className="p-2 bg-slate-900/80 hover:bg-sky-600 text-white hover:text-white rounded-lg backdrop-blur-sm transition-all"
+                                                        >
+                                                            <Edit className="w-3.5 h-3.5" />
+                                                        </button>
+                                                        <button
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                handleDeleteEvent(event.id, event.title);
+                                                            }}
+                                                            disabled={processingEventId === event.id}
+                                                            title="Eliminar Evento"
+                                                            className="p-2 bg-slate-900/80 hover:bg-red-600 text-white hover:text-white rounded-lg backdrop-blur-sm transition-all"
+                                                        >
+                                                            <Trash2 className="w-3.5 h-3.5" />
+                                                        </button>
+                                                    </div>
+                                                )}
                                             </div>
-                                            <div className="p-6 flex flex-col h-full space-y-4">
-                                                <div className="flex-1">
-                                                    <div className="flex items-center gap-2 mb-1 text-[10px] font-black uppercase tracking-widest text-sky-400">
+                                            <div className="p-4 flex flex-col gap-3">
+                                                <div>
+                                                    <div className="flex items-center gap-2 mb-1.5 text-[10px] font-black uppercase tracking-widest text-sky-400">
                                                         <span>{event.format}</span>
                                                         <span className="w-1 h-1 rounded-full bg-slate-600"></span>
                                                         <span className="text-slate-500">{details.type}</span>
                                                     </div>
-                                                    <h3 className="text-xl font-bold text-white group-hover:text-sky-400 transition-colors truncate">{event.title}</h3>
+                                                    <h3 className="text-lg font-bold text-white group-hover:text-sky-400 transition-colors" style={{ fontFamily: 'Cinzel, serif' }}>{event.title}</h3>
                                                 </div>
                                                 <div className="bg-slate-900/50 rounded-xl p-3 border border-slate-700/50 space-y-2">
                                                     <div className="flex items-center justify-between text-sm">
@@ -809,21 +969,21 @@ const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [
                                                             <CalendarIcon className="w-4 h-4 text-slate-500" />
                                                             {event.date}
                                                         </div>
-                                                        <span className="text-slate-400">{event.time || "19:00"}</span>
+                                                        <span className="text-slate-400 font-semibold">{event.time || "19:00"}</span>
                                                     </div>
                                                     <div className="flex items-center gap-2 text-sm text-slate-300">
                                                         <MapPinIcon className="w-4 h-4 text-slate-500" />
-                                                        <span className="truncate">{event.storeName}</span>
+                                                        <span className="truncate font-medium">{event.storeName}</span>
                                                     </div>
                                                 </div>
-                                                <div className="pt-4 mt-auto border-t border-slate-700/50 flex items-center justify-between">
+                                                <div className="pt-2 border-t border-slate-700/50 flex items-center justify-between">
                                                     <span className={`text-xs font-black uppercase ${isFull ? 'text-red-400' : 'text-emerald-400'}`}>
                                                         {event.playerCount || 0}/{event.maxPlayers || 64} JUGADORES
                                                     </span>
                                                     <button
                                                         onClick={() => handleRegisterClick(event)}
                                                         disabled={isFull || event.isUserRegistered}
-                                                        className={`px-4 py-2 rounded-lg text-xs font-black uppercase tracking-widest transition-all ${event.isUserRegistered ? 'bg-green-900/30 text-green-400 border border-green-700/30' : 'bg-sky-600 hover:bg-sky-500 text-white'}`}
+                                                        className={`px-4 py-2 rounded-lg text-xs font-black uppercase tracking-widest transition-all ${event.isUserRegistered ? 'bg-green-900/30 text-green-400 border border-green-700/30' : isFull ? 'bg-slate-700 text-slate-500 cursor-not-allowed' : 'bg-sky-600 hover:bg-sky-500 text-white shadow-lg shadow-sky-900/30'}`}
                                                     >
                                                         {event.isUserRegistered ? 'Inscrito' : isFull ? 'Completo' : 'Inscribirse'}
                                                     </button>
@@ -834,6 +994,38 @@ const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [
                                 })
                             )}
                         </div>
+
+                        {/* Bottom Pagination */}
+                        {allUpcomingEvents.length > EVENTS_PER_PAGE && (
+                            <div className="flex items-center justify-center gap-4 mt-8">
+                                <button
+                                    onClick={goToPreviousEvents}
+                                    disabled={upcomingPage === 0}
+                                    className="flex items-center gap-2 px-6 py-3 bg-slate-700 hover:bg-slate-600 text-white font-bold rounded-xl transition-all disabled:opacity-40 disabled:cursor-not-allowed border border-slate-600 hover:border-slate-500"
+                                >
+                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                                    </svg>
+                                    Página Anterior
+                                </button>
+                                <div className="flex items-center gap-2 px-5 py-3 bg-slate-800 rounded-xl border border-slate-700">
+                                    <span className="text-slate-400 text-sm font-medium">Página</span>
+                                    <span className="text-white font-black text-lg">{upcomingPage + 1}</span>
+                                    <span className="text-slate-500 text-sm">de</span>
+                                    <span className="text-slate-300 font-bold text-lg">{totalUpcomingPages}</span>
+                                </div>
+                                <button
+                                    onClick={goToNextEvents}
+                                    disabled={upcomingPage >= totalUpcomingPages - 1}
+                                    className="flex items-center gap-2 px-6 py-3 bg-sky-600 hover:bg-sky-500 text-white font-bold rounded-xl transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-lg shadow-sky-900/30"
+                                >
+                                    Siguiente Página
+                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                    </svg>
+                                </button>
+                            </div>
+                        )}
                     </div>
                 </div>
             ) : (
@@ -940,6 +1132,17 @@ const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [
                             <button onClick={() => setShowEventDetailsModal(false)} className="text-white hover:text-slate-200" aria-label="Cerrar detalles" title="Cerrar"><svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg></button>
                         </div>
                         <div className="p-6 space-y-6">
+                            {/* Visual Image Header */}
+                            <div className="h-44 w-full rounded-xl overflow-hidden bg-slate-950 border border-slate-700 relative">
+                                <img
+                                    src={getEventImageUrl(selectedCalendarEvent)}
+                                    alt={selectedCalendarEvent.title}
+                                    style={{ objectPosition: selectedCalendarEvent.imagePosition || '50% 50%' }}
+                                    className="w-full h-full object-cover"
+                                />
+                                <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/40 to-transparent"></div>
+                            </div>
+
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="bg-slate-900/50 p-3 rounded-xl border border-slate-700/50">
                                     <p className="text-[10px] text-slate-500 uppercase font-black mb-1">Fecha y Hora</p>
@@ -965,9 +1168,61 @@ const EventsPage: React.FC<EventsPageProps> = ({ events, finishedTournaments = [
                                     <button onClick={() => handleRegisterClick(selectedCalendarEvent)} className="flex-1 px-4 py-3 bg-sky-600 hover:bg-sky-500 text-white font-bold rounded-xl shadow-lg">Inscribirse</button>
                                 )}
                             </div>
+
+                            {/* Admin/Owner controls in calendar modal */}
+                            {(userRole === 'admin' || (userRole === 'store' && selectedCalendarEvent.createdBy === userId)) && (
+                                <div className="flex gap-3 pt-4 border-t border-slate-700/50">
+                                    <button
+                                        onClick={() => {
+                                            setShowEventDetailsModal(false);
+                                            setEditingEvent(selectedCalendarEvent);
+                                        }}
+                                        className="flex-1 py-3 px-4 bg-sky-600/10 border border-sky-500/20 hover:bg-sky-600 hover:text-white rounded-xl text-sky-400 font-bold text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2"
+                                    >
+                                        <Edit className="w-4 h-4" />
+                                        Editar Evento
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            setShowEventDetailsModal(false);
+                                            handleDeleteEvent(selectedCalendarEvent.id, selectedCalendarEvent.title);
+                                        }}
+                                        disabled={processingEventId === selectedCalendarEvent.id}
+                                        className="flex-1 py-3 px-4 bg-red-600/10 border border-red-500/20 hover:bg-red-600 hover:text-white rounded-xl text-red-400 font-bold text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2"
+                                    >
+                                        <Trash2 className="w-4 h-4" />
+                                        Eliminar Evento
+                                    </button>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>
+            )}
+            
+            {/* Edit Event Modal */}
+            {editingEvent && (
+                <ScheduleTournamentModal 
+                    isOpen={!!editingEvent} 
+                    onClose={() => setEditingEvent(null)} 
+                    onSchedule={handleScheduleTournament} 
+                    editingEvent={editingEvent}
+                    onUpdate={handleUpdateTournament}
+                />
+            )}
+
+            {/* Social Share Event Modal */}
+            {shareModalEvent && (
+                <ShareEventModal
+                    isOpen={!!shareModalEvent}
+                    onClose={() => {
+                        setShareModalEvent(null);
+                        window.location.reload();
+                    }}
+                    event={shareModalEvent}
+                    storeLogoUrl={storeLogo}
+                    storeNameDisplay={storeName}
+                />
             )}
         </div>
     );

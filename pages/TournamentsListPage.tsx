@@ -159,7 +159,7 @@ const TournamentsListPage: React.FC<TournamentsListPageProps> = ({ tournaments }
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-400 font-mono">{t.date}</td>
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <div className="text-sm font-bold text-white group-hover:text-sky-400 transition-colors">{t.name}</div>
-                                            <div className={`text-[9px] inline-block px-2 py-0.5 rounded border mt-1.5 font-black uppercase tracking-widest ${tier.color} ${tier.glow}`}>
+                                            <div className={`text-xs inline-block px-2 py-0.5 rounded border mt-1.5 font-black uppercase tracking-widest ${tier.color} ${tier.glow}`}>
                                                 {tier.type}
                                             </div>
                                         </td>

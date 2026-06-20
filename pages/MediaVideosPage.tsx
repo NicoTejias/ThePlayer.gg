@@ -3,6 +3,7 @@ import { supabase } from '../supabaseClient';
 import { useGame } from '../context/GameContext';
 import { GAME_LABELS, GameType } from '../types';
 import { Link } from 'react-router-dom';
+import { hasPremiumAccess } from '../config/adminConfig';
 
 interface Video {
     id: string;
@@ -45,15 +46,14 @@ const MediaVideosPage: React.FC = () => {
                     setUserId(session.user.id);
                     const { data: profile } = await supabase
                         .from('profiles')
-                        .select('role, subscription_tier')
+                        .select('role, subscription_tier, email')
                         .eq('id', session.user.id)
                         .single();
 
                     if (profile) {
-                        const isSubscriber = profile.subscription_tier === 'premium' || profile.subscription_tier === 'vip';
-                        const isAdmin = profile.role === 'admin';
+                        const isSubscriber = hasPremiumAccess(profile); // incluye admins (suscripción ilimitada)
                         const isStores = profile.role === 'store';
-                        if (isSubscriber || isAdmin || isStores) {
+                        if (isSubscriber || isStores) {
                             userAccess = true;
                         }
                     }

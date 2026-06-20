@@ -18,66 +18,49 @@ import { supabase } from './supabaseClient';
 const handleOAuthCallback = async () => {
   const hash = window.location.hash;
 
-  // Check if the hash contains OAuth tokens (access_token)
-  // We use includes checks to be safe before doing heavy parsing
-  if (hash && (hash.includes('access_token=') || hash.includes('refresh_token='))) {
-    // console.log('🔐 OAuth callback detected, processing tokens...');
-    // console.log('Raw hash:', hash);
+  if (!hash || (!hash.includes('access_token=') && !hash.includes('refresh_token='))) {
+    return;
+  }
 
-    try {
-      // Robust extraction using Regex to handle various router hash prefix scenarios
-      // Matches both "access_token=XYZ" and "access_token=XYZ&" patterns
-      const accessTokenMatch = hash.match(/access_token=([^&]+)/);
-      const refreshTokenMatch = hash.match(/refresh_token=([^&]+)/);
-      const typeMatch = hash.match(/type=([^&]+)/);
+  try {
+    const accessTokenMatch = hash.match(/access_token=([^&]+)/);
+    const refreshTokenMatch = hash.match(/refresh_token=([^&]+)/);
+    const typeMatch = hash.match(/type=([^&]+)/);
 
-      const accessToken = accessTokenMatch ? accessTokenMatch[1] : null;
-      const refreshToken = refreshTokenMatch ? refreshTokenMatch[1] : null;
-      const type = typeMatch ? typeMatch[1] : null;
+    const accessToken = accessTokenMatch ? accessTokenMatch[1] : null;
+    const refreshToken = refreshTokenMatch ? refreshTokenMatch[1] : null;
+    const type = typeMatch ? typeMatch[1] : null;
 
-      // console.log('Extracted structure:', {
-      //   hasAccessToken: !!accessToken,
-      //   hasRefreshToken: !!refreshToken,
-      //   type: type
-      // });
+    if (!accessToken) {
+      console.error('OAuth callback: no access_token found in URL hash');
+      window.history.replaceState(null, '', window.location.pathname + '#/');
+      return;
+    }
 
-      if (accessToken) {
-        if (refreshToken) {
-          // console.log('🔑 Setting session from OAuth tokens (Access + Refresh)...');
-          const { data, error } = await supabase.auth.setSession({
-            access_token: accessToken,
-            refresh_token: refreshToken,
-          });
+    if (refreshToken) {
+      const { error } = await supabase.auth.setSession({
+        access_token: accessToken,
+        refresh_token: refreshToken,
+      });
+      if (error) throw error;
+    } else {
+      console.warn('OAuth callback: no refresh_token — session may be short-lived');
+    }
 
-          if (error) throw error;
-          // console.log('✅ Session established successfully with Refresh Token!');
-          // console.log('👤 User:', data.user?.email);
-        } else {
-          // Fallback: This is unusual for 'offline' access_type but might happen
-          console.warn('⚠️ Warning: No refresh_token found. Setting session with access_token only.');
-          // supabase.auth.setSession supports partial sessions in some contexts or we might just rely on the token
-          // However, types usually require both. Let's try passing what we have if the library allows it, 
-          // otherwise we might need to manually set the cookie or just accept that session might be short lived.
-          // For now, let's try standard setSession and see if it accepts it or throw.
-          // Note: setSession({ access_token, refresh_token }) expects refresh_token.
-          // If we don't have it, we can't persist the session efficiently.
-          console.error('❌ Cannot set session: Missing refresh_token.');
-        }
-      } else {
-        console.error('❌ OAuth detected but could not extract access_token.');
-      }
-
-      // Clean the URL by removing OAuth params and redirect to home if a game is selected
-      // We explicitly clear the hash to a clean state
+    // Navigate to the correct route after auth
+    if (type === 'recovery') {
+      // Password reset flow: send user to reset-password page
+      window.history.replaceState(null, '', window.location.pathname + '#/reset-password');
+    } else {
+      // OAuth login flow: send user to home
       const savedGame = localStorage.getItem('selectedGame');
       const targetHash = savedGame ? '#/home' : '#/';
       window.history.replaceState(null, '', window.location.pathname + targetHash);
-
-    } catch (err) {
-      console.error('❌ OAuth callback handling error:', err);
-      // Still clean the URL even on error
-      window.history.replaceState(null, '', window.location.pathname + '#/');
     }
+
+  } catch (err) {
+    console.error('OAuth callback error:', err);
+    window.history.replaceState(null, '', window.location.pathname + '#/');
   }
 };
 

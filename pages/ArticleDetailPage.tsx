@@ -4,6 +4,7 @@ import { supabase } from '../supabaseClient';
 import ReactMarkdown from 'react-markdown';
 import { toast } from 'sonner';
 import SocialShare from '../components/SocialShare';
+import { hasPremiumAccess } from '../config/adminConfig';
 
 interface Article {
     id: string;
@@ -68,18 +69,16 @@ const ArticleDetailPage: React.FC = () => {
 
             const { data: profile } = await supabase
                 .from('profiles')
-                .select('role, subscription_tier')
+                .select('role, subscription_tier, email')
                 .eq('id', session.user.id)
                 .single();
 
             if (profile) {
-                // Allow admins, the author (although we didn't check author_id here, assuming admins cover moderation), 
-                // and subscribers
-                const isSubscriber = profile.subscription_tier === 'premium' || profile.subscription_tier === 'vip'; // Adjust tier names as needed
-                const isAdmin = profile.role === 'admin';
+                // Allow admins (suscripción ilimitada), the author, subscribers and stores
+                const isSubscriber = hasPremiumAccess(profile); // incluye admins
                 const isStores = profile.role === 'store'; // Stores typically spend money, maybe give access? Let's say yes for now.
 
-                if (isSubscriber || isAdmin || isStores) {
+                if (isSubscriber || isStores) {
                     setHasAccess(true);
 
                     // 3. Log View (Only if accessing premium content)

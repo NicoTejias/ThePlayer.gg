@@ -14,6 +14,7 @@ import ContentCreatorBadge from '../components/ContentCreatorBadge';
 import SEO from '../components/SEO';
 import AdminWidget from '../components/widgets/AdminWidget';
 import QuickRegistrationModal from '../components/QuickRegistrationModal';
+import { getEventImageUrl } from '../components/ShareEventModal';
 import GalaNominationsBanner from '../components/GalaNominationsBanner';
 import AliasReminderBanner from '../components/AliasReminderBanner';
 import TierBadge from '../components/TierBadge';
@@ -142,7 +143,7 @@ const HomePage: React.FC<HomePageProps> = ({ players, events, session, userRole,
       <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--bg-base)' }}>
         <div className="flex flex-col items-center gap-4">
           <div className="w-12 h-12 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: 'var(--color-accent)', borderTopColor: 'transparent' }} />
-          <p className="text-xs uppercase tracking-widest" style={{ fontFamily: 'Rajdhani, sans-serif', color: 'var(--text-secondary)', letterSpacing: '0.25em' }}>
+          <p className="text-sm uppercase tracking-widest" style={{ fontFamily: 'Rajdhani, sans-serif', color: 'var(--text-secondary)', letterSpacing: '0.25em' }}>
             Cargando Arena
           </p>
         </div>
@@ -163,7 +164,6 @@ const HomePage: React.FC<HomePageProps> = ({ players, events, session, userRole,
       <div
         className="relative rounded-3xl overflow-hidden group noise-overlay"
         style={{
-          minHeight: '480px',
           background: 'linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-base) 60%, var(--bg-secondary) 100%)',
           border: '1px solid rgba(255,255,255,0.06)',
           boxShadow: '0 20px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.04)',
@@ -175,73 +175,51 @@ const HomePage: React.FC<HomePageProps> = ({ players, events, session, userRole,
           style={{ background: 'radial-gradient(ellipse 60% 80% at 80% 50%, var(--color-accent), transparent)' }}
         />
 
-        {/* Background image */}
-        <div
-          className="absolute inset-0 bg-contain bg-no-repeat transition-transform duration-700 group-hover:scale-[1.02]"
-          style={{
-            backgroundImage: `url('/images/jace_banner.png')`,
-            backgroundPosition: 'right center',
-            opacity: 0.85,
-          }}
-        />
-
-        {/* Left vignette */}
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{ background: 'linear-gradient(to right, var(--bg-secondary) 0%, var(--bg-secondary) 18%, rgba(0,0,0,0.5) 55%, transparent 100%)' }}
-        />
-        {/* Bottom vignette */}
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{ background: 'linear-gradient(to top, var(--bg-base) 0%, transparent 50%)', opacity: 0.7 }}
-        />
-
-        {/* Decorative corner geometry */}
-        <div
-          className="absolute top-0 left-0 w-48 h-48 pointer-events-none opacity-10"
-          style={{
-            background: 'conic-gradient(from 0deg at 0% 0%, var(--color-accent), transparent 50%)',
-          }}
-        />
-
-        <div className="relative z-10 flex flex-col justify-center p-8 lg:p-14" style={{ minHeight: '480px' }}>
-          <div className="max-w-2xl space-y-5">
-            {/* Badge */}
+        {/* Mobile layout: image on top, text below */}
+        <div className="flex flex-col lg:hidden">
+          <div className="relative w-full overflow-hidden" style={{ maxHeight: '260px' }}>
+            <img
+              src="/images/jace_banner.png"
+              alt="Jace Beleren"
+              className="w-full object-cover object-top transition-transform duration-700 group-hover:scale-105"
+              style={{ height: '260px' }}
+            />
+            {/* Bottom fade into content area */}
+            <div
+              className="absolute inset-0 pointer-events-none"
+              style={{ background: 'linear-gradient(to top, var(--bg-base) 0%, transparent 50%)' }}
+            />
+          </div>
+          <div className="relative z-10 p-6 space-y-4">
             <div className="hero-badge animate-fade-in-up stagger-1" style={{ opacity: 0 }}>
               <span>{t('popular')}</span>
             </div>
-
-            {/* Title */}
             <h1
-              className="hero-title text-4xl sm:text-6xl text-white animate-fade-in-up stagger-2"
+              className="hero-title text-3xl text-white animate-fade-in-up stagger-2"
               style={{ opacity: 0 }}
             >
               {t('jace_title')}
             </h1>
-
-            {/* Description */}
             <p
-              className="text-base sm:text-lg leading-relaxed animate-fade-in-up stagger-3"
-              style={{ opacity: 0, color: 'rgba(255,255,255,0.65)', fontFamily: 'Rajdhani, sans-serif', fontWeight: 500, maxWidth: '480px' }}
+              className="text-sm leading-relaxed animate-fade-in-up stagger-3"
+              style={{ opacity: 0, color: 'rgba(255,255,255,0.65)', fontFamily: 'Rajdhani, sans-serif', fontWeight: 500 }}
             >
               {t('jace_desc')}
             </p>
-
-            {/* CTAs */}
-            <div className="flex items-center gap-3 pt-2 animate-fade-in-up stagger-4" style={{ opacity: 0 }}>
+            <div className="flex items-center gap-3 pt-1 animate-fade-in-up stagger-4" style={{ opacity: 0 }}>
               <Link
                 to="/eventos"
-                className="btn-accent px-7 py-3.5 rounded-xl text-xs"
-                style={{ letterSpacing: '0.12em' }}
+                className="btn-accent px-5 py-3 rounded-xl text-sm flex-1 text-center"
+                style={{ letterSpacing: '0.08em' }}
               >
                 {t('jugar')}
               </Link>
               <Link
                 to="/quienes-somos"
-                className="px-6 py-3.5 rounded-xl text-xs font-bold uppercase transition-all duration-300 hover:bg-white/8"
+                className="px-4 py-3 rounded-xl text-sm font-bold uppercase transition-all duration-300 flex-1 text-center"
                 style={{
                   fontFamily: 'Rajdhani, sans-serif',
-                  letterSpacing: '0.12em',
+                  letterSpacing: '0.08em',
                   background: 'rgba(255,255,255,0.05)',
                   border: '1px solid rgba(255,255,255,0.1)',
                   color: 'rgba(255,255,255,0.8)',
@@ -249,6 +227,75 @@ const HomePage: React.FC<HomePageProps> = ({ players, events, session, userRole,
               >
                 {t('detalles')}
               </Link>
+            </div>
+          </div>
+        </div>
+
+        {/* Desktop layout: image as background right, text left */}
+        <div className="hidden lg:block">
+          {/* Background image */}
+          <div
+            className="absolute inset-0 bg-contain bg-no-repeat transition-transform duration-700 group-hover:scale-[1.02]"
+            style={{
+              backgroundImage: `url('/images/jace_banner.png')`,
+              backgroundPosition: 'right center',
+              opacity: 0.85,
+            }}
+          />
+          {/* Left vignette */}
+          <div
+            className="absolute inset-0 pointer-events-none"
+            style={{ background: 'linear-gradient(to right, var(--bg-secondary) 0%, var(--bg-secondary) 18%, rgba(0,0,0,0.5) 55%, transparent 100%)' }}
+          />
+          {/* Bottom vignette */}
+          <div
+            className="absolute inset-0 pointer-events-none"
+            style={{ background: 'linear-gradient(to top, var(--bg-base) 0%, transparent 50%)', opacity: 0.7 }}
+          />
+          {/* Decorative corner geometry */}
+          <div
+            className="absolute top-0 left-0 w-48 h-48 pointer-events-none opacity-10"
+            style={{ background: 'conic-gradient(from 0deg at 0% 0%, var(--color-accent), transparent 50%)' }}
+          />
+          <div className="relative z-10 flex flex-col justify-center p-14" style={{ minHeight: '480px' }}>
+            <div className="max-w-2xl space-y-5">
+              <div className="hero-badge animate-fade-in-up stagger-1" style={{ opacity: 0 }}>
+                <span>{t('popular')}</span>
+              </div>
+              <h1
+                className="hero-title text-6xl text-white animate-fade-in-up stagger-2"
+                style={{ opacity: 0 }}
+              >
+                {t('jace_title')}
+              </h1>
+              <p
+                className="text-lg leading-relaxed animate-fade-in-up stagger-3"
+                style={{ opacity: 0, color: 'rgba(255,255,255,0.65)', fontFamily: 'Rajdhani, sans-serif', fontWeight: 500, maxWidth: '480px' }}
+              >
+                {t('jace_desc')}
+              </p>
+              <div className="flex items-center gap-3 pt-2 animate-fade-in-up stagger-4" style={{ opacity: 0 }}>
+                <Link
+                  to="/eventos"
+                  className="btn-accent px-7 py-3.5 rounded-xl text-sm"
+                  style={{ letterSpacing: '0.12em' }}
+                >
+                  {t('jugar')}
+                </Link>
+                <Link
+                  to="/quienes-somos"
+                  className="px-6 py-3.5 rounded-xl text-sm font-bold uppercase transition-all duration-300 hover:bg-white/8"
+                  style={{
+                    fontFamily: 'Rajdhani, sans-serif',
+                    letterSpacing: '0.12em',
+                    background: 'rgba(255,255,255,0.05)',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    color: 'rgba(255,255,255,0.8)',
+                  }}
+                >
+                  {t('detalles')}
+                </Link>
+              </div>
             </div>
           </div>
         </div>
@@ -323,10 +370,10 @@ const HomePage: React.FC<HomePageProps> = ({ players, events, session, userRole,
       ════════════════════════════════════════════════════════ */}
       <section className="space-y-5">
         <div className="flex justify-between items-end">
-          <h2 className="section-title text-xl">{t('te_podria_gustar')}</h2>
+          <h2 className="section-title text-xl">Próximos Eventos</h2>
           <Link
             to="/eventos"
-            className="text-xs font-bold uppercase tracking-widest transition-all hover:opacity-80 flex items-center gap-1.5"
+            className="text-sm font-bold uppercase tracking-widest transition-all hover:opacity-80 flex items-center gap-1.5"
             style={{ fontFamily: 'Rajdhani, sans-serif', color: 'var(--color-accent)', letterSpacing: '0.15em' }}
           >
             {t('ver_mas')}
@@ -338,82 +385,85 @@ const HomePage: React.FC<HomePageProps> = ({ players, events, session, userRole,
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
           {displayEvents.length > 0 ? (
-            displayEvents.map((event, idx) => (
-              <Link
-                key={event.id}
-                to="/eventos"
-                className={`group relative h-[300px] rounded-2xl overflow-hidden flex flex-col justify-end border border-shimmer animate-fade-in-up stagger-${idx + 1}`}
-                style={{
-                  opacity: 0,
-                  background: '#100a10',
-                  border: '1px solid rgba(255,255,255,0.06)',
-                  boxShadow: '0 4px 24px rgba(0,0,0,0.4)',
-                }}
-              >
-                {/* Cover image */}
+            displayEvents.map((event, idx) => {
+              const isFull = (event.playerCount || 0) >= (event.maxPlayers || 64);
+              const isRegistered = registrations.has(event.id);
+              return (
                 <div
-                  className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
-                  style={{ backgroundImage: `url('${event.imageUrl || '/images/placeholder-article.jpg'}')` }}
-                />
-                {/* Vignette */}
-                <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(10,3,14,0.97) 0%, rgba(10,3,14,0.5) 45%, transparent 100%)' }} />
-                {/* Hover accent border */}
-                <div
-                  className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
-                  style={{ boxShadow: 'inset 0 0 0 1px var(--color-accent)', filter: 'drop-shadow(0 0 8px var(--color-accent))' }}
-                />
-
-                {/* Player count */}
-                <div
-                  className="absolute top-3 right-3 px-2.5 py-1 rounded-full text-[9px] font-bold tracking-widest"
-                  style={{
-                    fontFamily: 'Rajdhani, sans-serif',
-                    background: 'rgba(0,0,0,0.7)',
-                    backdropFilter: 'blur(8px)',
-                    border: '1px solid rgba(255,255,255,0.1)',
-                    color: 'rgba(255,255,255,0.7)',
-                  }}
+                  key={event.id}
+                  className={`group bg-slate-800 rounded-2xl border border-slate-700 overflow-hidden hover:border-sky-500/50 transition-all duration-300 flex flex-col animate-fade-in-up stagger-${idx + 1}`}
+                  style={{ opacity: 0 }}
                 >
-                  {event.playerCount || 0}/{event.maxPlayers || 64}
-                </div>
-
-                {/* Content */}
-                <div className="relative z-10 p-5 space-y-2.5">
-                  <h3
-                    className="font-bold text-white leading-snug truncate group-hover:opacity-90 transition-opacity"
-                    style={{ fontFamily: 'Cinzel, serif', fontSize: '0.85rem', letterSpacing: '0.03em' }}
-                    title={event.title}
-                  >
-                    {event.title}
-                  </h3>
-
-                  <div className="flex items-center gap-2">
-                    <span
-                      className="text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded"
-                      style={{ fontFamily: 'Rajdhani, sans-serif', background: 'var(--color-accent)', color: '#fff', letterSpacing: '0.12em' }}
+                  {/* Header Image */}
+                  <div className="h-48 w-full relative overflow-hidden bg-slate-950">
+                    <img
+                      src={getEventImageUrl(event)}
+                      alt={event.title}
+                      style={{ objectPosition: event.imagePosition || '50% 30%' }}
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-800 via-slate-800/20 to-transparent" />
+                    {/* Player count badge */}
+                    <div
+                      className="absolute top-3 right-3 px-2.5 py-1 rounded-full text-xs font-bold tracking-widest"
+                      style={{ fontFamily: 'Rajdhani, sans-serif', background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.8)' }}
                     >
-                      {event.format}
-                    </span>
-                    <span className="text-[10px] truncate max-w-[100px]" style={{ color: 'rgba(255,255,255,0.5)', fontFamily: 'Rajdhani, sans-serif' }}>
-                      {event.storeName}
-                    </span>
+                      {event.playerCount || 0}/{event.maxPlayers || 64}
+                    </div>
                   </div>
 
-                  <div
-                    className="flex justify-between items-center text-[10px] border-t pt-2"
-                    style={{ borderColor: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.45)', fontFamily: 'Rajdhani, sans-serif', fontWeight: 600 }}
-                  >
-                    <span>{event.date}</span>
-                    <span style={{ color: '#fbbf24' }}>
-                      {event.entryFee ? (event.entryFee.includes('$') ? event.entryFee : `$${event.entryFee}`) : 'Gratis'}
-                    </span>
+                  {/* Content */}
+                  <div className="p-4 flex flex-col gap-3">
+                    <div>
+                      <span
+                        className="inline-block text-xs font-black uppercase tracking-widest px-2.5 py-0.5 rounded mb-2"
+                        style={{ fontFamily: 'Rajdhani, sans-serif', background: 'var(--color-accent)', color: '#fff', letterSpacing: '0.12em' }}
+                      >
+                        {event.format}
+                      </span>
+                      <h3
+                        className="text-base font-bold text-white group-hover:text-sky-400 transition-colors leading-tight"
+                        style={{ fontFamily: 'Cinzel, serif' }}
+                        title={event.title}
+                      >
+                        {event.title}
+                      </h3>
+                    </div>
+
+                    {/* Info box */}
+                    <div className="bg-slate-900/60 rounded-xl p-3 border border-slate-700/50 space-y-1.5">
+                      <div className="flex items-center justify-between text-sm font-bold text-slate-300">
+                        <span>{event.date}</span>
+                        <span className="text-slate-400 font-semibold text-xs">{(event as any).time || '19:00'}</span>
+                      </div>
+                      <div className="flex items-center justify-between text-xs text-slate-400">
+                        <span className="truncate font-medium">{event.storeName}</span>
+                        <span className="text-yellow-400 font-bold ml-2 shrink-0">
+                          {event.entryFee ? (event.entryFee.includes('$') ? event.entryFee : `$${event.entryFee}`) : 'Gratis'}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Footer */}
+                    <div className="flex items-center justify-between pt-1 border-t border-slate-700/50">
+                      <span className={`text-xs font-black uppercase ${isFull ? 'text-red-400' : 'text-emerald-400'}`}>
+                        {event.playerCount || 0}/{event.maxPlayers || 64} JUG.
+                      </span>
+                      <button
+                        onClick={() => { setSelectedEvent(event); setShowRegModal(true); }}
+                        disabled={isFull || isRegistered}
+                        className={`px-3 py-1.5 rounded-lg text-sm font-black uppercase tracking-widest transition-all ${isRegistered ? 'bg-green-900/30 text-green-400 border border-green-700/30' : isFull ? 'bg-slate-700 text-slate-500 cursor-not-allowed' : 'bg-sky-600 hover:bg-sky-500 text-white shadow-lg shadow-sky-900/30'}`}
+                      >
+                        {isRegistered ? 'Inscrito' : isFull ? 'Completo' : 'Inscribirse'}
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </Link>
-            ))
+              );
+            })
           ) : (
             <p
-              className="col-span-full py-16 text-center text-xs uppercase tracking-widest"
+              className="col-span-full py-16 text-center text-sm uppercase tracking-widest"
               style={{ fontFamily: 'Rajdhani, sans-serif', color: 'var(--text-secondary)', letterSpacing: '0.25em' }}
             >
               {t('no_eventos')}
@@ -457,7 +507,7 @@ const HomePage: React.FC<HomePageProps> = ({ players, events, session, userRole,
               </Link>
             </div>
             <p
-              className="mt-1.5 text-xs uppercase tracking-widest"
+              className="mt-1.5 text-sm uppercase tracking-widest"
               style={{ fontFamily: 'Rajdhani, sans-serif', color: 'var(--text-secondary)', letterSpacing: '0.2em' }}
             >
               {t('clasificacion_temporada')}{' '}
@@ -486,7 +536,7 @@ const HomePage: React.FC<HomePageProps> = ({ players, events, session, userRole,
                           style={{
                             fontFamily: 'Rajdhani, sans-serif',
                             fontWeight: 700,
-                            fontSize: isCurrent ? '1rem' : '0.9rem',
+                            fontSize: isCurrent ? '1.1rem' : '1rem',
                             color: isCurrent ? 'var(--color-accent)' : 'var(--text-primary)',
                             letterSpacing: '0.03em',
                           }}
@@ -498,7 +548,7 @@ const HomePage: React.FC<HomePageProps> = ({ players, events, session, userRole,
                       </div>
                       {player.team !== '-' && (
                         <p
-                          className="text-[10px] uppercase tracking-widest mt-0.5"
+                          className="text-xs uppercase tracking-widest mt-0.5"
                           style={{ fontFamily: 'Rajdhani, sans-serif', color: 'var(--text-secondary)', letterSpacing: '0.2em' }}
                         >
                           {player.team}
@@ -509,13 +559,13 @@ const HomePage: React.FC<HomePageProps> = ({ players, events, session, userRole,
 
                   <div className="flex items-baseline gap-1.5">
                     <span
-                      className="text-lg font-bold tabular-nums"
+                      className="text-xl font-bold tabular-nums"
                       style={{ fontFamily: 'Cinzel, serif', color: 'var(--text-primary)', letterSpacing: '0.02em' }}
                     >
                       {player.points.toLocaleString()}
                     </span>
                     <span
-                      className="text-[9px] uppercase font-bold"
+                      className="text-[11px] uppercase font-bold"
                       style={{ fontFamily: 'Rajdhani, sans-serif', color: 'var(--color-accent)', letterSpacing: '0.15em' }}
                     >
                       {t('puntos')}
@@ -587,7 +637,7 @@ const HomePage: React.FC<HomePageProps> = ({ players, events, session, userRole,
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                     />
                     <div
-                      className="absolute top-1.5 left-1.5 px-1.5 py-0.5 rounded text-[8px] font-bold uppercase tracking-wide"
+                      className="absolute top-1.5 left-1.5 px-1.5 py-0.5 rounded text-[11px] font-bold uppercase tracking-wide"
                       style={{ fontFamily: 'Rajdhani, sans-serif', background: 'var(--color-accent)', color: '#fff', letterSpacing: '0.1em' }}
                     >
                       {article.category || 'TCG'}
@@ -597,16 +647,16 @@ const HomePage: React.FC<HomePageProps> = ({ players, events, session, userRole,
                     <div>
                       <h4
                         className="font-bold line-clamp-2 leading-snug transition-colors group-hover:opacity-80"
-                        style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: 700, fontSize: '0.9rem', color: 'var(--text-primary)', letterSpacing: '0.02em' }}
+                        style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: 700, fontSize: '1.05rem', color: 'var(--text-primary)', letterSpacing: '0.02em' }}
                       >
                         {article.title}
                       </h4>
-                      <p className="text-xs line-clamp-2 mt-1 leading-relaxed" style={{ color: 'var(--text-secondary)', fontFamily: 'Rajdhani, sans-serif' }}>
+                      <p className="text-sm line-clamp-2 mt-1 leading-relaxed" style={{ color: 'var(--text-secondary)', fontFamily: 'Rajdhani, sans-serif' }}>
                         {article.excerpt || (article.content?.substring(0, 100) + '...')}
                       </p>
                     </div>
                     <div
-                      className="flex items-center justify-between text-[10px] border-t pt-2 mt-2"
+                      className="flex items-center justify-between text-xs border-t pt-2 mt-2"
                       style={{ borderColor: 'rgba(255,255,255,0.06)', color: 'var(--text-secondary)', fontFamily: 'Rajdhani, sans-serif', fontWeight: 600, letterSpacing: '0.05em' }}
                     >
                       <span>{t('por')} {article.author || 'ThePlayer'}</span>
@@ -616,7 +666,7 @@ const HomePage: React.FC<HomePageProps> = ({ players, events, session, userRole,
                 </Link>
               ))
             ) : (
-              <p className="text-xs py-10 uppercase tracking-widest text-center" style={{ fontFamily: 'Rajdhani, sans-serif', color: 'var(--text-secondary)', letterSpacing: '0.2em' }}>
+              <p className="text-sm py-10 uppercase tracking-widest text-center" style={{ fontFamily: 'Rajdhani, sans-serif', color: 'var(--text-secondary)', letterSpacing: '0.2em' }}>
                 {t('no_noticias')}
               </p>
             )}
@@ -662,7 +712,7 @@ const HomePage: React.FC<HomePageProps> = ({ players, events, session, userRole,
                       </div>
                     </div>
                     <div
-                      className="absolute top-1.5 left-1.5 px-1.5 py-0.5 rounded text-[8px] font-bold uppercase"
+                      className="absolute top-1.5 left-1.5 px-1.5 py-0.5 rounded text-[11px] font-bold uppercase"
                       style={{ fontFamily: 'Rajdhani, sans-serif', background: 'var(--color-accent)', color: '#fff', letterSpacing: '0.1em' }}
                     >
                       Video
@@ -672,16 +722,16 @@ const HomePage: React.FC<HomePageProps> = ({ players, events, session, userRole,
                     <div>
                       <h4
                         className="font-bold line-clamp-2 leading-snug"
-                        style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: 700, fontSize: '0.9rem', color: 'var(--text-primary)', letterSpacing: '0.02em' }}
+                        style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: 700, fontSize: '1.05rem', color: 'var(--text-primary)', letterSpacing: '0.02em' }}
                       >
                         {video.title}
                       </h4>
-                      <p className="text-xs line-clamp-1 mt-1" style={{ color: 'var(--text-secondary)', fontFamily: 'Rajdhani, sans-serif' }}>
+                      <p className="text-sm line-clamp-1 mt-1" style={{ color: 'var(--text-secondary)', fontFamily: 'Rajdhani, sans-serif' }}>
                         {video.description || 'Video destacado de la comunidad'}
                       </p>
                     </div>
                     <div
-                      className="flex items-center justify-between text-[10px] border-t pt-2 mt-2"
+                      className="flex items-center justify-between text-xs border-t pt-2 mt-2"
                       style={{ borderColor: 'rgba(255,255,255,0.06)', color: 'var(--text-secondary)', fontFamily: 'Rajdhani, sans-serif', fontWeight: 600, letterSpacing: '0.05em' }}
                     >
                       <span>YouTube</span>
@@ -691,7 +741,7 @@ const HomePage: React.FC<HomePageProps> = ({ players, events, session, userRole,
                 </a>
               ))
             ) : (
-              <p className="text-xs py-10 uppercase tracking-widest text-center" style={{ fontFamily: 'Rajdhani, sans-serif', color: 'var(--text-secondary)', letterSpacing: '0.2em' }}>
+              <p className="text-sm py-10 uppercase tracking-widest text-center" style={{ fontFamily: 'Rajdhani, sans-serif', color: 'var(--text-secondary)', letterSpacing: '0.2em' }}>
                 {t('no_videos')}
               </p>
             )}

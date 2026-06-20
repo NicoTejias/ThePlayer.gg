@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import { useGame } from '../context/GameContext';
 import { GAME_LABELS, GameType } from '../types';
@@ -20,31 +20,24 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, isLoggedIn, userRole
     const sidebarRef = useRef<HTMLDivElement>(null);
     const location = useLocation();
 
-    // Close sidebar when clicking outside
+    // Body scroll lock when open
     useEffect(() => {
-        const handleClickOutside = (event: MouseEvent) => {
-            if (!isInline && sidebarRef.current && !sidebarRef.current.contains(event.target as Node)) {
-                onClose();
-            }
-        };
-
         if (isOpen && !isInline) {
-            document.addEventListener('mousedown', handleClickOutside);
             document.body.style.overflow = 'hidden';
         }
-
         return () => {
-            document.removeEventListener('mousedown', handleClickOutside);
             document.body.style.overflow = 'unset';
         };
-    }, [isOpen, onClose, isInline]);
+    }, [isOpen, isInline]);
 
-    // Close sidebar on route change
+    // Close sidebar on route change (exclude onClose from deps to avoid closing on every render)
+    const onCloseRef = useRef(onClose);
+    onCloseRef.current = onClose;
     useEffect(() => {
         if (!isInline) {
-            onClose();
+            onCloseRef.current();
         }
-    }, [location.pathname, isInline, onClose]);
+    }, [location.pathname, isInline]);
 
     const NavItem: React.FC<{ item: { name: string; path: string; icon: string; isSpecial?: boolean } }> = ({ item }) => (
         <NavLink
@@ -74,9 +67,10 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, isLoggedIn, userRole
                         <img src="/logotheplayer.png" alt="ThePlayer.gg" className="h-8" />
                     </Link>
                     <button
+                        type="button"
                         onClick={onClose}
-                        title="Close"
-                        className="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors"
+                        aria-label="Cerrar menú"
+                        className="p-3 text-slate-400 hover:text-white hover:bg-slate-800 active:bg-slate-700 rounded-xl transition-colors touch-manipulation"
                     >
                         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -168,16 +162,16 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, isLoggedIn, userRole
         <>
             {/* Backdrop */}
             <div
-                className={`fixed inset-0 bg-black/60 backdrop-blur-sm z-[200] transition-opacity duration-300 ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
-                    }`}
+                className={`fixed inset-0 bg-black/60 backdrop-blur-sm z-[200] transition-opacity duration-300 ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
                 onClick={onClose}
+                onTouchEnd={onClose}
+                aria-hidden="true"
             />
 
-            {/* Sidebar */}
+            {/* Sidebar drawer */}
             <div
                 ref={sidebarRef}
-                className={`fixed left-0 top-0 h-full w-72 bg-slate-900 border-r border-slate-700/50 z-[201] transform transition-transform duration-300 ease-out ${isOpen ? 'translate-x-0' : '-translate-x-full'
-                    }`}
+                className={`fixed left-0 top-0 h-full w-72 bg-slate-900 border-r border-slate-700/50 z-[201] transform transition-transform duration-300 ease-out overscroll-contain ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}
             >
                 {sidebarInnerContent}
             </div>

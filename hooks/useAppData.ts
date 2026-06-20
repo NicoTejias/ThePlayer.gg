@@ -95,7 +95,8 @@ export const useAppData = (currentGame: string, userId: string | undefined) => {
                     description: e.description,
                     isUserRegistered: Boolean(e.is_user_registered || e.isUserRegistered),
                     entryFee: e.entry_fee || e.entryFee,
-                    gameType: e.game_type || e.gameType
+                    gameType: e.game_type || e.gameType,
+                    imagePosition: e.image_position || e.imagePosition || '50% 50%'
                 }));
                 setCommunityEvents(mappedEvents);
             }

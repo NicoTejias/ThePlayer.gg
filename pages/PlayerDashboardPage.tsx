@@ -41,7 +41,7 @@ const StatCard: React.FC<{ icon: React.ReactNode, title: string, value: string |
 
             <div className="flex justify-between items-start relative z-10">
                 <div className="space-y-1">
-                    <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500/80 group-hover:text-slate-400 transition-colors">{title}</p>
+                    <p className="text-xs font-black uppercase tracking-[0.2em] text-slate-500/80 group-hover:text-slate-400 transition-colors">{title}</p>
                     <p className={`text-4xl font-black text-white tracking-tighter ${glowMap[color]}`}>{value}</p>
                 </div>
                 <div className="p-4 rounded-2xl bg-slate-950/50 border border-white/5 shadow-2xl transition-all group-hover:scale-110 group-hover:rotate-6 duration-500 group-hover:border-white/10">
@@ -51,7 +51,7 @@ const StatCard: React.FC<{ icon: React.ReactNode, title: string, value: string |
 
             {rank !== undefined && rank !== 0 && rank !== '-' && (
                 <div className="mt-5 pt-5 border-t border-white/5 flex items-center justify-between relative z-10">
-                    <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-600">Rango Global</span>
+                    <span className="text-xs font-black uppercase tracking-[0.3em] text-slate-600">Rango Global</span>
                     <span className="text-xl font-black text-white px-3 py-1 bg-white/5 rounded-xl border border-white/10 italic tracking-tighter shadow-xl">
                         #{rank}
                     </span>
@@ -309,12 +309,12 @@ const PlayerDashboardPage: React.FC<{ profile?: any, showAliasReminder?: boolean
                             )}
                         </div>
                         <div className="relative z-10">
-                            <p className="text-[9px] text-slate-500 uppercase font-black tracking-[0.2em] mb-1">TEAM</p>
+                            <p className="text-xs text-slate-500 uppercase font-black tracking-[0.2em] mb-1">TEAM</p>
                             <p className="text-white font-black text-lg leading-none tracking-tight">{teamData?.name || '-'}</p>
                             {teamData && (
                                 <div className="mt-1.5 flex items-center gap-1.5">
                                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.5)]"></span>
-                                    <span className="text-[9px] text-slate-400 font-black uppercase tracking-wider">Comunidad Activa</span>
+                                    <span className="text-xs text-slate-400 font-black uppercase tracking-wider">Comunidad Activa</span>
                                 </div>
                             )}
                         </div>
@@ -468,14 +468,14 @@ const PlayerDashboardPage: React.FC<{ profile?: any, showAliasReminder?: boolean
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* Tournament History (2/3 width) */}
                 <section className="lg:col-span-2 space-y-6">
-                    <h2 className="text-xs font-black text-slate-500 uppercase tracking-[0.3em]">Historial Reciente</h2>
+                    <h2 className="text-sm font-black text-slate-500 uppercase tracking-[0.3em]">Historial Reciente</h2>
                     <div className="glass-premium rounded-3xl overflow-hidden border border-white/5 shadow-2xl">
                         <table className="min-w-full">
                             <thead>
                                 <tr className="bg-slate-900/50">
-                                    <th className="px-6 py-5 text-left text-[10px] font-black text-slate-500 uppercase tracking-widest">Torneo</th>
-                                    <th className="px-6 py-5 text-center text-[10px] font-black text-slate-500 uppercase tracking-widest hidden sm:table-cell">Pos</th>
-                                    <th className="px-6 py-5 text-right text-[10px] font-black text-sky-500 uppercase tracking-widest">Puntos</th>
+                                                    <th className="px-6 py-5 text-left text-xs font-black text-slate-500 uppercase tracking-widest">Torneo</th>
+                                    <th className="px-6 py-5 text-center text-xs font-black text-slate-500 uppercase tracking-widest hidden sm:table-cell">Pos</th>
+                                    <th className="px-6 py-5 text-right text-xs font-black text-sky-500 uppercase tracking-widest">Puntos</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-white/5">
@@ -486,7 +486,7 @@ const PlayerDashboardPage: React.FC<{ profile?: any, showAliasReminder?: boolean
                                         <tr key={t.id} className="hover:bg-white/5 transition-colors cursor-default group">
                                             <td className="px-6 py-5">
                                                 <p className="text-sm font-black text-white group-hover:text-sky-400 transition-colors">{t.tournaments?.name}</p>
-                                                <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-0.5">{t.tournaments?.date} • {t.tournaments?.format}</p>
+                                                <p className="text-xs text-slate-500 font-bold uppercase tracking-widest mt-0.5">{t.tournaments?.date} • {t.tournaments?.format}</p>
                                             </td>
                                             <td className="px-6 py-5 text-center hidden sm:table-cell">
                                                 <span className="px-3 py-1 bg-slate-900/50 rounded-lg border border-white/5 text-xs font-black text-slate-400">#4</span>
@@ -506,7 +506,7 @@ const PlayerDashboardPage: React.FC<{ profile?: any, showAliasReminder?: boolean
 
                 {/* TEAM Section (1/3 width) */}
                 <section className="space-y-6">
-                    <h2 className="text-xs font-black text-slate-500 uppercase tracking-[0.3em]">TEAM</h2>
+                    <h2 className="text-sm font-black text-slate-500 uppercase tracking-[0.3em]">TEAM</h2>
                     <div className="glass-premium p-8 rounded-3xl border border-white/5 shadow-2xl relative overflow-hidden group">
                         <div className="absolute inset-0 bg-gradient-to-br from-violet-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-1000"></div>
                         {teamData ? (
@@ -528,11 +528,11 @@ const PlayerDashboardPage: React.FC<{ profile?: any, showAliasReminder?: boolean
 
                                 <div className="grid grid-cols-2 gap-4 pb-4">
                                     <div className="bg-slate-900/50 p-4 rounded-2xl border border-white/5">
-                                        <p className="text-[10px] text-slate-500 uppercase font-black tracking-widest mb-1 group-hover:text-violet-400 transition-colors">Rango</p>
+                                        <p className="text-xs text-slate-500 uppercase font-black tracking-widest mb-1 group-hover:text-violet-400 transition-colors">Rango</p>
                                         <p className="text-2xl font-black text-white">#1</p>
                                     </div>
                                     <div className="bg-slate-900/50 p-4 rounded-2xl border border-white/5">
-                                        <p className="text-[10px] text-slate-500 uppercase font-black tracking-widest mb-1 group-hover:text-sky-400 transition-colors">Puntos</p>
+                                        <p className="text-xs text-slate-500 uppercase font-black tracking-widest mb-1 group-hover:text-sky-400 transition-colors">Puntos</p>
                                         <p className="text-2xl font-black text-sky-400">1.2K</p>
                                     </div>
                                 </div>

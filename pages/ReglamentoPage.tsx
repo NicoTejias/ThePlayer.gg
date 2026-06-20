@@ -41,7 +41,8 @@ const OFFICIAL_RULES: Record<GameType, ExternalRuleLink> = {
     rpg: { url: '#', label: 'Sistemas de Rol' },
     warhammer: { url: 'https://www.warhammer-community.com/en-gb/downloads/', label: 'Reglamentos Warhammer' },
     other: { url: '#', label: 'Reglamento General' },
-    digimon: { url: 'https://world.digimoncard.com/rule/', label: 'Reglamento Oficial Digimon Card Game' }
+    digimon: { url: 'https://world.digimoncard.com/rule/', label: 'Reglamento Oficial Digimon Card Game' },
+    alpha_clash: { url: 'https://alphaclashtcg.com/pages/rules', label: 'Reglamento Oficial Alpha Clash TCG' }
 };
 
 const ReglamentoPage: React.FC = () => {
